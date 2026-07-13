@@ -11,6 +11,8 @@
     --x-card-meta-control-min-height: var(--ui-post-chip-min-height);
     --x-card-meta-control-line-height: var(--ui-post-tag-line-height);
     --x-card-expand-icon-size: var(--ui-post-tag-icon-size);
+    --x-card-expand-hit-width: calc(var(--x-card-meta-control-min-height) + var(--ui-space-7));
+    --x-card-expand-hit-height: calc(var(--x-card-meta-control-min-height) + var(--ui-space-3));
     --x-card-media-only-gap: var(--ui-space-1);
     --x-card-media-with-content-gap: var(--ui-ins-card-media-margin-top);
     --post-card-promotion-link-gap: var(--profile-plus-inline-gap, var(--ui-space-1));
@@ -111,11 +113,11 @@
     bottom: var(--ui-space-none);
     z-index: var(--ui-z-local-raised);
     display: inline-flex;
-    width: var(--x-card-meta-control-min-height);
-    min-width: var(--x-card-meta-control-min-height);
-    min-height: var(--x-card-meta-control-min-height);
+    width: var(--x-card-expand-hit-width);
+    min-width: var(--x-card-expand-hit-width);
+    min-height: var(--x-card-expand-hit-height);
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     align-self: center;
     margin: var(--ui-space-none);
     overflow: visible;
@@ -124,7 +126,7 @@
     border: var(--ui-border-none);
     border-color: var(--ui-color-transparent);
     border-radius: var(--ui-radius-none);
-    background: linear-gradient(90deg, transparent, var(--ui-surface-card) 34%, var(--ui-surface-card));
+    background: linear-gradient(90deg, transparent 0%, transparent 26%, var(--ui-surface-card) 72%, var(--ui-surface-card) 100%);
     background-color: var(--ui-surface-card);
     padding: var(--ui-space-none);
     color: var(--ui-post-chip-text);
@@ -161,7 +163,7 @@
     -webkit-appearance: none;
     border: var(--ui-border-none);
     border-color: var(--ui-color-transparent);
-    background: linear-gradient(90deg, transparent, var(--ui-surface-card) 34%, var(--ui-surface-card));
+    background: linear-gradient(90deg, transparent 0%, transparent 26%, var(--ui-surface-card) 72%, var(--ui-surface-card) 100%);
     background-color: var(--ui-surface-card);
     color: var(--ui-social-text);
     box-shadow: var(--ui-shadow-none);

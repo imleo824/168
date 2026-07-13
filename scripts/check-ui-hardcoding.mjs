@@ -452,9 +452,15 @@ assertCssRuleIncludes(
 );
 assertCssRuleIncludes(
   'src/styles/components/feed-card-content.css',
+  '.ins-post-card',
+  ['--x-card-expand-hit-width:', '--x-card-expand-hit-height:'],
+  'feed card expand control must keep a dedicated enlarged hit area.',
+);
+assertCssRuleIncludes(
+  'src/styles/components/feed-card-content.css',
   '.ins-post-card .x-card-expand-button',
-  ['position: absolute;', 'right: var(--ui-space-none);', 'bottom: var(--ui-space-none);'],
-  'feed card expand icon must sit at the bottom-right of the final text line.',
+  ['position: absolute;', 'right: var(--ui-space-none);', 'bottom: var(--ui-space-none);', 'width: var(--x-card-expand-hit-width);', 'justify-content: flex-end;'],
+  'feed card expand icon must sit at the bottom-right of the final text line with an enlarged left-side hit area.',
 );
 assertNotIncludes('src/styles/components/feed-card-content.css', 'grid-row: 2;', 'feed card expand icon must not return to its own second row.');
 assertCssRuleIncludes(
