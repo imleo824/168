@@ -1,0 +1,41 @@
+/* Secondary page topbar contract.
+ *
+ * Text priority:
+ * - secondary-page titles own the center/start text lane;
+ * - two-line identity blocks in the leading slot own the main header lane;
+ * - right actions shrink first.
+ */
+
+@layer utilities {
+  .ui-app-page {
+    transform: var(--ui-transform-none);
+    backface-visibility: hidden;
+  }
+
+  :where(.ui-app-page, .ui-page, .surface-page) > .ui-topbar {
+    position: sticky;
+    top: var(--ui-space-none);
+    z-index: var(--ui-z-page-header);
+  }
+
+  :where(.ui-app-page, .ui-page, .surface-page) > .ui-topbar .ui-topbar-title {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: var(--ui-topbar-title-size);
+    font-weight: var(--ui-topbar-title-weight);
+    line-height: var(--ui-line-tight);
+  }
+
+  :where(.ui-app-page, .ui-page, .surface-page) > .ui-topbar .ui-topbar-title--start {
+    justify-self: stretch;
+  }
+
+  [data-route-overlay],
+  [data-mobile-addressbar-scroll] {
+    transform: var(--ui-transform-none);
+    backface-visibility: hidden;
+  }
+}

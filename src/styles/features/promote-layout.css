@@ -1,0 +1,6 @@
+/* Promote booking page layout facade. */
+
+@import "./promote-layout-shell.css";
+@import "./promote-layout-choices.css";
+@import "./promote-layout-calendar.css";
+@import "./promote-layout-checkout.css";

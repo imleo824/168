@@ -1,0 +1,415 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const root = path.resolve(__dirname, '..');
+
+const failures = [];
+
+function read(relativePath) {
+  return fs.readFileSync(path.join(root, relativePath), 'utf8');
+}
+
+function assert(condition, message) {
+  if (!condition) failures.push(message);
+}
+
+function importsInOrder(css, imports) {
+  let cursor = -1;
+  return imports.every((entry) => {
+    const index = css.indexOf(`@import "${entry}";`);
+    if (index <= cursor) return false;
+    cursor = index;
+    return true;
+  });
+}
+
+function walk(relativeEntry, predicate) {
+  const absoluteEntry = path.join(root, relativeEntry);
+  const stat = fs.statSync(absoluteEntry);
+
+  if (stat.isFile()) return predicate(relativeEntry) ? [relativeEntry] : [];
+
+  const files = [];
+  for (const name of fs.readdirSync(absoluteEntry)) {
+    files.push(...walk(path.join(relativeEntry, name), predicate));
+  }
+  return files;
+}
+
+function stylesheetImports(source) {
+  return [...source.matchAll(/import\s+['"]([^'"]+\.css)['"];?/g)].map((match) => match[1]);
+}
+
+const app = read('src/app/AppShell.tsx');
+const chatPage = read('src/features/chat/ChatPage.tsx');
+const featureContractsCss = read('src/styles/tokens/feature-contracts.css');
+const mobileAddressBarHook = read('src/hooks/useMobileAddressBar.ts');
+const indexCss = read('src/index.css');
+const systemCoreLayerCss = read('src/styles/layers/system-core.css');
+const componentsLayerCss = read('src/styles/layers/components.css');
+const featuresLayerCss = read('src/styles/layers/features.css');
+const contractsLayerCss = read('src/styles/layers/contracts.css');
+const mobileViewportContractCss = read('src/styles/system/mobile-viewport-contract.css');
+const overlayCss = read('src/styles/utilities/mobile-overlay-stability.css');
+const profileDialogCss = read('src/styles/components/profile-dialog.css');
+const profileModernCss = read('src/styles/features/profile-modern.css');
+const profileSecuritySheetCss = [
+  read('src/styles/features/profile-security-sheet.css'),
+  read('src/styles/features/profile-security-shell.css'),
+  read('src/styles/features/profile-security-content.css'),
+  read('src/styles/features/profile-security-motion.css'),
+].join('\n');
+const profileAvatarActionCss = read('src/styles/features/profile-avatar-action.css');
+const uiArchitectureContractCss = read('src/styles/system/ui-architecture-contract.css');
+const uiStickyTopbarContractCss = read('src/styles/system/ui-sticky-topbar-contract.css');
+const promoteCheckoutCss = [
+  read('src/styles/features/promote-layout-checkout.css'),
+  read('src/styles/features/promote-layout-checkout-bar.css'),
+  read('src/styles/features/promote-layout-picker-sheet.css'),
+].join('\n');
+const postDetailCss = [
+  read('src/styles/features/post-detail.css'),
+  read('src/styles/features/post-detail-shell.css'),
+  read('src/styles/features/post-detail-topbar.css'),
+  read('src/styles/features/post-detail-engagement.css'),
+  read('src/styles/features/post-detail-bottom-actions.css'),
+].join('\n');
+const createPromoteSubmitCss = read('src/styles/features/create-promote-submit.css');
+const secondaryPageActionsCss = read('src/styles/system/secondary-page-actions.css');
+const uiPrimitivesFeedbackCss = read('src/styles/system/ui-primitives-feedback.css');
+const feedScrollShellCss = read('src/styles/system/feed-scroll-shell.css');
+const feedScrollUtils = read('src/utils/feedScroll.ts');
+const scrollLock = read('src/utils/scrollLock.ts');
+const listReturnScroll = read('src/utils/listReturnScroll.ts');
+const homeFeatureCss = read('src/styles/features/home.css');
+const homeLayout = read('src/features/home/homeLayout.ts');
+const homeMobileLayoutCss = read('src/styles/features/home-mobile-layout.css');
+const homeMobileFirstPaintCss = read('src/styles/system/home-mobile-first-paint-contract.css');
+const homeFeedQueriesHook = read('src/hooks/useHomeFeedQueries.ts');
+const dataHooks = read('src/hooks/useData.ts');
+const postCreatePage = read('src/features/post-create/PostCreatePage.tsx');
+const postDetailPage = read('src/pages/PostDetailLegacy.tsx');
+const postDetailSections = read('src/features/post-detail/PostDetailLegacySections.tsx');
+const scrollTargets = read('src/utils/scrollTargets.ts');
+const homeBootstrapHook = dataHooks.slice(
+  dataHooks.indexOf('export function useHomeBootstrap'),
+  dataHooks.indexOf('export function useReducePostRecommendation'),
+);
+const profileDialog = read('src/features/profile/ProfileDialog.tsx');
+const feedScrollShell = read('src/features/feed/FeedScrollShell.tsx');
+const homeFeedContent = read('src/features/home/HomeFeedContent.tsx');
+
+assert(
+  /useScrollLock\(isRouteOverlay,\s*\{[\s\S]*?fixed:\s*true[\s\S]*?\}\);/.test(app),
+  'Route overlays must freeze the background with useScrollLock(... fixed: true).',
+);
+
+assert(
+  scrollLock.includes('.filter((element) => !isTargetAllowedByAnyLock(element))') &&
+    scrollLock.includes('if (isTargetAllowedByAnyLock(element)) return;'),
+  'Scroll lock must not snapshot or restore allowed foreground lanes such as route overlays; otherwise detail scrolling can jump back after touch/async scroll events.',
+);
+
+assert(
+  scrollLock.includes('function findAllowedScrollableElement(target: EventTarget | null, deltaX = 0, deltaY = 0)') &&
+    scrollLock.includes('isTargetAllowedByAnyLock(node)') &&
+    scrollLock.includes('canScrollElement(node, deltaX, deltaY)') &&
+    scrollLock.includes('findAllowedScrollableElement(target, deltaX, deltaY)'),
+  'Scroll lock must climb to the first ancestor that can scroll for the current gesture so vertical detail scrolling is not blocked by nested horizontal media.',
+);
+
+assert(
+  listReturnScroll.includes('function getActiveDetailOverlay()') &&
+    listReturnScroll.includes('/^\\/post(?:\\/|$)/.test(window.location.pathname)') &&
+    listReturnScroll.includes('function getVisibleListReturnTargets()') &&
+    listReturnScroll.includes('!isInsideElement(activeDetailOverlay, element)') &&
+    listReturnScroll.includes('if (isInsideElement(activeDetailOverlay, element)) continue;') &&
+    listReturnScroll.includes('activeOverlay && !activeDetailOverlay'),
+  'List return scroll must ignore route-overlay and nested targets while a post detail overlay is active, so detail scroll cannot overwrite the saved list position.',
+);
+
+assert(
+  (listReturnScroll.match(/getVisibleElements\(LIST_SCROLL_ROOT_SELECTOR\)/g) || []).length === 1 &&
+    listReturnScroll.includes('getVisibleListReturnTargets().forEach((element) =>') &&
+    listReturnScroll.includes('...getVisibleListReturnTargets().map((element) => element.scrollTop || 0)'),
+  'List return restore must write and measure only filtered list targets, not raw route-overlay targets.',
+);
+
+assert(
+  scrollTargets.includes("export const ROUTE_OVERLAY_SELECTOR = '[data-route-overlay]';") &&
+    scrollTargets.includes("export const ROUTE_OVERLAY_SCROLL_SELECTOR = '[data-route-overlay-scroll]';") &&
+    scrollTargets.includes('ROUTE_OVERLAY_SCROLL_SELECTOR,') &&
+    postDetailPage.includes("data-route-overlay={isOverlayDetail ? '' : undefined}") &&
+    postDetailPage.includes("data-route-overlay-scroll={isOverlayDetail ? '' : undefined}") &&
+    postDetailSections.includes("data-route-overlay={isOverlayDetail ? '' : undefined}") &&
+    postDetailSections.includes("data-route-overlay-scroll={isOverlayDetail ? '' : undefined}"),
+  'Post detail route overlays must expose the canonical overlay marker and scroll marker only while rendered as a route overlay.',
+);
+
+assert(
+  !mobileAddressBarHook.includes("visualViewport?.addEventListener('scroll'") &&
+    !mobileAddressBarHook.includes('visualViewport?.addEventListener("scroll"'),
+  'useMobileAddressBar must not listen to visualViewport.scroll because keyboard/address-bar movement must not rewrite layout scroll metrics.',
+);
+
+assert(
+  mobileAddressBarHook.includes("document.addEventListener('pointerdown', handleTextEntryPointerDown") &&
+    mobileAddressBarHook.includes('hasFocusedTextEntry = true;') &&
+    mobileAddressBarHook.includes('layout: !textEntryActive') &&
+    mobileAddressBarHook.includes('--app-keyboard-inset') &&
+    mobileAddressBarHook.includes('lastKeyboardInset') &&
+    mobileAddressBarHook.includes('keyboard: textEntryActive'),
+  'useMobileAddressBar must mark text-entry intent before keyboard resize, preserve the stable layout viewport, and publish keyboard inset while text entry is active.',
+);
+
+assert(
+  mobileAddressBarHook.includes('mobile-text-entry-active') &&
+    mobileAddressBarHook.includes('confirmTextEntryIntent'),
+  'useMobileAddressBar must expose and self-heal text-entry state instead of leaving global keyboard intent stuck after canceled focus.',
+);
+
+assert(
+  mobileAddressBarHook.includes('data-contained-text-entry-surface') &&
+    chatPage.includes('data-contained-text-entry-surface="true"') &&
+    !chatPage.includes('data-mobile-addressbar-scroll') &&
+    !featureContractsCss.includes(':root.mobile-text-entry-active'),
+  'Chat must own its fixed text-entry surface and avoid pre-clearing keyboard clearance before the real visual viewport inset exists.',
+);
+
+assert(
+  !/mobile-text-entry-active[\s\S]*?position:\s*fixed/.test(uiStickyTopbarContractCss),
+  'Text-entry mode must not switch PageHeader/topbar from sticky to fixed; changing the containing/layout model on focus breaks cross-page sticky and bottom-fixed surfaces.',
+);
+
+assert(
+  !postCreatePage.includes('post-create-scroll-shell'),
+  'PostCreatePage must not write legacy post-create-scroll-shell state to html/body; focus viewport state is owned by useMobileAddressBar.',
+);
+
+assert(
+  /--app-keyboard-inset:\s*(?:0px|var\(--ui-space-none\));/.test(mobileViewportContractCss) &&
+    mobileViewportContractCss.includes('--ui-keyboard-inset: var(--app-keyboard-inset') &&
+    mobileViewportContractCss.includes('--ui-visual-viewport-height: var(--app-visual-vh'),
+  'Mobile viewport contract must expose visual viewport height and keyboard inset as shared component variables.',
+);
+
+assert(
+  !feedScrollUtils.includes("classList.contains('mobile-addressbar-enabled')") &&
+    feedScrollUtils.includes('data-feed-document-scroll="true"') &&
+    feedScrollShell.includes('data-feed-document-scroll={documentScrollMode') &&
+    homeFeedContent.includes('documentScrollMode'),
+  'Feed document-scroll mode must be explicitly owned by the feed, not inferred from the global mobile-addressbar class.',
+);
+
+assert(
+  importsInOrder(indexCss, [
+    './styles/layers/foundation.css',
+    './styles/layers/system-core.css',
+    './styles/layers/components.css',
+    './styles/layers/features.css',
+    './styles/layers/contracts.css',
+  ]),
+  'src/index.css must load stable layers in this order: foundation, system-core, components, features, contracts.',
+);
+
+assert(
+  systemCoreLayerCss.includes('@import "../system/mobile-viewport-contract.css";') &&
+    systemCoreLayerCss.includes('@import "../system/feed-scroll-shell.css";'),
+  'System core layer must own shared viewport and feed scroll contracts.',
+);
+
+assert(
+  importsInOrder(componentsLayerCss, [
+    '../components/buttons.css',
+    '../components/telegram-contact-action.css',
+    '../components/topbar.css',
+    '../components/topbar-system.css',
+    '../components/feed-card-system.css',
+    '../components/feed-follow-interaction.css',
+    '../components/media.css',
+    '../components/profile-dialog.css',
+  ]),
+  'Shared component CSS must be registered through src/styles/layers/components.css.',
+);
+
+assert(
+  importsInOrder(featuresLayerCss, [
+    '../features/brand.css',
+    '../features/settings.css',
+    '../features/chat.css',
+    '../../features/admin/AdminDesktop.css',
+    '../../features/desktop/DesktopRouteFallback.css',
+    '../features/home.css',
+    '../features/home-feed.css',
+    '../features/category-feed.css',
+    '../features/messages.css',
+    '../features/post-detail.css',
+    '../features/post-detail-metadata.css',
+    '../features/profile.css',
+    '../features/user-space-next.css',
+    '../features/recharge.css',
+    '../features/sponsor.css',
+    '../features/referral-invite.css',
+    '../features/create-promote.css',
+    '../features/promote-page-foundation.css',
+    '../features/promote-page-keyboard.css',
+    '../features/promote-layout.css',
+    '../features/promote-history.css',
+    '../features/promotion-effects-history.css',
+    '../features/promote-history-edit.css',
+  ]),
+  'Route feature CSS must be registered through src/styles/layers/features.css.',
+);
+
+assert(
+    contractsLayerCss.includes('@import "../utilities/mobile-overlay-stability.css";') &&
+    contractsLayerCss.includes('@import "../system/secondary-page-shell.css";') &&
+    !contractsLayerCss.includes('../features/') &&
+    !contractsLayerCss.includes('ui-instagram-polish-contract.css') &&
+    !contractsLayerCss.includes('ui-auth-feed-polish-contract.css') &&
+    !contractsLayerCss.includes('ui-polish-corrections-contract.css') &&
+    !contractsLayerCss.includes('ui-post-list-contract.css') &&
+    !contractsLayerCss.includes('ui-action-input-final-contract.css') &&
+    !contractsLayerCss.includes('ui-page-alignment-final-contract.css') &&
+    !contractsLayerCss.includes('ui-home-recharge-contract.css') &&
+    !contractsLayerCss.includes('ui-profile-create-badge-contract.css') &&
+    !contractsLayerCss.includes('ui-home-country-ring-contract.css') &&
+    !contractsLayerCss.includes('profile-header-contract.css') &&
+    !contractsLayerCss.includes('profile-avatar-action.css') &&
+    !contractsLayerCss.includes('profile-security-sheet.css') &&
+    !contractsLayerCss.includes('ui-profile-tab-loading-contract.css') &&
+    !contractsLayerCss.includes('ui-detail-topbar-action-contract.css') &&
+    !contractsLayerCss.includes('ui-skeleton-avatar-contract.css') &&
+    !contractsLayerCss.includes('ui-telegram-contact-action.css') &&
+    !contractsLayerCss.includes('ui-post-create-topbar-contract.css') &&
+    !contractsLayerCss.includes('home-scroll-top-action.css') &&
+    !contractsLayerCss.includes('ui-post-contact-placement.css') &&
+    contractsLayerCss.trimEnd().endsWith('@import "../system/ui-sticky-topbar-contract.css";'),
+  'Contracts layer must remain the cross-page contract layer and must not import feature-owned or legacy cleanup CSS.',
+);
+
+for (const file of walk('src', (entry) => /\.(tsx|ts)$/.test(entry))) {
+  const imports = stylesheetImports(read(file));
+  if (file === 'src/main.tsx') {
+    assert(
+      imports.length === 1 && imports[0] === './index.css',
+      'src/main.tsx must be the only TS module importing CSS and it may only import ./index.css.',
+    );
+    continue;
+  }
+
+  assert(
+    imports.length === 0,
+    `${file} must not import CSS directly; use src/index.css layer facades instead.`,
+  );
+}
+
+assert(
+  overlayCss.includes('.ui-route-overlay') &&
+    overlayCss.includes('height: var(--app-layout-vh)') &&
+    overlayCss.includes('max-height: var(--app-layout-vh)') &&
+    overlayCss.includes('overscroll-behavior: none') &&
+    overlayCss.includes('transform: none') &&
+    !overlayCss.includes('.profile-dialog-overlay') &&
+    !overlayCss.includes('.profile-dialog-panel') &&
+    !overlayCss.includes('transform: none !important') &&
+    !overlayCss.includes('transform: translateZ(0);'),
+  'Route overlay CSS must be viewport-fixed, stop overscroll chaining, avoid transformed containing blocks, and not own component dialog rules.',
+);
+
+
+assert(
+  !overlayCss.includes('.profile-dialog-overlay') &&
+    profileDialogCss.includes('.profile-dialog-overlay') &&
+    profileDialogCss.includes('position: fixed') &&
+    profileDialogCss.includes('.profile-dialog-panel') &&
+    profileDialogCss.includes('var(--ui-visual-viewport-height)') &&
+    profileDialogCss.includes('var(--ui-dialog-mobile-available-height)') &&
+    profileDialogCss.includes('@media (max-width: 1023px)') &&
+    profileDialogCss.includes('padding-top: calc(env(safe-area-inset-top) + var(--ui-space-4))') &&
+    !profileDialogCss.includes('align-items: flex-end;') &&
+    !profileDialogCss.includes('330px') &&
+    !profileDialogCss.includes('100dvh') &&
+    !profileDialogCss.includes('var(--app-layout-vh)') &&
+    !uiPrimitivesFeedbackCss.includes('.profile-dialog-panel') &&
+    !profileAvatarActionCss.includes('.profile-dialog-panel') &&
+    !uiArchitectureContractCss.includes('.profile-dialog-panel') &&
+    profileDialog.includes("import { createPortal } from 'react-dom';") &&
+    profileDialog.includes('createPortal(dialog, root)'),
+  'Profile dialogs must render through a portal and own their visual-viewport sizing in the component stylesheet.',
+);
+
+assert(
+  profileSecuritySheetCss.includes('.profile-security-overlay .account-info-sheet') &&
+    profileSecuritySheetCss.includes('var(--ui-visual-viewport-height)') &&
+    profileSecuritySheetCss.includes('var(--ui-dialog-mobile-available-height)') &&
+    profileSecuritySheetCss.includes('@media (max-width: 1023px)') &&
+    profileSecuritySheetCss.includes('padding: var(--ui-dialog-mobile-top-offset) var(--ui-space-2) var(--ui-dialog-mobile-bottom-inset)') &&
+    !profileSecuritySheetCss.includes('100dvh') &&
+    !profileModernCss.includes('account-info-sheet') &&
+    !profileModernCss.includes('profile-security-overlay') &&
+    !uiArchitectureContractCss.includes('account-info-sheet') &&
+    !uiArchitectureContractCss.includes('profile-security-overlay'),
+  'Account information sheet CSS must be owned by features/profile-security-sheet.css and use the shared visual viewport contract.',
+);
+
+assert(
+    promoteCheckoutCss.includes('bottom: var(--ui-keyboard-inset)') &&
+    promoteCheckoutCss.includes('var(--ui-visual-viewport-height)') &&
+    (
+      !postDetailCss.includes('position: fixed') ||
+      (
+        postDetailCss.includes('bottom: var(--ui-keyboard-inset)') &&
+        !/(^|\n)\s*bottom\s*:\s*0\s*;/.test(postDetailCss)
+      )
+    ) &&
+    secondaryPageActionsCss.includes('bottom: var(--ui-keyboard-inset)') &&
+    uiPrimitivesFeedbackCss.includes('bottom: var(--ui-keyboard-inset)'),
+  'Page-level fixed bottom bars must consume the shared keyboard inset instead of anchoring directly to bottom: 0.',
+);
+
+assert(
+  !createPromoteSubmitCss.includes('.post-create-submit-bar') &&
+    !/(^|\n)\s*bottom\s*:/.test(createPromoteSubmitCss),
+  'Post create publish action must live in the header and must not reintroduce a fixed bottom submit bar.',
+);
+
+assert(
+  !homeFeedQueriesHook.includes('keepPreviousData') &&
+    !homeFeedQueriesHook.includes('placeholderData') &&
+    !homeBootstrapHook.includes('placeholderData'),
+  'Home first paint must not reuse previous home feed/bootstrap data as placeholder content.',
+);
+
+assert(
+  feedScrollShellCss.includes('.feed-scroll-root') &&
+    feedScrollShellCss.includes("[data-feed-scroll-translated='true']") &&
+    feedScrollShell.includes('feed-scroll-root') &&
+    feedScrollShell.includes('--feed-scroll-translate-y') &&
+    !feedScrollShell.includes('overscrollBehaviorY') &&
+    !feedScrollShell.includes('WebkitOverflowScrolling'),
+  'Feed scroll static styles must live in CSS, while components only pass dynamic variables.',
+);
+
+assert(
+  !homeFeatureCss.includes('home-mobile-addressbar.css') &&
+    homeLayout.includes('home-document-scroll-shell') &&
+    homeMobileFirstPaintCss.includes('.home-mobile-shell.home-document-scroll-shell') &&
+    homeMobileFirstPaintCss.includes('.home-mobile-shell.home-document-scroll-shell .home-mobile-feed-panel [data-feed-scroll-root]') &&
+    !/body\.mobile-addressbar-enabled\s+\./.test(homeMobileFirstPaintCss) &&
+    homeMobileLayoutCss.includes('.home-mobile-shell .ui-topbar-inner') &&
+    homeMobileLayoutCss.includes('.home-mobile-shell :is(') &&
+    !homeMobileLayoutCss.includes('\n    .ui-topbar-inner {\n'),
+  'Home mobile CSS must keep shell/document-scroll ownership explicit and avoid global topbar/root viewport rules.',
+);
+
+if (failures.length > 0) {
+  console.error('[overlay-guards] failed');
+  failures.forEach((failure) => console.error(`- ${failure}`));
+  process.exit(1);
+}
+
+console.log('[overlay-guards] passed');

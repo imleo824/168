@@ -1,0 +1,7 @@
+/* Promote history page shell. */
+
+@layer utilities {
+  .promote-history-shell {
+    color: var(--ui-text-strong);
+  }
+}

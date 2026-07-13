@@ -1,0 +1,390 @@
+/* Feature contract tokens. Admin, media, country story, post detail, promote, category, and profile contracts */
+
+@layer base {
+  :root {
+    --ui-admin-surface-start: #f7f6f2;
+    --ui-admin-surface-end: #eeebe4;
+    --ui-admin-ink: #1f2633;
+    --ui-admin-sidebar-surface: #171d29;
+    --ui-admin-sidebar-text: rgba(255, 255, 255, 0.86);
+    --ui-admin-sidebar-text-muted: rgba(255, 255, 255, 0.56);
+    --ui-admin-sidebar-text-soft: rgba(255, 255, 255, 0.38);
+    --ui-admin-sidebar-active-surface: rgba(255, 255, 255, 0.92);
+    --ui-admin-sidebar-active-text: #171d29;
+    --ui-admin-sidebar-muted-surface: rgba(255, 255, 255, 0.08);
+    --ui-admin-sidebar-hover-surface: rgba(255, 255, 255, 0.12);
+    --ui-admin-line: rgba(32, 38, 55, 0.1);
+    --ui-admin-table-edge: rgba(32, 38, 55, 0.1);
+    --ui-admin-card-radius: var(--ui-surface-card-radius);
+    --ui-admin-card-padding: var(--ui-space-4);
+    --ui-admin-card-padding-desktop: var(--ui-space-5);
+    --ui-admin-panel-surface: var(--ui-product-glass-white-82);
+    --ui-admin-panel-filter: var(--ui-product-glass-filter-soft);
+    --ui-admin-sidebar-width: calc(var(--ui-space-8) * 7 + var(--ui-space-6));
+    --ui-admin-mobile-card-padding: var(--ui-space-3);
+    --ui-admin-nav-item-height: var(--ui-control-md);
+    --ui-admin-nav-icon-size: calc(var(--ui-control-sm) - var(--ui-space-1));
+    --ui-admin-nav-icon-graphic-size: var(--ui-control-icon-sm);
+    --ui-admin-nav-radius: var(--ui-radius-xl);
+    --ui-admin-user-list-avatar-size: var(--ui-control-sm);
+    --ui-admin-user-list-avatar-size-mobile: calc(var(--ui-control-sm) + var(--ui-space-1));
+    --ui-admin-user-list-avatar-glyph-size: var(--ui-text-sm);
+    --ui-admin-mobile-edit-control-width: calc(var(--ui-space-8) * 6);
+    --ui-admin-filter-gap: calc(var(--ui-space-1) + var(--ui-space-half));
+    --ui-admin-filter-top: calc(var(--ui-topbar-height) + var(--ui-space-6) + var(--ui-space-half));
+    --ui-admin-filter-z: var(--ui-z-sticky-tab);
+    --ui-admin-filter-control-height: var(--ui-control-hit);
+    --ui-admin-filter-panel-padding: var(--ui-space-3);
+    --ui-admin-filter-panel-padding-desktop: var(--ui-space-4);
+    --ui-admin-filter-stat-min-width: calc(var(--ui-space-8) * 3 + var(--ui-space-2));
+    --ui-admin-filter-icon-size: var(--ui-control-icon-sm);
+    --ui-admin-filter-textarea-min-height: calc(var(--ui-space-8) * 3 - var(--ui-space-1));
+    --ui-admin-sidebar-border: color-mix(in srgb, var(--ui-color-black) 26%, transparent);
+    --ui-admin-control-shadow: 0 calc(var(--ui-space-2) + var(--ui-space-half)) calc(var(--ui-space-8) - var(--ui-space-half)) var(--ui-line-subtle);
+    --ui-admin-config-input-disabled-opacity: 0.5;
+    --ui-admin-table-head-padding: calc(var(--ui-space-3) + var(--ui-space-quarter)) var(--ui-space-4);
+    --ui-admin-table-cell-padding: calc(var(--ui-space-3) + var(--ui-space-half)) var(--ui-space-4);
+    --ui-admin-config-icon-surface: var(--ui-surface-muted);
+    --ui-admin-config-icon-graphic-size: var(--ui-control-icon-md);
+    --ui-admin-config-badge-border: var(--ui-line-medium);
+    --ui-admin-config-badge-surface: var(--ui-surface-muted);
+    --ui-admin-config-tab-height: var(--ui-control-md);
+    --ui-admin-scope-ad: var(--ui-warning);
+    --ui-admin-scope-chat: var(--ui-brand);
+    --ui-admin-scope-telegram: var(--ui-brand);
+    --ui-admin-scope-ops: var(--ui-success);
+    --ui-admin-scope-deposit: var(--ui-brand-warm);
+    --ui-admin-chat-card-surface: var(--ui-surface-muted);
+    --ui-admin-chat-field-grid-min: calc(var(--ui-space-8) * 5);
+    --ui-admin-report-table-min-width: calc(var(--ui-space-8) * 16 + var(--ui-space-2));
+    --ui-admin-report-chart-min-width: calc(var(--ui-space-8) * 20);
+    --ui-admin-report-chart-height: calc(var(--ui-space-8) * 7 - var(--ui-space-1));
+    --ui-admin-table-min-width-default: calc(var(--ui-space-8) * 30);
+    --ui-admin-table-min-width-content: calc(var(--ui-space-8) * 32 + var(--ui-space-4));
+    --ui-admin-table-min-width-promotions: calc(var(--ui-space-8) * 38 + var(--ui-space-6));
+    --ui-admin-table-min-width-orders: calc(var(--ui-space-8) * 35);
+    --ui-admin-table-min-width-transactions: calc(var(--ui-space-8) * 27 - var(--ui-space-1));
+    --ui-admin-table-min-width-chat: calc(var(--ui-space-8) * 33 + var(--ui-space-1));
+    --ui-admin-table-min-width-deposit-addresses: calc(var(--ui-space-8) * 38 + var(--ui-space-1));
+    --ui-admin-cell-user-max-width: calc(var(--ui-space-8) * 11 + var(--ui-space-2));
+    --ui-admin-cell-content-max-width: calc(var(--ui-space-8) * 13 + var(--ui-space-1));
+    --ui-admin-action-height-sm: calc(var(--ui-space-8) - var(--ui-space-1));
+    --ui-admin-action-height-md: var(--ui-space-8);
+    --ui-admin-action-height-lg: calc(var(--ui-space-8) + var(--ui-space-1));
+    --ui-admin-action-height-comfortable: calc(var(--ui-space-8) + var(--ui-space-2));
+    --ui-admin-action-padding-sm: var(--ui-space-2);
+    --ui-admin-action-padding-md: var(--ui-space-3);
+    --ui-admin-action-disabled-opacity: 0.45;
+    --ui-admin-icon-action-disabled-opacity: 0.3;
+    --ui-admin-icon-action-size: var(--ui-admin-action-height-md);
+    --ui-admin-pagination-icon-size: var(--ui-control-icon-md);
+    --ui-admin-route-gate-icon-size: calc(var(--ui-space-8) + var(--ui-space-2));
+    --ui-admin-brand-mark-icon-size: var(--ui-control-icon-md);
+    --ui-admin-chat-refresh-icon-size: var(--ui-control-icon-sm);
+    --ui-admin-ad-thumb-table-height: calc(var(--ui-space-8) + var(--ui-space-2));
+    --ui-admin-ad-thumb-table-desktop-width: calc(var(--ui-space-8) * 2 + var(--ui-space-4));
+    --ui-admin-ad-thumb-table-mobile-width: calc(var(--ui-space-8) * 2);
+    --ui-admin-ad-thumb-card-height: calc(var(--ui-space-8) + var(--ui-space-4));
+    --ui-admin-ad-thumb-card-desktop-width: calc(var(--ui-space-8) * 3);
+    --ui-admin-ad-thumb-card-mobile-width: calc(var(--ui-space-8) * 2);
+    --ui-admin-editor-panel-max-width: calc(var(--ui-space-8) * 18);
+    --ui-admin-form-control-height-sm: calc(var(--ui-space-8) - var(--ui-space-1));
+    --ui-admin-form-control-height-md: calc(var(--ui-space-8) + var(--ui-space-1));
+    --ui-admin-form-control-height-lg: calc(var(--ui-space-8) + var(--ui-space-3));
+    --ui-admin-form-control-height-xl: calc(var(--ui-space-8) + var(--ui-space-6));
+    --ui-admin-form-control-height-xl-desktop: calc(var(--ui-space-8) + var(--ui-space-7));
+    --ui-admin-form-textarea-min-height-sm: calc(var(--ui-space-8) * 3 - var(--ui-space-1));
+    --ui-admin-form-textarea-min-height-md: calc(var(--ui-space-8) * 3 + var(--ui-space-2));
+    --ui-admin-form-textarea-min-height-lg: calc(var(--ui-space-8) * 6 + var(--ui-space-1));
+    --ui-admin-form-control-focus-border: var(--ui-text-strong);
+    --ui-admin-alert-danger-border: color-mix(in srgb, var(--ui-danger) 16%, var(--ui-color-white));
+    --ui-admin-submit-height: calc(var(--ui-space-8) + var(--ui-space-3));
+    --ui-admin-submit-height-desktop: calc(var(--ui-space-8) + var(--ui-space-4));
+    --ui-admin-submit-padding-x: var(--ui-space-6);
+    --ui-admin-submit-padding-x-desktop: calc(var(--ui-space-8) * 2 + var(--ui-space-4));
+    --ui-admin-submit-radius: var(--ui-radius-2xl, calc(var(--ui-radius-xl) + var(--ui-space-1)));
+    --ui-admin-submit-active-opacity: 0.95;
+    --ui-admin-choice-height: calc(var(--ui-space-8) + var(--ui-space-3));
+    --ui-admin-choice-active-border: var(--ui-text-strong);
+    --ui-admin-choice-idle-border: var(--ui-line-medium);
+    --ui-admin-state-success-surface: var(--ui-success-bg);
+    --ui-admin-state-success-text: var(--ui-success-strong);
+    --ui-admin-state-warning-surface: var(--ui-warning-bg);
+    --ui-admin-state-warning-text: var(--ui-warning);
+    --ui-admin-state-danger-surface: color-mix(in srgb, var(--ui-danger) 8%, var(--ui-color-white));
+    --ui-admin-state-danger-pressed-surface: color-mix(in srgb, var(--ui-danger) 12%, var(--ui-color-white));
+    --ui-admin-state-danger-text: var(--ui-danger);
+    --ui-admin-state-info-surface: color-mix(in srgb, var(--ui-brand) 8%, var(--ui-color-white));
+    --ui-admin-state-info-text: var(--ui-brand);
+    --ui-admin-state-neutral-surface: var(--ui-surface-muted);
+    --ui-admin-state-neutral-soft-surface: color-mix(in srgb, var(--ui-surface-muted) 50%, var(--ui-color-white));
+    --ui-admin-state-neutral-text: var(--ui-text-muted);
+    --ui-admin-state-neutral-strong-text: var(--ui-text-secondary);
+    --ui-admin-state-primary-surface: var(--ui-text-strong);
+    --ui-admin-state-primary-text: var(--ui-color-white);
+    --ui-admin-meta-mono-family: var(--ui-font-family-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
+    --ui-media-single-max-height: calc(var(--ui-space-8) * 16);
+    --ui-upload-remove-backdrop-filter: blur(var(--ui-space-2)) saturate(1.08);
+    --ui-upload-remove-border: color-mix(in srgb, var(--ui-color-white) 42%, transparent);
+    --ui-upload-remove-surface: color-mix(in srgb, var(--ui-color-black) 62%, transparent);
+    --ui-upload-remove-shadow: 0 var(--ui-space-1) var(--ui-space-3) color-mix(in srgb, var(--ui-color-black) 28%, transparent);
+    --ui-upload-busy-overlay-surface: color-mix(in srgb, var(--ui-color-black) 40%, transparent);
+    --ui-upload-progress-track-color: color-mix(in srgb, var(--ui-color-white) 25%, transparent);
+    --ui-upload-error-overlay-surface: color-mix(in srgb, var(--ui-danger) 64%, var(--ui-color-black));
+    --ui-upload-error-icon-color: color-mix(in srgb, var(--ui-danger-classic) 35%, var(--ui-color-white));
+    --ui-upload-add-icon-size: calc(var(--ui-control-icon-md) + var(--ui-space-1));
+    --ui-upload-error-icon-size: var(--ui-control-icon-md);
+    --ui-upload-inline-error-icon-size: var(--ui-control-icon-xs);
+    --ui-upload-progress-ring-size: var(--ui-control-icon-md);
+    --ui-upload-progress-ring-stroke: var(--ui-control-border-width);
+    --ui-upload-toolbar-icon-size: calc(var(--ui-control-icon-md) + var(--ui-space-half));
+    --feed-scroll-translate-y: var(--ui-space-none);
+    --ui-glass-white-96: rgba(255, 255, 255, 0.96);
+    --ui-brand-elevated-shadow: rgba(3, 5, 8, 0.24);
+    --ui-overlay-lightbox: rgba(0, 0, 0, 0.95);
+    --ui-overlay-caption: rgba(0, 0, 0, 0.45);
+    --ui-overlay-sheet: rgba(0, 0, 0, 0.28);
+    --ui-online-pulse: var(--ui-brand);
+    --ui-online-dot: var(--ui-brand);
+
+    --ui-post-create-main-padding-top: var(--ui-space-none);
+    --ui-post-create-submit-label-size: var(--ui-text-title);
+    --ui-post-create-submit-label-weight: var(--ui-font-weight-title);
+    --ui-post-create-submit-label-line-height: var(--ui-line-tight);
+    --ui-post-create-submit-label-tracking: var(--ui-tracking-normal);
+    --post-create-publishing-lock-surface: color-mix(in srgb, var(--ui-color-black) 12%, transparent);
+    --ui-post-create-topbar-compact-action-height: var(--ui-header-filter-height);
+    --ui-post-create-topbar-compact-action-min-width: calc(var(--ui-header-filter-height) + var(--ui-space-4));
+    --ui-post-create-topbar-compact-text-action-min-width: var(--ui-post-create-topbar-compact-action-min-width);
+    --ui-post-create-topbar-compact-action-padding-x: var(--ui-space-3);
+    --ui-recharge-page-max: var(--ui-page-narrow);
+    --ui-recharge-shell-gap: var(--ui-space-4);
+    --ui-recharge-card-radius: var(--ui-section-card-radius, var(--ui-radius-lg));
+    --ui-recharge-balance-icon-size: var(--ui-control-lg);
+    --ui-recharge-balance-icon-graphic-size: calc(var(--ui-control-icon-md) + var(--ui-space-1));
+    --ui-recharge-submit-icon-size: var(--ui-control-icon-md);
+    --ui-recharge-copy-icon-size: var(--ui-control-icon-xs);
+    --ui-record-copy-icon-size: var(--ui-control-icon-xs);
+    --ui-promote-history-action-icon-size: var(--ui-control-icon-xs);
+    --ui-refresh-hint-icon-size: var(--ui-control-icon-xs);
+    --ui-toast-icon-size: var(--ui-control-icon-md);
+    --ui-brand-about-eyebrow-icon-size: var(--ui-control-icon-xs);
+    --ui-brand-about-action-icon-size: var(--ui-control-icon-sm);
+    --ui-brand-about-card-icon-graphic-size: calc(var(--ui-control-icon-md) + var(--ui-space-1));
+    --ui-brand-about-check-icon-size: var(--ui-control-icon-md);
+    --ui-recharge-input-height: calc(var(--ui-control-lg) + var(--ui-space-3));
+    --ui-recharge-input-radius: var(--ui-radius-lg);
+    --ui-recharge-action-height: var(--ui-control-lg);
+    --ui-recharge-qr-size: min(64vw, calc(var(--ui-space-8) * 7));
+    --chat-shell-width: min(var(--ui-viewport-width), var(--ui-page-content-max-width));
+    --chat-shell-bg: var(--chat-page-bg);
+    --chat-shell-desktop-max-height: calc(var(--ui-space-8) * 24);
+    --chat-shell-desktop-available-height: calc(var(--ui-visual-viewport-height) - var(--ui-space-8) - var(--ui-space-4));
+    --chat-shell-desktop-height: min(var(--chat-shell-desktop-max-height), var(--chat-shell-desktop-available-height));
+    --chat-shell-desktop-radius: var(--ui-radius-lg);
+    --chat-shell-desktop-shadow: var(--ui-shadow-card);
+    --chat-page-desktop-padding: var(--ui-space-6);
+    --chat-page-bg: var(--ui-surface-page);
+    --chat-panel-bg: var(--ui-surface-card);
+    --chat-panel-bg-glass: color-mix(in srgb, var(--chat-panel-bg) 94%, transparent);
+    --chat-panel-muted: var(--ui-surface-muted);
+    --chat-panel-muted-glass: color-mix(in srgb, var(--chat-panel-muted) 78%, transparent);
+    --chat-panel-border: var(--ui-social-line-soft, var(--ui-line-hairline));
+    --chat-text: var(--ui-text-primary);
+    --chat-text-strong: var(--ui-text-strong);
+    --chat-text-muted: var(--ui-text-muted);
+    --chat-accent: var(--ui-brand);
+    --chat-accent-soft: var(--ui-brand-accent-surface);
+    --chat-accent-border: color-mix(in srgb, var(--ui-brand) 22%, var(--chat-panel-border));
+    --chat-accent-message-surface: color-mix(in srgb, var(--ui-brand) 12%, var(--chat-panel-bg));
+    --chat-scrim-surface: color-mix(in srgb, var(--ui-color-ink) 42%, transparent);
+    --chat-rule-surface: color-mix(in srgb, var(--ui-text-muted) 42%, transparent);
+    --chat-stream-panel-surface: linear-gradient(180deg, color-mix(in srgb, var(--ui-color-white) 98%, transparent), color-mix(in srgb, var(--ui-surface-soft) 92%, transparent)), var(--chat-panel-bg);
+    --chat-message-avatar-size: var(--ui-social-feed-avatar-size);
+    --chat-message-identity-gap: var(--ui-space-2);
+    --chat-message-row-gap: var(--ui-space-2);
+    --chat-reply-thumb-size: calc(var(--ui-space-5) + var(--ui-space-half));
+    --chat-composer-control-height: var(--ui-control-lg);
+    --chat-composer-z: var(--ui-z-local-floating);
+    --chat-composer-shadow: 0 calc((var(--ui-space-2) + var(--ui-space-half)) * -1) var(--ui-space-6) color-mix(in srgb, var(--ui-color-black) 4%, transparent);
+    --chat-composer-bottom-dock-gap: var(--ui-space-1);
+    --chat-bottom-nav-offset: var(--ui-bottom-nav-page-bottom-space);
+    --chat-mobile-bottom-clearance: max(calc(var(--chat-bottom-nav-offset) - var(--ui-keyboard-inset, var(--ui-space-none))), var(--ui-space-none));
+    --chat-bottom-dock-space: var(--chat-composer-bottom-dock-gap);
+    --chat-mobile-viewport-height: calc(var(--ui-visual-viewport-height) - var(--chat-mobile-bottom-clearance));
+    --chat-post-preview-max-width: calc(var(--ui-space-8) * 10);
+    --chat-post-preview-gap: var(--ui-space-1);
+    --chat-post-preview-square-ratio: 1 / 1;
+    --chat-post-preview-single-ratio: 4 / 3;
+    --chat-post-preview-more-surface: color-mix(in srgb, var(--ui-color-black) 38%, transparent);
+    --ui-feed-list-item-animation-duration: 180ms;
+    --ui-feed-list-item-animation-stagger-step: 20ms;
+    --ui-feed-list-item-animation-stagger-max: 80ms;
+    --ui-feed-list-item-intrinsic-size: calc(var(--ui-space-8) * 10);
+    --post-create-section-padding-x: var(--ui-topbar-edge-padding-x, var(--ui-page-padding-x));
+    --post-create-media-padding-block: var(--ui-space-3);
+    --post-create-input-padding-block-start: var(--ui-space-4);
+    --post-create-input-padding-block-end: var(--post-create-media-padding-block);
+    --post-create-textarea-min-height: calc(var(--ui-space-8) * 4 + var(--ui-space-3));
+    --post-create-header-action-min-width: calc(var(--ui-space-8) + var(--ui-space-4));
+    --post-create-input-padding: var(--post-create-input-padding-block-start) var(--post-create-section-padding-x) var(--post-create-input-padding-block-end);
+    --post-create-sync-width: calc(var(--ui-space-8) * 2);
+    --post-create-sync-height: var(--ui-control-sm);
+    --post-create-sync-thumb-size: var(--ui-space-6);
+    --post-create-sync-thumb-on-x: calc(var(--ui-control-sm) + var(--ui-space-half));
+    --post-create-sync-thumb-off-x: var(--ui-space-1);
+    --post-create-channel-gap: calc(var(--ui-space-1) + var(--ui-space-half));
+    --post-create-category-option-min-height: calc(var(--ui-control-lg) + var(--ui-space-1));
+    --post-create-option-gap-top-sm: var(--ui-space-2);
+    --post-create-option-selected-border: var(--ui-color-transparent);
+    --post-create-option-selected-surface: var(--ui-action-primary-soft);
+    --post-create-option-selected-text: var(--ui-action-primary-strong);
+    --post-create-option-selected-shadow: var(--ui-shadow-none);
+    --post-create-option-idle-border: var(--ui-color-transparent);
+    --post-create-option-idle-surface: var(--ui-action-muted-surface);
+    --post-create-option-idle-surface-hover: var(--ui-action-muted-surface-hover);
+    --post-create-option-idle-text: var(--ui-text-secondary);
+    --post-create-meta-card-surface: color-mix(in srgb, var(--ui-social-surface) 92%, transparent);
+    --post-create-meta-row-filled-surface: color-mix(in srgb, var(--ui-social-surface-muted) 70%, var(--ui-social-surface));
+    --post-create-meta-row-error-border: color-mix(in srgb, var(--ui-danger-classic) 30%, transparent);
+    --post-create-meta-row-error-surface: color-mix(in srgb, var(--ui-danger-classic) 8%, var(--ui-social-surface));
+    --post-create-contact-input-padding: calc(var(--ui-space-3) + var(--ui-space-half)) var(--ui-space-4);
+    --post-create-contact-save-min-width: calc(var(--ui-space-8) * 3 + var(--ui-space-4));
+    --post-create-location-city-grid-max-height: min(48vh, calc(var(--ui-space-8) * 13));
+    --post-create-location-option-mark-ring: 0 0 0 var(--ui-border-width-hairline) color-mix(in srgb, var(--ui-brand) 32%, transparent);
+    --post-create-edit-icon-size: var(--ui-control-sm);
+    --post-create-edit-icon-offset: var(--ui-space-3);
+    --post-create-picker-panel-height: 100%;
+    --post-create-picker-panel-height-svh: var(--ui-app-page-min-height);
+    --post-create-picker-panel-height-dvh: var(--app-layout-vh);
+    --post-create-picker-panel-max-width: calc(var(--ui-space-8) * 21);
+    --post-create-picker-panel-desktop-max-height: calc(var(--ui-space-8) * 23);
+    --post-create-picker-panel-desktop-viewport-height: 82vh;
+    --post-create-picker-panel-desktop-height: min(var(--post-create-picker-panel-desktop-viewport-height), var(--post-create-picker-panel-desktop-max-height));
+    --post-create-page-scroll-padding-top: calc(var(--ui-topbar-height) + var(--ui-space-4) + env(safe-area-inset-top));
+    --post-create-dialog-actions-gap: var(--ui-space-3);
+    --post-create-dialog-actions-margin-top: var(--ui-space-6);
+    --post-create-promote-actions-gap: var(--ui-space-3);
+    --post-create-promote-actions-margin-top: var(--ui-space-5);
+    --post-create-promote-action-height: var(--ui-control-lg);
+    --post-create-promote-title-size: var(--ui-type-section-title-size);
+    --ui-record-header-caret-offset-x: var(--ui-space-2);
+    --post-create-mobile-input-font-size: var(--ui-mobile-form-font-size);
+    --post-create-mobile-scroll-margin-top: calc(var(--ui-topbar-height) + var(--ui-space-4) + env(safe-area-inset-top));
+    --ui-detail-topbar-author-max: min(54vw, var(--ui-page-narrow));
+    --ui-detail-topbar-author-gap: var(--ui-space-2);
+    --ui-detail-topbar-author-stack-gap: var(--ui-space-half);
+    --ui-detail-topbar-avatar-size: var(--ui-control-md);
+    --ui-detail-topbar-avatar-size-compact: calc(var(--ui-control-sm) - var(--ui-space-1));
+    --ui-detail-topbar-author-name-size: var(--ui-text-sm);
+    --ui-detail-topbar-author-time-size: var(--ui-text-2xs);
+    --ui-detail-topbar-action-slot-min-width: calc(var(--ui-control-lg) + var(--ui-space-4));
+    --ui-detail-border: var(--ui-ins-divider);
+    --ui-detail-border-soft: var(--ui-ins-divider-soft);
+    --ui-promote-picker-sheet-max-height: 86dvh;
+    --ui-promote-payment-sheet-max-height: 88dvh;
+    --ui-detail-page-bottom-space: calc(var(--ui-space-8) * 4 + var(--ui-space-2));
+    --ui-detail-article-padding-mobile: var(--ui-social-feed-row-padding-y) var(--ui-social-feed-row-padding-x) calc(var(--ui-space-3) + var(--ui-space-half));
+    --ui-detail-content-gap: var(--ui-space-3);
+    --ui-detail-tag-row-gap: var(--ui-post-tag-row-gap-y);
+    --ui-detail-source-padding: var(--ui-space-2) var(--ui-social-feed-row-padding-x) var(--ui-social-feed-row-padding-y);
+    --ui-detail-source-gap: var(--ui-space-1);
+    --ui-category-feed-bottom-space-mobile: calc(var(--ui-space-8) * 3 + var(--ui-space-4));
+    --ui-category-feed-bottom-space-desktop: calc(var(--ui-space-8) * 2);
+    --ui-category-feed-empty-padding: var(--ui-space-8) var(--ui-space-6);
+    --ui-promote-form-gap: calc(var(--ui-space-3) + var(--ui-space-half));
+    --ui-promote-form-field-gap: calc(var(--ui-space-1) + var(--ui-space-half));
+    --ui-promote-input-height: var(--ui-control-lg);
+    --ui-promote-calendar-gap: calc(var(--ui-space-1) + var(--ui-space-half));
+    --ui-promote-record-filter-surface: color-mix(in srgb, var(--ui-surface-raised) 92%, transparent);
+    --ui-promote-ad-input-error-border: color-mix(in srgb, var(--ui-danger-classic) 35%, var(--ui-line-hairline));
+    --ui-sponsor-row-skeleton-title-width: 42%;
+    --ui-sponsor-row-skeleton-meta-width: var(--ui-skeleton-width-compact);
+    --ui-profile-sticky-tab-top: var(--ui-space-none);
+    --ui-profile-tab-count: 5;
+    --ui-profile-tab-min-height: calc(var(--ui-control-lg) + var(--ui-space-half));
+    --ui-profile-tab-padding-y: calc(var(--ui-space-2) - var(--ui-space-quarter));
+    --ui-profile-tab-padding-x: var(--ui-space-half);
+    --ui-profile-tab-underline-inset: var(--ui-tab-indicator-inset);
+    --ui-profile-tab-selected-weight: var(--ui-font-weight-title);
+    --ui-profile-tab-meta-opacity: 0.62;
+    --ui-profile-cover-height: calc(var(--ui-space-8) * 4 + var(--ui-space-4));
+    --ui-profile-cover-image-opacity: 1;
+    --ui-profile-cover-pattern-opacity: 0.18;
+    --ui-profile-cover-default-pattern-opacity: 0.09;
+    --ui-profile-cover-default-glass-opacity: 0.22;
+    --ui-profile-cover-image-overlay-opacity: 0.18;
+    --ui-profile-cover-default-surface:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--ui-color-white) 94%, var(--ui-brand) 6%) 0%,
+        color-mix(in srgb, var(--ui-color-white) 97%, var(--ui-success) 3%) 46%,
+        color-mix(in srgb, var(--ui-surface-card-solid) 98%, var(--ui-brand) 2%) 100%
+      ),
+      linear-gradient(
+        118deg,
+        color-mix(in srgb, var(--ui-brand) 10%, var(--ui-color-white)) 0%,
+        color-mix(in srgb, var(--ui-success) 7%, var(--ui-color-white)) 54%,
+        color-mix(in srgb, var(--ui-warning) 9%, var(--ui-color-white)) 100%
+      );
+    --ui-profile-cover-pattern-surface:
+      repeating-linear-gradient(
+        0deg,
+        color-mix(in srgb, var(--ui-brand) 8%, transparent) 0,
+        color-mix(in srgb, var(--ui-brand) 8%, transparent) var(--ui-border-width-hairline),
+        transparent var(--ui-border-width-hairline),
+        transparent calc(var(--ui-space-5) + var(--ui-space-1))
+      ),
+      repeating-linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--ui-text-primary) 5%, transparent) 0,
+        color-mix(in srgb, var(--ui-text-primary) 5%, transparent) var(--ui-border-width-hairline),
+        transparent var(--ui-border-width-hairline),
+        transparent calc(var(--ui-space-8) + var(--ui-space-3))
+      ),
+      repeating-linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--ui-color-white) 46%, transparent) 0,
+        color-mix(in srgb, var(--ui-color-white) 46%, transparent) var(--ui-border-width-hairline),
+        transparent var(--ui-border-width-hairline),
+        transparent calc(var(--ui-space-7) + var(--ui-space-1))
+      ),
+      linear-gradient(
+        100deg,
+        transparent 0%,
+        color-mix(in srgb, var(--ui-color-white) 32%, transparent) 42%,
+        transparent 76%
+      );
+    --ui-profile-cover-glass-surface:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--ui-color-white) 12%, transparent) 0%,
+        transparent 46%,
+        color-mix(in srgb, var(--ui-surface-card-solid) 58%, transparent) 100%
+      ),
+      linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--ui-brand) 3%, transparent) 0%,
+        transparent 38%,
+        color-mix(in srgb, var(--ui-warning) 3%, transparent) 100%
+      );
+    --ui-profile-cover-edit-badge-border: color-mix(in srgb, var(--ui-color-white) 28%, transparent);
+    --ui-profile-cover-edit-badge-surface: color-mix(in srgb, var(--ui-color-black) 16%, transparent);
+    --ui-profile-cover-image-overlay-surface:
+      linear-gradient(180deg, color-mix(in srgb, var(--ui-color-black) 3%, transparent), transparent 42%),
+      linear-gradient(180deg, transparent 72%, color-mix(in srgb, var(--ui-surface-card-solid) 22%, transparent));
+    --ui-profile-avatar-camera-badge-bg: var(--ui-brand);
+    --ui-profile-avatar-camera-badge-fg: var(--ui-color-white);
+    --ui-profile-avatar-camera-badge-border: var(--ui-surface-card);
+    --ui-profile-avatar-camera-badge-size: calc(var(--ui-control-xs) - var(--ui-space-half) - var(--ui-space-1));
+    --ui-profile-avatar-camera-badge-shadow: 0 0 0 var(--ui-border-width-hairline) color-mix(in srgb, var(--ui-brand) 24%, transparent);
+    --ui-profile-user-list-avatar-size: var(--ui-header-avatar-size);
+    --ui-user-space-bottom-mobile: calc(env(safe-area-inset-bottom) + var(--ui-space-8) * 2 + var(--ui-space-4));
+    --ui-user-space-bottom-desktop: calc(env(safe-area-inset-bottom) + var(--ui-space-8) + var(--ui-space-5));
+    --ui-user-space-following-surface: color-mix(in srgb, var(--ui-surface-muted) 92%, var(--ui-color-white));
+    --ui-profile-security-scrim-surface: color-mix(in srgb, var(--ui-color-black) 42%, transparent);
+    --ui-profile-security-row-border: color-mix(in srgb, var(--ui-line-hairline) 72%, transparent);
+    --promote-payment-card-padding: calc(var(--ui-space-3) + var(--ui-space-quarter));
+    --promote-category-chip-padding: calc(var(--ui-space-1) + var(--ui-space-half)) calc(var(--ui-space-3) + var(--ui-space-half));
+  }
+}

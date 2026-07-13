@@ -1,0 +1,102 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import process from 'node:process';
+
+const root = process.cwd();
+const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
+const exists = (file) => fs.existsSync(path.join(root, file));
+const mustHave = (label, source, pattern) => {
+  if (!pattern.test(source)) throw new Error(`${label} is missing ${pattern}`);
+};
+const mustNotHave = (label, source, pattern) => {
+  if (pattern.test(source)) throw new Error(`${label} still contains ${pattern}`);
+};
+
+for (const file of [
+  'server/services/auto-crawl-category-routing.service.ts',
+  'server/services/auto-crawl-seed-sources.ts',
+  'scripts/init-auto-crawl-sources.ts',
+  'server/services/auto-crawl-final-category.service.ts',
+]) {
+  if (exists(file)) throw new Error(`${file} must remain deleted.`);
+}
+
+const routes = read('server/routes/auto-crawl.routes.ts');
+const types = read('server/services/auto-crawl.types.ts');
+const normalize = read('server/services/auto-crawl-normalize.ts');
+const crawl = read('server/services/auto-crawl.service.ts');
+const crawlAi = read('server/services/crawl-content-ai.service.ts');
+const crawlRecovery = read('server/services/auto-crawl-recovery.service.ts');
+const observedRunner = read('server/services/auto-crawl-observed-runner.service.ts');
+const crawlDatabaseConfig = read('server/services/auto-crawl-database-config.service.ts');
+const crawlMeta = read('server/services/crawl-category-meta-normalize.service.ts');
+const crawlQuality = read('server/services/crawl-content-quality.service.ts');
+const locationNormalize = read('server/services/location-preset-normalize.service.ts');
+const packageJson = read('package.json');
+
+mustNotHave('domain types', types, /syncToTelegram|localOnlyMode|aiEnabled|QUARANTINED|FILTERED/);
+mustHave('domain types', types, /RETRYABLE/);
+mustNotHave('source normalization', normalize, /normalizeSeed|shouldDisableSeedSource|normalizeCategoryName|syncToTelegram/);
+mustHave('source normalization', normalize, /sanitizeDatabaseText/);
+
+mustHave('source routes', routes, /categoryId/);
+mustHave('source routes', routes, /prisma\.category\.findUnique/);
+mustNotHave('source routes', routes, /sources\/seed|category-routing-rules|resolveDefaultAutoCrawlAuthorUserId|repairEnabledAutoCrawlSourcesWithoutAuthor|localOnlyMode|aiEnabled|syncToTelegram/);
+mustNotHave('package scripts', packageJson, /seed:auto-crawl-sources/);
+
+mustHave('crawl database config', crawlDatabaseConfig, /prisma\.systemConfig\.findMany/);
+mustHave('crawl database config', crawlDatabaseConfig, /prisma\.category\.findMany/);
+mustHave('crawl database config', crawlDatabaseConfig, /categoriesById/);
+mustHave('crawl database config', crawlDatabaseConfig, /schemasBySlug/);
+mustHave('crawl database config', crawlDatabaseConfig, /getAutoCrawlDatabaseCategory/);
+mustHave('crawl database config', crawlDatabaseConfig, /getAutoCrawlCategorySchema/);
+mustHave('crawl database config', crawlDatabaseConfig, /auto_crawl_database_meta_category_not_found/);
+mustNotHave('crawl database config', crawlDatabaseConfig, /ConfigService|getDefaultConfigs|DEFAULT_|fallback|entry\.slug|entry\.id/);
+
+mustHave('main flow', crawl, /loadAutoCrawlDatabaseConfig/);
+mustHave('main flow', crawl, /getAutoCrawlDatabaseCategory\(databaseConfig, source\.categoryId\)/);
+mustHave('main flow', crawl, /getAutoCrawlCategorySchema\(databaseConfig, category\)/);
+mustHave('main flow', crawl, /category: \{ connect: \{ id: category\.id \} \}/);
+mustHave('main flow', crawl, /categoryMeta: extracted\.meta/);
+mustHave('main flow', crawl, /set_config\('app\.auto_crawl_write','1',true\)/);
+mustHave('main flow', crawl, /images: item\.images/);
+mustHave('main flow', crawl, /帖子发布失败，已进入失败队列/);
+mustHave('main flow', crawl, /auto_crawl_database_migration_required/);
+mustNotHave('main flow', crawl, /resolveCategoryById|findPublishCategoryMetaSchema|ConfigService|AutoCrawlLock|AutoCrawlCategoryAuthor|heartbeatAutoCrawlLock|resolveAutoCrawlFinalCategoryByRules|initializeAutoCrawlSourcesFromSeed|AUTO_CRAWL_SEED|CREATE TABLE IF NOT EXISTS|CREATE INDEX IF NOT EXISTS/);
+mustNotHave('main flow metadata', crawl, /metadata:\s*\{[\s\S]{0,160}\bcategory\s*[,}]|metadata:\s*\{[\s\S]{0,180}\bmeta\s*:/);
+mustHave('source identity', crawl, /duplicateBy: 'sourcePostId' \| 'fingerprint' \| 'contentHash'/);
+mustHave('source identity', crawl, /\(\"sourceId\"=\$1 AND \"sourcePostId\"=\$2\)/);
+mustHave('source identity', crawl, /ON CONFLICT\(\"sourceId\",\"sourcePostId\"\)/);
+mustNotHave('source identity', crawl, /fingerprint\(source, item, itemHash\)/);
+
+mustHave('recovery', crawlRecovery, /reconcileInterruptedAutoCrawlState/);
+mustHave('recovery', crawlRecovery, /runAutoCrawlRecoveryQueue/);
+mustHave('observed runner', observedRunner, /runRecoverySafely/);
+
+mustHave('AI extraction', crawlAi, /context: AutoCrawlExtractionContext/);
+mustHave('AI extraction', crawlAi, /jsonMode: true/);
+mustHave('AI extraction', crawlAi, /enrichmentStatus/);
+mustHave('AI extraction', crawlAi, /数据库 Category 是分类唯一事实源/);
+mustHave('AI extraction', crawlAi, /Meta Schema 是 Meta 唯一事实源/);
+mustHave('AI extraction', crawlAi, /输出字段只能是 title、contact、meta/);
+mustNotHave('AI extraction', crawlAi, /AUTO_CRAWL_META_REQUIRED_MISSING|auto_crawl_ai_required_failed|auto_crawl_ai_required_json_parse_failed|输出字段只能是 title、location|parsed\?\.location/);
+mustNotHave('AI extraction', crawlAi, /import prisma|loadAutoCrawlDatabaseConfig|findPublishCategoryMetaSchema|extractSchemaLabeledMeta|repairAiJson|aiRequest|rawAiMeta/);
+
+mustHave('Meta normalization', crawlMeta, /database_option_exact/);
+mustHave('Meta normalization', crawlMeta, /strict_number/);
+mustHave('Meta normalization', crawlMeta, /strict_boolean/);
+mustHave('Meta normalization', crawlMeta, /unexpectedKeys/);
+mustHave('Meta normalization', crawlMeta, /rejected/);
+mustNotHave('Meta normalization', crawlMeta, /missingRequiredKeys|alias|salaryBucket|normalizeCurrency|fallback/i);
+
+mustHave('location normalization', locationNormalize, /buildLocationPresetIndex/);
+mustHave('location normalization', locationNormalize, /const ambiguous = new Set<string>/);
+mustNotHave('location normalization', locationNormalize, /scan\.includes|DEFAULT_LOCATION_PRESETS|normalizeLocationCountryAlias/);
+
+mustHave('quality', crawlQuality, /canonicalContent\(input\.content\)/);
+mustHave('quality', crawlQuality, /source_tail_removed/);
+mustHave('quality', crawlQuality, /images\?: string\[\]/);
+mustHave('quality', crawlQuality, /imageCount === 0/);
+mustNotHave('quality', crawlQuality, /EMOJI_EXCESSIVE_COUNT_THRESHOLD|emojiCount >= 24|CrawlAdDecision|CrawlCategoryValueDecision|extractFirstContact|CATEGORY_INTENT_RULES/);
+
+console.log('[auto-crawl-guards] passed');

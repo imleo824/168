@@ -1,0 +1,55 @@
+/* Profile avatar action affordance. */
+
+@layer utilities {
+  .profile-modern-page .profile-avatar-camera-badge {
+    --ui-profile-avatar-camera-badge-local-size: var(--ui-profile-avatar-camera-badge-size);
+
+    position: absolute;
+    right: var(--ui-space-none);
+    bottom: var(--ui-space-none);
+    z-index: var(--ui-z-local-floating);
+    display: inline-flex;
+    width: var(--ui-profile-avatar-camera-badge-local-size);
+    height: var(--ui-profile-avatar-camera-badge-local-size);
+    min-width: var(--ui-profile-avatar-camera-badge-local-size);
+    min-height: var(--ui-profile-avatar-camera-badge-local-size);
+    max-width: var(--ui-profile-avatar-camera-badge-local-size);
+    max-height: var(--ui-profile-avatar-camera-badge-local-size);
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: calc(var(--ui-border-width-hairline) * 2) solid var(--ui-profile-avatar-camera-badge-border);
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-profile-avatar-camera-badge-bg);
+    color: var(--ui-profile-avatar-camera-badge-fg);
+    box-shadow: var(--ui-profile-avatar-camera-badge-shadow);
+    font-size: 0;
+    line-height: var(--ui-line-none);
+  }
+
+  .profile-modern-page .profile-avatar-camera-badge svg {
+    display: block;
+    width: var(--ui-control-icon-xs);
+    height: var(--ui-control-icon-xs);
+    opacity: var(--ui-opacity-visible);
+    stroke-width: var(--ui-icon-stroke);
+  }
+
+  .profile-modern-page .profile-avatar-camera-badge::before {
+    content: var(--ui-content-none);
+    display: none;
+  }
+
+  .profile-modern-page .profile-avatar-camera-badge::after {
+    content: var(--ui-content-none);
+    display: none;
+  }
+
+  .profile-modern-page .profile-avatar-button {
+    overflow: visible;
+  }
+
+  .profile-modern-page .profile-avatar-button :is(.ui-avatar-lg, img) {
+    overflow: hidden;
+  }
+}

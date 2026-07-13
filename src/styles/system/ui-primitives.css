@@ -1,0 +1,13 @@
+/* Supplemental primitive styles for shared UI components. */
+
+@import "./ui-primitives-layout.css";
+@import "./ui-primitives-auth.css";
+@import "./ui-primitives-auth-agreement.css";
+@import "./ui-primitives-feedback.css";
+@import "./ui-primitives-upload.css";
+@import "./ui-primitives-interactions.css";
+@import "./ui-interaction-performance.css";
+@import "./ui-touch-contract.css";
+@import "./ui-primitives-lightbox.css";
+@import "./ui-primitives-responsive.css";
+@import "./wide-screen-mobile-adaptation.css";

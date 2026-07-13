@@ -1,0 +1,16 @@
+export const APP_ROUTES = {
+  home: '/',
+  sponsor: '/sponsor',
+  invite: '/invite',
+  inviteRecords: '/invite/records',
+  promote: '/promote',
+  promotions: '/promotions',
+  promotionEffects: '/promotion-effects',
+  transactions: '/transactions',
+  recharge: '/recharge',
+  tuiPlus: '/tui-plus',
+  tuiPlusLinkEditor: '/profile/tui-plus-link',
+  profileBioEditor: '/profile/bio',
+  legacyPromoteHistory: '/promote/history',
+  legacyPromotionEffects: '/promote/effects',
+} as const;

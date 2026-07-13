@@ -1,0 +1,29 @@
+/* Home scrollaway chrome collapse behavior. */
+
+@layer utilities {
+  .home-scrollaway-chrome {
+    display: grid;
+    grid-template-rows: minmax(var(--ui-space-none), 1fr);
+    flex: 0 0 auto;
+    min-height: var(--ui-space-none);
+    overflow: hidden;
+    opacity: var(--ui-opacity-visible);
+    visibility: visible;
+    transition:
+      grid-template-rows var(--ui-duration-home-collapse-layout) var(--ease-standard),
+      opacity var(--ui-duration-home-collapse-opacity) var(--ease-standard),
+      visibility var(--ui-duration-home-collapse-opacity) var(--ease-standard);
+  }
+
+  .home-scrollaway-chrome-inner {
+    min-height: var(--ui-space-none);
+    overflow: hidden;
+  }
+
+  .home-chrome-collapsed .home-scrollaway-chrome {
+    grid-template-rows: minmax(var(--ui-space-none), var(--ui-space-none));
+    opacity: var(--ui-opacity-hidden);
+    visibility: hidden;
+    pointer-events: none;
+  }
+}

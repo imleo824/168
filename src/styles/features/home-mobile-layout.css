@@ -1,0 +1,85 @@
+/* features/home-mobile-layout.css */
+
+@layer components {
+  .home-topbar-instagram-inner {
+    padding-inline: var(--ui-topbar-edge-inline);
+  }
+
+  .home-topbar .ui-topbar-leading-slot,
+  .home-topbar .ui-topbar-leading-slot .ui-topbar-slot-item {
+    width: var(--ui-topbar-control-size);
+    min-width: var(--ui-topbar-control-size);
+    max-width: var(--ui-topbar-control-size);
+  }
+
+  .home-topbar .ui-topbar-leading-slot .ui-topbar-slot-item {
+    justify-content: center;
+  }
+
+  .home-topbar-message-icon {
+    position: relative;
+    display: inline-flex;
+    width: var(--ui-control-icon-sm, var(--ui-control-icon-xs));
+    height: var(--ui-control-icon-sm, var(--ui-control-icon-xs));
+    align-items: center;
+    justify-content: center;
+  }
+
+  .home-topbar-message-icon svg {
+    width: 100%;
+    height: 100%;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .home-topbar-message-icon--heart {
+    color: color-mix(in srgb, var(--ui-text-strong) 88%, transparent);
+    transform: translateY(var(--ui-border-width-hairline));
+  }
+
+  .home-topbar-message-icon--heart svg {
+    stroke-width: 2.05;
+  }
+
+  .home-topbar-message-dot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--ui-space-2);
+    height: var(--ui-space-2);
+    border: var(--ui-border-width-hairline) solid var(--ui-surface-card);
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-brand);
+    box-shadow: var(--ui-shadow-sm);
+    transform: translate(-50%, -50%);
+  }
+
+  .home-topbar-message-icon--heart .home-topbar-message-dot {
+    top: 50%;
+    left: 50%;
+    right: auto;
+  }
+
+  /* Mobile layout shell */
+  @media (max-width: 1023px) {
+    .home-topbar {
+      flex: 0 0 auto;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .home-mobile-shell .ui-topbar-inner {
+      min-width: 0;
+    }
+
+    .home-mobile-shell :is(
+      .ui-topbar-back-button,
+      .ui-topbar-publish-btn
+    ) {
+      width: var(--ui-topbar-control-size);
+      height: var(--ui-topbar-control-size);
+      min-width: var(--ui-topbar-control-size);
+      min-height: var(--ui-topbar-control-size);
+    }
+  }
+}

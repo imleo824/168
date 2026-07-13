@@ -1,0 +1,56 @@
+/* Shared profile cover layout and shell. */
+
+@layer utilities {
+  :is(.profile-modern-page, .user-space-page-next) {
+    --profile-cover-top-bleed: calc(var(--ui-topbar-height) + env(safe-area-inset-top));
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) :is(.profile-identity-section, .user-space-profile-section) {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: var(--ui-max-width-none);
+    margin: calc(var(--profile-cover-top-bleed) * -1) 0 0;
+    padding: var(--ui-space-none);
+    border-radius: var(--ui-radius-none);
+    background: var(--ui-surface-card-solid);
+  }
+
+  .user-space-page-next.ui-page-card-shell {
+    border-radius: var(--ui-radius-none);
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) :is(
+    .profile-header-cover,
+    .profile-header-cover--interactive,
+    .profile-header-cover--image,
+    .profile-header-cover--default,
+    .profile-header-cover--skeleton,
+    .profile-header-cover-image,
+    .profile-header-cover-image.optimized-image
+  ),
+  :is(.profile-modern-page, .user-space-page-next) .profile-header-cover::before,
+  :is(.profile-modern-page, .user-space-page-next) .profile-header-cover::after,
+  :is(.profile-modern-page, .user-space-page-next) .profile-header-cover--image::before {
+    border-radius: var(--ui-radius-none);
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) .profile-header-cover {
+    position: relative;
+    isolation: isolate;
+    display: block;
+    width: 100%;
+    height: calc(clamp(calc(var(--ui-space-8) * 3), 24vw, var(--ui-profile-cover-height)) + var(--profile-cover-top-bleed));
+    min-height: calc((var(--ui-space-8) * 3) + var(--profile-cover-top-bleed));
+    overflow: hidden;
+    border-bottom: 0;
+    border-radius: var(--ui-radius-none);
+    background: var(--ui-profile-cover-default-surface);
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) .profile-header-cover[data-profile-cover-edge='flush'],
+  :is(.profile-modern-page, .user-space-page-next) .profile-header-cover[data-profile-cover-edge='flush'] :is(.profile-header-cover-image, .optimized-image),
+  :is(.profile-modern-page, .user-space-page-next) .profile-header-cover[data-profile-cover-edge='flush']::before,
+  :is(.profile-modern-page, .user-space-page-next) .profile-header-cover[data-profile-cover-edge='flush']::after {
+    border-radius: var(--ui-radius-none);
+  }
+}

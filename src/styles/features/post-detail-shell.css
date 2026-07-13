@@ -1,0 +1,82 @@
+/* Post detail page shell and layout. */
+
+@layer utilities {
+  .detail-page {
+    scroll-padding-top: calc(var(--ui-topbar-height) + env(safe-area-inset-top) + var(--ui-root-scroll-padding-top-extra));
+    overflow-x: clip;
+    background: var(--ui-surface-page);
+    color: var(--ui-text-primary);
+  }
+
+  .detail-page[data-route-overlay] {
+    position: fixed;
+    inset: var(--ui-inset-none);
+    z-index: var(--ui-z-route-overlay);
+    isolation: isolate;
+    width: 100%;
+    min-width: 0;
+    background: var(--ui-surface-page);
+  }
+
+  .detail-page[data-route-overlay],
+  .detail-page--mobile {
+    height: var(--app-layout-vh);
+    min-height: var(--app-layout-vh);
+    max-height: var(--app-layout-vh);
+    overflow-x: clip;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .detail-page.ui-page-enter {
+    animation: var(--ui-animation-none);
+    transform: var(--ui-transform-none);
+  }
+
+  .detail-page--mobile {
+    display: flex;
+    flex-direction: column;
+    transform: var(--ui-transform-none);
+    backface-visibility: visible;
+  }
+
+  .detail-page--desktop {
+    width: 100%;
+    padding-bottom: var(--ui-detail-page-bottom-space);
+    transform: var(--ui-transform-none);
+    backface-visibility: visible;
+  }
+
+  .detail-page[data-route-overlay].detail-page--desktop {
+    max-width: var(--ui-app-shell-bounded-max-width);
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+  }
+
+  .detail-page .detail-page-main {
+    padding-top: var(--ui-space-none);
+  }
+
+  .detail-state-shell {
+    color: var(--ui-text-muted);
+    text-align: center;
+  }
+
+  .detail-page-main--mobile {
+    flex: 1 0 auto;
+    min-height: 0;
+    padding-inline: var(--ui-space-none);
+    padding-bottom: calc(var(--ui-detail-page-bottom-space) + env(safe-area-inset-bottom));
+  }
+
+  .detail-page-main--desktop {
+    width: 100%;
+    margin-inline: auto;
+    padding-top: var(--ui-home-desktop-page-padding-y);
+    padding-inline: var(--ui-space-none);
+    padding-bottom: calc(var(--ui-detail-page-bottom-space) + env(safe-area-inset-bottom));
+  }
+}

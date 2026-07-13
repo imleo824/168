@@ -1,0 +1,145 @@
+/* Post detail quotes and like wall. */
+
+@layer utilities {
+  .detail-quotes-section {
+    display: grid;
+    gap: var(--ui-space-3);
+    border-top: var(--ui-border-width-hairline) solid color-mix(in srgb, var(--ui-detail-border-soft) 78%, transparent);
+    padding: calc(var(--ui-space-3) + var(--ui-space-half)) var(--ui-social-feed-row-padding-x) var(--ui-social-feed-row-padding-y);
+    background: var(--ui-surface-card);
+  }
+
+  .detail-quotes-header,
+  .detail-like-wall-header {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: flex-start;
+    gap: var(--ui-space-1);
+  }
+
+  .detail-quotes-title,
+  .detail-like-wall-title {
+    margin: var(--ui-space-none);
+    color: var(--ui-text-strong);
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-title);
+    line-height: var(--ui-line-tight);
+    letter-spacing: var(--ui-tracking-tight);
+  }
+
+  .detail-quotes-count,
+  .detail-like-wall-count {
+    color: color-mix(in srgb, var(--ui-text-muted) 88%, transparent);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-medium);
+    line-height: var(--ui-line-none);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .detail-like-wall {
+    display: grid;
+    min-width: 0;
+    gap: var(--ui-space-3);
+    border-top: var(--ui-border-width-hairline) solid color-mix(in srgb, var(--ui-detail-border-soft) 78%, transparent);
+    padding: calc(var(--ui-space-3) + var(--ui-space-half)) var(--ui-social-feed-row-padding-x) var(--ui-social-feed-row-padding-y);
+    background: var(--ui-surface-card);
+  }
+
+  .detail-like-wall-avatar-row {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--ui-space-1);
+  }
+
+  .detail-like-wall-avatar-frame {
+    display: inline-flex;
+    width: var(--ui-space-6);
+    height: var(--ui-space-6);
+    min-width: var(--ui-space-6);
+    min-height: var(--ui-space-6);
+    max-width: var(--ui-space-6);
+    max-height: var(--ui-space-6);
+    flex: 0 0 var(--ui-space-6);
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: var(--ui-border-width-hairline) solid color-mix(in srgb, var(--ui-surface-card) 88%, transparent);
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-surface-muted);
+    box-shadow: inset 0 0 0 var(--ui-border-width-hairline) color-mix(in srgb, var(--ui-text-strong) 4%, transparent);
+  }
+
+  .detail-like-wall-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--ui-radius-pill);
+  }
+
+  .detail-like-wall-more {
+    display: inline-flex;
+    min-width: 0;
+    min-height: var(--ui-space-6);
+    flex: 0 1 auto;
+    align-items: center;
+    padding-inline: var(--ui-space-1);
+    color: color-mix(in srgb, var(--ui-text-muted) 90%, transparent);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-compact);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .detail-like-wall-loading-block {
+    min-height: var(--ui-control-lg);
+    padding-block: var(--ui-space-2);
+  }
+
+  .detail-quotes-state-block {
+    padding-block: var(--ui-space-5);
+  }
+
+  .detail-quotes-loading-block {
+    min-height: calc(var(--ui-space-8) * 2);
+  }
+
+  .detail-quotes-list {
+    display: grid;
+    min-width: 0;
+  }
+
+  .detail-quotes-loadmore {
+    min-height: var(--ui-control-lg);
+    border-top: var(--ui-border-width-hairline) solid color-mix(in srgb, var(--ui-detail-border-soft) 72%, transparent);
+    padding-top: var(--ui-space-3);
+  }
+
+  .detail-interaction-comment-author {
+    display: inline-block;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    color: var(--ui-text-strong);
+    font-weight: var(--ui-font-weight-strong);
+    text-overflow: ellipsis;
+    vertical-align: middle;
+    white-space: nowrap;
+  }
+
+  .detail-interaction-comment-icon {
+    width: var(--ui-control-icon-xs);
+    height: var(--ui-control-icon-xs);
+    min-width: var(--ui-control-icon-xs);
+    min-height: var(--ui-control-icon-xs);
+    flex: 0 0 var(--ui-control-icon-xs);
+    color: color-mix(in srgb, var(--ui-text-muted) 88%, transparent);
+    stroke-width: var(--ui-icon-stroke);
+  }
+
+  .detail-interaction-item--comment {
+    cursor: default;
+  }
+}

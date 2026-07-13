@@ -1,0 +1,43 @@
+/* Profile and user-space topbar action buttons. */
+
+@layer utilities {
+  :is(.profile-modern-page, .user-space-page-next) > .ui-topbar :is(.ui-topbar-back-button, .topbar-icon-button, .ui-icon-button),
+  :is(.profile-modern-page, .user-space-page-next) .profile-modern-topbar :is(.ui-topbar-back-button, .topbar-icon-button, .ui-icon-button) {
+    color: var(--ui-text-strong);
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) > .ui-topbar :is(.ui-topbar-back-button, .topbar-icon-button, .ui-icon-button) .ui-icon-button-content,
+  :is(.profile-modern-page, .user-space-page-next) .profile-modern-topbar :is(.ui-topbar-back-button, .topbar-icon-button, .ui-icon-button) .ui-icon-button-content {
+    display: inline-grid;
+    width: var(--ui-profile-topbar-action-visual-size);
+    height: var(--ui-profile-topbar-action-visual-size);
+    min-width: var(--ui-profile-topbar-action-visual-size);
+    min-height: var(--ui-profile-topbar-action-visual-size);
+    place-items: center;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--ui-radius-pill);
+    color: var(--ui-text-strong);
+    line-height: var(--ui-line-none);
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) > .ui-topbar :is(.ui-topbar-back-button, .topbar-icon-button, .ui-icon-button) .ui-icon-button-content > svg,
+  :is(.profile-modern-page, .user-space-page-next) .profile-modern-topbar :is(.ui-topbar-back-button, .topbar-icon-button, .ui-icon-button) .ui-icon-button-content > svg {
+    display: block;
+    width: var(--ui-profile-topbar-action-icon-size);
+    height: var(--ui-profile-topbar-action-icon-size);
+    min-width: var(--ui-profile-topbar-action-icon-size);
+    min-height: var(--ui-profile-topbar-action-icon-size);
+    margin: var(--ui-space-none);
+    justify-self: center;
+    align-self: center;
+    transform: var(--ui-transform-none);
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) > .ui-topbar :is(.ui-topbar-back-button, .topbar-icon-button, .ui-icon-button):hover .ui-icon-button-content,
+  :is(.profile-modern-page, .user-space-page-next) .profile-modern-topbar :is(.ui-topbar-back-button, .topbar-icon-button, .ui-icon-button):hover .ui-icon-button-content,
+  :is(.profile-modern-page, .user-space-page-next) > .ui-topbar :is(.ui-topbar-back-button, .topbar-icon-button, .ui-icon-button):focus-visible .ui-icon-button-content,
+  :is(.profile-modern-page, .user-space-page-next) .profile-modern-topbar :is(.ui-topbar-back-button, .topbar-icon-button, .ui-icon-button):focus-visible .ui-icon-button-content {
+    color: var(--ui-text-strong);
+  }
+}

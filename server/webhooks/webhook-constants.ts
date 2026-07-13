@@ -1,0 +1,6 @@
+export const WEBHOOK_MAX_TITLE_LEN = 18;
+export const WEBHOOK_MAX_CONTENT_LEN = 5000;
+export const WEBHOOK_MAX_CONTACT_LEN = 120;
+export const WEBHOOK_MAX_LOCATION_LEN = 120;
+export const WEBHOOK_MAX_IMAGES = 9;
+export const WEBHOOK_MAX_IMAGE_URL_LEN = 2048;

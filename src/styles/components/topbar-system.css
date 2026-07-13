@@ -1,0 +1,193 @@
+/* Topbar system contract: shared header variants and actions. */
+
+@layer utilities {
+  .ui-topbar--home,
+  .home-topbar {
+    position: relative;
+    flex-shrink: 0;
+    --ui-topbar-surface-standard: var(--ui-topbar-surface-home);
+    --ui-topbar-title-size: var(--ui-home-topbar-brand-size);
+    --ui-topbar-column-gap: var(--ui-home-topbar-title-gap);
+    --home-topbar-action-button-size: var(--ui-home-topbar-action-size);
+    --home-topbar-action-icon-size: var(--ui-home-action-icon-size);
+    --home-topbar-action-icon-stroke: var(--ui-home-action-icon-stroke);
+  }
+
+  .ui-topbar--detail,
+  .detail-page-topbar {
+    --ui-topbar-surface-standard: var(--ui-topbar-surface-detail);
+  }
+
+  .ui-topbar--transparent {
+    --ui-topbar-surface-standard: var(--ui-topbar-surface-base);
+    backdrop-filter: var(--ui-backdrop-filter-none);
+    -webkit-backdrop-filter: var(--ui-backdrop-filter-none);
+  }
+
+  .topbar-icon-button--default {
+    color: var(--ui-text-secondary);
+    background: var(--ui-surface-transparent);
+  }
+
+  .topbar-icon-button--strong {
+    color: var(--ui-text-strong);
+    background: var(--ui-surface-transparent);
+  }
+
+  .topbar-icon-button--brand {
+    color: var(--ui-color-white);
+    background: var(--ui-brand);
+    box-shadow: var(--ui-shadow-none);
+  }
+
+  .topbar-icon-button--brand:hover {
+    color: var(--ui-color-white);
+    background: var(--ui-brand-hover);
+  }
+
+  .topbar-icon-button--brand:active {
+    opacity: var(--ui-pressed-opacity);
+    box-shadow: var(--ui-shadow-none);
+    filter: var(--ui-filter-none);
+    transform: var(--ui-transform-none);
+  }
+
+  .ui-topbar-action-slot :is(.topbar-icon-button, .ui-icon-button, .ui-avatar-action),
+  .ui-topbar-leading-slot :is(.topbar-icon-button, .ui-icon-button, .ui-avatar-action) {
+    width: var(--ui-topbar-control-size);
+    min-width: var(--ui-topbar-control-size);
+    max-width: var(--ui-topbar-control-size);
+    flex: 0 0 var(--ui-topbar-control-size);
+  }
+
+  .detail-page-topbar .detail-topbar-author {
+    min-height: var(--ui-topbar-control-size);
+  }
+
+  .home-topbar.ui-topbar {
+    --ui-topbar-control-size: var(--ui-home-topbar-action-size);
+    --ui-topbar-action-gap: var(--ui-home-topbar-action-gap);
+
+    max-height: calc(var(--ui-topbar-height) + env(safe-area-inset-top));
+    overflow: hidden;
+    transition: var(--ui-transition-none);
+  }
+
+  .home-topbar.nav-blur {
+    --ui-topbar-surface-standard: var(--ui-topbar-surface-home);
+  }
+
+  .home-topbar :is(.ui-topbar-inner, .ui-topbar-leading-slot, .ui-topbar-action-slot, .ui-topbar-slot-item, .home-topbar-actions-slot, .home-topbar-title) {
+    align-items: center;
+  }
+
+  .home-topbar .ui-topbar-title {
+    display: inline-flex;
+    height: var(--ui-topbar-height);
+    min-height: var(--ui-topbar-height);
+    justify-content: center;
+    line-height: var(--ui-line-none);
+  }
+
+  .home-topbar .home-topbar-brand-lockup,
+  .home-topbar .home-topbar-brand-name {
+    display: inline-flex;
+    width: var(--ui-home-topbar-brand-vector-width);
+    height: var(--ui-home-topbar-brand-vector-height);
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .home-topbar .home-topbar-brand-lockup {
+    color: var(--ui-text-strong);
+    transform: translateY(var(--ui-home-topbar-brand-baseline-shift));
+  }
+
+  .home-topbar .home-topbar-brand-vector {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  .home-topbar .home-topbar-brand-vector-ink {
+    fill: var(--ui-home-topbar-brand-vector-ink);
+  }
+
+  .home-topbar .home-topbar-brand-vector-ink--secondary {
+    fill: var(--ui-home-topbar-brand-vector-ink-secondary);
+  }
+
+  .home-topbar .home-topbar-brand-vector-accent {
+    fill: var(--ui-home-topbar-brand-vector-accent);
+  }
+
+  .home-topbar .home-topbar-title--brand-text {
+    color: var(--ui-text-strong);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: var(--ui-home-topbar-brand-display-size);
+    font-weight: 800;
+    font-style: normal;
+    font-synthesis: none;
+    letter-spacing: -0.02em;
+    line-height: var(--ui-home-topbar-brand-line-height);
+    text-rendering: geometricPrecision;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-shadow: none;
+    text-transform: none;
+    transition: none;
+  }
+
+  .home-topbar :is(.ui-topbar-leading-slot, .ui-topbar-action-slot) {
+    height: var(--ui-topbar-height);
+    min-height: var(--ui-topbar-height);
+  }
+
+  @media (min-width: 768px) {
+    .home-topbar .home-topbar-brand-lockup,
+    .home-topbar .home-topbar-brand-name {
+      width: var(--ui-home-topbar-brand-vector-width-desktop);
+      height: var(--ui-home-topbar-brand-vector-height-desktop);
+    }
+
+    .home-topbar .home-topbar-title--brand-text {
+      font-size: var(--ui-home-topbar-brand-desktop-display-size);
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .home-topbar .home-topbar-brand-lockup,
+    .home-topbar .home-topbar-brand-name {
+      width: var(--ui-home-topbar-brand-vector-width-wide);
+      height: var(--ui-home-topbar-brand-vector-height-wide);
+    }
+
+    .home-topbar .home-topbar-title--brand-text {
+      font-size: var(--ui-home-topbar-brand-wide-desktop-display-size);
+    }
+  }
+
+  .home-topbar .home-topbar-action-button {
+    display: inline-flex;
+    box-sizing: border-box;
+    width: var(--home-topbar-action-button-size);
+    height: var(--home-topbar-action-button-size);
+    min-width: var(--home-topbar-action-button-size);
+    min-height: var(--home-topbar-action-button-size);
+    max-width: var(--home-topbar-action-button-size);
+    max-height: var(--home-topbar-action-button-size);
+    flex: 0 0 var(--home-topbar-action-button-size);
+    align-items: center;
+    align-self: center;
+    justify-content: center;
+    border: var(--ui-border-none);
+    border-radius: var(--ui-topbar-action-radius);
+    background: var(--ui-surface-transparent);
+    color: var(--ui-ins-text);
+    line-height: var(--ui-line-none);
+    overflow: hidden;
+    padding: var(--ui-space-none);
+  }
+}

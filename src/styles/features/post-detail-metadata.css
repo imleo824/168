@@ -1,0 +1,7 @@
+/* Detail page metadata weight contract. */
+
+@layer utilities {
+  .detail-page .detail-source-line {
+    font-weight: var(--ui-font-weight-medium);
+  }
+}

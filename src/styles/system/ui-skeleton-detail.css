@@ -1,0 +1,21 @@
+/* Detail page skeleton owner. */
+
+@layer utilities {
+  .detail-skeleton-bottom-inner {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-3);
+  }
+
+  .ui-skeleton-bottom-action {
+    width: var(--ui-control-sm);
+    height: var(--ui-control-sm);
+    background: var(--ui-skeleton-avatar-surface);
+  }
+
+  @media (min-width: 640px) {
+    .detail-skeleton-card {
+      border-radius: var(--ui-radius-xl);
+    }
+  }
+}

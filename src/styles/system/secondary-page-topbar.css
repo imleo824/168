@@ -1,0 +1,4 @@
+/* Secondary page topbar contract facade. */
+
+@import "./secondary-page-topbar-base.css";
+@import "./secondary-page-detail-topbar.css";

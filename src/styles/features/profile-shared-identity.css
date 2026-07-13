@@ -1,0 +1,6 @@
+/* Shared profile identity CSS facade. */
+
+@import "./profile-shared-identity-layout.css";
+@import "./profile-shared-avatar.css";
+@import "./profile-shared-stats.css";
+@import "./profile-shared-bio.css";

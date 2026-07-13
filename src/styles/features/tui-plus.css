@@ -1,0 +1,469 @@
+/* Tui Plus membership surfaces and reusable avatar ring. */
+
+@layer utilities {
+  :where(.profile-avatar-button[data-tui-plus='true'], .app-bottom-nav-avatar-shell[data-tui-plus='true'], .tui-plus-x-mark) {
+    --tui-plus-ring-gradient: conic-gradient(
+      from 35deg,
+      var(--ui-brand),
+      color-mix(in srgb, var(--ui-brand) 54%, var(--ui-color-white)),
+      var(--ui-brand-strong),
+      color-mix(in srgb, var(--ui-brand-warm) 76%, var(--ui-brand)),
+      var(--ui-brand)
+    );
+  }
+
+  .profile-avatar-button[data-tui-plus='true']::before {
+    background: var(--tui-plus-ring-gradient);
+    box-shadow:
+      0 0 0 var(--ui-border-width-hairline) color-mix(in srgb, var(--ui-brand) 24%, transparent),
+      0 var(--ui-space-quarter) var(--ui-space-1) color-mix(in srgb, var(--ui-brand) 22%, transparent);
+  }
+
+  .profile-avatar-button[data-tui-plus='true']::after {
+    content: var(--ui-content-empty);
+    pointer-events: none;
+    position: absolute;
+    inset: calc(var(--ui-profile-avatar-ring-gap) * -1);
+    z-index: var(--ui-z-local-base);
+    display: block;
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-color-white);
+  }
+
+  .app-bottom-nav-avatar-shell[data-tui-plus='true'] {
+    overflow: visible;
+    background: var(--tui-plus-ring-gradient);
+    box-shadow:
+      var(--ui-bottom-nav-active-avatar-shadow),
+      0 0 0 var(--ui-border-width-hairline) color-mix(in srgb, var(--ui-brand) 18%, transparent);
+  }
+
+  .app-bottom-nav-avatar-shell[data-tui-plus='true']::before {
+    inset: calc(var(--ui-space-half) + var(--ui-border-width-hairline));
+    background: var(--ui-panel-card-surface, var(--ui-color-white));
+    box-shadow: var(--ui-bottom-nav-avatar-placeholder-inset-shadow);
+  }
+
+  .profile-name-row {
+    display: flex;
+    max-width: 100%;
+    min-width: 0;
+    align-items: center;
+    gap: var(--ui-space-2);
+  }
+
+  .profile-tui-plus-chip {
+    display: inline-flex;
+    min-width: 0;
+    max-width: min(48vw, calc(var(--ui-space-8) * 5));
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: var(--ui-border-width-hairline) solid color-mix(in srgb, var(--ui-brand) 22%, transparent);
+    border-radius: var(--ui-radius-pill);
+    background: color-mix(in srgb, var(--ui-brand) 8%, var(--ui-color-white));
+    color: var(--ui-brand-strong);
+    font-size: var(--ui-text-2xs);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-none);
+    padding: var(--ui-space-1) var(--ui-space-2);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    box-shadow: var(--ui-shadow-none);
+  }
+
+  .profile-tui-plus-chip[data-state='active'] {
+    border-color: color-mix(in srgb, var(--ui-brand) 34%, transparent);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--ui-brand) 14%, var(--ui-color-white)), var(--ui-color-white));
+    color: var(--ui-brand-strong);
+    box-shadow: 0 var(--ui-border-width-hairline) var(--ui-space-half) color-mix(in srgb, var(--ui-brand) 14%, transparent);
+  }
+
+  .tui-plus-page {
+    min-height: var(--app-layout-vh);
+    background: var(--ui-surface-page);
+    color: var(--ui-text-primary);
+  }
+
+  .tui-plus-main {
+    width: 100%;
+    max-width: var(--ui-page-content-max-width);
+    margin-inline: auto;
+    gap: var(--ui-space-4);
+    padding: var(--ui-space-3) var(--ui-space-3) calc(var(--ui-page-bottom-safe) + var(--ui-control-lg) + var(--ui-space-8));
+  }
+
+  .tui-plus-topbar { background: var(--ui-surface-page); }
+
+  .tui-plus-topbar-title-node {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ui-space-1);
+    color: inherit;
+    line-height: var(--ui-line-tight);
+  }
+
+  .tui-plus-topbar-title-node svg {
+    width: var(--ui-control-icon-sm);
+    height: var(--ui-control-icon-sm);
+    color: var(--ui-brand-strong);
+    stroke-width: var(--ui-icon-stroke);
+  }
+
+  .tui-plus-loading {
+    min-height: calc(var(--ui-control-lg) * 3);
+    justify-content: center;
+  }
+
+  .tui-plus-x-hero,
+  .tui-plus-x-card,
+  .tui-plus-x-benefits,
+  .tui-plus-channel-section {
+    border: var(--ui-border-width-hairline) solid var(--ui-line-subtle);
+    border-radius: var(--ui-radius-2xl);
+    background: var(--ui-surface-card);
+    box-shadow: var(--ui-shadow-card);
+  }
+
+  .tui-plus-x-hero {
+    position: relative;
+    display: grid;
+    justify-items: center;
+    gap: var(--ui-space-2);
+    overflow: hidden;
+    padding: var(--ui-space-4);
+    text-align: center;
+  }
+
+  .tui-plus-x-hero::before {
+    content: var(--ui-content-empty);
+    pointer-events: none;
+    position: absolute;
+    inset: var(--ui-inset-none);
+    background:
+      radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--ui-brand) 16%, transparent), transparent 44%),
+      linear-gradient(180deg, color-mix(in srgb, var(--ui-brand) 5%, transparent), transparent 54%);
+  }
+
+  .tui-plus-x-mark,
+  .tui-plus-x-eyebrow,
+  .tui-plus-x-hero h1,
+  .tui-plus-x-status,
+  .tui-plus-x-subtitle {
+    position: relative;
+    z-index: var(--ui-z-local-raised);
+  }
+
+  .tui-plus-x-mark {
+    display: inline-flex;
+    width: calc(var(--ui-control-lg) + var(--ui-space-2));
+    height: calc(var(--ui-control-lg) + var(--ui-space-2));
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--ui-radius-pill);
+    background: var(--tui-plus-ring-gradient);
+    color: var(--ui-color-white);
+    box-shadow: 0 var(--ui-space-2) var(--ui-space-6) color-mix(in srgb, var(--ui-brand) 22%, transparent);
+  }
+
+  .tui-plus-x-mark svg,
+  .tui-plus-x-benefit-icon svg,
+  .tui-plus-refresh svg {
+    width: var(--ui-control-icon-md);
+    height: var(--ui-control-icon-md);
+    stroke-width: var(--ui-icon-stroke);
+  }
+
+  .tui-plus-x-eyebrow,
+  .tui-plus-x-hero h1,
+  .tui-plus-x-status,
+  .tui-plus-x-subtitle,
+  .tui-plus-section-head h2,
+  .tui-plus-section-head p,
+  .tui-plus-x-benefits h2,
+  .tui-plus-x-benefit-item h3,
+  .tui-plus-x-benefit-item p,
+  .tui-plus-x-price-row p,
+  .tui-plus-x-payment-note {
+    margin: var(--ui-space-none);
+  }
+
+  .tui-plus-x-eyebrow {
+    color: var(--ui-brand-strong);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-strong);
+    letter-spacing: var(--ui-tracking-wide);
+    text-transform: uppercase;
+  }
+
+  .tui-plus-x-hero h1 {
+    color: var(--ui-text-strong);
+    font-size: calc(var(--ui-text-xl) + var(--ui-space-half));
+    font-weight: var(--ui-font-weight-display);
+    line-height: var(--ui-line-tight);
+  }
+
+  .tui-plus-x-status {
+    color: var(--ui-text-primary);
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-normal);
+  }
+
+  .tui-plus-x-subtitle {
+    max-width: calc(var(--ui-space-8) * 10);
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-text-sm);
+    line-height: var(--ui-line-normal);
+  }
+
+  .tui-plus-x-card,
+  .tui-plus-x-benefits,
+  .tui-plus-channel-section {
+    display: grid;
+    gap: var(--ui-space-4);
+    padding: var(--ui-space-4);
+  }
+
+  .tui-plus-x-toggle {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ui-space-1);
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-surface-muted);
+    padding: var(--ui-space-1);
+  }
+
+  .tui-plus-x-toggle button {
+    display: inline-flex;
+    min-height: var(--ui-control-sm);
+    align-items: center;
+    justify-content: center;
+    gap: var(--ui-space-1);
+    border: var(--ui-border-none);
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-surface-transparent);
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-strong);
+  }
+
+  .tui-plus-x-toggle button[data-state='active'] {
+    background: var(--ui-color-white);
+    color: var(--ui-text-strong);
+    box-shadow: var(--ui-shadow-hairline);
+  }
+
+  .tui-plus-x-toggle span {
+    color: var(--ui-brand-strong);
+    font-size: var(--ui-text-2xs);
+  }
+
+  .tui-plus-x-price-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ui-space-3);
+  }
+
+  .tui-plus-x-plan-name {
+    display: inline-flex;
+    margin-bottom: var(--ui-space-1);
+    color: var(--ui-brand-strong);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-strong);
+  }
+
+  .tui-plus-x-price-row strong {
+    display: block;
+    color: var(--ui-text-strong);
+    font-size: calc(var(--ui-text-xl) + var(--ui-space-1));
+    font-weight: var(--ui-font-weight-display);
+    line-height: var(--ui-line-tight);
+  }
+
+  .tui-plus-x-price-row p,
+  .tui-plus-x-payment-note {
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-text-xs);
+    line-height: var(--ui-line-normal);
+  }
+
+  .tui-plus-x-price-row em {
+    flex: 0 0 auto;
+    border-radius: var(--ui-radius-pill);
+    background: color-mix(in srgb, var(--ui-brand) 8%, var(--ui-color-white));
+    color: var(--ui-brand-strong);
+    font-size: var(--ui-text-2xs);
+    font-style: normal;
+    font-weight: var(--ui-font-weight-strong);
+    padding: var(--ui-space-1) var(--ui-space-2);
+  }
+
+  .tui-plus-x-primary { width: 100%; }
+
+  .tui-plus-x-benefits h2,
+  .tui-plus-section-head h2 {
+    color: var(--ui-text-strong);
+    font-size: var(--ui-text-title);
+    font-weight: var(--ui-font-weight-display);
+    line-height: var(--ui-line-tight);
+  }
+
+  .tui-plus-x-benefit-list {
+    display: grid;
+    gap: var(--ui-space-3);
+  }
+
+  .tui-plus-x-benefit-item {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: var(--ui-space-3);
+  }
+
+  .tui-plus-x-benefit-icon {
+    display: inline-flex;
+    width: var(--ui-control-md);
+    height: var(--ui-control-md);
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--ui-radius-pill);
+    background: color-mix(in srgb, var(--ui-brand) 9%, var(--ui-color-white));
+    color: var(--ui-brand-strong);
+  }
+
+  .tui-plus-x-benefit-item h3 {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-1);
+    color: var(--ui-text-strong);
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-tight);
+  }
+
+  .tui-plus-x-benefit-item h3 svg {
+    width: var(--ui-control-icon-xs);
+    height: var(--ui-control-icon-xs);
+    color: var(--ui-success);
+  }
+
+  .tui-plus-x-benefit-item p,
+  .tui-plus-section-head p {
+    margin-top: var(--ui-space-1);
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-text-xs);
+    line-height: var(--ui-line-normal);
+  }
+
+  .tui-plus-channel-form {
+    display: grid;
+    gap: var(--ui-space-2);
+  }
+
+  .tui-plus-channel-form input {
+    width: 100%;
+    min-height: var(--ui-control-lg);
+    border: var(--ui-border-width-hairline) solid var(--ui-line-subtle);
+    border-radius: var(--ui-radius-xl);
+    background: var(--ui-surface-card);
+    color: var(--ui-text-primary);
+    font-size: var(--ui-text-sm);
+    padding: var(--ui-space-2) var(--ui-space-3);
+  }
+
+  .tui-plus-channel-form input:disabled { opacity: 0.52; }
+
+  .tui-plus-channel-list {
+    display: grid;
+    gap: var(--ui-space-2);
+  }
+
+  .tui-plus-channel-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ui-space-3);
+    border-top: var(--ui-border-width-hairline) solid var(--ui-line-subtle);
+    color: var(--ui-text-primary);
+    font-size: var(--ui-text-sm);
+    padding-top: var(--ui-space-2);
+  }
+
+  .tui-plus-channel-item span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .tui-plus-channel-item em {
+    flex: 0 0 auto;
+    color: var(--ui-brand-strong);
+    font-size: var(--ui-text-xs);
+    font-style: normal;
+    font-weight: var(--ui-font-weight-strong);
+  }
+
+  .tui-plus-refresh {
+    display: inline-flex;
+    align-self: center;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ui-space-2);
+    border: var(--ui-border-none);
+    background: var(--ui-surface-transparent);
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-text-sm);
+    padding: var(--ui-space-2);
+  }
+
+  .tui-plus-sticky-cta {
+    position: fixed;
+    right: var(--ui-space-3);
+    bottom: calc(env(safe-area-inset-bottom) + var(--ui-space-3));
+    left: var(--ui-space-3);
+    z-index: var(--ui-z-bottom-nav);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--ui-space-3);
+    max-width: var(--ui-page-content-max-width);
+    margin-inline: auto;
+    border: var(--ui-border-width-hairline) solid var(--ui-line-glass-strong);
+    border-radius: var(--ui-radius-2xl);
+    background: color-mix(in srgb, var(--ui-surface-card) 92%, transparent);
+    padding: var(--ui-space-3);
+    box-shadow: var(--ui-shadow-sheet);
+    backdrop-filter: var(--ui-floating-muted-filter);
+    -webkit-backdrop-filter: var(--ui-floating-muted-filter);
+  }
+
+  .tui-plus-sticky-cta div {
+    display: grid;
+    min-width: 0;
+    gap: var(--ui-space-half);
+  }
+
+  .tui-plus-sticky-cta strong {
+    color: var(--ui-text-strong);
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-display);
+    line-height: var(--ui-line-tight);
+  }
+
+  .tui-plus-sticky-cta span {
+    overflow: hidden;
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-text-xs);
+    line-height: var(--ui-line-tight);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  @media (min-width: 768px) {
+    .tui-plus-main { padding-inline: var(--ui-space-5); }
+  }
+}

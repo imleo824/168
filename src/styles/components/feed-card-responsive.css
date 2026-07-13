@@ -1,0 +1,28 @@
+/* components/feed-card-responsive.css */
+
+@layer utilities {
+  @media (max-width: 390px) {
+    .ins-post-card {
+      --feed-card-author-row-padding-x: var(--ui-space-3);
+      --feed-card-author-row-gap: var(--ui-space-2);
+      --feed-card-action-size: var(--ui-control-md);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .ins-post-card {
+      --feed-card-author-avatar-size: var(--ui-social-feed-avatar-size-desktop);
+      --feed-card-layout-padding-x: var(--ui-social-feed-row-padding-x);
+      --feed-card-layout-padding-y: var(--ui-social-feed-row-padding-y);
+      --feed-card-layout-padding-bottom: var(--ui-space-3);
+    }
+
+    .ins-post-card .ui-media-grid {
+      border-radius: var(--ui-feed-card-media-radius-desktop);
+    }
+
+    .ins-post-card--text .x-card-content {
+      font-size: var(--ui-type-feed-body-compact-size);
+    }
+  }
+}

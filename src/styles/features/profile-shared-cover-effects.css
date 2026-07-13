@@ -1,0 +1,42 @@
+/* Shared profile cover generated overlays. */
+
+@layer utilities {
+  :is(.profile-modern-page, .user-space-page-next) .profile-header-cover::before,
+  :is(.profile-modern-page, .user-space-page-next) .profile-header-cover::after {
+    content: var(--ui-content-empty);
+    pointer-events: none;
+    position: absolute;
+    inset: var(--ui-inset-none);
+    z-index: var(--ui-z-local-raised);
+    border-radius: var(--ui-radius-none);
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) .profile-header-cover::before {
+    background: var(--ui-profile-cover-pattern-surface);
+    opacity: var(--ui-profile-cover-pattern-opacity);
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) .profile-header-cover::after {
+    background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--ui-color-white) 12%, transparent) 0%,
+        transparent 46%,
+        color-mix(in srgb, var(--ui-surface-card-solid) 58%, transparent) 100%
+      ),
+      linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--ui-brand) 3%, transparent) 0%,
+        transparent 38%,
+        color-mix(in srgb, var(--ui-color-white) 4%, transparent) 100%
+      );
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) .profile-header-cover--default::before {
+    opacity: var(--ui-profile-cover-default-pattern-opacity);
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) .profile-header-cover--default::after {
+    opacity: var(--ui-profile-cover-default-glass-opacity);
+  }
+}

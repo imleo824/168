@@ -1,0 +1,95 @@
+/* Shared feed scroll shell contract.
+ *
+ * Feed scroll behavior belongs to the system layer, not inline page styles.
+ * Components may set only dynamic CSS variables such as --feed-scroll-translate-y.
+ */
+
+@layer utilities {
+  .douyin-feed-frame {
+    position: relative;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    min-height: var(--ui-space-none);
+    flex: 1 1 auto;
+    background: var(--ui-surface-card);
+  }
+
+  .feed-pull-refresh-indicator {
+    position: absolute;
+    top: var(--ui-space-none);
+    right: var(--ui-space-none);
+    left: var(--ui-space-none);
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+    transform: translateY(max(var(--ui-space-2), calc(var(--feed-pull-refresh-distance, var(--ui-space-none)) - var(--ui-space-7))));
+  }
+
+  .feed-scroll-root {
+    width: 100%;
+    height: 100%;
+    min-height: var(--ui-space-none);
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior-x: auto;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .feed-scroll-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-ins-card-desktop-gap);
+    width: 100%;
+    max-width: var(--ui-max-width-none);
+    margin-inline: auto;
+    padding-inline: var(--ui-space-none);
+    padding-block: var(--ui-space-none);
+    min-height: 100%;
+    transform: var(--ui-transform-none);
+    will-change: auto;
+  }
+
+  .feed-scroll-content[data-feed-content-state='empty'],
+  .feed-scroll-content[data-feed-content-state='error'],
+  .feed-scroll-content[data-feed-content-state='refreshing'] {
+    display: grid;
+    width: 100%;
+    min-block-size: max(
+      calc(
+        var(--app-visual-vh, 100dvh) -
+        var(--feed-scroll-state-header-offset, var(--ui-space-none)) -
+        var(--feed-scroll-state-sticky-offset, var(--ui-space-none)) -
+        var(--feed-scroll-state-bottom-offset, var(--ui-space-none))
+      ),
+      calc(var(--ui-control-lg) * 4)
+    );
+    align-content: center;
+    justify-items: center;
+  }
+
+  .feed-scroll-content[data-feed-scroll-translated='true'] {
+    transform: translate3d(0, var(--feed-scroll-translate-y), 0);
+    will-change: transform;
+  }
+
+  .feed-scroll-content[data-feed-footer-only='true'] {
+    display: grid;
+    min-height: 100%;
+    align-items: center;
+  }
+
+  .feed-scroll-content[data-feed-footer-only='true'] .ui-feed-footer-state {
+    min-height: min(58svh, calc(var(--ui-space-8) * 10));
+    padding-block: var(--ui-space-8);
+  }
+
+  @media (max-width: 767px) {
+    .feed-scroll-content {
+      gap: var(--ui-space-none);
+      padding-inline: var(--ui-space-none);
+      padding-block: var(--ui-space-none) calc(var(--ui-bottom-nav-height, calc(var(--ui-control-hit) + var(--ui-space-2))) + env(safe-area-inset-bottom) + var(--ui-space-4));
+    }
+  }
+}

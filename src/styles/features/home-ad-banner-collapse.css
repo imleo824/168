@@ -1,0 +1,28 @@
+/* Home ad banner collapse behavior. */
+
+@layer components {
+  .home-ad-banner-shell {
+    max-height: var(--ui-home-ad-banner-max-height);
+    overflow: hidden;
+    flex: 0 0 auto;
+    will-change: auto;
+    transition:
+      max-height var(--ui-duration-home-collapse-height) var(--ease-standard),
+      padding-top var(--ui-duration-home-collapse-layout) var(--ease-standard),
+      padding-bottom var(--ui-duration-home-collapse-layout) var(--ease-standard),
+      margin-top var(--ui-duration-home-collapse-layout) var(--ease-standard),
+      margin-bottom var(--ui-duration-home-collapse-layout) var(--ease-standard),
+      opacity var(--ui-duration-home-collapse-opacity) var(--ease-standard);
+  }
+
+  .home-chrome-collapsed .home-ad-banner-shell {
+    max-height: var(--ui-space-none);
+    margin: var(--ui-space-none);
+    padding-top: var(--ui-space-none);
+    padding-bottom: var(--ui-space-none);
+    opacity: var(--ui-opacity-hidden);
+    visibility: hidden;
+    pointer-events: none;
+    transform: var(--ui-transform-none);
+  }
+}

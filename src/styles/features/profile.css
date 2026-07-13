@@ -1,0 +1,24 @@
+/* Profile page shell.
+ * Shared header primitives live in profile-shared-header.css.
+ * User-space actions and post lists live in user-space-next.css.
+ */
+
+@import "./profile-shared-header.css";
+@import "./profile-topbar-contrast.css";
+@import "./profile-modern.css";
+@import "./profile-dialog.css";
+@import "./profile-tabs.css";
+@import "./profile-avatar-action.css";
+@import "./profile-security-sheet.css";
+
+@layer utilities {
+  .profile-modern-page .profile-edit-home-button {
+    position: absolute;
+    width: var(--ui-border-width-hairline);
+    height: var(--ui-border-width-hairline);
+    margin: calc(var(--ui-border-width-hairline) * -1);
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+}

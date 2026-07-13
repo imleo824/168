@@ -1,0 +1,438 @@
+/* features/admin/admin-workflows.css */
+/* Admin workflow surfaces: page base, system config, chat config, quote automation, reports. */
+
+@layer utilities {
+  .admin-console-page {
+    min-width: 100%;
+    background: linear-gradient(180deg, var(--ui-admin-surface-start) 0%, var(--ui-admin-surface-end) 100%);
+    color: var(--ui-text-strong);
+  }
+
+  .admin-section-card {
+    border: var(--ui-border-width-hairline) solid var(--ui-admin-line);
+    border-radius: var(--ui-admin-card-radius);
+    background: var(--ui-glass-white-96);
+    box-shadow: var(--ui-shadow-popover);
+    padding: var(--ui-admin-card-padding);
+  }
+
+  .admin-system-config-header,
+  .admin-pagination-bar,
+  .admin-pagination-controls {
+    display: flex;
+    min-width: 0;
+  }
+
+  .admin-system-config-header {
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--ui-space-3);
+  }
+
+  .admin-system-config-title-group {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: var(--ui-space-2);
+  }
+
+  .admin-system-config-icon {
+    display: inline-flex;
+    width: var(--ui-control-hit);
+    height: var(--ui-control-hit);
+    flex: 0 0 var(--ui-control-hit);
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--ui-radius-2xl);
+    background: var(--ui-admin-config-icon-surface);
+    color: var(--ui-text-secondary);
+  }
+
+  .admin-system-config-icon[data-scope='ad'] {
+    color: var(--ui-admin-scope-ad);
+  }
+
+  .admin-system-config-icon[data-scope='chat-config'] {
+    color: var(--ui-admin-scope-chat);
+  }
+
+  .admin-system-config-icon[data-scope='telegram'] {
+    color: var(--ui-admin-scope-telegram);
+  }
+
+  .admin-system-config-icon[data-scope='ops'] {
+    color: var(--ui-admin-scope-ops);
+  }
+
+  .admin-system-config-icon[data-scope='deposit-addresses'] {
+    color: var(--ui-admin-scope-deposit);
+  }
+
+  .admin-system-config-icon-graphic {
+    width: var(--ui-admin-config-icon-graphic-size, var(--ui-control-icon-md));
+    height: var(--ui-admin-config-icon-graphic-size, var(--ui-control-icon-md));
+    flex: 0 0 var(--ui-admin-config-icon-graphic-size, var(--ui-control-icon-md));
+    stroke-width: var(--ui-icon-stroke);
+  }
+
+  .admin-system-config-copy {
+    min-width: 0;
+  }
+
+  .admin-system-config-title {
+    margin: var(--ui-space-none);
+    color: var(--ui-text-strong);
+    font-size: var(--ui-text-base);
+    font-weight: var(--ui-font-weight-title);
+    line-height: var(--ui-line-tight);
+  }
+
+  .admin-system-config-summary {
+    margin: var(--ui-space-half) 0 0;
+    color: var(--ui-text-muted);
+    font-size: var(--ui-text-xs);
+    line-height: var(--ui-line-tight);
+  }
+
+  .admin-system-config-badge {
+    display: inline-flex;
+    align-items: center;
+    border: var(--ui-border-width-hairline) solid var(--ui-admin-config-badge-border);
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-admin-config-badge-surface);
+    padding: var(--ui-space-1) var(--ui-space-3);
+    color: var(--ui-text-muted);
+    font-size: var(--ui-text-2xs);
+    font-weight: var(--ui-font-weight-title);
+    letter-spacing: var(--ui-tracking-normal);
+    line-height: var(--ui-line-tight);
+    text-transform: uppercase;
+  }
+
+  .admin-system-config-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ui-space-2);
+    margin-top: var(--ui-space-4);
+  }
+
+  .admin-system-config-tab {
+    display: inline-flex;
+    min-height: var(--ui-admin-config-tab-height);
+    align-items: center;
+    justify-content: center;
+    border: var(--ui-border-width-hairline) solid var(--ui-line-medium);
+    border-radius: var(--ui-radius-xl);
+    background: var(--ui-color-white);
+    padding-inline: var(--ui-space-3);
+    color: var(--ui-text-muted);
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-title);
+    transition:
+      border-color var(--ui-duration-base) var(--ease-standard),
+      background-color var(--ui-duration-base) var(--ease-standard),
+      color var(--ui-duration-base) var(--ease-standard);
+  }
+
+  .admin-system-config-tab:hover {
+    border-color: var(--ui-line-strong);
+  }
+
+  .admin-system-config-tab[data-state='active'] {
+    border-color: var(--ui-text-strong);
+    background: var(--ui-text-strong);
+    color: var(--ui-color-white);
+  }
+
+  .admin-chat-panel-body {
+    display: grid;
+    gap: var(--ui-space-3);
+    margin-top: var(--ui-space-4);
+  }
+
+  .admin-chat-config-card {
+    border: var(--ui-border-width-hairline) solid var(--ui-surface-muted);
+    border-radius: var(--ui-radius-2xl);
+    background: var(--ui-admin-chat-card-surface);
+    padding: var(--ui-admin-card-padding);
+  }
+
+  .admin-chat-config-header {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: var(--ui-space-3);
+    margin-bottom: var(--ui-space-3);
+  }
+
+  .admin-chat-config-title {
+    color: var(--ui-text-strong);
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-title);
+    line-height: var(--ui-line-tight);
+  }
+
+  .admin-chat-config-summary {
+    margin-top: var(--ui-space-half);
+    color: var(--ui-text-subtle);
+    font-size: var(--ui-text-2xs);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-meta);
+  }
+
+  .admin-chat-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-title);
+  }
+
+  .admin-chat-field-grid {
+    display: grid;
+    gap: var(--ui-space-2);
+  }
+
+  .admin-chat-action,
+  .admin-chat-refresh-button {
+    min-height: var(--ui-control-md);
+    border-radius: var(--ui-radius-xl);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-title);
+  }
+
+  .admin-chat-refresh-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ui-space-2);
+    border: var(--ui-border-width-hairline) solid var(--ui-line-medium);
+    background: var(--ui-color-white);
+    padding-inline: var(--ui-space-3);
+    color: var(--ui-text-secondary);
+  }
+
+  .admin-chat-refresh-icon {
+    width: var(--ui-admin-chat-refresh-icon-size, var(--ui-control-icon-sm));
+    height: var(--ui-admin-chat-refresh-icon-size, var(--ui-control-icon-sm));
+    flex: 0 0 var(--ui-admin-chat-refresh-icon-size, var(--ui-control-icon-sm));
+    stroke-width: var(--ui-icon-stroke);
+  }
+
+  .admin-chat-action {
+    margin-top: var(--ui-space-3);
+    border: var(--ui-border-width-hairline) solid var(--ui-text-strong);
+    background: var(--ui-text-strong);
+    padding-inline: var(--ui-space-4);
+    color: var(--ui-color-white);
+  }
+
+  .admin-chat-action:disabled,
+  .admin-chat-refresh-button:disabled {
+    opacity: var(--ui-disabled-opacity);
+  }
+
+  .admin-quote-shell {
+    display: grid;
+    gap: var(--ui-space-4);
+    padding-bottom: var(--ui-bottom-nav-page-bottom-space);
+  }
+
+  .admin-quote-actions,
+  .admin-quote-card-header {
+    display: flex;
+    min-width: 0;
+    gap: var(--ui-space-3);
+  }
+
+  .admin-quote-actions {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--ui-space-2);
+  }
+
+  .admin-quote-card-grid {
+    display: grid;
+    gap: var(--ui-space-3);
+    margin-top: var(--ui-space-4);
+  }
+
+  .admin-quote-card {
+    border: var(--ui-border-width-hairline) solid var(--ui-surface-muted);
+    border-radius: var(--ui-radius-2xl);
+    background: var(--ui-color-white);
+  }
+
+  .admin-quote-card {
+    padding: var(--ui-admin-card-padding);
+  }
+
+  .admin-quote-card--muted {
+    background: var(--ui-surface-muted);
+  }
+
+  .admin-quote-card-header {
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--ui-space-3);
+  }
+
+  .admin-quote-card-title {
+    color: var(--ui-text-strong);
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-title);
+    line-height: var(--ui-line-tight);
+  }
+
+  .admin-quote-card-summary,
+  .admin-quote-latest-list {
+    color: var(--ui-text-subtle);
+    font-size: var(--ui-text-2xs);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-meta);
+  }
+
+  .admin-quote-card-summary {
+    margin-top: var(--ui-space-half);
+  }
+
+  .admin-quote-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-title);
+  }
+
+  .admin-quote-config-grid {
+    display: grid;
+    gap: var(--ui-space-2);
+  }
+
+  .admin-quote-action {
+    min-height: var(--ui-control-md);
+    border-radius: var(--ui-radius-xl);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-title);
+  }
+
+  .admin-quote-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ui-space-2);
+    border: var(--ui-border-width-hairline) solid var(--ui-line-medium);
+    background: var(--ui-color-white);
+    padding-inline: var(--ui-space-3);
+    color: var(--ui-text-secondary);
+  }
+
+  .admin-quote-action[data-variant='primary'] {
+    border-color: var(--ui-text-strong);
+    background: var(--ui-text-strong);
+    color: var(--ui-color-white);
+  }
+
+  .admin-quote-action:disabled {
+    opacity: var(--ui-disabled-opacity);
+  }
+
+  .admin-quote-latest-list {
+    display: grid;
+    gap: var(--ui-space-2);
+    margin-top: var(--ui-space-3);
+  }
+
+  .admin-report-table-inner {
+    min-width: var(--ui-admin-report-table-min-width);
+  }
+
+  .admin-report-action {
+    width: var(--ui-admin-action-height-comfortable);
+    height: var(--ui-admin-action-height-comfortable);
+    padding-inline: var(--ui-space-none);
+  }
+
+  .admin-report-metric-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ui-space-3);
+    margin-top: var(--ui-space-4);
+  }
+
+  .admin-report-metric-card {
+    border: var(--ui-border-width-hairline) solid var(--ui-surface-muted);
+    border-radius: var(--ui-radius-xl);
+    background: color-mix(in srgb, var(--ui-surface-muted) 40%, var(--ui-color-white));
+    padding: var(--ui-space-3);
+  }
+
+  .admin-report-metric-card--soft {
+    background: color-mix(in srgb, var(--ui-surface-muted) 30%, var(--ui-color-white));
+  }
+
+  .admin-report-chart {
+    width: 100%;
+    min-width: var(--ui-admin-report-chart-min-width);
+    height: var(--ui-admin-report-chart-height);
+    border: var(--ui-border-width-hairline) solid var(--ui-admin-line);
+    border-radius: var(--ui-radius-xl);
+    background: color-mix(in srgb, var(--ui-surface-muted) 30%, transparent);
+  }
+
+  .admin-report-kicker {
+    color: var(--ui-text-soft);
+    font-size: var(--ui-text-2xs);
+    font-weight: var(--ui-font-weight-title);
+    letter-spacing: var(--ui-tracking-normal);
+    text-transform: uppercase;
+  }
+
+  .admin-report-metric-label {
+    color: var(--ui-text-muted);
+    font-size: var(--ui-text-2xs);
+    font-weight: var(--ui-font-weight-strong);
+  }
+
+  .admin-report-chart-meta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--ui-text-soft);
+    font-size: var(--ui-text-2xs);
+    font-weight: var(--ui-font-weight-body);
+  }
+
+  .admin-report-trend-filter {
+    min-height: var(--ui-admin-action-height-sm);
+    border: var(--ui-border-none);
+    border-radius: var(--ui-radius-lg);
+    padding-inline: var(--ui-space-3);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-title);
+    transition:
+      background-color var(--ui-duration-fast) var(--ease-standard),
+      color var(--ui-duration-fast) var(--ease-standard);
+  }
+
+  .admin-report-trend-filter[data-active='true'] {
+    background: var(--ui-admin-state-primary-surface);
+    color: var(--ui-admin-state-primary-text);
+  }
+
+  .admin-report-delta {
+    font-weight: var(--ui-font-weight-title);
+  }
+
+  .admin-report-delta[data-tone='positive'] {
+    color: var(--ui-success-strong);
+  }
+
+  .admin-report-delta[data-tone='negative'] {
+    color: var(--ui-danger);
+  }
+}

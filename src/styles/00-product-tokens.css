@@ -1,0 +1,458 @@
+/*
+ * Product-level design tokens for 推推.
+ *
+ * This file is not a compatibility patch. It is the product visual layer that
+ * sits on top of the primitive token set in 00-tokens.css and before any
+ * component/page styles. Components should consume these tokens instead of
+ * redefining raw visual values locally.
+ */
+
+@layer base {
+  :root {
+    /*
+     * Product UI v2 primitives.
+     * Raw color and elevation values live here so components can consume
+     * semantic tokens without scattering page-level overrides.
+     */
+    --ui-product-canvas: #F8F8F7;
+    --ui-product-canvas-muted: #F1F1EF;
+    --ui-product-ink: #1A1A1A;
+    --ui-product-ink-muted: #505057;
+    --ui-product-ink-soft: #707079;
+    --ui-product-brand: #4F5FD9;
+    --ui-product-brand-shade: #2B3380;
+    --ui-product-brand-tint: #EEF0FC;
+    --ui-product-glass-white-70: rgba(255, 255, 255, 0.7);
+    --ui-product-glass-white-82: rgba(255, 255, 255, 0.82);
+    --ui-product-glass-line: color-mix(in srgb, var(--ui-product-ink) 7%, transparent);
+    --ui-product-glass-line-strong: color-mix(in srgb, var(--ui-product-ink) 11%, transparent);
+    --ui-product-glass-shadow: 0 var(--ui-border-width-hairline) var(--ui-space-half) color-mix(in srgb, var(--ui-product-ink) 4%, transparent), 0 var(--ui-space-2) var(--ui-space-6) color-mix(in srgb, var(--ui-product-ink) 5%, transparent);
+    --ui-product-glass-shadow-hover: 0 var(--ui-space-half) calc(var(--ui-space-1) + var(--ui-space-half)) color-mix(in srgb, var(--ui-product-ink) 6%, transparent), 0 calc(var(--ui-space-3) + var(--ui-space-half)) var(--ui-space-8) color-mix(in srgb, var(--ui-product-ink) 8%, transparent);
+    --ui-product-floating-shadow: 0 var(--ui-space-4) calc(var(--ui-space-8) + var(--ui-space-2) + var(--ui-space-half)) color-mix(in srgb, var(--ui-product-ink) 14%, transparent);
+    --ui-product-glass-filter: blur(20px);
+    --ui-product-glass-filter-soft: blur(var(--ui-space-5));
+
+    /* Brand identity: one restrained blue-violet owns action, selection, link and tag emphasis. */
+    --ui-brand: var(--ui-product-brand);
+    --ui-brand-hover: color-mix(in srgb, var(--ui-product-brand) 84%, var(--ui-product-brand-shade));
+    --ui-brand-strong: var(--ui-product-brand-shade);
+    --ui-brand-soft: var(--ui-product-brand-tint);
+    --ui-brand-soft-10: color-mix(in srgb, var(--ui-brand) 10%, transparent);
+    --ui-brand-soft-15: color-mix(in srgb, var(--ui-brand) 15%, transparent);
+    --ui-brand-soft-25: color-mix(in srgb, var(--ui-brand) 25%, transparent);
+    --ui-link-text: var(--ui-product-brand-shade);
+    --ui-link-hover-text: var(--ui-product-brand-shade);
+    --ui-link-surface: var(--ui-product-brand-tint);
+    --ui-link-ring: color-mix(in srgb, var(--ui-brand) 24%, transparent);
+    --ui-ins-link-blue: var(--ui-link-text);
+    --ui-ins-link-blue-strong: var(--ui-link-text);
+    --ui-ins-link-blue-soft: var(--ui-link-surface);
+    --ui-ins-link-blue-hover: color-mix(in srgb, var(--ui-brand) 14%, transparent);
+    --ui-ins-link-blue-ring: var(--ui-link-ring);
+    --ui-brand-accent: var(--ui-brand);
+    --ui-brand-accent-strong: var(--ui-brand-strong);
+    --ui-brand-accent-soft: color-mix(in srgb, var(--ui-brand) 10%, transparent);
+    --ui-brand-accent-ring: color-mix(in srgb, var(--ui-brand) 20%, transparent);
+    --ui-brand-accent-surface: color-mix(in srgb, var(--ui-brand) 8%, var(--ui-surface-card));
+    --ui-brand-warm-accent: var(--ui-brand);
+    --ring: color-mix(in srgb, var(--ui-brand) 20%, transparent);
+    --ui-focus-ring: color-mix(in srgb, var(--ui-brand) 18%, transparent);
+    --ui-focus-outline: color-mix(in srgb, var(--ui-brand) 36%, transparent);
+    --ui-focus-surface: color-mix(in srgb, var(--ui-brand) 8%, transparent);
+
+    /* Typography hierarchy for a clean Chinese marketplace reading rhythm. */
+    --ui-text-2xs: 0.6875rem;
+    --ui-text-xs: 0.75rem;
+    --ui-text-sm: 0.8125rem;
+    --ui-text-md: 0.875rem;
+    --ui-text-base: 1rem;
+    --ui-text-body: 1rem;
+    --ui-text-title: 1rem;
+    --ui-text-page-title: 1.125rem;
+    --ui-type-display-size: clamp(1.75rem, 8vw, 2.125rem);
+    --ui-type-xl-size: 1.25rem;
+    --ui-type-feed-author-size: var(--ui-type-feed-body-size);
+    --ui-type-feed-body-size: var(--ui-text-base);
+    --ui-type-feed-body-compact-size: var(--ui-text-md);
+    --ui-type-feed-action-size: var(--ui-text-xs);
+    --ui-line-normal: 1.56;
+    --ui-line-readable: 1.68;
+    --ui-line-title: 1.34;
+    --ui-line-title-compact: 1.32;
+    --ui-line-meta: 1.4;
+
+    /* Neutral surfaces and lines: fewer visible separators, more space-led grouping. */
+    --ui-color-black: var(--ui-product-ink);
+    --ui-color-ink: var(--ui-product-ink);
+    --ui-color-ink-raised: var(--ui-product-ink);
+    --ui-color-ink-soft: var(--ui-product-ink-muted);
+    --ui-text-primary: var(--ui-product-ink);
+    --ui-text-strong: var(--ui-product-ink);
+    --ui-text-secondary: var(--ui-product-ink-muted);
+    --ui-text-muted: var(--ui-product-ink-soft);
+    --ui-text-subtle: color-mix(in srgb, var(--ui-product-ink) 48%, transparent);
+    --ui-text-soft: color-mix(in srgb, var(--ui-product-ink) 38%, transparent);
+    --ui-text-disabled: color-mix(in srgb, var(--ui-product-ink) 32%, transparent);
+    --ui-text-placeholder: color-mix(in srgb, var(--ui-product-ink) 48%, transparent);
+    --ui-surface-page: var(--ui-product-canvas);
+    --ui-surface-card: var(--ui-product-glass-white-70);
+    --ui-surface-raised: var(--ui-product-glass-white-82);
+    --ui-surface-focus: var(--ui-color-white);
+    --ui-surface-elevated: var(--ui-product-glass-white-82);
+    --ui-surface-muted: color-mix(in srgb, var(--ui-product-canvas-muted) 88%, var(--ui-color-white));
+    --ui-surface-weak: color-mix(in srgb, var(--ui-product-canvas) 70%, var(--ui-color-white));
+    --ui-surface-soft: color-mix(in srgb, var(--ui-product-canvas) 42%, var(--ui-color-white));
+    --ui-line-hairline: var(--ui-product-glass-line);
+    --ui-line-soft: color-mix(in srgb, var(--ui-product-ink) 10%, transparent);
+    --ui-line-medium: color-mix(in srgb, var(--ui-product-ink) 16%, transparent);
+    --ui-line-subtle: color-mix(in srgb, var(--ui-product-ink) 7.5%, transparent);
+    --ui-line-fainter: color-mix(in srgb, var(--ui-product-ink) 4.5%, transparent);
+    --ui-state-hover: color-mix(in srgb, var(--ui-brand) 5%, transparent);
+    --ui-state-pressed: color-mix(in srgb, var(--ui-brand) 8%, transparent);
+    --ui-state-selected: var(--ui-brand-soft);
+    --ui-state-selected-strong: color-mix(in srgb, var(--ui-brand) 12%, var(--ui-brand-soft));
+    --ui-state-selected-soft: color-mix(in srgb, var(--ui-brand) 7%, var(--ui-brand-soft));
+    --ui-pressed-opacity: var(--ui-disabled-opacity);
+
+    /* Radius scale: controlled, soft, but not toy-like. */
+    --ui-radius-xs: var(--ui-space-1);
+    --ui-radius-sm: calc(var(--ui-space-1) + var(--ui-space-half));
+    --ui-radius-md: var(--ui-space-2);
+    --ui-radius-lg: var(--ui-radius-md);
+    --ui-radius-xl: calc(var(--ui-space-2) + var(--ui-space-half));
+    --ui-radius-2xl: var(--ui-space-3);
+    --ui-radius-3xl: calc(var(--ui-space-3) + var(--ui-space-half));
+    --ui-radius-4xl: calc(var(--ui-space-4) + var(--ui-space-half));
+    --ui-radius-media: var(--ui-radius-md);
+
+    /* Shadows: edge-light card rhythm; avoid stacked separator lines. */
+    --ui-shadow-card: var(--ui-product-glass-shadow);
+    --ui-shadow-card-hover: var(--ui-product-glass-shadow-hover);
+    --ui-shadow-sheet: 0 calc(var(--ui-border-width-hairline) * -1) 0 color-mix(in srgb, var(--ui-color-black) 3.5%, transparent), 0 calc((var(--ui-space-2) + var(--ui-space-half)) * -1) var(--ui-space-7) color-mix(in srgb, var(--ui-color-black) 6.5%, transparent);
+    --ui-shadow-popover: 0 var(--ui-space-4) calc(var(--ui-space-8) + var(--ui-space-1) + var(--ui-space-half)) color-mix(in srgb, var(--ui-color-black) 6.5%, transparent);
+    --ui-shadow-panel: var(--ui-product-floating-shadow);
+    --ui-shadow-brand-soft: 0 var(--ui-space-2) var(--ui-space-5) color-mix(in srgb, var(--ui-brand) 14%, transparent);
+
+    /* Global layout rhythm. */
+    --ui-page-padding-x: var(--ui-space-5);
+    --ui-page-edge-padding-x: var(--ui-page-padding-x);
+    --ui-page-content-max-width: min(100%, calc(var(--ui-space-8) * 19 + var(--ui-space-4)));
+    --ui-app-shell-bounded-max-width: var(--ui-page-content-max-width);
+    --ui-app-shell-desktop-padding-x: var(--ui-space-6);
+    --ui-app-shell-desktop-padding-y: var(--ui-space-5);
+    --ui-page-main-gap: var(--ui-space-5);
+    --ui-app-page-main-gap: var(--ui-space-5);
+    --ui-app-page-main-padding-y: var(--ui-space-4);
+    --ui-page-content-bottom-safe: var(--ui-bottom-nav-page-bottom-space);
+    --ui-secondary-page-gap: var(--ui-space-5);
+    --ui-secondary-page-gap-loose: var(--ui-space-6);
+    --ui-feed-card-max-width: calc(var(--ui-space-8) * 30);
+
+    /* Product UI v2 surface/component contracts. */
+    --ui-surface-card-glass: var(--ui-product-glass-white-70);
+    --ui-surface-card-solid: var(--ui-color-white);
+    --ui-surface-card-muted: color-mix(in srgb, var(--ui-product-canvas) 74%, var(--ui-color-white));
+    --ui-surface-card-border: var(--ui-product-glass-line);
+    --ui-surface-card-radius: var(--ui-space-4);
+    --ui-surface-card-shadow: var(--ui-product-glass-shadow);
+    --ui-surface-card-filter: var(--ui-product-glass-filter);
+    --ui-glass-input-surface: var(--ui-product-glass-white-70);
+    --ui-glass-input-border: var(--ui-product-glass-line);
+    --ui-glass-input-radius: var(--ui-space-5);
+    --ui-glass-input-min-height: var(--ui-control-lg);
+    --ui-floating-tabbar-surface: var(--ui-product-glass-white-70);
+    --ui-floating-tabbar-border: color-mix(in srgb, var(--ui-product-ink) 6%, transparent);
+    --ui-floating-tabbar-shadow: none;
+    --ui-floating-tabbar-radius: var(--ui-radius-pill);
+    --ui-media-frame-radius: var(--ui-space-3);
+    --ui-media-frame-ratio: 16 / 9;
+    --ui-action-cell-radius: var(--ui-radius-pill);
+    --ui-action-cell-min-height: var(--ui-control-lg);
+    --ui-page-enter-duration: 220ms;
+    --ui-press-scale-card: 0.97;
+
+    /*
+     * Threads-style social surface contract.
+     *
+     * This is the shared product contract for feed rows, text-entry sheets,
+     * and profile editing. Feature CSS should map to these tokens
+     * instead of carrying page-specific card/sheet geometry.
+     */
+    --ui-social-canvas: var(--ui-product-canvas);
+    --ui-social-surface: var(--ui-surface-card);
+    --ui-social-surface-muted: color-mix(in srgb, var(--ui-product-canvas) 70%, var(--ui-color-white));
+    --ui-social-surface-pressed: color-mix(in srgb, var(--ui-brand) 8%, var(--ui-color-white));
+    --ui-social-panel-surface: var(--ui-color-white);
+    --ui-social-popover-surface: var(--ui-social-panel-surface);
+    --ui-social-text: var(--ui-text-strong);
+    --ui-social-text-soft: color-mix(in srgb, var(--ui-product-ink) 45%, transparent);
+    --ui-social-line: var(--ui-product-glass-line-strong);
+    --ui-social-line-soft: var(--ui-product-glass-line);
+    --ui-social-action: color-mix(in srgb, var(--ui-color-black) 70%, transparent);
+    --ui-social-action-muted: color-mix(in srgb, var(--ui-color-black) 46%, transparent);
+    --ui-social-feed-max-width: var(--ui-feed-card-max-width);
+    --ui-social-feed-row-padding-y: var(--ui-space-5);
+    --ui-social-feed-row-padding-x: var(--ui-space-4);
+    --ui-social-feed-column-gap: var(--ui-space-3);
+    --ui-social-feed-list-padding-x: var(--ui-space-none);
+    --ui-feed-list-padding-x: var(--ui-social-feed-list-padding-x);
+    --ui-feed-list-padding-y: var(--ui-space-none);
+    --ui-feed-card-list-gap: var(--ui-space-none);
+    --ui-social-feed-list-max-width: min(100%, var(--ui-social-feed-max-width));
+    --ui-social-feed-avatar-size: calc(var(--ui-control-sm) + var(--ui-space-1));
+    --ui-social-feed-avatar-size-desktop: var(--ui-social-feed-avatar-size);
+    --ui-social-feed-body-size: var(--ui-text-base);
+    --ui-social-feed-body-line: 1.54;
+    --ui-social-feed-meta-size: var(--ui-text-xs);
+    --ui-social-feed-meta-line: var(--ui-line-tight);
+    --ui-social-feed-footer-gap: calc(var(--ui-space-1) + var(--ui-space-half));
+    --ui-social-action-size: var(--ui-control-hit);
+    --ui-social-action-icon-size: calc(var(--ui-control-icon-md) + var(--ui-space-half));
+    --ui-social-topbar-shadow: var(--ui-shadow-none);
+    --ui-section-card-border: var(--ui-surface-card-border);
+    --ui-section-card-radius: var(--ui-surface-card-radius);
+    --ui-section-card-shadow: var(--ui-surface-card-shadow);
+    --ui-page-card-shell-border: var(--ui-social-line-soft);
+    --ui-page-card-shell-shadow: var(--ui-shadow-panel);
+    --ui-social-sheet-radius: var(--ui-radius-4xl);
+    --ui-social-sheet-width: min(100%, var(--ui-secondary-sheet-max-width));
+    --ui-social-sheet-max-height: calc(var(--ui-visual-viewport-height) - env(safe-area-inset-top) - var(--ui-space-3));
+    --ui-social-sheet-overlay: color-mix(in srgb, var(--ui-color-black) 38%, transparent);
+    --ui-social-sheet-shadow: var(--ui-shadow-sheet);
+    --ui-social-sheet-header-height: var(--ui-control-hit);
+    --ui-social-sheet-body-padding: var(--ui-space-4);
+    --ui-social-sheet-footer-padding: var(--ui-space-3) var(--ui-space-4) calc(env(safe-area-inset-bottom) + var(--ui-space-3));
+    --ui-sheet-radius: var(--ui-social-sheet-radius);
+    --ui-sheet-header-height: var(--ui-social-sheet-header-height);
+    --ui-sheet-body-padding: var(--ui-social-sheet-body-padding);
+    --ui-social-input-radius: var(--ui-radius-2xl);
+    --ui-social-input-focus-ring: 0 0 0 var(--ui-border-width-hairline) var(--ui-social-line-soft);
+    --ui-social-compose-tool-size: var(--ui-control-hit);
+    --ui-social-compose-icon-size: calc(var(--ui-control-icon-md) - var(--ui-space-half));
+    --ui-avatar-fallback-size: 0.95em;
+    --ui-avatar-fallback-glyph-size: 1em;
+    --ui-avatar-fallback-glyph-weight: var(--ui-font-weight-display);
+    --ui-avatar-fallback-glyph-shift-y: -0.02em;
+    --ui-avatar-fallback-bg-glow-strong: rgba(255, 229, 163, 0.38);
+    --ui-avatar-fallback-bg-glow-soft: rgba(255, 229, 163, 0.08);
+    --ui-avatar-fallback-bg-shine: rgba(255, 255, 255, 0.10);
+    --ui-avatar-fallback-bg-deep: #07090c;
+    --ui-avatar-fallback-bg-mid: #101418;
+    --ui-avatar-fallback-bg-lifted: #1d242b;
+    --ui-avatar-fallback-gold-text: #f7d889;
+    --ui-avatar-fallback-ring-light: rgba(255, 255, 255, 0.14);
+    --ui-avatar-fallback-shadow-light: rgba(255, 255, 255, 0.055);
+    --ui-avatar-fallback-shadow-dark: rgba(0, 0, 0, 0.32);
+    --ui-avatar-fallback-orbit-start: rgba(255, 216, 122, 0);
+    --ui-avatar-fallback-orbit-glow: rgba(255, 216, 122, 0.32);
+    --ui-avatar-fallback-orbit-inset: 12%;
+    --ui-avatar-fallback-orbit-filter: blur(calc(var(--ui-border-width-hairline) / 5));
+    --ui-avatar-fallback-orbit-opacity: 0.78;
+    --ui-avatar-fallback-inner-ring: rgba(255, 216, 122, 0.16);
+    --ui-avatar-fallback-glyph-start: #fff6d8;
+    --ui-avatar-fallback-glyph-mid: #f8cf72;
+    --ui-avatar-fallback-glyph-end: #b97821;
+    --ui-avatar-fallback-glyph-highlight: rgba(255, 255, 255, 0.22);
+    --ui-avatar-fallback-glyph-shadow: rgba(0, 0, 0, 0.45);
+
+    /* Topbar rhythm consumed by topbar.css / topbar-system.css. */
+    --ui-topbar-height: var(--ui-control-hit);
+    --ui-topbar-surface-base: var(--ui-surface-card-solid);
+    --ui-topbar-surface-standard: var(--ui-surface-card-solid);
+    --ui-topbar-surface-home: var(--ui-topbar-surface-standard);
+    --ui-topbar-surface-detail: var(--ui-topbar-surface-standard);
+    --ui-topbar-backdrop-filter: var(--ui-backdrop-filter-none);
+    --ui-topbar-border-color: var(--ui-color-transparent);
+    --ui-topbar-shadow: var(--ui-shadow-none);
+    --ui-topbar-title-size: var(--ui-text-title);
+    --ui-topbar-title-weight: var(--ui-font-weight-title);
+    --ui-topbar-title-line-height: var(--ui-line-tight);
+    --ui-topbar-title-tracking: var(--ui-tracking-normal);
+    --ui-topbar-title-color: var(--ui-text-strong);
+    --ui-topbar-text-color: var(--ui-text-primary);
+    --ui-topbar-action-color: var(--ui-text-strong);
+    --ui-topbar-action-hover-color: var(--ui-text-strong);
+    --ui-topbar-action-hover-surface: color-mix(in srgb, var(--ui-text-primary) 5%, transparent);
+    --ui-topbar-action-pressed-surface: color-mix(in srgb, var(--ui-text-primary) 8%, transparent);
+    --ui-topbar-back-action-surface: var(--ui-color-transparent);
+    --ui-topbar-back-action-hover-surface: var(--ui-color-transparent);
+    --ui-topbar-back-action-pressed-surface: var(--ui-color-transparent);
+    --ui-topbar-edge-padding-x: var(--ui-page-edge-padding-x);
+    --ui-topbar-transition-duration: var(--ui-duration-base);
+    --ui-topbar-icon-stroke: var(--ui-icon-stroke);
+    --ui-topbar-back-icon-stroke: 2.35;
+    --ui-topbar-back-icon-offset-x: calc(var(--ui-space-2) * -1);
+    --ui-topbar-back-track-size: var(--ui-control-sm);
+    --ui-topbar-back-title-gap: var(--ui-space-2);
+    --ui-header-avatar-size: var(--ui-control-lg);
+
+    /* Home rhythm consumed by features/home.css. */
+    --ui-home-accent-soft: var(--ui-color-transparent);
+    --ui-home-feed-surface: var(--ui-social-canvas);
+    --ui-home-glass-border: var(--ui-line-hairline);
+    --ui-home-glass-border-strong: var(--ui-line-soft);
+    --ui-home-bottom-sheet-shadow: var(--ui-shadow-sheet);
+    --ui-home-sheet-surface: var(--ui-topbar-surface-home);
+    --ui-home-panel-shadow: var(--ui-shadow-card);
+    --ui-home-subtle-shadow: var(--ui-shadow-none);
+    --ui-home-feed-state-surface: var(--ui-color-transparent);
+    --ui-home-feed-state-border: var(--ui-color-transparent);
+    --ui-home-feed-state-shadow: var(--ui-shadow-none);
+    --ui-home-topbar-brand-font: var(--ui-font-family-sans);
+    --ui-home-topbar-brand-weight: var(--ui-font-weight-display);
+    --ui-home-topbar-brand-baseline-shift: var(--ui-space-none);
+    --ui-home-topbar-brand-display-size: var(--ui-home-topbar-brand-size);
+    --ui-home-topbar-blur-strong: var(--ui-topbar-backdrop-filter);
+    --ui-home-action-icon-size: var(--ui-control-icon-md);
+    --ui-home-action-icon-stroke: var(--ui-icon-stroke);
+    --ui-home-topic-tab-visible-count: 6;
+    --ui-home-topic-tab-gap: calc(var(--ui-space-1) + var(--ui-space-half));
+    --ui-home-topic-tab-min-width: clamp(
+      calc(var(--ui-space-8) + var(--ui-space-1)),
+      calc((var(--ui-viewport-width) - (var(--ui-page-padding-x) * 2) - (var(--ui-home-topic-tab-gap) * (var(--ui-home-topic-tab-visible-count) - 1))) / var(--ui-home-topic-tab-visible-count)),
+      calc(var(--ui-space-8) * 2)
+    );
+    --ui-home-topic-tab-padding-x: calc(var(--ui-space-1) + var(--ui-space-half));
+    --ui-home-topic-filter-chip-max-width: min(46vw, calc(var(--ui-space-8) * 7 - var(--ui-space-1)));
+    --ui-home-topic-filter-chip-max-width-compact: min(54vw, calc(var(--ui-space-8) * 6 + var(--ui-space-2)));
+    --ui-home-topic-filter-value-opacity: 0.82;
+    --ui-home-topic-filter-caret-opacity: 0.72;
+    --ui-home-topic-filter-caret-stroke-delta: 0.1;
+    --ui-home-topic-tab-surface: color-mix(in srgb, var(--ui-product-canvas) 72%, var(--ui-color-white));
+    --ui-home-topic-tab-surface-hover: color-mix(in srgb, var(--ui-brand-soft) 72%, var(--ui-color-white));
+    --ui-home-topic-tab-surface-active: var(--ui-brand-soft);
+    --ui-home-topic-tab-text: var(--ui-text-secondary);
+    --ui-home-topic-tab-active-text: var(--ui-brand-strong);
+    --ui-home-topic-tab-shadow: var(--ui-shadow-none);
+    --ui-home-topic-tab-active-shadow: none;
+
+    /* Brand/about rhythm consumed by features/brand.css. */
+    --ui-brand-about-hero-padding: calc(var(--ui-space-6) + var(--ui-space-1)) var(--ui-space-5);
+    --ui-brand-about-hero-padding-desktop: calc(var(--ui-space-8) + var(--ui-space-2)) var(--ui-space-8);
+    --ui-brand-about-chip-padding: calc(var(--ui-space-1) + var(--ui-space-half)) var(--ui-space-3);
+    --ui-brand-about-keyword-padding: calc(var(--ui-space-1) + var(--ui-space-half) + var(--ui-space-quarter)) var(--ui-space-3);
+    --ui-brand-about-title-size: 2rem;
+    --ui-brand-about-title-size-desktop: 2.65rem;
+    --ui-brand-about-title-tracking: -0.032em;
+    --ui-brand-about-copy-max-width: 42rem;
+    --ui-brand-about-copy-line: 1.9;
+    --ui-brand-about-copy-size-desktop: 1.05rem;
+    --ui-brand-about-icon-size: calc(var(--ui-space-8) + var(--ui-space-3));
+    --ui-brand-about-check-offset: var(--ui-space-1);
+
+    /* Feed rhythm consumed by components/feed-card-system.css. */
+    --ui-feed-author-avatar-size: var(--ui-social-feed-avatar-size);
+    --ui-feed-author-stack-gap: var(--ui-space-none);
+    --ui-feed-author-meta-gap: calc(var(--ui-space-1) + var(--ui-space-quarter));
+    --ui-feed-author-name-line: var(--ui-social-feed-meta-line);
+    --ui-feed-author-meta-line: var(--ui-social-feed-meta-line);
+    --ui-feed-card-content-line: var(--ui-social-feed-body-line);
+    --ui-feed-contact-size: calc(var(--ui-control-xs) + var(--ui-space-half));
+    --ui-feed-card-padding: var(--ui-social-feed-row-padding-y);
+    --ui-feed-card-gap: var(--ui-social-feed-column-gap);
+    --ui-feed-chip-min-height: calc(var(--ui-space-5) + var(--ui-space-half));
+    --ui-feed-tag-surface: var(--ui-brand-soft);
+    --ui-feed-tag-color: var(--ui-brand-strong);
+    --ui-feed-location-chip-gap: var(--ui-space-1);
+    --ui-feed-location-icon-size: var(--ui-control-icon-xs);
+    --ui-feed-follow-pending-opacity: 0.72;
+    --ui-feed-follow-ping-opacity: 0.75;
+    --ui-feed-follow-pending-sheen: linear-gradient(90deg, transparent, color-mix(in srgb, currentColor 12%, transparent), transparent);
+    --ui-feed-promote-color: var(--ui-brand-accent-strong);
+    --ui-feed-promote-hover-color: var(--ui-color-white);
+
+    --ui-ins-card-radius: var(--ui-surface-card-radius);
+    --ui-ins-card-desktop-gap: var(--ui-feed-card-list-gap);
+    --ui-ins-card-author-padding-x: var(--ui-social-feed-row-padding-x);
+    --ui-ins-card-author-padding-y: var(--ui-social-feed-row-padding-y);
+    --ui-ins-card-body-padding-x: var(--ui-social-feed-row-padding-x);
+    --ui-ins-card-body-padding-bottom: var(--ui-space-4);
+    --ui-ins-card-media-margin-top: var(--ui-space-3);
+    --ui-ins-card-footer-padding-x: var(--ui-social-feed-row-padding-x);
+    --ui-ins-card-action-button-size: var(--ui-social-action-size);
+    --ui-ins-card-action-icon-size: var(--ui-social-action-icon-size);
+    --ui-feed-card-tags-margin-top: calc(var(--ui-space-2) + var(--ui-space-half));
+    --ui-feed-card-expand-margin-top: var(--ui-feed-card-tags-margin-top);
+
+    --ui-feed-action-icon-size: var(--ui-social-action-icon-size);
+    --ui-feed-action-surface: var(--ui-color-transparent);
+    --ui-feed-action-surface-hover: transparent;
+    --ui-feed-action-border: var(--ui-color-transparent);
+    --ui-feed-action-shadow: var(--ui-shadow-none);
+    --ui-feed-action-color: var(--ui-social-action-muted);
+    --ui-feed-action-active-color: var(--ui-brand);
+    --ui-feed-action-heat-color: var(--ui-social-action-muted);
+    --ui-feed-action-heat-hover-color: var(--ui-social-action);
+    --ui-feed-action-sync-color: var(--ui-social-action-muted);
+    --ui-feed-action-sync-hover-color: var(--ui-social-action);
+    --ui-feed-action-icon-stroke: calc(var(--ui-icon-stroke) + var(--ui-icon-stroke-emphasis-delta));
+    --ui-feed-action-like-stroke: var(--ui-feed-action-icon-stroke);
+    --ui-feed-action-gap: var(--ui-space-2);
+    --ui-feed-action-padding: var(--ui-space-none) var(--ui-space-2);
+    --ui-feed-more-button-size: var(--ui-control-hit);
+    --ui-feed-more-button-icon-size: var(--ui-control-icon-md);
+    --ui-feed-card-media-radius-mobile: var(--ui-media-frame-radius);
+    --ui-feed-card-media-radius-desktop: var(--ui-media-frame-radius);
+    --ui-avatar-lg-size: calc(var(--ui-space-8) * 2 + var(--ui-space-2));
+
+    /* Create / promote product rhythm. */
+    --ui-create-page-surface: var(--ui-surface-page);
+    --ui-create-card-surface: var(--ui-surface-card);
+    --ui-create-card-radius: var(--ui-radius-2xl);
+    --ui-create-section-surface: var(--ui-surface-card);
+    --ui-create-input-placeholder: var(--ui-text-disabled);
+    --ui-create-control-hover-surface: var(--ui-state-hover);
+    --ui-create-auth-card-border: var(--ui-color-transparent);
+    --ui-create-picker-overlay-surface: color-mix(in srgb, var(--ui-color-black) 24%, transparent);
+    --ui-create-picker-overlay-filter: var(--ui-glass-blur-md) saturate(1.08);
+    --ui-create-picker-panel-surface: color-mix(in srgb, var(--ui-surface-card) 96%, transparent);
+    --ui-create-picker-panel-shadow: var(--ui-shadow-sheet);
+    --ui-create-picker-header-surface: color-mix(in srgb, var(--ui-surface-card) 88%, transparent);
+    --ui-create-picker-option-surface: color-mix(in srgb, var(--ui-social-surface-muted) 72%, var(--ui-surface-card));
+    --ui-create-picker-option-border: color-mix(in srgb, var(--ui-color-black) 5%, transparent);
+    --ui-create-picker-option-shadow: var(--ui-shadow-none);
+    --ui-create-picker-option-selected-surface: var(--ui-brand-accent-surface);
+    --ui-create-picker-option-selected-text: var(--ui-brand-strong);
+    --ui-create-picker-option-selected-border: var(--ui-brand-accent-ring);
+    --ui-promote-flow-surface: var(--ui-surface-page);
+    /* Sheet / dialog rhythm consumed by sheet components. */
+    --ui-layer-panel-surface: var(--ui-color-white);
+    --ui-layer-panel-border: var(--ui-line-hairline);
+    --ui-layer-panel-shadow: var(--ui-shadow-sheet);
+    --ui-layer-panel-radius: var(--ui-social-sheet-radius);
+    --ui-layer-panel-header-surface: var(--ui-layer-panel-surface);
+    --ui-layer-panel-header-border: var(--ui-line-hairline);
+    --ui-layer-panel-title-size: var(--ui-text-title);
+    --ui-layer-panel-close-surface: transparent;
+    --ui-layer-panel-close-color: var(--ui-text-secondary);
+    --ui-layer-panel-close-active-surface: color-mix(in srgb, var(--ui-color-black) 5%, transparent);
+    --ui-layer-panel-close-offset-inline-end: calc(var(--ui-space-1) * -1);
+    --ui-dialog-mobile-top-offset: calc(env(safe-area-inset-top) + var(--ui-topbar-height) + var(--ui-space-3));
+    --ui-dialog-mobile-bottom-inset: max(var(--ui-space-3), env(safe-area-inset-bottom));
+    --ui-dialog-mobile-available-height: calc(var(--ui-visual-viewport-height) - var(--ui-dialog-mobile-top-offset) - var(--ui-dialog-mobile-bottom-inset));
+    --ui-centered-state-min-height: calc(var(--ui-space-8) * 13 + var(--ui-space-1));
+    --ui-dialog-action-min-width: calc(var(--ui-space-8) * 3 + var(--ui-space-1));
+    --ui-auth-scrim-surface: color-mix(in srgb, var(--ui-color-black) 32%, transparent);
+    --ui-auth-panel-surface: color-mix(in srgb, var(--ui-surface-raised) 97%, transparent);
+    --ui-auth-panel-border: var(--ui-social-line-soft);
+    --ui-auth-panel-shadow: var(--ui-shadow-panel);
+    --ui-auth-tab-active-shadow: inset 0 0 0 var(--ui-border-width-hairline) var(--ui-line-hairline);
+    --ui-detail-bottom-count-max-width: 4.5ch;
+    --ui-description-clamp-max-width: calc(var(--ui-space-8) * 6 - var(--ui-space-half));
+    --ui-record-filter-status-min-width: calc(var(--ui-space-8) * 3 - var(--ui-space-1));
+    --ui-record-filter-action-min-width: calc(var(--ui-space-8) * 3 + var(--ui-space-2));
+    --ui-motion-sheet-offset-y: calc(var(--ui-space-2) + var(--ui-space-half));
+    --ui-avatar-fallback-shadow-y: calc(var(--ui-space-2) + var(--ui-space-half));
+    --ui-avatar-fallback-shadow-blur: calc(var(--ui-space-5) + var(--ui-space-half));
+    --ui-avatar-fallback-shadow-y-inverse: calc((var(--ui-space-3) + var(--ui-space-half)) * -1);
+  }
+
+  @media (min-width: 768px) {
+    :root {
+      --ui-app-page-main-gap: var(--ui-space-6);
+      --ui-app-page-main-padding-y: var(--ui-space-5);
+      --ui-social-feed-row-padding-y: calc(var(--ui-space-4) + var(--ui-space-half));
+      --ui-social-feed-row-padding-x: var(--ui-space-5);
+    }
+  }
+}

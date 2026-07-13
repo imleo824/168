@@ -1,0 +1,29 @@
+/* Category / tag feed empty and refresh states. */
+
+@layer utilities {
+  .category-feed-empty {
+    width: 100%;
+    max-width: var(--ui-home-desktop-feed-width);
+    margin-inline: auto;
+    border: var(--ui-border-none);
+    border-radius: var(--ui-ins-card-radius);
+    background: var(--ui-surface-card);
+    padding: var(--ui-category-feed-empty-padding);
+    box-shadow: var(--ui-shadow-none);
+  }
+
+  .category-feed-empty-icon {
+    width: var(--ui-control-icon-md);
+    height: var(--ui-control-icon-md);
+    stroke-width: var(--ui-icon-stroke);
+  }
+
+  .category-feed-refresh-row {
+    display: flex;
+    width: 100%;
+    max-width: var(--ui-home-desktop-feed-width);
+    justify-content: center;
+    margin-inline: auto;
+    padding: var(--ui-space-2) var(--ui-social-feed-list-padding-x);
+  }
+}

@@ -1,0 +1,32 @@
+/* Reusable record more entry shared by record preview modules. */
+
+@layer utilities {
+  .ui-record-more-link {
+    display: inline-flex;
+    min-width: 0;
+    min-height: var(--ui-control-md);
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ui-space-1);
+    border: var(--ui-border-none);
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-surface-transparent);
+    color: var(--ui-action-link);
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-none);
+  }
+
+  .ui-record-more-link:active {
+    background: var(--ui-brand-soft-10);
+  }
+
+  .ui-record-more-link-icon {
+    width: var(--ui-control-icon-sm);
+    height: var(--ui-control-icon-sm);
+    flex: 0 0 var(--ui-control-icon-sm);
+    color: currentColor;
+    stroke-width: var(--ui-icon-stroke);
+  }
+}

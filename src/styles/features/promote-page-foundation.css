@@ -1,0 +1,8 @@
+/* Promote page shared foundation. */
+
+@layer utilities {
+  .promote-mobile-page {
+    color: var(--ui-text-primary);
+    background: var(--ui-promote-flow-surface);
+  }
+}

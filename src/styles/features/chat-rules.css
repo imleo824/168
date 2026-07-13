@@ -1,0 +1,59 @@
+@layer utilities {
+  .chat-rules-overlay {
+    position: fixed;
+    inset: var(--ui-inset-none);
+    z-index: calc(var(--ui-z-modal) + 1);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    background: var(--chat-scrim-surface);
+    padding: var(--ui-space-3);
+  }
+
+  .chat-rules-sheet {
+    width: min(100%, var(--chat-shell-width));
+    border: var(--ui-border-width-hairline) solid var(--chat-panel-border);
+    border-radius: var(--ui-social-sheet-radius) var(--ui-social-sheet-radius) var(--ui-radius-none) var(--ui-radius-none);
+    background: var(--ui-surface-raised);
+    color: var(--ui-text-primary);
+    padding: var(--ui-space-2) var(--ui-space-4) calc(var(--ui-space-4) + env(safe-area-inset-bottom));
+    box-shadow: var(--ui-shadow-sheet);
+  }
+
+  .chat-rules-handle {
+    width: calc(var(--ui-space-8) + var(--ui-space-2));
+    height: var(--ui-space-half);
+    margin: var(--ui-space-1) auto var(--ui-space-3);
+    border-radius: var(--ui-radius-full);
+    background: var(--chat-rule-surface);
+  }
+
+  .chat-rules-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--ui-control-hit);
+    align-items: center;
+    gap: var(--ui-space-3);
+  }
+
+  .chat-rules-header h2 {
+    margin: var(--ui-space-none);
+    color: var(--ui-text-strong);
+    font-size: var(--ui-text-title);
+    font-weight: var(--ui-font-weight-title);
+    line-height: var(--ui-line-tight);
+  }
+
+  .chat-rules-close {
+    justify-self: end;
+  }
+
+  .chat-rules-list {
+    display: grid;
+    gap: var(--ui-space-2);
+    margin: var(--ui-space-4) var(--ui-space-none) var(--ui-space-none);
+    padding: var(--ui-space-none) var(--ui-space-none) var(--ui-space-none) var(--ui-space-4);
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-text-sm);
+    line-height: var(--ui-line-readable);
+  }
+}

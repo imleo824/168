@@ -1,0 +1,230 @@
+/* Profile/Tui Plus visual polish: unified profile rhythm and checkout stability. */
+
+@layer utilities {
+  :is(.profile-modern-page, .user-space-page-next) {
+    --profile-plus-flow-gap: calc(var(--ui-space-1) + var(--ui-space-half));
+    --profile-plus-row-gap: var(--ui-space-1);
+    --profile-plus-inline-gap: var(--ui-space-1);
+    --profile-plus-text-link-gap: var(--ui-space-1);
+    --profile-plus-link-min-height: calc(var(--ui-text-xs) * var(--ui-line-tight));
+    --profile-plus-link-color: var(--ui-brand);
+    --profile-plus-link-color-hover: var(--ui-brand-strong);
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) :is(.profile-identity-copy, .user-space-profile-copy) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--profile-plus-flow-gap);
+    margin-top: var(--ui-space-1);
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) :is(.profile-identity-copy, .user-space-profile-copy) > * {
+    margin-block: 0;
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) .profile-name-row {
+    gap: var(--profile-plus-inline-gap);
+    padding-block: var(--ui-space-none);
+    line-height: var(--ui-line-tight);
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) :is(.profile-name-mobile, .profile-name-desktop, .user-space-name-mobile, .user-space-name-desktop) {
+    line-height: var(--ui-line-tight);
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) :is(.profile-bio-button, .user-space-bio-mobile, .user-space-bio-desktop) {
+    gap: var(--profile-plus-inline-gap);
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    line-height: var(--ui-line-normal);
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) .profile-bio-text {
+    line-height: var(--ui-line-normal);
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) .profile-bio-edit-icon {
+    margin-left: var(--ui-space-none);
+    margin-top: var(--ui-space-none);
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) .user-space-plus-links {
+    display: grid;
+    gap: var(--profile-plus-flow-gap);
+    margin: 0;
+    padding: 0;
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) .user-space-plus-link-list {
+    display: grid;
+    gap: var(--profile-plus-text-link-gap);
+    margin: 0;
+    padding: 0;
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) .user-space-plus-link-row {
+    min-height: var(--profile-plus-link-min-height);
+    margin: 0;
+    padding: 0;
+    column-gap: var(--profile-plus-inline-gap);
+    row-gap: var(--profile-plus-text-link-gap);
+    line-height: var(--ui-line-tight);
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) .user-space-plus-link-row + .user-space-plus-link-row {
+    margin-top: 0;
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) .user-space-plus-contact-row {
+    min-height: var(--profile-plus-link-min-height);
+    align-items: center;
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) .user-space-plus-contact-icon-button {
+    width: auto;
+    height: auto;
+    min-height: var(--profile-plus-link-min-height);
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) .user-space-plus-brand-icon {
+    width: var(--ui-control-icon-sm);
+    height: var(--ui-control-icon-sm);
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) .user-space-plus-link-list > .user-space-plus-link.user-space-plus-text-link {
+    min-height: var(--profile-plus-link-min-height);
+    align-items: center;
+    gap: var(--profile-plus-inline-gap);
+    margin: 0;
+    padding: 0;
+    line-height: var(--ui-line-tight);
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) .user-space-plus-link-label {
+    line-height: var(--ui-line-tight);
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) .user-space-plus-actions {
+    display: flex;
+    gap: var(--profile-plus-inline-gap);
+    margin: 0;
+    padding: 0;
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) .user-space-plus-action {
+    min-height: var(--ui-control-sm);
+    padding-inline: var(--ui-space-2);
+  }
+
+  .tui-plus-main {
+    padding-bottom: calc(var(--ui-page-bottom-safe) + var(--ui-control-lg) + var(--ui-space-8) + var(--ui-space-4));
+  }
+
+  .tui-plus-x-benefit-grid {
+    display: grid;
+    gap: var(--ui-space-2);
+  }
+
+  .tui-plus-x-benefit-item {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: var(--ui-space-2);
+  }
+
+  .tui-plus-x-benefit-item > span:not(.tui-plus-x-benefit-icon) {
+    display: grid;
+    min-width: 0;
+    gap: var(--ui-space-half);
+  }
+
+  .tui-plus-x-benefit-item strong,
+  .tui-plus-x-benefit-item small {
+    display: block;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .tui-plus-x-benefit-item strong {
+    color: var(--ui-text-strong);
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-tight);
+  }
+
+  .tui-plus-x-benefit-item small {
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-body);
+    line-height: var(--ui-line-normal);
+  }
+
+  .tui-plus-x-plan-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ui-space-2);
+    width: 100%;
+  }
+
+  .tui-plus-x-plans {
+    display: grid;
+    gap: var(--ui-space-3);
+  }
+
+  .tui-plus-x-section-heading {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ui-space-2);
+  }
+
+  .tui-plus-x-section-heading h2,
+  .tui-plus-x-section-heading span {
+    margin: 0;
+  }
+
+  .tui-plus-x-section-heading h2 {
+    color: var(--ui-text-strong);
+    font-size: var(--ui-text-title);
+    font-weight: var(--ui-font-weight-display);
+    line-height: var(--ui-line-tight);
+  }
+
+  .tui-plus-x-section-heading span {
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-tight);
+    text-align: right;
+  }
+
+  .tui-plus-x-plan-grid .tui-plus-plan-card {
+    grid-template-columns: minmax(0, 1fr) var(--ui-control-icon-sm);
+    gap: var(--ui-space-2);
+    min-width: 0;
+    padding: var(--ui-space-3);
+  }
+
+  .tui-plus-x-plan-grid .tui-plus-plan-card-mark {
+    display: none;
+  }
+
+  .tui-plus-x-plan-grid .tui-plus-plan-card-top {
+    gap: var(--ui-space-1);
+  }
+
+  .tui-plus-x-plan-grid .tui-plus-plan-card-top strong {
+    font-size: var(--ui-text-sm);
+  }
+
+  .tui-plus-x-plan-grid .tui-plus-plan-card-top em {
+    padding-inline: var(--ui-space-1);
+    font-size: var(--ui-text-2xs);
+  }
+
+  .tui-plus-x-plan-grid .tui-plus-plan-card-price b {
+    font-size: var(--ui-text-title);
+  }
+}

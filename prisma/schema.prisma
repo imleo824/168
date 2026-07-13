@@ -1,0 +1,939 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum UserType {
+  NORMAL
+  ROBOT
+  OFFICIAL
+}
+
+enum OrderStatus {
+  WAITING_PAYMENT
+  MANUAL_REVIEW
+  CREDITED
+  EXPIRED
+  BELOW_MINIMUM
+  CANCELLED
+  FAILED
+}
+
+enum DepositAddressStatus {
+  AVAILABLE
+  ASSIGNED
+  DISABLED
+}
+
+enum DepositAddressSource {
+  POOL
+  HD
+  FALLBACK
+}
+
+enum SweepStatus {
+  NONE
+  PENDING
+  QUEUED
+  COMPLETED
+  FAILED
+}
+
+enum SweepJobStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  PARTIAL_FAILED
+  FAILED
+  CANCELLED
+}
+
+enum SweepTransactionStatus {
+  PENDING
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum WebhookRequestStatus {
+  IN_PROGRESS
+  SUCCEEDED
+  FAILED
+}
+
+enum ChatMessageAuthorType {
+  USER
+  BOT
+  SYSTEM
+}
+
+enum ChatMessageStatus {
+  VISIBLE
+  HIDDEN
+  DELETED
+}
+
+enum ChatBotInvocationStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  SKIPPED
+}
+
+enum ChatBotTrigger {
+  HUMAN_MESSAGE
+  IDLE_WARMUP
+}
+
+enum TelegramSyncStatus {
+  NONE
+  PENDING
+  SENT
+  FAILED
+}
+
+model User {
+  id                  String                       @id @default(uuid())
+  photoUrl            String?
+  coverUrl            String?
+  loginAccount        String?                      @unique
+  contact             String?
+  passwordHash        String?
+  paymentPasswordHash String?
+  displayName         String
+  points              Int                          @default(0)
+  viewCount           Int                          @default(0)
+  role                Role                         @default(USER)
+  userType            UserType                     @default(NORMAL)
+  createdAt           DateTime                     @default(now())
+  updatedAt           DateTime                     @updatedAt
+  isDisabled          Boolean                      @default(false)
+  bio                 String?
+  plusStatus          String?
+  plusPlan            String?
+  plusExpiresAt       DateTime?
+  plusTrialUsed       Boolean                      @default(false)
+  posts               Post[]
+  orders              Order[]
+  promotions          PromotionBooking[]
+  depositAddressRecord DepositAddress?
+  pointTransactions   PointTransaction[]           @relation("UserPointTransactions")
+  promotionCampaigns  PromotionCampaign[]
+  following           Follow[]                     @relation("following")
+  followers           Follow[]                     @relation("followers")
+  likes               Like[]
+  comments            PostComment[]
+  postViews           PostView[]                   @relation("PostViewViewer")
+  mutedCategories     UserMutedCategory[]
+  joinedTopics        UserJoinedTopic[]
+  recommendationFeedbacks UserRecommendationFeedback[]
+
+  @@index([createdAt(sort: Desc), id(sort: Desc)], map: "idx_user_created_id")
+  @@index([userType, createdAt(sort: Desc), id(sort: Desc)], map: "idx_user_type_created_id")
+  @@index([role, createdAt(sort: Desc), id(sort: Desc)], map: "idx_user_role_created_id")
+}
+
+model Follow {
+  followerId  String
+  follower    User     @relation("following", fields: [followerId], references: [id], onDelete: Cascade)
+  followingId String
+  following   User     @relation("followers", fields: [followingId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@id([followerId, followingId])
+  @@index([followingId, createdAt(sort: Desc), followerId(sort: Desc)], map: "idx_follow_fans_created_desc")
+  @@index([followerId, createdAt(sort: Desc), followingId(sort: Desc)], map: "idx_follow_following_desc")
+  @@index([createdAt(sort: Desc), followerId(sort: Desc), followingId(sort: Desc)], map: "idx_follow_created_desc")
+}
+
+model Category {
+  id           String              @id @default(uuid())
+  name         String
+  slug         String              @unique
+  order        Int                 @default(0)
+  posts        Post[]
+  mutedByUsers UserMutedCategory[]
+  autoCrawlSources AutoCrawlSource[]
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  @@index([order, createdAt], map: "idx_category_order_created")
+}
+
+model UserMutedCategory {
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+
+  @@id([userId, categoryId])
+  @@index([categoryId, createdAt], map: "idx_user_muted_category_category_created")
+}
+
+model UserJoinedTopic {
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  topicId   String
+  topicName String
+  topicType String   @default("topic")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([userId, topicId])
+  @@index([userId, createdAt(sort: Desc), topicId(sort: Desc)], map: "idx_user_joined_topic_user_created_desc")
+  @@index([topicId, createdAt(sort: Desc), userId(sort: Desc)], map: "idx_user_joined_topic_topic_created_desc")
+}
+
+model Block {
+  blockerId String
+  blockedId String
+  createdAt DateTime @default(now())
+
+  @@id([blockerId, blockedId])
+  @@index([blockedId])
+  @@index([createdAt(sort: Desc), blockerId(sort: Desc), blockedId(sort: Desc)], map: "idx_block_created_desc")
+}
+
+model Post {
+  id           String    @id @default(uuid())
+  title        String
+  content      String    @db.Text
+  location     String?
+  countryCode  String?
+  countryName  String?
+  source       String?
+  contact      String
+  categoryId   String?
+  category     Category? @relation(fields: [categoryId], references: [id])
+  images       String[]  @default([])
+  categoryMeta Json?
+  categoryMetaSchemaVersion Int?
+  clientNonce  String?
+  isPublished             Boolean            @default(true)
+  deletedAt               DateTime?
+  isAnonymous             Boolean            @default(false)
+  showContact             Boolean            @default(true)
+  syncToTelegram          Boolean            @default(false)
+  telegramSyncStatus      TelegramSyncStatus @default(NONE)
+  telegramSyncedAt        DateTime?
+  telegramSyncRequestedAt DateTime?
+  telegramSyncLastError   String?            @db.Text
+  viewCount    Int @default(0)
+  shareCount   Int @default(0)
+  likeCount    Int @default(0)
+  commentCount Int @default(0)
+  quoteCount   Int @default(0)
+  bumpedAt DateTime @default(now())
+  userId       String
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  quotedPostId String?
+  quotedPost   Post?   @relation("PostQuotes", fields: [quotedPostId], references: [id], onDelete: SetNull)
+  likes                   Like[]
+  comments                PostComment[]
+  views                   PostView[]
+  shares                  PostShare[]
+  quotedByPosts           Post[]                       @relation("PostQuotes")
+  engagementAggregate     PostEngagementAggregate?
+  rankingScore            PostRankingScore?
+  recommendationFeedbacks UserRecommendationFeedback[]
+  promotions              PromotionBooking[]
+  promotionCampaigns      PromotionCampaign[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([isPublished, deletedAt, createdAt, id], map: "idx_post_visible_created")
+  @@index([isPublished, deletedAt, bumpedAt(sort: Desc), createdAt(sort: Desc), id(sort: Desc)], map: "idx_post_visible_bumped_desc")
+  @@index([categoryId, isPublished, deletedAt, bumpedAt(sort: Desc), createdAt(sort: Desc), id(sort: Desc)], map: "idx_post_category_visible_bumped_desc")
+  @@index([countryCode, isPublished, deletedAt, bumpedAt(sort: Desc), createdAt(sort: Desc), id(sort: Desc)], map: "idx_post_country_visible_bumped_desc")
+  @@index([location, isPublished, deletedAt, bumpedAt, createdAt, id], map: "idx_post_location_visible_bumped")
+  @@index([userId, createdAt, id])
+  @@index([userId, isPublished, deletedAt, createdAt, id])
+  @@index([userId, isPublished, deletedAt, bumpedAt(sort: Desc), createdAt(sort: Desc), id(sort: Desc)], map: "idx_post_author_visible_bumped_desc")
+  @@index([userId, telegramSyncStatus])
+  @@index([quotedPostId, isPublished, deletedAt, createdAt(sort: Desc), id(sort: Desc)], map: "idx_post_quote_visible_created")
+  @@index([isPublished, deletedAt, shareCount, createdAt, id], map: "idx_post_visible_share_created")
+  @@index([isPublished, deletedAt, shareCount(sort: Desc), bumpedAt(sort: Desc), id(sort: Desc)], map: "idx_post_visible_share_bumped_desc")
+  @@index([isPublished, deletedAt, viewCount, createdAt(sort: Desc), id(sort: Desc)], map: "idx_post_visible_view_created")
+  @@index([isPublished, deletedAt, viewCount(sort: Desc), bumpedAt(sort: Desc), id(sort: Desc)], map: "idx_post_visible_view_bumped_desc")
+  @@index([createdAt(sort: Desc), id(sort: Desc)], map: "idx_post_created_id_desc")
+  @@unique([userId, clientNonce], map: "idx_post_user_client_nonce_unique")
+}
+
+model Like {
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, postId])
+  @@index([postId, createdAt])
+  @@index([userId, createdAt, postId], map: "idx_like_user_created_post")
+  @@index([createdAt(sort: Desc), postId(sort: Desc)], map: "idx_like_created_post_desc")
+}
+
+model PostComment {
+  id        String    @id @default(uuid())
+  postId    String
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  content   String    @db.Text
+  status    String    @default("VISIBLE")
+  source    String?
+  deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([postId, status, deletedAt, createdAt(sort: Desc), id(sort: Desc)], map: "idx_post_comment_post_visible_created")
+  @@index([postId, createdAt(sort: Desc), id(sort: Desc)], map: "idx_post_comment_post_created")
+  @@index([source, createdAt(sort: Desc), id(sort: Desc)], map: "idx_post_comment_source_created")
+  @@index([userId, createdAt(sort: Desc), id(sort: Desc)], map: "idx_post_comment_user_created")
+  @@index([createdAt(sort: Desc), id(sort: Desc)], map: "idx_post_comment_created_id_desc")
+}
+
+model PostView {
+  id           String   @id @default(uuid())
+  postId       String
+  post         Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  viewerKey    String
+  viewerUserId String?
+  viewerUser   User?    @relation("PostViewViewer", fields: [viewerUserId], references: [id], onDelete: SetNull)
+  bucketAt     DateTime
+  source       String   @default("view")
+  dwellMs      Int      @default(0)
+  quickSkip    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  @@unique([postId, viewerKey, bucketAt])
+  @@index([postId, createdAt])
+  @@index([viewerKey, bucketAt])
+  @@index([viewerKey, createdAt(sort: Desc)], map: "idx_post_view_viewer_created")
+  @@index([viewerUserId, createdAt(sort: Desc)], map: "idx_post_view_viewer_user_created")
+  @@index([postId, viewerUserId, createdAt(sort: Desc)], map: "idx_post_view_post_viewer_user_created")
+  @@index([bucketAt], map: "idx_post_view_bucket_at")
+  @@index([source, createdAt(sort: Desc), id(sort: Desc)], map: "idx_post_view_source_created_desc")
+}
+
+model PostShare {
+  id        String   @id @default(uuid())
+  postId    String
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  actorKey  String
+  userId    String?
+  createdAt DateTime @default(now())
+
+  @@unique([postId, actorKey])
+  @@index([postId, createdAt])
+  @@index([actorKey, createdAt])
+  @@index([userId, createdAt])
+  @@index([createdAt(sort: Desc), postId(sort: Desc)], map: "idx_post_share_created_post_desc")
+}
+
+model PostEngagementAggregate {
+  postId                String   @id
+  post                  Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  verifiedLikeCount     Int      @default(0)
+  verifiedViewCount     Int      @default(0)
+  verifiedShareCount    Int      @default(0)
+  dwellMs               Int      @default(0)
+  quickSkipCount        Int      @default(0)
+  normalLikeCount       Int      @default(0)
+  normalViewCount       Int      @default(0)
+  normalShareCount      Int      @default(0)
+  normalCommentCount    Int      @default(0)
+  normalQuoteCount      Int      @default(0)
+  normalDwellMs         Int      @default(0)
+  normalQuickSkipCount  Int      @default(0)
+  updatedAt             DateTime @updatedAt
+
+  @@index([updatedAt], map: "idx_post_engagement_aggregate_updated_at")
+}
+
+model PostRankingScore {
+  postId              String   @id
+  post                Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  recommendationScore Float    @default(0)
+  countryCode         String?
+  countryName         String?
+  updatedAt           DateTime @updatedAt
+
+  @@index([recommendationScore(sort: Desc), postId], map: "idx_post_ranking_score_recommendation")
+  @@index([updatedAt], map: "idx_post_ranking_score_updated_at")
+}
+
+model UserRecommendationFeedback {
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId     String
+  post       Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  categoryId String?
+  authorId   String?
+  action     String   @default("REDUCE")
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@id([userId, postId])
+  @@index([userId, action, updatedAt(sort: Desc)], map: "idx_user_recommendation_feedback_user_action_updated")
+  @@index([categoryId, action, updatedAt(sort: Desc)], map: "idx_user_recommendation_feedback_category_updated")
+  @@index([authorId, action, updatedAt(sort: Desc)], map: "idx_user_recommendation_feedback_author_updated")
+  @@index([action, updatedAt(sort: Desc), postId(sort: Desc)], map: "idx_user_recommendation_feedback_action_updated")
+  @@index([postId, updatedAt(sort: Desc)], map: "idx_user_recommendation_feedback_post_updated")
+}
+
+model Order {
+  id              String      @id @default(uuid())
+  txHash          String?
+  logIndex        Int         @default(0)
+  chain           String      @default("TRON")
+  token           String      @default("USDT")
+  contractAddress String?
+  fromAddress     String?
+  toAddress       String?
+  amountRaw       String?
+  usdtAmount      Decimal
+  pointsGained    Int
+  status          OrderStatus @default(WAITING_PAYMENT)
+  statusReason    String?
+  blockNumber     Int?
+  blockTimestamp  DateTime?
+  confirmedAt     DateTime?
+  creditedAt      DateTime?
+  scanStartedAt   DateTime?
+  scanExpiresAt   DateTime?
+  lastScannedAt   DateTime?
+  scanAttempts    Int         @default(0)
+  autoCredit      Boolean     @default(true)
+  sweepStatus     SweepStatus @default(NONE)
+  sweepJobId      String?
+  sweptAt         DateTime?
+  userId          String
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@unique([txHash, logIndex], map: "order_tx_hash_log_index_key")
+  @@index([userId, createdAt(sort: Desc), id(sort: Desc)], map: "idx_order_user_created_desc")
+  @@index([userId, status, createdAt(sort: Desc), id(sort: Desc)], map: "idx_order_user_status_created_desc")
+  @@index([toAddress, status, createdAt])
+  @@index([status, autoCredit, lastScannedAt])
+  @@index([status, autoCredit, scanExpiresAt, lastScannedAt, createdAt], map: "idx_order_scan_queue")
+  @@index([sweepStatus, creditedAt])
+  @@index([sweepJobId])
+  @@index([scanExpiresAt])
+  @@index([createdAt(sort: Desc), id(sort: Desc)], map: "idx_order_created_id")
+  @@index([status, createdAt(sort: Desc), id(sort: Desc)], map: "idx_order_status_created_id")
+  @@index([status, creditedAt(sort: Desc), id(sort: Desc)], map: "idx_order_status_credited_id")
+}
+
+model DepositAddress {
+  id              String               @id @default(uuid())
+  address         String               @unique
+  chain           String               @default("TRON")
+  token           String               @default("USDT")
+  network         String               @default("TRC20")
+  status          DepositAddressStatus @default(AVAILABLE)
+  source          DepositAddressSource @default(POOL)
+  derivationIndex Int?                 @unique
+  derivationPath  String?
+  userId          String?              @unique
+  user            User?                @relation(fields: [userId], references: [id], onDelete: SetNull)
+  assignedAt      DateTime?
+  lastSweptAt     DateTime?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  @@index([status, createdAt(sort: Desc), id(sort: Desc)], map: "idx_deposit_address_status_created_id")
+  @@index([chain, token, network, status], map: "idx_deposit_address_asset_status")
+  @@index([source, status])
+}
+
+model SweepJob {
+  id            String             @id @default(uuid())
+  status        SweepJobStatus     @default(PENDING)
+  requestedById String?
+  targetAddress String
+  totalUsdt     Decimal            @default(0)
+  orderCount    Int                @default(0)
+  addressCount  Int                @default(0)
+  statusReason  String?
+  startedAt     DateTime?
+  finishedAt    DateTime?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  transactions  SweepTransaction[]
+
+  @@index([status, createdAt])
+  @@index([createdAt])
+}
+
+model SweepTransaction {
+  id           String                 @id @default(uuid())
+  jobId        String
+  job          SweepJob               @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  orderId      String                 @unique
+  fromAddress  String
+  toAddress    String
+  usdtAmount   Decimal
+  status       SweepTransactionStatus @default(PENDING)
+  txHash       String?
+  feeTrx       Decimal?
+  errorMessage String?
+  createdAt    DateTime               @default(now())
+  updatedAt    DateTime               @updatedAt
+
+  @@index([jobId, status, createdAt], map: "idx_sweep_transaction_job_status_created")
+  @@index([fromAddress, status])
+  @@index([txHash])
+}
+
+enum PointAction {
+  RECHARGE
+  SIGNUP_REWARD
+  ANONYMOUS_PUBLISH
+  PIN_POST
+  PIN_CHAT
+  TELEGRAM_SYNC
+  AD
+}
+
+model PointTransaction {
+  id            String      @id @default(uuid())
+  amount        Int
+  action        PointAction
+  description   String?
+  referenceType String?
+  referenceId   String?
+  metadata      Json?
+  userId        String
+  user          User        @relation("UserPointTransactions", fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+
+  @@index([userId, createdAt(sort: Desc), id(sort: Desc)], map: "idx_point_tx_user_created_desc")
+  @@index([userId, action, createdAt(sort: Desc), id(sort: Desc)], map: "idx_point_tx_user_action_created_desc")
+  @@index([createdAt(sort: Desc), id(sort: Desc)], map: "idx_point_tx_created_id")
+  @@index([action, createdAt(sort: Desc), id(sort: Desc)], map: "idx_point_tx_action_created_id")
+  @@index([referenceId, action], map: "idx_point_tx_reference_action")
+}
+
+model PromotionBooking {
+  id               String            @id @default(uuid())
+  campaignId       String
+  campaign         PromotionCampaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  /// Live promotion types: AD_HOME, PIN_HOME, PIN_CATEGORY, PIN_CHAT.
+  type             String
+  targetDate       DateTime
+  startsAt         DateTime
+  endsAt           DateTime
+  slotIndex        Int
+  scopeKey         String            @default("GLOBAL")
+  pricePaid        Int               @default(0)
+  postId           String?
+  post             Post?             @relation(fields: [postId], references: [id], onDelete: SetNull)
+  adImageUrl       String?
+  adMobileImageUrl String?
+  adTargetUrl      String?
+  categoryId       String?
+  userId           String
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @default(now()) @updatedAt
+
+  @@unique([type, targetDate, slotIndex, scopeKey])
+  @@index([type, startsAt, endsAt, scopeKey])
+  @@index([type, scopeKey, startsAt, endsAt, slotIndex, createdAt], map: "idx_promotion_ads_effective_order")
+  @@index([type, targetDate, scopeKey])
+  @@index([campaignId])
+  @@index([postId])
+  @@index([userId, createdAt])
+  @@index([userId, targetDate(sort: Desc), createdAt(sort: Desc), id(sort: Desc)], map: "idx_promotion_user_target_created_desc")
+}
+
+model PromotionCampaign {
+  id               String             @id @default(uuid())
+  /// Live promotion types: AD_HOME, PIN_HOME, PIN_CATEGORY, PIN_CHAT.
+  type             String
+  scopeKey         String             @default("GLOBAL")
+  userId           String
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  postId           String?
+  post             Post?              @relation(fields: [postId], references: [id], onDelete: SetNull)
+  categoryId       String?
+  categoryName     String?
+  adImageUrl       String?
+  adMobileImageUrl String?
+  adTargetUrl      String?
+  startsAt         DateTime
+  endsAt           DateTime
+  totalPrice       Int                @default(0)
+  bookings         PromotionBooking[]
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @default(now()) @updatedAt
+
+  @@index([type, scopeKey, startsAt, endsAt], map: "idx_promotion_campaign_active")
+  @@index([userId, createdAt], map: "idx_promotion_campaign_user_created")
+  @@index([postId, createdAt], map: "idx_promotion_campaign_post_created")
+  @@index([categoryId, createdAt], map: "idx_promotion_campaign_category_created")
+}
+
+model SystemConfig {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt
+}
+
+model ChatRoom {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  title     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  messages    ChatMessage[]
+  invocations ChatBotInvocation[]
+}
+
+model ChatMessage {
+  id              String                @id @default(uuid())
+  roomId          String
+  room            ChatRoom              @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  authorType      ChatMessageAuthorType
+  authorUserId    String?
+  authorName      String
+  authorPhotoUrl  String?
+  body            String                @db.Text
+  status          ChatMessageStatus     @default(VISIBLE)
+  clientNonce     String?
+  metadata        Json?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  deletedAt       DateTime?
+  deletedByUserId String?
+
+  @@unique([authorUserId, clientNonce], map: "chat_message_user_nonce_key")
+  @@index([roomId, createdAt(sort: Desc), id(sort: Desc)], map: "idx_chat_msg_room_created_desc")
+  @@index([roomId, status, createdAt(sort: Desc), id(sort: Desc)], map: "idx_chat_msg_room_status_created_desc")
+  @@index([authorUserId, createdAt(sort: Desc), id(sort: Desc)], map: "idx_chat_msg_author_created_desc")
+  @@index([deletedAt], map: "idx_chat_msg_deleted_at")
+}
+
+model ChatMute {
+  id            String    @id @default(uuid())
+  userId        String
+  mutedByUserId String?
+  reason        String?
+  expiresAt     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([userId, expiresAt], map: "idx_chat_mute_user_expires")
+  @@index([createdAt(sort: Desc), id(sort: Desc)], map: "idx_chat_mute_created_desc")
+}
+
+model ChatBotInvocation {
+  id              String                  @id @default(uuid())
+  roomId          String
+  room            ChatRoom                @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  trigger         ChatBotTrigger
+  status          ChatBotInvocationStatus @default(PENDING)
+  inputMessageId  String?
+  outputMessageId String?
+  model           String
+  error           String?
+  startedAt       DateTime                @default(now())
+  finishedAt      DateTime?
+  createdAt       DateTime                @default(now())
+
+  @@index([status, createdAt], map: "idx_chat_bot_invocation_status_created")
+  @@index([roomId, createdAt(sort: Desc), id(sort: Desc)], map: "idx_chat_bot_invocation_room_created")
+}
+
+model QuotePublishRun {
+  id               String    @id @default(uuid())
+  trigger          String    @default("SCHEDULED")
+  status           String    @default("PENDING")
+  sourcePostId     String?
+  quotePostId      String?
+  robotUserId      String?
+  aiModel          String?
+  generatedContent String?   @db.Text
+  skipReason       String?   @db.Text
+  error            String?   @db.Text
+  candidateScore   Float?
+  startedAt        DateTime  @default(now())
+  finishedAt       DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([status, createdAt(sort: Desc), id(sort: Desc)], map: "idx_quote_publish_run_status_created")
+  @@index([sourcePostId, createdAt(sort: Desc), id(sort: Desc)], map: "idx_quote_publish_run_source_created")
+  @@index([robotUserId, createdAt(sort: Desc), id(sort: Desc)], map: "idx_quote_publish_run_robot_created")
+  @@index([quotePostId], map: "idx_quote_publish_run_quote_post")
+  @@index([createdAt(sort: Desc), id(sort: Desc)], map: "idx_quote_publish_run_created")
+}
+
+model CommentPublishRun {
+  id               String   @id @default(uuid())
+  postId           String?
+  commentId        String?
+  robotUserId      String?
+  status           String
+  reason           String?  @db.Text
+  content          String?  @db.Text
+  contentSignature String?
+  qualityScore     Int?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([status, createdAt(sort: Desc), id(sort: Desc)], map: "idx_comment_publish_run_status_created")
+  @@index([postId, createdAt(sort: Desc)], map: "idx_comment_publish_run_post")
+  @@index([createdAt(sort: Desc), id(sort: Desc)], map: "idx_comment_publish_run_created")
+}
+
+model AutoLikeRun {
+  id          String   @id
+  trigger     String
+  status      String
+  postId      String?
+  robotUserId String?
+  reason      String?  @db.Text
+  createdAt   DateTime @default(now())
+  finishedAt  DateTime @default(now())
+
+  @@index([createdAt(sort: Desc), id(sort: Desc)], map: "idx_auto_like_run_created")
+  @@index([status, createdAt(sort: Desc)], map: "idx_auto_like_run_status_created")
+  @@index([postId, createdAt(sort: Desc)], map: "idx_auto_like_run_post_created")
+  @@index([robotUserId, createdAt(sort: Desc)], map: "idx_auto_like_run_robot_created")
+}
+
+model AutomationTaskLock {
+  name        String   @id
+  owner       String
+  lockedAt    DateTime @default(now())
+  expiresAt   DateTime
+  heartbeatAt DateTime @default(now())
+  metadata    Json?
+
+  @@index([expiresAt], map: "idx_automation_task_lock_expires_at")
+}
+
+model AutomationHeartbeat {
+  id         String   @id
+  module     String
+  trigger    String
+  status     String
+  enabled    Boolean?
+  reason     String?  @db.Text
+  runId      String?
+  details    Json?
+  startedAt  DateTime
+  finishedAt DateTime
+  durationMs Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  @@index([module, createdAt(sort: Desc), id(sort: Desc)], map: "idx_automation_heartbeat_module_created")
+  @@index([status, createdAt(sort: Desc), id(sort: Desc)], map: "idx_automation_heartbeat_status_created")
+}
+
+model RobotContentSignature {
+  id          String   @id @default(uuid())
+  module      String
+  signature   String
+  content     String?  @db.Text
+  postId      String?
+  robotUserId String?
+  createdAt   DateTime @default(now())
+
+  @@index([module, signature, createdAt(sort: Desc)], map: "idx_robot_content_signature_module_sig_created")
+}
+
+model AutoPostContent {
+  id           String    @id @default(uuid())
+  topic        String
+  title        String?
+  content      String    @db.Text
+  answer       String?   @db.Text
+  author       String?
+  sourceName   String
+  sourceUrl    String
+  license      String
+  contentHash  String    @unique
+  isActive     Boolean   @default(true)
+  usedAt       DateTime?
+  postId       String?
+  qualityScore Int       @default(80)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([topic, isActive, usedAt, qualityScore, createdAt(sort: Desc), id(sort: Desc)], map: "idx_auto_post_content_pick")
+  @@index([usedAt, createdAt(sort: Desc), id(sort: Desc)], map: "idx_auto_post_content_used")
+  @@index([isActive, topic, createdAt(sort: Desc), id(sort: Desc)], map: "idx_auto_post_content_list")
+  @@index([postId], map: "idx_auto_post_content_post")
+}
+
+model AutoPostRun {
+  id               String    @id @default(uuid())
+  trigger          String    @default("SCHEDULED")
+  status           String    @default("PENDING")
+  contentId        String?
+  topic            String?
+  postId           String?
+  authorUserId     String?
+  categoryId       String?
+  publishedContent String?   @db.Text
+  skipReason       String?   @db.Text
+  error            String?   @db.Text
+  startedAt        DateTime  @default(now())
+  finishedAt       DateTime?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@index([status, createdAt(sort: Desc), id(sort: Desc)], map: "idx_auto_post_run_status_created")
+  @@index([contentId, createdAt(sort: Desc), id(sort: Desc)], map: "idx_auto_post_run_content_created")
+  @@index([postId], map: "idx_auto_post_run_post")
+  @@index([authorUserId, createdAt(sort: Desc), id(sort: Desc)], map: "idx_auto_post_run_author_created")
+  @@index([createdAt(sort: Desc), id(sort: Desc)], map: "idx_auto_post_run_created")
+}
+
+model AutoCrawlConfig {
+  id                   String   @id @default("default")
+  enabled              Boolean  @default(false)
+  checkIntervalMinutes Int      @default(30)
+  maxItemsPerSource    Int      @default(20)
+  maxSourcesPerRun     Int      @default(20)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+}
+
+model AutoCrawlSource {
+  id                   String    @id
+  source               String
+  type                 String
+  sourceName           String
+  categoryId           String
+  category             Category  @relation(fields: [categoryId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  authorUserId         String
+  showContact          Boolean   @default(true)
+  disabled             Boolean   @default(false)
+  cursor               String    @default("")
+  cursorKind           String    @default("baseline_pending")
+  pollIntervalMinutes  Int       @default(30)
+  nextRunAt            DateTime?
+  lastSyncAt           DateTime?
+  lastFetchedCount     Int       @default(0)
+  lastParsedCount      Int       @default(0)
+  lastCandidateCount   Int       @default(0)
+  lastDeliveredCount   Int       @default(0)
+  lastFilteredCount    Int       @default(0)
+  lastDuplicateCount   Int       @default(0)
+  failCount            Int       @default(0)
+  lastError            String?   @db.Text
+  lastVisibleMinCursor String?
+  lastVisibleMaxCursor String?
+  sourceHealth         String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+
+  @@unique([source], map: "idx_auto_crawl_source_source_unique")
+  @@index([disabled, nextRunAt, updatedAt], map: "idx_auto_crawl_source_due")
+  @@index([categoryId], map: "idx_auto_crawl_source_category")
+}
+
+model AutoCrawlRun {
+  id           String    @id
+  status       String    @default("RUNNING")
+  trigger      String    @default("SCHEDULED")
+  lockOwner    String?
+  startedAt    DateTime  @default(now())
+  finishedAt   DateTime?
+  scanned      Int       @default(0)
+  delivered    Int       @default(0)
+  filtered     Int       @default(0)
+  duplicate    Int       @default(0)
+  error        Int       @default(0)
+  sourceCount  Int       @default(0)
+  skipReason   String?   @db.Text
+  errorMessage String?   @db.Text
+  latestTitle  String?   @db.Text
+
+  @@index([startedAt(sort: Desc), id(sort: Desc)], map: "idx_auto_crawl_run_started")
+}
+
+model AutoCrawlItem {
+  id                String    @id
+  sourceId          String
+  runId             String?
+  sourceType        String
+  sourceName        String
+  sourcePostId      String?
+  sourceUrl         String?
+  rawTitle          String?   @db.Text
+  rawContent        String?   @db.Text
+  cleanTitle        String?   @db.Text
+  cleanContent      String?   @db.Text
+  contentHash       String
+  fingerprint       String
+  cursorValue       String?
+  cursorNumber      Float?
+  sourcePublishedAt DateTime?
+  status            String    @default("RAW")
+  filterReason      String?   @db.Text
+  errorMessage      String?   @db.Text
+  postId            String?
+  retryCount        Int       @default(0)
+  metadata          Json?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  lastSeenAt        DateTime  @default(now())
+
+  @@unique([fingerprint], map: "idx_auto_crawl_item_fingerprint_unique")
+  @@unique([sourceId, sourcePostId], map: "AutoCrawlItem_sourceId_sourcePostId_key")
+  @@index([sourceId, cursorNumber], map: "idx_auto_crawl_item_source_cursor")
+  @@index([contentHash, status, createdAt], map: "idx_auto_crawl_item_content_hash")
+  @@index([status, updatedAt], map: "idx_auto_crawl_item_status")
+}
+
+
+
+model WebhookRequest {
+  id             String               @id @default(uuid())
+  endpoint       String
+  idempotencyKey String
+  requestHash    String
+  status         WebhookRequestStatus @default(IN_PROGRESS)
+  responseStatus Int?
+  responseBody   Json?
+  postId         String?
+  errorCode      String?
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+
+  @@unique([endpoint, idempotencyKey])
+  @@index([createdAt])
+  @@index([status, createdAt])
+  @@index([endpoint, status, createdAt, id])
+}
+
+model WebhookPostOperation {
+  id             String   @id @default(uuid())
+  endpoint       String
+  postId         String
+  userId         String
+  idempotencyKey String
+  requestId      String?
+  createdAt      DateTime @default(now())
+
+  @@unique([endpoint, userId, postId])
+  @@index([createdAt], map: "idx_webhook_post_operation_created")
+  @@index([postId, createdAt])
+  @@index([endpoint, userId, createdAt])
+}

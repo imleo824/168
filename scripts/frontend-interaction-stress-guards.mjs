@@ -1,0 +1,264 @@
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const root = path.resolve(__dirname, '..');
+const failures = [];
+
+function read(relativePath) {
+  return fs.readFileSync(path.join(root, relativePath), 'utf8');
+}
+
+function assert(condition, message) {
+  if (!condition) failures.push(message);
+}
+
+function assertOrder(source, snippets, message) {
+  let cursor = -1;
+  for (const snippet of snippets) {
+    const index = source.indexOf(snippet);
+    if (index <= cursor) {
+      failures.push(message);
+      return;
+    }
+    cursor = index;
+  }
+}
+
+function assertOrderAfter(source, anchor, snippets, message) {
+  const anchorIndex = source.indexOf(anchor);
+  if (anchorIndex < 0) {
+    failures.push(message);
+    return;
+  }
+  assertOrder(source.slice(anchorIndex), snippets, message);
+}
+
+const actionButton = read('src/ui/ActionButton.tsx');
+const commentSheet = read('src/features/post/PostCommentSheetPanel.tsx');
+const commentComposer = read('src/features/post/PostCommentComposerDialog.tsx');
+const quoteSheet = read('src/features/post/PostQuoteSheetPanel.tsx');
+const postSheetOpenIntent = read('src/features/post/postSheetOpenIntent.ts');
+const profileDialog = read('src/features/profile/ProfileDialog.tsx');
+const postCreatePage = read('src/features/post-create/PostCreatePage.tsx');
+const postCreateFocusBridge = read('src/utils/postCreateFocusBridge.ts');
+const publishIconButton = read('src/ui/PublishIconButton.tsx');
+const bottomNavigation = read('src/app/AppBottomNavigation.tsx');
+const appShell = read('src/app/AppShell.tsx');
+const authRoute = read('src/app/AppRequireAuthRoute.tsx');
+const authRequiredState = read('src/ui/AuthRequiredState.tsx');
+const pageHeader = read('src/ui/PageHeader.tsx');
+const homeTopbar = read('src/features/home/HomeTopbar.tsx');
+const homePage = read('src/pages/Home.tsx');
+const brandAbout = read('src/pages/BrandAbout.tsx');
+const notFound = read('src/pages/NotFound.tsx');
+const homeRefresh = read('src/hooks/useHomeRefresh.ts');
+const listLoadMoreState = read('src/ui/ListLoadMoreState.tsx');
+const postDetail = read('src/pages/PostDetailLegacy.tsx');
+const categoryFeed = read('src/pages/CategoryFeedMobile.tsx');
+const homePageSource = read('src/pages/Home.tsx');
+const sponsorPage = read('src/features/sponsor/SponsorMobilePage.tsx');
+const chatPage = read('src/features/chat/ChatPage.tsx');
+const profileRoute = read('src/pages/ProfileMobile.tsx');
+
+assert(
+  appShell.includes('<div\n        className="app-main app-shell-main"') &&
+    !appShell.includes('<main\n        className="app-main app-shell-main"') &&
+    homePage.includes('<main className={homeShellClassName}>') &&
+    authRoute.includes('<PageContentShell as="main" className="ui-auth-required-wrap ui-app-page-main">') &&
+    authRoute.includes('titleAs="h1"') &&
+    authRequiredState.includes("titleAs?: 'h1' | 'h2';"),
+  'Route shells must not nest a global main landmark around page-owned main content; auth fallbacks must own their main landmark.',
+);
+
+assert(
+  homePageSource.includes('const loadMoreRequestIdRef = useRef(0);') &&
+    homePageSource.includes('loadMoreRequestIdRef.current === requestId') &&
+    categoryFeed.includes('const requestGenerationRef = useRef(0);') &&
+    categoryFeed.includes('requestGenerationRef.current === requestGeneration'),
+  'Old load-more requests must not release locks or leak errors into a newly selected feed.',
+);
+
+assert(
+  !homeRefresh.includes('scrollHomeFeedToTop();') &&
+    homeRefresh.includes('await queryClient.cancelQueries({ queryKey: activeQueryKey });'),
+  'Manual refresh must preserve the current reading position when the network request fails.',
+);
+
+assert(
+  listLoadMoreState.includes('const onClick = loading ? undefined') &&
+    listLoadMoreState.includes('<InlineSpinner size="xs" className="ui-list-loadmore-spinner" />') &&
+    listLoadMoreState.includes("role={error ? 'alert' : loading ? 'status' : undefined}"),
+  'Shared load-more state must be non-interactive while loading and announce errors immediately.',
+);
+
+assert(
+  pageHeader.includes("titleAs?: 'h1' | 'div';") &&
+    homeTopbar.includes('titleAs="div"') &&
+    brandAbout.includes('titleAs="div"') &&
+    notFound.includes('titleAs="h2"'),
+  'Content pages must expose one authoritative H1 instead of duplicating the page header and content heading.',
+);
+
+assert(
+  actionButton.includes('instantPress?: boolean;') &&
+    actionButton.includes('instantPress = true') &&
+    actionButton.includes('const shouldUseInstantPress = instantPress && type === \'button\' && Boolean(onClick);'),
+  'ActionButton must support instantPress={false} so layered CTAs can avoid pointerup/click-through under rapid tapping.',
+);
+
+assert(
+  commentSheet.includes('instantPress={false}') &&
+    commentSheet.includes('const closeSheetFrameRef = useRef<number | null>(null);') &&
+    commentSheet.includes('function scheduleSheetClose(callback: () => void)') &&
+    commentSheet.includes('event?.preventDefault();') &&
+    commentSheet.includes('event?.stopPropagation();'),
+  'Comment sheet CTA must disable instant press and stop propagation to avoid rapid-tap click-through into the feed/create entry.',
+);
+
+assertOrderAfter(
+  commentSheet,
+  'const handleOpenComposer = useCallback',
+  [
+    "setComposerError('');",
+    'setIsComposerOpen(true);',
+    'closeSheetFrameRef.current = scheduleSheetClose(() => {',
+    'onClose();',
+  ],
+  'Comment CTA must open the composer before closing the sheet on the next frame, so the same tap cannot hit the underlying page.',
+);
+
+assert(
+  postSheetOpenIntent.includes('POST_CARD_SHEET_OPEN_EVENT') &&
+    postSheetOpenIntent.includes('export function dispatchPostSheetOpen') &&
+    postSheetOpenIntent.includes('export function subscribePostSheetOpen') &&
+    postSheetOpenIntent.includes('window.addEventListener(POST_CARD_SHEET_OPEN_EVENT, handleEvent)') &&
+    postSheetOpenIntent.includes('window.removeEventListener(POST_CARD_SHEET_OPEN_EVENT, handleEvent)'),
+  'Post sheet open intent must own the shared sheet-open event and subscription cleanup.',
+);
+
+assert(
+  commentSheet.includes('dispatchPostSheetOpen') &&
+    commentSheet.includes('subscribePostSheetOpen') &&
+    commentSheet.includes("dispatchPostSheetOpen({ postId, kind: 'comment' })") &&
+    commentSheet.includes('onClose();'),
+  'Comment sheets must publish/listen through shared postSheetOpenIntent so competing comment/quote sheets close instead of stacking.',
+);
+
+assert(
+  quoteSheet.includes('instantPress={false}') &&
+    quoteSheet.includes('primePostCreateComposerFocus();') &&
+    quoteSheet.includes('markPostCreateComposerFocusIntent();') &&
+    quoteSheet.includes('scheduleAfterSheetHandoff'),
+  'Quote sheet CTA must avoid instant press, close the sheet, and carry explicit create-page focus intent during rapid tapping.',
+);
+
+assert(
+  quoteSheet.includes('dispatchPostSheetOpen') &&
+    quoteSheet.includes('subscribePostSheetOpen') &&
+    quoteSheet.includes("dispatchPostSheetOpen({ postId: resolvedPostId, kind: 'quote' })") &&
+    quoteSheet.includes('onClose();'),
+  'Quote sheets must publish/listen through shared postSheetOpenIntent so competing comment/quote sheets close instead of stacking.',
+);
+
+assert(
+  postDetail.includes('setIsCommentSheetOpen(false);') &&
+    postDetail.includes('setIsQuoteSheetOpen(false);') &&
+    postDetail.includes('setIsQuoteSheetOpen(true);') &&
+    postDetail.includes('setIsCommentSheetOpen(true);'),
+  'Post detail must make comment and quote sheets mutually exclusive before opening a new sheet.',
+);
+
+assert(
+  profileDialog.includes("import { useScrollLock } from '@/utils/scrollLock';") &&
+    profileDialog.includes('useScrollLock(open, {') &&
+    profileDialog.includes('data-profile-dialog-scroll') &&
+    profileDialog.includes("target.closest('[data-profile-dialog-scroll]')"),
+  'Profile/comment dialogs must lock background scroll and allow touch movement only inside the foreground dialog panel.',
+);
+
+assert(
+  commentComposer.includes('useLayoutEffect') &&
+    commentComposer.includes('const setTextareaRef = useCallback') &&
+    commentComposer.includes('focusCommentComposer(node);') &&
+    commentComposer.includes('textarea.focus({ preventScroll: true });') &&
+    commentComposer.includes('COMMENT_COMPOSER_FOCUS_MAX_ATTEMPTS'),
+  'Comment composer must focus the real textarea on mount and retry after layout, without causing scroll jumps.',
+);
+
+assert(
+  postCreatePage.includes('const textareaRef = useRef<HTMLTextAreaElement | null>(null);') &&
+    postCreatePage.includes('focusPostCreateComposerElement(textareaRef.current)') &&
+    postCreatePage.includes('focusedComposerLocationKeyRef.current = location.key') &&
+    postCreatePage.includes('POST_CREATE_COMPOSER_FOCUS_MAX_ATTEMPTS'),
+  'Create page must focus the real textarea ref after navigation, including quote-publish navigation.',
+);
+
+assert(
+  postCreateFocusBridge.includes('export const POST_CREATE_FOCUS_TRIGGER_ATTR') &&
+    postCreateFocusBridge.includes('export function markPostCreateComposerFocusIntent()') &&
+    postCreateFocusBridge.includes('export function primePostCreateComposerFocus()') &&
+    postCreateFocusBridge.includes('installPostCreateFocusIntentCapture'),
+  'Create focus bridge must preserve click intent across route changes and multiple create entry points.',
+);
+
+assert(
+  publishIconButton.includes('POST_CREATE_FOCUS_TRIGGER_ATTR') &&
+    publishIconButton.includes('POST_CREATE_FOCUS_TRIGGER_PROPS'),
+  'Publish icon buttons must be marked as create-focus triggers for rapid navigation/focus handoff.',
+);
+
+assert(
+  bottomNavigation.includes('guardedGoCreate') &&
+    bottomNavigation.includes('cooldownMs: 520') &&
+    appShell.includes('guardedOpenCreate') &&
+    appShell.includes('cooldownMs: 520'),
+  'Top and bottom publish entries must be guarded so rapid taps cannot repeat route navigation and focus retries.',
+);
+
+assert(
+  categoryFeed.includes('guardedToggleTopicJoin') &&
+    categoryFeed.includes('cooldownMs: 520') &&
+    categoryFeed.includes('mode: \'drop\''),
+  'Category join/leave must be guarded so rapid taps cannot submit overlapping follow mutations.',
+);
+
+assert(
+  sponsorPage.includes('SPONSOR_NAV_GUARD') &&
+    sponsorPage.includes('guardedGoRecharge') &&
+    sponsorPage.includes('guardedGoPromote') &&
+    sponsorPage.includes('guardedGoTransactions'),
+  'Sponsor page navigation CTAs must be guarded so rapid taps do not repeat route changes and loading flashes.',
+);
+
+assert(
+  chatPage.includes('useScrollLock(isRulesOpen') &&
+    chatPage.includes('data-chat-rules-scroll') &&
+    chatPage.includes("target.closest('[data-chat-rules-scroll]')"),
+  'Chat rules sheet must lock background scroll and allow only the rules sheet to scroll.',
+);
+
+assert(
+  chatPage.includes('CHAT_SEND_DEDUPE_MS') &&
+    chatPage.includes('sendDedupeLockedRef') &&
+    chatPage.includes('if (sendDedupeLockedRef.current) return;') &&
+    chatPage.includes('sendDedupeLockedRef.current = true;'),
+  'Chat composer must dedupe rapid send taps before React clears the draft value.',
+);
+
+assert(
+  profileRoute.includes('guardedOpenProfileSettings') &&
+    profileRoute.includes('cooldownMs: 520') &&
+    profileRoute.includes('mode: \'drop\''),
+  'Profile settings topbar entry must be guarded so rapid taps do not repeatedly proxy-click the settings sheet trigger.',
+);
+
+if (failures.length > 0) {
+  console.error('[frontend-interaction-stress-guards] failed');
+  failures.forEach((failure) => console.error(`- ${failure}`));
+  process.exit(1);
+}
+
+console.log('[frontend-interaction-stress-guards] passed');

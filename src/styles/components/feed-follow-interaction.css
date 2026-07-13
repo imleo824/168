@@ -1,0 +1,131 @@
+/* Feed follow/contact button interaction contract.
+ *
+ * Follow state copy is owned by FollowButton.tsx. CSS should not swap text
+ * labels because that can create duplicated labels such as "已关注取消" when
+ * other late-loaded contracts change display rules.
+ *
+ * Contact and follow share the author action lane. The author lane itself is
+ * owned by feed-card-shell.css; this file only owns button interaction states.
+ */
+
+@layer base {
+  :root {
+    --ui-feed-inline-action-min-width: calc(2em + var(--ui-space-5));
+    --ui-feed-inline-action-active-min-width: calc(3em + var(--ui-space-5));
+    --ui-feed-inline-action-radius: var(--ui-action-radius, var(--ui-radius-pill));
+    --ui-feed-inline-action-padding-x: var(--ui-space-2);
+    --ui-feed-inline-action-gap: var(--ui-space-1);
+  }
+}
+
+@layer utilities {
+  .feed-follow-button {
+    --feed-follow-idle-min-width: var(--ui-feed-inline-action-min-width);
+    --feed-follow-active-min-width: var(--ui-feed-inline-action-active-min-width);
+    position: relative;
+    min-height: var(--ui-feed-inline-action-height);
+    height: var(--ui-feed-inline-action-height);
+    pointer-events: auto;
+    overflow: visible;
+    align-items: center;
+    border-radius: var(--ui-feed-inline-action-radius);
+    line-height: var(--ui-line-none);
+    transform: translateZ(0);
+    transition:
+      background-color var(--ui-duration-base) var(--ease-standard),
+      border-color var(--ui-duration-base) var(--ease-standard),
+      color var(--ui-duration-base) var(--ease-standard),
+      opacity var(--ui-duration-base) var(--ease-standard),
+      transform var(--ui-duration-fast) var(--ease-standard);
+  }
+
+  .feed-follow-button--compact {
+    flex-shrink: 0;
+  }
+
+  .feed-follow-button:active {
+    transform: scale(var(--ui-motion-press-scale));
+  }
+
+  .feed-follow-button[data-follow-pending='true'] {
+    opacity: var(--ui-feed-follow-pending-opacity);
+    cursor: progress;
+  }
+
+  .feed-follow-button[data-follow-pending='true']::after {
+    content: var(--ui-content-empty);
+    position: absolute;
+    inset: var(--ui-inset-none);
+    overflow: hidden;
+    border-radius: inherit;
+    background: var(--ui-feed-follow-pending-sheen);
+    transform: translateX(-100%);
+    animation: feed-follow-pending-sheen var(--ui-duration-feed-follow-pending-sheen) var(--ease-standard) infinite;
+    pointer-events: none;
+  }
+
+  .feed-follow-button[data-follow-state='following'] {
+    border-color: var(--ui-line-hairline);
+    background: var(--ui-social-surface-muted, var(--ui-surface-muted));
+    color: var(--ui-text-secondary);
+    font-weight: var(--ui-font-weight-medium);
+    box-shadow: var(--ui-shadow-none);
+  }
+
+  .feed-follow-button[data-follow-state='following']:hover {
+    border-color: var(--ui-line-soft);
+    background: var(--ui-state-hover);
+    color: var(--ui-text-strong);
+  }
+
+  .feed-follow-button-inner {
+    display: inline-flex;
+    min-width: max-content;
+    max-width: 100%;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ui-space-none);
+    overflow: visible;
+    text-align: center;
+    white-space: nowrap;
+    line-height: var(--ui-line-none);
+  }
+
+  .feed-follow-button-text {
+    display: inline-block;
+    min-width: max-content;
+    overflow: visible;
+    line-height: var(--ui-line-none);
+    white-space: nowrap;
+  }
+
+  .unified-post-card-wrap .ins-post-card .feed-follow-button {
+    min-width: var(--feed-follow-idle-min-width);
+  }
+
+  .unified-post-card-wrap .ins-post-card .feed-follow-button[data-follow-state='following'] {
+    min-width: var(--feed-follow-active-min-width);
+  }
+
+  .unified-post-card-wrap .ins-post-card .feed-card-inline-follow,
+  .unified-post-card-wrap .ins-post-card .feed-card-inline-contact {
+    height: var(--ui-feed-inline-action-height);
+    min-height: var(--ui-feed-inline-action-height);
+    align-items: center;
+    justify-content: center;
+    padding-inline: var(--ui-feed-inline-action-padding-x);
+    border-radius: var(--ui-feed-inline-action-radius);
+    line-height: var(--ui-line-none);
+  }
+
+  .unified-post-card-wrap .ins-post-card .feed-follow-button .feed-follow-button-inner,
+  .unified-post-card-wrap .ins-post-card .feed-follow-button .feed-follow-button-text {
+    max-width: var(--ui-max-width-none);
+  }
+
+  @keyframes feed-follow-pending-sheen {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+}

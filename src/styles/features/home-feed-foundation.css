@@ -1,0 +1,58 @@
+/* Home feed shell and page-level feed variables. */
+
+@layer utilities {
+  .home-mobile-shell,
+  .home-desktop-shell {
+    --home-topic-rhythm-y: var(--ui-space-none);
+    --home-topic-tabs-top-gap: var(--ui-space-none);
+    --home-topic-tabs-shell-padding-block: var(--home-topic-rhythm-y);
+    --home-topic-tabs-filter-gap: var(--ui-space-1);
+    --home-topic-tabs-stack-gap: var(--home-topic-tabs-filter-gap);
+    --home-topic-tab-min-height: var(--ui-control-sm);
+    --home-topic-tabs-rail-padding: var(--ui-space-none);
+    --home-topic-filter-row-height: var(--ui-control-xs);
+    --home-topic-tabs-shell-height: calc(
+      var(--home-topic-tab-min-height) +
+      var(--home-topic-filter-row-height) +
+      var(--home-topic-tabs-stack-gap) +
+      var(--home-topic-tabs-top-gap) +
+      calc(2 * var(--home-topic-tabs-shell-padding-block))
+    );
+    --home-topic-tabs-sticky-height: var(--home-topic-tabs-shell-height);
+    --home-topic-tabs-sticky-top: env(safe-area-inset-top);
+    --ui-sticky-tab-top: var(--home-topic-tabs-sticky-top);
+    --feed-scroll-state-header-offset: var(--ui-topbar-height);
+    --feed-scroll-state-sticky-offset: var(--home-topic-tabs-sticky-height);
+    --feed-scroll-state-bottom-offset: var(--ui-bottom-nav-reserved-space, var(--ui-space-none));
+    --home-feed-state-gap: var(--ui-space-3);
+    --home-feed-state-padding-block: var(--ui-space-3);
+    --home-feed-state-padding-inline: var(--ui-space-3);
+    --home-feed-state-context-opacity: var(--ui-disabled-opacity);
+    --home-desktop-shell-padding-bottom: calc(var(--ui-space-8) * 4);
+
+    width: 100%;
+    background: var(--ui-surface-page);
+    color: var(--ui-text-primary);
+  }
+
+  .home-desktop-shell {
+    min-height: var(--app-visual-vh, 100dvh);
+    padding-bottom: var(--home-desktop-shell-padding-bottom);
+  }
+
+  .home-mobile-feed-panel {
+    position: relative;
+    width: 100%;
+  }
+
+  .home-desktop-main {
+    width: 100%;
+    margin-inline: auto;
+    margin-top: var(--ui-home-desktop-page-padding-y);
+    padding: var(--ui-space-none) 0 var(--ui-space-6);
+  }
+
+  .home-desktop-loadmore {
+    margin-top: var(--ui-space-6);
+  }
+}

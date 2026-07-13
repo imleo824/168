@@ -1,0 +1,26 @@
+/* Category / tag feed header actions. */
+
+@layer utilities {
+  .category-feed-header-actions {
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--ui-space-2);
+  }
+
+  .category-feed-join-button {
+    display: inline-flex;
+    min-width: auto;
+    align-items: center;
+    gap: var(--ui-space-1);
+    padding-inline: var(--ui-space-3);
+    white-space: nowrap;
+  }
+
+  .category-feed-join-icon {
+    width: var(--ui-control-icon-xs);
+    height: var(--ui-control-icon-xs);
+    stroke-width: var(--ui-icon-stroke);
+  }
+}

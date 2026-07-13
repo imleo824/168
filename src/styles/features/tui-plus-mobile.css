@@ -1,0 +1,314 @@
+/* Tui Plus mobile page composition. */
+
+@layer utilities {
+  .tui-plus-x-hero,
+  .tui-plus-x-card,
+  .tui-plus-x-benefits {
+    border: var(--ui-border-width-hairline) solid var(--ui-line-subtle);
+    border-radius: var(--ui-radius-2xl);
+    background: var(--ui-surface-card);
+    box-shadow: var(--ui-shadow-card);
+  }
+
+  .tui-plus-x-hero {
+    position: relative;
+    display: grid;
+    overflow: hidden;
+    gap: var(--ui-space-2);
+    padding: var(--ui-space-6) var(--ui-space-5);
+  }
+
+  .tui-plus-x-hero::before {
+    content: var(--ui-content-empty);
+    pointer-events: none;
+    position: absolute;
+    inset: var(--ui-inset-none);
+    background:
+      radial-gradient(circle at 14% 12%, color-mix(in srgb, var(--ui-brand) 20%, transparent), transparent 34%),
+      radial-gradient(circle at 88% 18%, color-mix(in srgb, var(--ui-brand-warm) 18%, transparent), transparent 32%),
+      linear-gradient(145deg, color-mix(in srgb, var(--ui-brand) 6%, transparent), transparent 54%);
+  }
+
+  .tui-plus-x-mark,
+  .tui-plus-x-eyebrow,
+  .tui-plus-x-hero h1,
+  .tui-plus-x-status,
+  .tui-plus-x-subtitle {
+    position: relative;
+    z-index: var(--ui-z-local-raised);
+  }
+
+  .tui-plus-x-mark {
+    display: inline-flex;
+    width: calc(var(--ui-control-lg) + var(--ui-space-2));
+    height: calc(var(--ui-control-lg) + var(--ui-space-2));
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--ui-radius-pill);
+    background: var(--tui-plus-ring-gradient, conic-gradient(from 35deg, var(--ui-brand), var(--ui-brand-warm), var(--ui-brand)));
+    color: var(--ui-color-white);
+    box-shadow: 0 var(--ui-space-1) var(--ui-space-4) color-mix(in srgb, var(--ui-brand) 24%, transparent);
+  }
+
+  .tui-plus-x-mark svg {
+    width: var(--ui-control-icon-md);
+    height: var(--ui-control-icon-md);
+    stroke-width: var(--ui-icon-stroke);
+  }
+
+  .tui-plus-x-eyebrow,
+  .tui-plus-x-hero h1,
+  .tui-plus-x-status,
+  .tui-plus-x-subtitle,
+  .tui-plus-x-card p,
+  .tui-plus-x-benefits h2,
+  .tui-plus-x-benefit-item h3,
+  .tui-plus-x-benefit-item p {
+    margin: var(--ui-space-none);
+  }
+
+  .tui-plus-x-eyebrow {
+    color: var(--ui-brand-strong);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-strong);
+    letter-spacing: var(--ui-tracking-wide);
+    text-transform: uppercase;
+  }
+
+  .tui-plus-x-hero h1 {
+    color: var(--ui-text-strong);
+    font-size: var(--ui-text-xl);
+    font-weight: var(--ui-font-weight-display);
+    line-height: var(--ui-line-tight);
+  }
+
+  .tui-plus-x-status {
+    color: var(--ui-brand-strong);
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-normal);
+  }
+
+  .tui-plus-x-subtitle {
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-text-sm);
+    line-height: var(--ui-line-normal);
+  }
+
+  .tui-plus-x-card,
+  .tui-plus-x-benefits {
+    display: grid;
+    gap: var(--ui-space-4);
+    padding: var(--ui-space-4);
+  }
+
+  .tui-plus-x-toggle {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ui-space-1);
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-surface-muted);
+    padding: var(--ui-space-1);
+  }
+
+  .tui-plus-x-toggle button {
+    display: inline-flex;
+    min-height: var(--ui-control-sm);
+    align-items: center;
+    justify-content: center;
+    gap: var(--ui-space-1);
+    border: var(--ui-border-none);
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-surface-transparent);
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-strong);
+  }
+
+  .tui-plus-x-toggle button[data-state='active'] {
+    background: var(--ui-surface-card);
+    color: var(--ui-brand-strong);
+    box-shadow: var(--ui-shadow-hairline);
+  }
+
+  .tui-plus-x-toggle span {
+    color: var(--ui-brand-warm-strong);
+    font-size: var(--ui-text-2xs);
+  }
+
+  .tui-plus-x-price-row {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: var(--ui-space-3);
+  }
+
+  .tui-plus-x-price-stack {
+    display: grid;
+    gap: var(--ui-space-1);
+  }
+
+  .tui-plus-x-plan-name {
+    display: block;
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-strong);
+  }
+
+  .tui-plus-x-price-row strong {
+    display: block;
+    color: var(--ui-text-strong);
+    font-size: calc(var(--ui-text-xl) + 2px);
+    font-weight: var(--ui-font-weight-display);
+    line-height: var(--ui-line-tight);
+  }
+
+  .tui-plus-x-price-row p {
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-text-xs);
+    line-height: var(--ui-line-normal);
+  }
+
+  .tui-plus-x-points-price {
+    display: inline-flex;
+    width: fit-content;
+    align-items: center;
+    border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-surface-muted);
+    color: var(--ui-text-secondary);
+    padding: 0 var(--ui-space-2);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-control-sm);
+  }
+
+  .tui-plus-x-price-row em {
+    flex: 0 0 auto;
+    color: var(--ui-brand-strong);
+    font-size: var(--ui-text-xs);
+    font-style: normal;
+    font-weight: var(--ui-font-weight-strong);
+  }
+
+  .tui-plus-x-primary {
+    width: 100%;
+  }
+
+  .tui-plus-x-action-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ui-space-2);
+  }
+
+  .tui-plus-x-action {
+    width: 100%;
+  }
+
+  .tui-plus-x-benefits h2 {
+    color: var(--ui-text-strong);
+    font-size: var(--ui-text-title);
+    font-weight: var(--ui-font-weight-display);
+  }
+
+  .tui-plus-x-benefit-list {
+    display: grid;
+    gap: var(--ui-space-3);
+  }
+
+  .tui-plus-x-benefit-item {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: var(--ui-space-3);
+  }
+
+  .tui-plus-x-benefit-icon {
+    display: inline-flex;
+    width: var(--ui-control-md);
+    height: var(--ui-control-md);
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--ui-radius-pill);
+    background: color-mix(in srgb, var(--ui-brand) 8%, var(--ui-color-white));
+    color: var(--ui-brand-strong);
+  }
+
+  .tui-plus-x-benefit-icon svg,
+  .tui-plus-x-benefit-item h3 svg {
+    width: var(--ui-control-icon-sm);
+    height: var(--ui-control-icon-sm);
+    stroke-width: var(--ui-icon-stroke);
+  }
+
+  .tui-plus-x-benefit-item h3 {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-1);
+    color: var(--ui-text-strong);
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-tight);
+  }
+
+  .tui-plus-x-benefit-item h3 svg {
+    color: var(--ui-success-strong);
+  }
+
+  .tui-plus-x-benefit-item p {
+    margin-top: var(--ui-space-1);
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-text-xs);
+    line-height: var(--ui-line-normal);
+  }
+
+  .tui-plus-sticky-cta {
+    position: sticky;
+    right: var(--ui-space-none);
+    bottom: calc(env(safe-area-inset-bottom) + var(--ui-space-3));
+    left: var(--ui-space-none);
+    z-index: var(--ui-z-sticky);
+    display: flex;
+    width: min(calc(100% - var(--ui-space-6)), var(--ui-page-content-max-width));
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ui-space-3);
+    margin: var(--ui-space-4) auto var(--ui-space-2);
+    border: var(--ui-border-width-hairline) solid var(--ui-line-subtle);
+    border-radius: var(--ui-radius-2xl);
+    background: color-mix(in srgb, var(--ui-surface-card) 94%, transparent);
+    padding: var(--ui-space-2) var(--ui-space-3);
+    box-shadow: var(--ui-shadow-popover);
+    backdrop-filter: var(--ui-floating-muted-filter);
+    -webkit-backdrop-filter: var(--ui-floating-muted-filter);
+  }
+
+  .tui-plus-sticky-cta strong,
+  .tui-plus-sticky-cta span {
+    display: block;
+  }
+
+  .tui-plus-sticky-cta strong {
+    color: var(--ui-text-strong);
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-tight);
+  }
+
+  .tui-plus-sticky-cta span {
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-text-xs);
+    line-height: var(--ui-line-tight);
+  }
+
+  .tui-plus-x-hero,
+  .tui-plus-sticky-cta {
+    display: none;
+  }
+
+  @media (max-width: 360px) {
+    .tui-plus-x-action-row {
+      grid-template-columns: 1fr;
+    }
+  }
+}

@@ -1,0 +1,32 @@
+/* Secondary page fixed action contract.
+ *
+ * Bottom bars stay viewport-bound, and primary action labels keep priority over
+ * decorative edge slots.
+ */
+
+@layer utilities {
+  :is(.detail-bottom-bar, .promote-checkout-bar, .ui-checkout-bar) {
+    position: fixed;
+    right: var(--ui-space-none);
+    bottom: var(--ui-keyboard-inset);
+    left: var(--ui-space-none);
+  }
+
+  .ui-checkout-bar .ui-button {
+    min-width: var(--ui-space-none);
+  }
+
+  .ui-checkout-bar .promote-action-label {
+    min-width: var(--ui-space-none);
+    max-width: 100%;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 390px) {
+    .ui-checkout-bar .promote-action-label {
+      font-size: var(--ui-text-sm);
+    }
+  }
+}

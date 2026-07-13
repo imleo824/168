@@ -1,0 +1,17 @@
+/* Reduce off-screen feed card layout and paint work during long list rendering. */
+
+@layer utilities {
+  .post-feed-list-panel .feed-list-item {
+    content-visibility: auto;
+    contain-intrinsic-size: 1px 320px;
+  }
+
+  .post-feed-list-panel .feed-list-item--media {
+    contain-intrinsic-size: 1px 520px;
+  }
+
+  .post-feed-list-panel .feed-list-item:nth-child(-n + 2) {
+    content-visibility: visible;
+    contain-intrinsic-size: auto;
+  }
+}

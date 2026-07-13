@@ -1,0 +1,352 @@
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
+import { MessageCircle } from 'lucide-react';
+import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+
+import BottomSheet from '@/ui/BottomSheet';
+import ActionButton from '@/ui/ActionButton';
+import { StateBlock } from '@/ui/LoadingState';
+import ListLoadMoreState from '@/ui/ListLoadMoreState';
+import AvatarImage from '@/ui/AvatarImage';
+import { apiFetch } from '@/services/api';
+import { useAuth } from '@/context/AuthContext';
+import { formatRelativeTime } from '@/utils/time';
+import { formatCompactChineseEngagementCount } from '@/utils/engagement';
+import PostCommentComposerDialog from '@/features/post/PostCommentComposerDialog';
+import { CommentContentText } from '@/features/post/CommentContentText';
+import {
+  dispatchPostSheetOpen,
+  subscribePostSheetOpen,
+} from './postSheetOpenIntent';
+
+export type PostCommentUser = {
+  id: string;
+  displayName?: string | null;
+  username?: string | null;
+  photoUrl?: string | null;
+  userType?: string | null;
+};
+
+export type PostComment = {
+  id: string;
+  postId: string;
+  userId: string;
+  content: string;
+  status?: string;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+  user?: PostCommentUser | null;
+};
+
+type CommentPage = {
+  items: PostComment[];
+  total: number;
+  nextCursor: string | null;
+  hasMore: boolean;
+};
+
+export interface PostCommentSheetPanelProps {
+  open: boolean;
+  postId: string;
+  commentCount: number;
+  onCommentCountChange?: (count: number) => void;
+  onClose: () => void;
+}
+
+async function readApiMessage(response: Response) {
+  try {
+    const payload = await response.json();
+    return String(payload?.error || payload?.message || '').trim() || `Status: ${response.status}`;
+  } catch {
+    return `Status: ${response.status}`;
+  }
+}
+
+async function getPostCommentsPage(params: { postId: string; limit?: number; cursor?: string | null; signal?: AbortSignal }): Promise<CommentPage> {
+  const query = new URLSearchParams();
+  query.set('limit', String(params.limit || 20));
+  if (params.cursor) query.set('cursor', params.cursor);
+  const response = await apiFetch(`/api/posts/${params.postId}/comments?${query.toString()}`, {
+    signal: params.signal,
+    retry: false,
+  });
+  if (!response.ok) throw new Error(await readApiMessage(response));
+  const payload = await response.json();
+  const items = Array.isArray(payload?.items) ? payload.items : [];
+  const totalFromPayload = Number(payload?.total);
+  const totalFromHeader = Number(response.headers.get('X-Total-Count') || '');
+  const total = Number.isFinite(totalFromPayload)
+    ? totalFromPayload
+    : Number.isFinite(totalFromHeader)
+      ? totalFromHeader
+      : items.length;
+  return {
+    items,
+    total: Math.max(0, Math.floor(total)),
+    nextCursor: response.headers.get('X-Next-Cursor') || null,
+    hasMore: response.headers.get('X-Has-More') === 'true',
+  };
+}
+
+async function createPostComment(postId: string, content: string): Promise<{ comment: PostComment; commentCount: number }> {
+  const response = await apiFetch(`/api/posts/${postId}/comments`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content }),
+  });
+  if (!response.ok) throw new Error(await readApiMessage(response));
+  const payload = await response.json();
+  return {
+    comment: payload.comment,
+    commentCount: Math.max(0, Number(payload.commentCount || 0)),
+  };
+}
+
+function getCommentAuthorName(comment: PostComment) {
+  return String(comment.user?.displayName || comment.user?.username || '用户').trim() || '用户';
+}
+
+function scheduleSheetClose(callback: () => void) {
+  if (typeof window === 'undefined') {
+    callback();
+    return null;
+  }
+
+  return window.requestAnimationFrame(callback);
+}
+
+const PostCommentSheetItem = memo(function PostCommentSheetItem({ comment }: { comment: PostComment }) {
+  const authorName = getCommentAuthorName(comment);
+  const timeText = comment.createdAt ? formatRelativeTime(comment.createdAt) : '';
+  const content = String(comment.content || '').trim();
+
+  return (
+    <article className="detail-quote-item post-quote-list-item post-comment-list-item" aria-label={`${authorName} 的评论`}>
+      <AvatarImage
+        src={comment.user?.photoUrl || ''}
+        name={authorName}
+        id={comment.user?.id || comment.userId || comment.id}
+        alt={authorName}
+        className="detail-quote-item-avatar post-quote-list-avatar post-comment-list-avatar"
+        variant="thumb"
+        loading="lazy"
+      />
+      <span className="detail-quote-item-main post-quote-list-main post-comment-list-main">
+        <span className="detail-quote-item-meta">
+          <span className="detail-quote-item-author post-quote-list-author">{authorName}</span>
+          {timeText ? <span className="detail-quote-item-time">· {timeText}</span> : null}
+        </span>
+        <span className="detail-quote-item-text post-quote-list-text post-comment-list-text"><CommentContentText content={content} /></span>
+      </span>
+    </article>
+  );
+});
+
+export const PostCommentSheetPanel = memo(function PostCommentSheetPanel({
+  open,
+  postId,
+  commentCount,
+  onCommentCountChange,
+  onClose,
+}: PostCommentSheetPanelProps) {
+  const queryClient = useQueryClient();
+  const { requireAuth, showToast } = useAuth();
+  const [isComposerOpen, setIsComposerOpen] = useState(false);
+  const [composerError, setComposerError] = useState('');
+  const closeSheetFrameRef = useRef<number | null>(null);
+  const queryKey = useMemo(() => ['post-comments', postId] as const, [postId]);
+
+  useEffect(() => () => {
+    if (closeSheetFrameRef.current === null || typeof window === 'undefined') return;
+    window.cancelAnimationFrame(closeSheetFrameRef.current);
+    closeSheetFrameRef.current = null;
+  }, []);
+
+  const commentsQuery = useInfiniteQuery({
+    queryKey,
+    queryFn: ({ pageParam, signal }) => getPostCommentsPage({
+      postId,
+      limit: 20,
+      cursor: pageParam as string | null | undefined,
+      signal,
+    }),
+    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextCursor : undefined,
+    initialPageParam: undefined as string | undefined,
+    maxPages: 6,
+    enabled: open && Boolean(postId),
+    staleTime: 30_000,
+    refetchOnWindowFocus: false,
+  });
+
+  const comments = useMemo(() => {
+    const items: PostComment[] = [];
+    commentsQuery.data?.pages?.forEach((page) => {
+      if (Array.isArray(page?.items)) items.push(...page.items);
+    });
+    return items;
+  }, [commentsQuery.data]);
+
+  const total = Math.max(0, Number(commentsQuery.data?.pages?.[0]?.total ?? commentCount ?? 0));
+  const titleCount = formatCompactChineseEngagementCount(total) || '0';
+
+  useEffect(() => {
+    if (!open || typeof window === 'undefined') return undefined;
+    dispatchPostSheetOpen({ postId, kind: 'comment' });
+
+    return subscribePostSheetOpen((event) => {
+      if (event.detail.kind === 'comment' && event.detail.postId === postId) return;
+      onClose();
+    });
+  }, [onClose, open, postId]);
+
+  useEffect(() => {
+    if (!open || !commentsQuery.data?.pages?.length) return;
+    onCommentCountChange?.(total);
+  }, [commentsQuery.data?.pages?.length, onCommentCountChange, open, total]);
+
+  const createMutation = useMutation({
+    mutationFn: (content: string) => createPostComment(postId, content),
+    onSuccess: (result) => {
+      setComposerError('');
+      setIsComposerOpen(false);
+      queryClient.setQueryData(queryKey, (current: any) => {
+        if (!current?.pages?.length) return current;
+        const [firstPage, ...restPages] = current.pages;
+        const nextFirstPage = {
+          ...firstPage,
+          total: result.commentCount,
+          items: [result.comment, ...(Array.isArray(firstPage.items) ? firstPage.items : [])],
+        };
+        return {
+          ...current,
+          pages: [nextFirstPage, ...restPages],
+        };
+      });
+      queryClient.setQueryData(['post', postId], (old: any) => old ? { ...old, commentCount: result.commentCount } : old);
+      queryClient.setQueriesData({ queryKey: ['posts'] }, (old: any) => patchPostCommentCount(old, postId, result.commentCount));
+      onCommentCountChange?.(result.commentCount);
+      showToast('评论已发表', 'success');
+    },
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : '评论发表失败，请稍后重试';
+      setComposerError(message);
+      showToast(message, 'error');
+    },
+  });
+
+  const handleOpenComposer = useCallback((event?: MouseEvent<HTMLButtonElement>) => {
+    event?.preventDefault();
+    event?.stopPropagation();
+    if (!postId || createMutation.isPending) return;
+    requireAuth(() => {
+      setComposerError('');
+      setIsComposerOpen(true);
+      if (closeSheetFrameRef.current !== null && typeof window !== 'undefined') {
+        window.cancelAnimationFrame(closeSheetFrameRef.current);
+      }
+      closeSheetFrameRef.current = scheduleSheetClose(() => {
+        closeSheetFrameRef.current = null;
+        onClose();
+      });
+    });
+  }, [createMutation.isPending, onClose, postId, requireAuth]);
+
+  const handleCloseComposer = useCallback(() => {
+    if (createMutation.isPending) return;
+    setIsComposerOpen(false);
+    setComposerError('');
+    onClose();
+  }, [createMutation.isPending, onClose]);
+
+  return (
+    <>
+      <BottomSheet
+        open={open}
+        title={`评论 ${titleCount}`}
+        ariaLabel="帖子评论"
+        onClose={onClose}
+        panelClassName="ui-sheet-panel post-quote-sheet post-comment-sheet"
+        bodyClassName="post-quote-sheet-body post-comment-sheet-body"
+        closeClassName="quiet-button ui-icon-action post-create-sheet-close"
+        footer={(
+          <div className="post-quote-sheet-footer post-comment-sheet-footer">
+            <ActionButton
+              type="button"
+              variant="brand"
+              size="md"
+              onClick={handleOpenComposer}
+              instantPress={false}
+              disabled={!postId || createMutation.isPending}
+              state={!postId || createMutation.isPending ? 'disabled' : 'idle'}
+              aria-busy={createMutation.isPending || undefined}
+              className="post-quote-create-action post-comment-create-action"
+            >
+              <MessageCircle className="post-quote-create-action-icon post-comment-create-action-icon" aria-hidden="true" />
+              <span>我要评论</span>
+            </ActionButton>
+          </div>
+        )}
+        showHandle
+      >
+        {commentsQuery.isLoading ? (
+          <div className="post-quote-sheet-loading post-comment-sheet-loading">正在加载评论</div>
+        ) : commentsQuery.error ? (
+          <StateBlock
+            title="评论加载失败"
+            tone="error"
+            compact
+            actionLabel="重新加载"
+            onAction={() => void commentsQuery.refetch()}
+          />
+        ) : comments.length === 0 ? (
+          <StateBlock
+            title="还没有评论"
+            tone="empty"
+            compact
+            icon={<MessageCircle className="post-quote-empty-icon post-comment-empty-icon" aria-hidden="true" />}
+          />
+        ) : (
+          <div className="post-quote-list post-comment-list" aria-label="评论列表">
+            {comments.map((comment) => (
+              <PostCommentSheetItem key={comment.id} comment={comment} />
+            ))}
+            <ListLoadMoreState
+              error={Boolean(commentsQuery.error)}
+              loading={commentsQuery.isFetchingNextPage}
+              hasMore={Boolean(commentsQuery.hasNextPage)}
+              onRetry={() => void commentsQuery.refetch()}
+              onLoadMore={() => void commentsQuery.fetchNextPage()}
+              loadingText="正在加载更多评论"
+              doneText=""
+            />
+          </div>
+        )}
+      </BottomSheet>
+      <PostCommentComposerDialog
+        open={isComposerOpen}
+        isSubmitting={createMutation.isPending}
+        error={composerError}
+        onSubmit={(content) => createMutation.mutate(content)}
+        onClose={handleCloseComposer}
+      />
+    </>
+  );
+});
+
+function patchPostCommentCount(old: any, postId: string, commentCount: number): any {
+  if (!old) return old;
+  const patchPost = (item: any) => item?.id === postId ? { ...item, commentCount } : item;
+  if (Array.isArray(old)) return old.map(patchPost);
+  if (old?.pages && Array.isArray(old.pages)) {
+    return {
+      ...old,
+      pages: old.pages.map((page: any) => {
+        if (Array.isArray(page)) return page.map(patchPost);
+        if (Array.isArray(page?.items)) return { ...page, items: page.items.map(patchPost) };
+        return page;
+      }),
+    };
+  }
+  return patchPost(old);
+}
+
+export default PostCommentSheetPanel;

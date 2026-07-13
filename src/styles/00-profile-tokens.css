@@ -1,0 +1,31 @@
+@layer base {
+  :root {
+    --ui-profile-header-avatar-mobile: var(--ui-profile-avatar-size);
+    --ui-profile-header-avatar-small: var(--ui-profile-avatar-size-compact);
+    --ui-profile-header-avatar-desktop: var(--ui-profile-avatar-size-desktop);
+    --ui-profile-header-gap-mobile: var(--ui-profile-main-gap);
+    --ui-profile-header-gap-small: var(--ui-profile-main-gap-compact);
+    --ui-profile-header-gap-desktop: var(--ui-profile-main-gap-desktop);
+    --ui-profile-stats-avatar-align-offset: calc((var(--ui-profile-avatar-size) - var(--ui-profile-action-height)) / 2);
+    --ui-profile-stats-avatar-align-offset-small: calc((var(--ui-profile-avatar-size-compact) - var(--ui-profile-action-height)) / 2);
+    --ui-profile-stats-avatar-align-offset-desktop: calc((var(--ui-profile-avatar-size-desktop) - var(--ui-profile-action-height)) / 2);
+    --ui-profile-header-padding-top: var(--ui-space-3);
+    --ui-profile-header-copy-margin-top: var(--ui-profile-bio-margin-top);
+    --ui-profile-grid-gap: var(--ui-border-width-hairline);
+    --ui-profile-action-min-height: var(--ui-profile-action-height);
+    --ui-profile-action-radius: var(--ui-radius-lg);
+    --ui-profile-bio-size: var(--ui-text-sm);
+    --ui-profile-bio-line: var(--ui-line-normal);
+    --ui-profile-tabs-height: var(--ui-profile-tab-min-height);
+    --ui-profile-tabs-padding-x: var(--ui-profile-tab-padding-x);
+    --ui-profile-tabs-icon-size: var(--ui-control-icon-md);
+    --ui-profile-tabs-label-size: var(--ui-text-2xs);
+    --ui-profile-tabs-underline-inset: 28%;
+    --ui-profile-tabs-underline-height: calc(var(--ui-border-width-hairline) * 2);
+    --ui-profile-inline-note-padding: var(--ui-space-2) var(--ui-page-padding-x) calc(var(--ui-space-2) + var(--ui-space-half));
+    --ui-profile-edit-action-height: var(--ui-header-filter-height);
+    --ui-profile-user-row-padding-y: var(--ui-space-3);
+    --ui-profile-user-row-padding-x: var(--ui-page-padding-x);
+    --ui-profile-user-row-chevron-size: var(--ui-control-icon-xs);
+  }
+}

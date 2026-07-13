@@ -1,0 +1,107 @@
+/* Wide-screen automatic adaptation for the user mobile-first app.
+ * Contract: mobile keeps its current behavior; PC shows the same user mobile app scaled as one canvas.
+ * Admin and non-user surfaces must not receive these variables or layout rules.
+ */
+
+@layer utilities {
+  .app-shell[data-route-surface='user'] {
+    --app-mobile-canvas-target-width: calc(var(--ui-space-8) * 12 + var(--ui-space-2) + var(--ui-space-half));
+    --app-mobile-canvas-width: 100vw;
+    --app-adaptive-scale: 1;
+    --app-adaptive-scale-max: 1.28;
+    --app-adaptive-scale-wide: 1.32;
+    --app-adaptive-visual-width: 100vw;
+    --app-adaptive-canvas-border: var(--ui-border-none);
+    --app-adaptive-canvas-shadow: var(--ui-shadow-none);
+    --app-adaptive-page-bg: var(--ui-surface-card);
+  }
+
+  .app-shell[data-route-surface='admin'],
+  .app-shell[data-route-surface='admin'] .app-shell-main {
+    width: 100%;
+    max-width: var(--ui-max-width-none);
+    min-height: 100svh;
+    margin: var(--ui-space-none);
+    overflow: visible;
+    border: var(--ui-border-none);
+    background: var(--ui-surface-page);
+    box-shadow: var(--ui-shadow-none);
+    transform: none;
+  }
+
+  .app-shell[data-route-surface='admin'] {
+    display: block;
+  }
+
+  .app-shell[data-route-surface='user'] .app-shell-main {
+    width: 100%;
+    min-height: 100svh;
+    margin-inline: auto;
+    background: var(--ui-surface-page);
+  }
+
+  @media (min-width: 768px) {
+    .app-shell[data-route-surface='user'] {
+      --app-mobile-canvas-width: var(--app-mobile-canvas-target-width);
+      --app-adaptive-scale: min(var(--app-adaptive-scale-max), calc((100vw - var(--ui-space-8)) / var(--app-mobile-canvas-target-width)));
+      --app-adaptive-visual-width: calc(var(--app-mobile-canvas-width) * var(--app-adaptive-scale));
+      --app-adaptive-canvas-border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+      --app-adaptive-canvas-shadow: 0 var(--ui-space-6) calc(var(--ui-space-8) * 2 + var(--ui-space-4)) color-mix(in srgb, var(--ui-color-black) 10%, transparent);
+      --app-adaptive-page-bg:
+        radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--ui-brand) 8%, transparent), transparent 32%),
+        var(--ui-surface-page);
+      --chat-shell-width: var(--app-mobile-canvas-width);
+
+      display: flex;
+      min-height: 100svh;
+      justify-content: center;
+      overflow-x: hidden;
+      background: var(--app-adaptive-page-bg);
+    }
+
+    .app-shell[data-route-surface='user'] .app-shell-main {
+      position: relative;
+      width: var(--app-mobile-canvas-width);
+      max-width: var(--app-mobile-canvas-width);
+      min-height: calc(100svh / var(--app-adaptive-scale));
+      flex: 0 0 var(--app-mobile-canvas-width);
+      border-inline: var(--app-adaptive-canvas-border);
+      background: var(--ui-surface-page);
+      box-shadow: var(--app-adaptive-canvas-shadow);
+      transform: scale(var(--app-adaptive-scale));
+      transform-origin: top center;
+    }
+
+    .app-shell[data-route-surface='user'] .app-bottom-nav {
+      right: auto;
+      left: 50%;
+      width: var(--app-mobile-canvas-width);
+      transform: translateX(-50%) scale(var(--app-adaptive-scale)) translateZ(var(--ui-space-none));
+      transform-origin: bottom center;
+    }
+
+    .app-shell[data-route-surface='user'] .app-bottom-nav-inner {
+      width: 100%;
+      max-width: 100%;
+    }
+  }
+
+  @media (min-width: 1200px) {
+    .app-shell[data-route-surface='user'] {
+      --app-adaptive-scale: var(--app-adaptive-scale-wide);
+      --app-adaptive-visual-width: calc(var(--app-mobile-canvas-width) * var(--app-adaptive-scale));
+    }
+  }
+
+  @media (max-width: 767px) {
+    .app-shell[data-route-surface='user'] .app-shell-main {
+      width: 100%;
+      max-width: var(--ui-max-width-none);
+      min-height: 100svh;
+      margin-inline: var(--ui-space-none);
+      border-inline: var(--ui-border-none);
+      box-shadow: var(--ui-shadow-none);
+      transform: none;
+    }
+  }
+}

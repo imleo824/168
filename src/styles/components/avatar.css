@@ -1,0 +1,138 @@
+/* components/avatar.css */
+
+@layer utilities {
+  :where(
+    .ui-avatar[data-tui-plus='true'],
+    [data-tui-plus='true'] > .ui-avatar,
+    [data-tui-plus='true'] .ui-avatar,
+    .ui-avatar-action[data-tui-plus='true'],
+    .ui-profile-icon-button[data-tui-plus='true'],
+    .profile-avatar-button[data-tui-plus='true'],
+    .user-space-avatar-next[data-tui-plus='true'],
+    .feed-card-author-avatar-link[data-tui-plus='true'],
+    .app-bottom-nav-avatar-shell[data-tui-plus='true'],
+    .chat-message-avatar[data-tui-plus='true']
+  ) {
+    --ui-avatar-tui-plus-ring-gap: var(--ui-space-half);
+    --ui-avatar-tui-plus-ring-size: calc(var(--ui-border-width-hairline) * 2);
+    --ui-avatar-tui-plus-ring-color: var(--ui-brand);
+    --ui-avatar-tui-plus-ring-surface: var(--ui-surface-card);
+    --ui-avatar-tui-plus-ring-gradient: conic-gradient(
+      from 35deg,
+      var(--ui-brand),
+      var(--ui-brand-strong),
+      color-mix(in srgb, var(--ui-brand) 58%, var(--ui-color-white)),
+      var(--ui-brand)
+    );
+  }
+
+  :where(.ui-avatar, .ui-avatar-fallback) {
+    border-radius: var(--ui-radius-pill);
+    background-clip: padding-box;
+  }
+
+  :where(
+    .ui-avatar-action[data-tui-plus='true'],
+    .ui-profile-icon-button[data-tui-plus='true'],
+    .profile-avatar-button[data-tui-plus='true'],
+    .user-space-avatar-next[data-tui-plus='true'],
+    .feed-card-author-avatar-link[data-tui-plus='true'],
+    .app-bottom-nav-avatar-shell[data-tui-plus='true'],
+    .chat-message-avatar[data-tui-plus='true']
+  ) {
+    position: relative;
+    isolation: isolate;
+    overflow: visible;
+    border-radius: var(--ui-radius-pill);
+  }
+
+  :where(
+    .ui-avatar-action[data-tui-plus='true'],
+    .ui-profile-icon-button[data-tui-plus='true'],
+    .profile-avatar-button[data-tui-plus='true'],
+    .user-space-avatar-next[data-tui-plus='true'],
+    .feed-card-author-avatar-link[data-tui-plus='true'],
+    .chat-message-avatar[data-tui-plus='true']
+  )::before,
+  :where(
+    .ui-avatar-action[data-tui-plus='true'],
+    .ui-profile-icon-button[data-tui-plus='true'],
+    .profile-avatar-button[data-tui-plus='true'],
+    .user-space-avatar-next[data-tui-plus='true'],
+    .feed-card-author-avatar-link[data-tui-plus='true'],
+    .chat-message-avatar[data-tui-plus='true']
+  )::after {
+    content: var(--ui-content-empty);
+    pointer-events: none;
+    position: absolute;
+    border-radius: inherit;
+  }
+
+  :where(
+    .ui-avatar-action[data-tui-plus='true'],
+    .ui-profile-icon-button[data-tui-plus='true'],
+    .profile-avatar-button[data-tui-plus='true'],
+    .user-space-avatar-next[data-tui-plus='true'],
+    .feed-card-author-avatar-link[data-tui-plus='true'],
+    .chat-message-avatar[data-tui-plus='true']
+  )::before {
+    inset: calc((var(--ui-avatar-tui-plus-ring-gap) + var(--ui-avatar-tui-plus-ring-size)) * -1);
+    z-index: -2;
+    background: var(--ui-avatar-tui-plus-ring-gradient);
+    box-shadow: var(--ui-shadow-none);
+  }
+
+  :where(
+    .ui-avatar-action[data-tui-plus='true'],
+    .ui-profile-icon-button[data-tui-plus='true'],
+    .profile-avatar-button[data-tui-plus='true'],
+    .user-space-avatar-next[data-tui-plus='true'],
+    .feed-card-author-avatar-link[data-tui-plus='true'],
+    .chat-message-avatar[data-tui-plus='true']
+  )::after {
+    inset: calc(var(--ui-avatar-tui-plus-ring-gap) * -1);
+    z-index: -1;
+    background: var(--ui-avatar-tui-plus-ring-surface);
+    box-shadow: var(--ui-shadow-none);
+  }
+
+  .app-bottom-nav-avatar-shell[data-tui-plus='true'] {
+    background: var(--ui-avatar-tui-plus-ring-gradient);
+    box-shadow:
+      var(--ui-bottom-nav-active-avatar-shadow),
+      0 0 0 var(--ui-avatar-tui-plus-ring-size) var(--ui-avatar-tui-plus-ring-color);
+  }
+
+  :where(
+    .ui-avatar-action[data-tui-plus='true'],
+    .ui-profile-icon-button[data-tui-plus='true'],
+    .profile-avatar-button[data-tui-plus='true'],
+    .user-space-avatar-next[data-tui-plus='true'],
+    .feed-card-author-avatar-link[data-tui-plus='true'],
+    .app-bottom-nav-avatar-shell[data-tui-plus='true'],
+    .chat-message-avatar[data-tui-plus='true']
+  ) > .ui-avatar,
+  :where(
+    .ui-avatar-action[data-tui-plus='true'],
+    .ui-profile-icon-button[data-tui-plus='true'],
+    .profile-avatar-button[data-tui-plus='true'],
+    .user-space-avatar-next[data-tui-plus='true'],
+    .feed-card-author-avatar-link[data-tui-plus='true'],
+    .app-bottom-nav-avatar-shell[data-tui-plus='true'],
+    .chat-message-avatar[data-tui-plus='true']
+  ) .ui-avatar,
+  .ui-avatar[data-tui-plus='true'] {
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    border-radius: inherit;
+    box-shadow: var(--ui-shadow-none);
+  }
+
+  .ui-avatar[data-tui-plus='true']:not(:where([data-tui-plus='true'] .ui-avatar, [data-tui-plus='true'] > .ui-avatar)) {
+    overflow: visible;
+    box-shadow:
+      0 0 0 var(--ui-avatar-tui-plus-ring-gap) var(--ui-avatar-tui-plus-ring-surface),
+      0 0 0 calc(var(--ui-avatar-tui-plus-ring-gap) + var(--ui-avatar-tui-plus-ring-size)) var(--ui-avatar-tui-plus-ring-color);
+  }
+}

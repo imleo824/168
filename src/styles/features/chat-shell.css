@@ -1,0 +1,95 @@
+@layer utilities {
+  .chat-page {
+    position: fixed;
+    top: var(--ui-space-none);
+    right: var(--ui-space-none);
+    bottom: auto;
+    left: var(--ui-space-none);
+    box-sizing: border-box;
+    display: flex;
+    height: var(--chat-mobile-viewport-height);
+    min-height: var(--ui-space-none);
+    max-height: var(--chat-mobile-viewport-height);
+    width: 100%;
+    justify-content: center;
+    overflow: hidden;
+    overscroll-behavior: none;
+    background: var(--chat-page-bg);
+    color: var(--chat-text);
+  }
+
+  .chat-shell {
+    box-sizing: border-box;
+    position: relative;
+    display: flex;
+    width: var(--chat-shell-width);
+    height: var(--chat-mobile-viewport-height);
+    min-height: var(--ui-space-none);
+    max-height: var(--chat-mobile-viewport-height);
+    flex-direction: column;
+    overflow: hidden;
+    padding-bottom: var(--chat-bottom-dock-space);
+    background: var(--chat-shell-bg);
+  }
+
+  .chat-shell--with-ad {
+    display: flex;
+  }
+
+  .chat-shell .home-ad-banner-shell--compact {
+    flex: 0 0 auto;
+    padding: var(--ui-space-2) var(--ui-page-padding-x) var(--ui-space-1);
+  }
+
+  @media (max-width: 767px) {
+    :root[data-chat-route-active],
+    body[data-chat-route-active],
+    [data-chat-route='true'] {
+      height: var(--chat-mobile-viewport-height);
+      min-height: var(--ui-space-none);
+      max-height: var(--chat-mobile-viewport-height);
+      overflow: hidden;
+      overscroll-behavior: none;
+    }
+
+    [data-chat-route='true'] .app-shell-main,
+    [data-chat-route='true'] .ui-route-background {
+      height: var(--chat-mobile-viewport-height);
+      min-height: var(--ui-space-none);
+      max-height: var(--chat-mobile-viewport-height);
+      overflow: hidden;
+      overscroll-behavior: none;
+      padding-block-end: var(--ui-space-none);
+    }
+
+    :root.mobile-text-entry-active [data-chat-route='true'] {
+      --chat-bottom-dock-space: var(--ui-space-none);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .chat-page {
+      position: static;
+      inset: auto;
+      height: auto;
+      min-height: var(--ui-visual-viewport-height);
+      max-height: var(--ui-max-height-none);
+      overflow: visible;
+      align-items: center;
+      padding: var(--chat-page-desktop-padding);
+    }
+
+    .chat-shell {
+      display: flex;
+      height: var(--chat-shell-desktop-height);
+      padding-bottom: var(--ui-space-none);
+      border: var(--ui-border-width-hairline) solid var(--chat-panel-border);
+      border-radius: var(--chat-shell-desktop-radius);
+      box-shadow: var(--chat-shell-desktop-shadow);
+    }
+
+    .chat-shell .home-ad-banner-shell--compact {
+      padding-inline: var(--ui-space-3);
+    }
+  }
+}

@@ -1,0 +1,84 @@
+name: Feed Route Migration
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  migrate-feed-route:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Create migration branch
+        run: |
+          BRANCH="architecture/feed-route-migration-${GITHUB_RUN_ID}"
+          echo "MIGRATION_BRANCH=${BRANCH}" >> "$GITHUB_ENV"
+          git checkout -b "$BRANCH"
+
+      - name: Run feed route migration
+        run: npm run migrate:feed-routes
+
+      - name: Ratchet architecture boundaries
+        run: npm run ratchet:architecture
+
+      - name: Run feed module guard
+        run: npm run test:feed-module
+
+      - name: Run architecture audit
+        run: npm run audit:architecture
+
+      - name: Build
+        run: npm run build
+
+      - name: Generate architecture debt report
+        if: always()
+        run: npm run audit:report
+
+      - name: Upload architecture debt report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: architecture-report-feed-route-migration
+          path: artifacts/architecture-report.md
+
+      - name: Commit migration changes
+        id: commit
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No migration changes detected."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add server/bootstrap.ts config/architecture-boundaries.json artifacts/architecture-report.md
+          git commit -m "refactor(feed): register feed route module"
+          git push origin "$MIGRATION_BRANCH"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Create pull request
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr create \
+            --title "refactor(feed): register feed route module" \
+            --body "This PR migrates /api/home/feed registration from server/bootstrap.ts into server/routes/feed.routes.ts, runs architecture audits, builds the project, and ratchets architecture boundaries downward where the measured complexity decreased." \
+            --base main \
+            --head "$MIGRATION_BRANCH"

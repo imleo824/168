@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "description": "Central architecture boundary baselines. These numbers must only move downward during refactors unless a documented architecture decision explains why they changed.",
+  "bootstrap": {
+    "maxLines": 1315,
+    "maxRouteLiterals": 0,
+    "maxDirectAppRouteCalls": 0
+  },
+  "routes": {
+    "maxRouteFilesWithPrismaBusinessQueries": 6,
+    "maxRouteFilesWithLargeHandlers": 2,
+    "maxLongHandlerLines": 180,
+    "maxRouteFilesWithLocalHttpHelpers": 0,
+    "maxRouteFilesWithSchedulerStartup": 0,
+    "maxAccountRouteImplementationLeaks": 0,
+    "maxAccountAggregatorRouteRegistrations": 0
+  },
+  "frontendApi": {
+    "maxDirectApiFilesOutsideAllowedApiLayers": 12,
+    "maxDirectApiLiteralsOutsideAllowedApiLayers": 40
+  }
+}

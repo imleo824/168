@@ -1,0 +1,23 @@
+/* Promote page keyboard stability. */
+
+@layer utilities {
+  .promote-mobile-page {
+    overflow-anchor: none;
+  }
+
+  @media (max-width: 639px) {
+    .promote-mobile-page:focus-within {
+      scroll-behavior: auto;
+    }
+  }
+
+  @media (max-width: 767px) {
+    .promote-mobile-page input,
+    .promote-mobile-page textarea,
+    .promote-mobile-page select,
+    .promote-mobile-page .ui-control {
+      font-size: var(--ui-mobile-form-font-size);
+      line-height: var(--ui-mobile-form-line-height);
+    }
+  }
+}

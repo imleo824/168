@@ -1,0 +1,46 @@
+/* Shared profile identity card and layout. */
+
+@layer utilities {
+  :is(.profile-modern-page, .user-space-page-next) :is(.profile-identity-card, .user-space-profile-card) {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: var(--ui-profile-header-max-width);
+    margin-inline: auto;
+    border: var(--ui-border-none);
+    border-radius: var(--ui-radius-none);
+    background: var(--ui-surface-card);
+    padding: var(--ui-profile-header-padding-block) var(--ui-profile-header-padding-x);
+    box-shadow: var(--ui-shadow-none);
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) :is(.profile-identity-main, .user-space-profile-main) {
+    display: grid;
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: minmax(var(--ui-profile-avatar-size), calc(var(--ui-profile-avatar-size) + var(--ui-space-8))) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--ui-profile-main-gap);
+  }
+
+  @media (min-width: 768px) {
+    :is(.profile-modern-page, .user-space-page-next) :is(.profile-identity-card, .user-space-profile-card) {
+      padding-inline: var(--ui-profile-header-padding-x-desktop);
+    }
+
+    :is(.profile-modern-page, .user-space-page-next) :is(.profile-identity-main, .user-space-profile-main) {
+      grid-template-columns: minmax(var(--ui-profile-avatar-size-desktop), calc(var(--ui-profile-avatar-size-desktop) + var(--ui-space-8))) minmax(0, 1fr);
+      gap: var(--ui-profile-main-gap-desktop);
+    }
+  }
+
+  @media (max-width: 390px) {
+    :is(.profile-modern-page, .user-space-page-next) :is(.profile-identity-card, .user-space-profile-card) {
+      padding-inline: var(--ui-profile-header-padding-x-compact);
+    }
+
+    :is(.profile-modern-page, .user-space-page-next) :is(.profile-identity-main, .user-space-profile-main) {
+      grid-template-columns: minmax(var(--ui-profile-avatar-size-compact), calc(var(--ui-profile-avatar-size-compact) + var(--ui-space-6))) minmax(0, 1fr);
+      gap: var(--ui-profile-main-gap-compact);
+    }
+  }
+}

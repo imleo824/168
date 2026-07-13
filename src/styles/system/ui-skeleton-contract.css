@@ -1,0 +1,7 @@
+/* Global skeleton contract facade. */
+
+@import "./ui-skeleton-primitives.css";
+@import "./ui-skeleton-home.css";
+@import "./ui-skeleton-feed.css";
+@import "./ui-skeleton-detail.css";
+@import "./ui-skeleton-recharge.css";
