@@ -3,6 +3,10 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "engines": {
+    "node": ">=20 <25",
+    "npm": ">=10"
+  },
   "scripts": {
     "dev": "npm run source:normalize && tsx server.ts",
     "source:normalize": "node scripts/normalize-all-source.mjs",
