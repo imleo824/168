@@ -7,6 +7,7 @@ const read = (relativePath) => fs.readFileSync(path.join(root, relativePath), 'u
 const pkg = JSON.parse(read('package.json'));
 const railway = JSON.parse(read('railway.json'));
 const schemaVerify = read('scripts/railway-schema-verify.mjs');
+const prismaMigrateDeploy = read('scripts/prisma-migrate-deploy.mjs');
 
 assert.equal(
   pkg.scripts['railway:db-prepare'],
@@ -47,6 +48,24 @@ assert.doesNotMatch(
   schemaVerify,
   /\b(?:CREATE|ALTER|DROP)\s+(?:TABLE|TYPE|INDEX|FUNCTION|TRIGGER|EXTENSION)\b/i,
   'Schema verification must not mutate production database structure.',
+);
+
+assert.match(
+  prismaMigrateDeploy,
+  /P3005/,
+  'Prisma deploy wrapper must recognize Prisma P3005 for existing non-empty production databases.',
+);
+
+assert.match(
+  prismaMigrateDeploy,
+  /migrate', 'resolve', '--applied'/,
+  'Existing production databases must be baselined with Prisma migration history before migrate deploy can continue.',
+);
+
+assert.doesNotMatch(
+  prismaMigrateDeploy,
+  /\b(?:CREATE|ALTER|DROP)\s+(?:TABLE|TYPE|INDEX|FUNCTION|TRIGGER|EXTENSION)\b/i,
+  'Prisma deploy wrapper must not patch production database structure directly.',
 );
 
 console.log('[deployment-contract-guards] passed');
