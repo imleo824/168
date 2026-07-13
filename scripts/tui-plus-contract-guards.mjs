@@ -145,7 +145,8 @@ mustHave('Tui Plus routes', routes, 'upsertTuiPlusTypedContact(req.user.id, norm
 mustNotHave('Tui Plus routes', routes, 'tui-plus-existing-source.service');
 mustHave('account routes', accountRoutes, 'registerTuiPlusRoutes(app,');
 mustNotHave('billing routes', billingRoutes, 'registerTuiPlusRoutes(app)');
-mustHave('telegram sync routes', telegramSyncRoutes, 'resolveTuiPlusTelegramSyncCost');
+mustHave('telegram sync routes', telegramSyncRoutes, 'isActiveTuiPlusUser');
+mustHave('telegram sync routes', telegramSyncRoutes, 'const telegramSyncCost = isTuiPlusMember ? 0 : deps.resolveTelegramSyncCost(config)');
 
 mustHave('shared benefit contract', sharedBenefits, 'TUI_PLUS_BENEFIT_ITEMS');
 mustHave('shared benefit contract', sharedBenefits, '会员专属付费广告功能');

@@ -514,7 +514,9 @@ const PostCard = memo(function PostCard({ post: inputPost, isOwner = false, show
   }, { cooldownMs: 1200, mode: 'drop', onError: (error) => { if (error instanceof DOMException && error.name === 'AbortError') return; showToast('分享失败，请稍后重试', 'error'); } });
   const telegramSyncLock = useActionLock(async () => { if (!onTelegramSync) return; await onTelegramSync(inputPost); setIsTelegramSyncConfirmOpen(false); }, { cooldownMs: 1200, mode: 'drop', onError: (error: any) => showToast(error?.message || '同步提交失败，请稍后重试', 'error') });
   const telegramSyncStatus = normalizePostTelegramSyncStatus(post);
-  const telegramSyncPrice = Number.isFinite(Number(config?.prices?.telegram_sync)) ? Math.max(0, Math.floor(Number(config?.prices?.telegram_sync))) : 0;
+  const currentUserTuiPlusActive = isTuiPlusUserLike(currentUser);
+  const baseTelegramSyncPrice = Number.isFinite(Number(config?.prices?.telegram_sync)) ? Math.max(0, Math.floor(Number(config?.prices?.telegram_sync))) : 0;
+  const telegramSyncPrice = currentUserTuiPlusActive ? 0 : baseTelegramSyncPrice;
   const currentPoints = Number.isFinite(Number(currentUser?.points)) ? Math.max(0, Math.floor(Number(currentUser?.points))) : 0;
   const canAffordTelegramSync = telegramSyncPrice === 0 || currentPoints >= telegramSyncPrice;
   const canShowTelegramSync = Boolean(isOwner && showStatus && onTelegramSync);

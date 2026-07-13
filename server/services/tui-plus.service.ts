@@ -130,6 +130,12 @@ function assertUserCanUseTuiPlus(user: any, message = TUI_PLUS_REQUIRED_MESSAGE,
   return status;
 }
 
+export async function isActiveTuiPlusUser(userId: string | null | undefined) {
+  if (!userId || !isDbConfigured()) return false;
+  const status = await getTuiPlusStatus(userId).catch(() => null);
+  return Boolean(status?.active);
+}
+
 function normalizeWebsiteUrl(input: unknown) {
   const raw = String(input || '').trim();
   if (!raw) return '';
@@ -396,9 +402,7 @@ export async function deleteTuiPlusContact(userId: string, contactId: string) {
 }
 
 export async function resolveTuiPlusTelegramSyncCost(userId: string | null | undefined, fallbackCost: number) {
-  if (!userId) return fallbackCost;
-  const status = await getTuiPlusStatus(userId).catch(() => null);
-  return status?.active ? 0 : fallbackCost;
+  return await isActiveTuiPlusUser(userId) ? 0 : fallbackCost;
 }
 
 export function getTuiPlusRankingBoostMultiplier(userLike: any) {

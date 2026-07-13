@@ -5,7 +5,7 @@ import { catchAsync } from '../middlewares/error';
 import { setNoStore } from '../http-cache';
 import prisma, { isDbConfigured } from '../db';
 import { ConfigService } from '../config.service';
-import { resolveTuiPlusTelegramSyncCost } from '../services/tui-plus.service';
+import { isActiveTuiPlusUser } from '../services/tui-plus.service';
 
 export type TelegramSyncStatuses = {
   NONE: string;
@@ -88,9 +88,9 @@ export function registerPostTelegramSyncRoutes(app: Express, deps: PostTelegramS
       return res.status(400).json({ error: '该帖子暂不符合频道同步规则' });
     }
 
-    const baseTelegramSyncCost = deps.resolveTelegramSyncCost(config);
-    const telegramSyncCost = await resolveTuiPlusTelegramSyncCost(req.user.id, baseTelegramSyncCost);
-    if (telegramSyncCost > 0) {
+    const isTuiPlusMember = await isActiveTuiPlusUser(req.user.id);
+    const telegramSyncCost = isTuiPlusMember ? 0 : deps.resolveTelegramSyncCost(config);
+    if (!isTuiPlusMember && telegramSyncCost > 0) {
       const owner = await prisma.user.findUnique({
         where: { id: req.user.id },
         select: { points: true },
@@ -191,6 +191,7 @@ export function registerPostTelegramSyncRoutes(app: Express, deps: PostTelegramS
       telegramSyncStatus: TELEGRAM_SYNC_STATUS_PENDING,
       telegramSyncedAt: null,
       telegramSyncCost,
+      isTuiPlusMember,
     });
   }));
 }
