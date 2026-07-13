@@ -218,7 +218,7 @@
     color: var(--post-card-promotion-link-color-hover);
   }
 
-  .ins-post-card .post-card-promotion-link .user-space-plus-link-icon {
+  .ins-post-card .post-card-promotion-link .post-card-promotion-link-icon {
     width: var(--ui-control-icon-sm);
     height: var(--ui-control-icon-sm);
     flex: 0 0 var(--ui-control-icon-sm);
@@ -226,7 +226,7 @@
     stroke-width: var(--ui-icon-stroke);
   }
 
-  .ins-post-card .post-card-promotion-link .user-space-plus-link-label {
+  .ins-post-card .post-card-promotion-link .post-card-promotion-link-label {
     display: block;
     max-width: min(100%, 220px);
     overflow: hidden;

@@ -328,7 +328,7 @@ const AuthorAvatarLink = memo(function AuthorAvatarLink({ authorId, canOpenProfi
 const PostPromotionLinkCard = memo(function PostPromotionLinkCard({ link }: { link: PostPromotionLink }) {
   return (
     <a
-      className="user-space-plus-link user-space-plus-text-link pressable post-card-promotion-link"
+      className="pressable post-card-promotion-link"
       data-link-type="website"
       href={link.url}
       target="_blank"
@@ -337,8 +337,8 @@ const PostPromotionLinkCard = memo(function PostPromotionLinkCard({ link }: { li
       data-no-card-click="true"
       onClick={(event) => { event.stopPropagation(); }}
     >
-      <Link2 className="user-space-plus-link-icon" aria-hidden="true" />
-      <span className="user-space-plus-link-label">{link.title}</span>
+      <Link2 className="post-card-promotion-link-icon" aria-hidden="true" />
+      <span className="post-card-promotion-link-label">{link.title}</span>
     </a>
   );
 });

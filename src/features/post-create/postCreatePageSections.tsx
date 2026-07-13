@@ -8,7 +8,6 @@ import ImageUpload from '@/features/upload/ImageUpload';
 import QuotedPostPreviewCard from '@/features/post/QuotedPostPreviewCard';
 import TuiPlusBenefitPromptDialog from '@/features/tui-plus/TuiPlusBenefitPromptDialog';
 import { buildTuiPlusBenefitRouteState, isTuiPlusActive } from '@/features/tui-plus/tuiPlusBenefits';
-import { apiFetch } from '@/services/api';
 import AuthRequiredState from '@/ui/AuthRequiredState';
 import ActionButton from '@/ui/ActionButton';
 import AppPage from '@/ui/AppPage';
@@ -126,7 +125,6 @@ export function PostCreateComposerSection({
   const { user } = useAuth();
   const [isLinkEditorOpen, setIsLinkEditorOpen] = useState(false);
   const [isLinkPromptOpen, setIsLinkPromptOpen] = useState(false);
-  const [isCheckingLinkEligibility, setIsCheckingLinkEligibility] = useState(false);
   const [draftLinkTitle, setDraftLinkTitle] = useState('');
   const [draftLinkUrl, setDraftLinkUrl] = useState('');
   const [linkError, setLinkError] = useState('');
@@ -154,32 +152,18 @@ export function PostCreateComposerSection({
     setLinkError('');
     setIsLinkEditorOpen(true);
   };
-  const openPromotionLinkPanel = useCallback(async () => {
-    if (isCheckingLinkEligibility) return;
+  const openPromotionLinkPanel = useCallback(() => {
     if (onOpenPromotionLink) {
       onOpenPromotionLink();
       return;
     }
     if (!tuiPlusActive) {
-      setIsCheckingLinkEligibility(true);
-      try {
-        const res = await apiFetch('/api/tui-plus/status', { cache: 'no-store' });
-        const text = await res.text();
-        const payload = text ? JSON.parse(text) : null;
-        if (!res.ok || !payload?.active) {
-          setIsLinkPromptOpen(true);
-          return;
-        }
-      } catch {
-        setIsLinkPromptOpen(true);
-        return;
-      } finally {
-        setIsCheckingLinkEligibility(false);
-      }
+      setIsLinkPromptOpen(true);
+      return;
     }
     openPromotionLinkEditorCard();
-  }, [isCheckingLinkEligibility, onOpenPromotionLink, tuiPlusActive, activePromotionTitle, activePromotionUrl]);
-  const linkPressHandlers = useInstantPress<HTMLButtonElement>(openPromotionLinkPanel, isPublishingLocked || isCheckingLinkEligibility);
+  }, [onOpenPromotionLink, tuiPlusActive, activePromotionTitle, activePromotionUrl]);
+  const linkPressHandlers = useInstantPress<HTMLButtonElement>(openPromotionLinkPanel, isPublishingLocked);
   const normalizedDraftLinkUrl = useMemo(() => normalizePostPromotionLinkUrl(draftLinkUrl), [draftLinkUrl]);
   const savePromotionLink = () => {
     const safeTitle = cleanPostPromotionLinkTitle(draftLinkTitle);
@@ -233,7 +217,7 @@ export function PostCreateComposerSection({
                 <MapPin className="post-create-tool-icon" aria-hidden="true" />
                 {toolSummary.location.isVisible ? <span className="post-create-tool-summary">{toolSummary.location.label}</span> : null}
               </button>
-              <button type="button" className="post-create-tool-button" data-tool="link" data-state={isCheckingLinkEligibility ? 'loading' : linkSummary.state} aria-label={linkSummary.isVisible ? '推广链接：链接' : '添加推广链接'} title={linkSummary.isVisible ? '推广链接：链接' : '添加推广链接'} disabled={isPublishingLocked || isCheckingLinkEligibility} {...linkPressHandlers}>
+              <button type="button" className="post-create-tool-button" data-tool="link" data-state={linkSummary.state} aria-label={linkSummary.isVisible ? '推广链接：链接' : '添加推广链接'} title={linkSummary.isVisible ? '推广链接：链接' : '添加推广链接'} disabled={isPublishingLocked} {...linkPressHandlers}>
                 <LinkIcon className="post-create-tool-icon" aria-hidden="true" />
                 {linkSummary.isVisible ? <span className="post-create-tool-summary">链接</span> : null}
               </button>
