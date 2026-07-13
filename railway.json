@@ -5,8 +5,8 @@
     "buildCommand": "npm run build"
   },
   "deploy": {
-    "preDeployCommand": "npm run railway:schema-repair",
-    "startCommand": "npm run railway:schema-repair && npm start",
+    "preDeployCommand": "npm run railway:db-prepare",
+    "startCommand": "npm run railway:db-prepare && npm start",
     "healthcheckPath": "/health",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",

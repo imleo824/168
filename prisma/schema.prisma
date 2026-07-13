@@ -504,6 +504,7 @@ enum PointAction {
   PIN_POST
   PIN_CHAT
   TELEGRAM_SYNC
+  TUI_PLUS
   AD
 }
 
