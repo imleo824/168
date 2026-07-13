@@ -6,8 +6,8 @@
   },
   "deploy": {
     "preDeployCommand": "npm run railway:db-prepare",
-    "startCommand": "npm run railway:db-prepare && npm start",
-    "healthcheckPath": "/health",
+    "startCommand": "npm start",
+    "healthcheckPath": "/api/readyz",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
