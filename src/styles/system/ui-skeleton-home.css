@@ -9,38 +9,6 @@
     overflow: visible;
   }
 
-  .home-page-skeleton .home-topbar-brand-skeleton {
-    position: relative;
-    display: inline-flex;
-    height: var(--ui-topbar-height);
-    min-height: var(--ui-topbar-height);
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    border-radius: var(--ui-radius-md);
-    padding-inline: var(--ui-space-1);
-    color: var(--ui-text-strong);
-    font-family: var(--ui-home-topbar-brand-font);
-    font-size: var(--ui-home-topbar-brand-display-size);
-    font-weight: var(--ui-home-topbar-brand-weight);
-    letter-spacing: var(--ui-tracking-normal);
-    line-height: var(--ui-home-topbar-brand-line-height);
-    text-transform: lowercase;
-    text-rendering: geometricPrecision;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
-
-  .home-page-skeleton .home-topbar-brand-skeleton-text {
-    position: relative;
-    z-index: var(--ui-z-local-raised);
-  }
-
-  .home-page-skeleton .home-topbar-brand-skeleton .ui-skeleton-shimmer {
-    border-radius: inherit;
-    opacity: var(--ui-opacity-hidden);
-  }
-
   .home-page-skeleton .home-topbar .ui-profile-icon-button > * {
     opacity: var(--ui-opacity-hidden);
   }
@@ -119,7 +87,6 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .home-page-skeleton .home-topbar-brand-skeleton .ui-skeleton-shimmer,
     .home-page-skeleton .home-topbar .ui-profile-icon-button::before {
       animation: var(--ui-animation-none);
       opacity: var(--ui-skeleton-shimmer-reduced-opacity);

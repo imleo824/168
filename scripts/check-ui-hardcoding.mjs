@@ -280,7 +280,9 @@ assertIncludes('index.html', '--initial-online-dot: var(--ui-online-dot, color-m
 assertIncludes('index.html', 'class="initial-home-topbar home-topbar ui-topbar ui-topbar--home"', 'initial home skeleton must use the shared home topbar semantic contract.');
 assertIncludes('index.html', 'class="initial-home-topbar-inner ui-topbar-inner ui-topbar-inner--center-title"', 'initial home skeleton topbar must use the centered PageHeader grid.');
 assertIncludes('index.html', 'class="initial-home-leading-placeholder ui-topbar-leading-placeholder"', 'initial home skeleton must reserve the same leading lane as HomeTopbar.');
-assertIncludes('index.html', 'class="initial-home-brand-name home-topbar-brand-name">TuiTui</span>', 'initial home skeleton brand must use the same brand text lane as HomeTopbar.');
+assertIncludes('index.html', '<div class="initial-home-brand"></div>', 'initial home skeleton must leave the brand lane empty until React renders the real HomeTopbar brand.');
+assertNotIncludes('index.html', 'initial-home-brand-vector', 'initial home skeleton must not render a fixed brand SVG placeholder.');
+assertNotIncludes('index.html', 'home-topbar-brand-name">TuiTui</span>', 'initial home skeleton must not render a fixed brand text placeholder.');
 assertNotIncludes('index.html', '.initial-home-topbar {\n        display: flex;', 'initial home skeleton topbar must not use the old left-brand flex layout.');
 assertNotIncludes('index.html', '<div class="initial-home-brand">TuiTui</div>', 'initial home skeleton brand must not be a left-lane direct child.');
 assertNotIncludes('index.html', '.initial-home-topbar {\n        display: flex;\n        align-items: center;\n        justify-content: space-between;', 'initial home skeleton topbar must not restore the old split layout.');
@@ -809,7 +811,7 @@ assertIncludes('src/styles/tokens/feature-contracts.css', '--chat-mobile-viewpor
 assertNotIncludes('src/features/chat/ChatPage.tsx', 'chat-online-', 'chat must use the shared topbar online badge.');
 assertNotIncludes('src/features/home/HomeChrome.tsx', 'home-topbar-online-', 'home must use the shared topbar online badge.');
 assertNotIncludes('src/styles/components/topbar-system.css', 'home-topbar-online-', 'home must not own topbar online badge styling.');
-assertIncludes('src/features/home/HomeTopbar.tsx', 'titleNode={<HomeBrandLockup />}', 'home brand must render in the centered title lane.');
+assertIncludes('src/features/home/HomeTopbar.tsx', 'titleNode={skeletonAvatar ? <></> : <HomeBrandLockup />}', 'home brand must render in the centered title lane only outside loading skeletons.');
 assertIncludes('src/features/home/HomeTopbar.tsx', 'titleAlign="center"', 'home brand must stay centered like chat.');
 assertNotIncludes('src/features/home/HomeTopbar.tsx', 'left={<HomeBrandLockup />}', 'home brand must not return to the left topbar lane.');
 assertIncludes('src/ui/TopbarActions.tsx', 'ui-topbar-online-badge', 'topbar online badge must be a shared topbar action component.');

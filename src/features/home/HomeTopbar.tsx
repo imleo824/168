@@ -62,15 +62,6 @@ export function HomeBrandLockup() {
   );
 }
 
-function HomeBrandSkeleton() {
-  return (
-    <span className="home-topbar-brand-skeleton" aria-label="tuitui">
-      <span className="home-topbar-brand-skeleton-text">tuitui</span>
-      <span className="ui-skeleton-shimmer" aria-hidden="true" />
-    </span>
-  );
-}
-
 export const HomeTopbar = memo(function HomeTopbar({
   onlineCountText,
   className = '',
@@ -118,7 +109,7 @@ export const HomeTopbar = memo(function HomeTopbar({
       title={HOME_TOPBAR_TITLE}
       titleAs="div"
       showBack={false}
-      titleNode={skeletonAvatar ? <HomeBrandSkeleton /> : <HomeBrandLockup />}
+      titleNode={skeletonAvatar ? <></> : <HomeBrandLockup />}
       left={left}
       right={<TopbarOnlineBadge countText={onlineCountText} />}
       variant="home"
