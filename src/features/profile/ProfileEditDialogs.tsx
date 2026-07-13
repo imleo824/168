@@ -2,7 +2,6 @@ import type { User } from "@/types";
 import ActionButton from "@/ui/ActionButton";
 import ProfileDialog from "@/features/profile/ProfileDialog";
 import { normalizeTelegramContactHandle } from "@/utils/contact";
-import { LOGIN_ACCOUNT_RULE_TEXT } from "@/utils/accountCredentials";
 import { LOGIN_PASSWORD_MAX_LENGTH } from "@/features/profile/profileHelpers";
 
 type ProfileEditDialogsProps = {
@@ -124,7 +123,6 @@ export default function ProfileEditDialogs({
       <ProfileDialog
         open={isEditingLoginAccount}
         title="修改登录账号"
-        description={`${LOGIN_ACCOUNT_RULE_TEXT}；登录账号全站唯一，昵称可单独修改。`}
         onClose={resetLoginAccount}
       >
         <input
@@ -155,7 +153,6 @@ export default function ProfileEditDialogs({
       <ProfileDialog
         open={isEditingDisplayName}
         title="修改昵称"
-        description="设置公开昵称。昵称会展示在个人主页和帖子列表。"
         onClose={resetDisplayName}
       >
         <input
@@ -194,7 +191,6 @@ export default function ProfileEditDialogs({
       <ProfileDialog
         open={isEditingContact && user.userType !== "ROBOT"}
         title="设置联系方式"
-        description="设置公开 Telegram 联系方式。发布信息时会默认带出，其他用户可直接点击联系。"
         onClose={resetContact}
       >
         <div className="profile-dialog-contact-field">
@@ -231,11 +227,6 @@ export default function ProfileEditDialogs({
       <ProfileDialog
         open={isEditingPassword}
         title={Boolean(user.hasPassword) ? "修改登录密码" : "设置登录密码"}
-        description={
-          Boolean(user.hasPassword)
-            ? "请输入您当前使用的原始密码进行安全确认，然后设置并确认新密码。"
-            : "设置独立密码后，您可以使用“用户名+密码”的方式登录系统，保障账号和数据安全。"
-        }
         onClose={resetPassword}
         scrollable
       >
@@ -302,7 +293,6 @@ export default function ProfileEditDialogs({
       <ProfileDialog
         open={isEditingPaymentPassword}
         title={user.hasPaymentPassword ? "修改支付密码" : "设置支付密码"}
-        description="支付密码用于积分扣款确认，开通推广、广告投放等付费操作前需要校验。"
         onClose={resetPaymentPassword}
         scrollable
       >

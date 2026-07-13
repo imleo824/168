@@ -110,7 +110,7 @@
     pointer-events: auto;
     position: absolute;
     right: var(--ui-space-none);
-    bottom: var(--ui-space-none);
+    bottom: calc((1lh - var(--x-card-expand-hit-height)) / 2);
     z-index: var(--ui-z-local-raised);
     display: inline-flex;
     width: var(--x-card-expand-hit-width);

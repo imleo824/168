@@ -33,7 +33,6 @@ interface PostOptionsMenuPanelProps extends PostOptionsMenuProps {
 interface PostOptionsRowProps {
   icon: ReactNode;
   title: string;
-  description?: string;
   className?: string;
   disabled?: boolean;
   onPointerDown: (event: React.PointerEvent<HTMLButtonElement>) => void;
@@ -60,7 +59,6 @@ function eventPathContainsFeedMenu(event: Event, menuId: string) {
 const PostOptionsRow = memo(function PostOptionsRow({
   icon,
   title,
-  description,
   className = '',
   disabled = false,
   onPointerDown,
@@ -81,7 +79,6 @@ const PostOptionsRow = memo(function PostOptionsRow({
         </span>
         <span className="feed-card-options-sheet-button-copy">
           <span className="feed-card-options-sheet-button-title">{title}</span>
-          {description ? <span className="feed-card-options-sheet-button-desc">{description}</span> : null}
         </span>
       </span>
     </button>
@@ -280,7 +277,6 @@ export const PostOptionsMenuPanel = memo(function PostOptionsMenuPanel({
                 <PostOptionsRow
                   icon={<RadioTower />}
                   title="同步到频道"
-                  description="发布到官方频道提升曝光"
                   className="feed-card-options-row--sync"
                   onPointerDown={handleMenuRowPointerDown}
                   onClick={handleTelegramSyncClick}
@@ -288,7 +284,6 @@ export const PostOptionsMenuPanel = memo(function PostOptionsMenuPanel({
                 <PostOptionsRow
                   icon={<Megaphone />}
                   title="推广"
-                  description="购买曝光，让更多人看到"
                   className="feed-card-options-row--promote"
                   onPointerDown={handleMenuRowPointerDown}
                   onClick={handlePromoteClick}
@@ -296,7 +291,6 @@ export const PostOptionsMenuPanel = memo(function PostOptionsMenuPanel({
                 <PostOptionsRow
                   icon={isPublished ? <EyeOff /> : <Eye />}
                   title={isPublished ? '下架' : '上架'}
-                  description={isPublished ? '暂时隐藏这条内容' : '重新公开这条内容'}
                   className={isPublished ? 'feed-card-options-row--unpublish' : 'feed-card-options-row--publish'}
                   onPointerDown={handleMenuRowPointerDown}
                   onClick={handleStatusClick}
@@ -304,7 +298,6 @@ export const PostOptionsMenuPanel = memo(function PostOptionsMenuPanel({
                 <PostOptionsRow
                   icon={<Trash2 />}
                   title="删除"
-                  description="删除后不可恢复"
                   className="feed-card-options-row--delete"
                   onPointerDown={handleMenuRowPointerDown}
                   onClick={handleDeleteClick}
@@ -315,7 +308,6 @@ export const PostOptionsMenuPanel = memo(function PostOptionsMenuPanel({
                 <PostOptionsRow
                   icon={<EyeOff />}
                   title="不感兴趣"
-                  description="减少相似内容推荐"
                   disabled={reduceRecommendation.isPending}
                   onPointerDown={handleMenuRowPointerDown}
                   onClick={handleFeedbackClick}
@@ -323,7 +315,6 @@ export const PostOptionsMenuPanel = memo(function PostOptionsMenuPanel({
                 <PostOptionsRow
                   icon={<UserX />}
                   title="不看此人"
-                  description="隐藏这个用户的内容"
                   disabled={!authorId || blockUser.isPending}
                   onPointerDown={handleMenuRowPointerDown}
                   onClick={handleBlockAuthorClick}

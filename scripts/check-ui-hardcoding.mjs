@@ -459,10 +459,35 @@ assertCssRuleIncludes(
 assertCssRuleIncludes(
   'src/styles/components/feed-card-content.css',
   '.ins-post-card .x-card-expand-button',
-  ['position: absolute;', 'right: var(--ui-space-none);', 'bottom: var(--ui-space-none);', 'width: var(--x-card-expand-hit-width);', 'justify-content: flex-end;'],
-  'feed card expand icon must sit at the bottom-right of the final text line with an enlarged left-side hit area.',
+  ['position: absolute;', 'right: var(--ui-space-none);', 'bottom: calc((1lh - var(--x-card-expand-hit-height)) / 2);', 'width: var(--x-card-expand-hit-width);', 'justify-content: flex-end;'],
+  'feed card expand icon must align to the final text line while keeping an enlarged left-side hit area.',
 );
 assertNotIncludes('src/styles/components/feed-card-content.css', 'grid-row: 2;', 'feed card expand icon must not return to its own second row.');
+assertNotIncludes(
+  'src/features/profile/ProfileEditDialogs.tsx',
+  'description=',
+  'profile edit dialogs must keep concise titles without subtitle copy.',
+);
+assertNotIncludes(
+  'src/features/tui-plus/TuiPlusBenefitPromptDialog.tsx',
+  'description={copy.description}',
+  'Tui Plus benefit prompt must not render subtitle copy.',
+);
+assertNotIncludes(
+  'src/features/tui-plus/tuiPlusBenefits.ts',
+  'description:',
+  'Tui Plus benefit prompt copy must keep one concise body sentence instead of subtitle copy.',
+);
+assertNotIncludes(
+  'src/features/post/AnchoredActionMenuPanel.tsx',
+  'description=',
+  'feed card more menu rows must not render per-action subtitles.',
+);
+assertNotIncludes(
+  'src/styles/components/feed-card-options-menu.css',
+  'feed-card-options-sheet-button-desc',
+  'feed card more menu must not retain subtitle-only layout styles.',
+);
 assertCssRuleIncludes(
   'src/styles/components/media.css',
   '.media-carousel-track',

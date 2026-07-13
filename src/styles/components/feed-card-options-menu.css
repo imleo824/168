@@ -51,27 +51,17 @@
   }
 
   .feed-card-options-sheet-button-copy {
-    display: grid;
+    display: block;
     min-width: 0;
-    align-content: center;
-    gap: var(--ui-space-half);
   }
 
-  .feed-card-options-sheet-button-title,
-  .feed-card-options-sheet-button-desc {
+  .feed-card-options-sheet-button-title {
     display: block;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-
-  .feed-card-options-sheet-button-title {
     line-height: var(--ui-line-normal);
-  }
-
-  .feed-card-options-sheet-button-desc {
-    line-height: var(--ui-line-tight);
   }
 
   .feed-card-options-status {

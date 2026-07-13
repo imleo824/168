@@ -27,9 +27,9 @@ mustHave('shared Tui Plus post promotion benefit', sharedBenefits, "title: '发�
 mustHave('shared Tui Plus post promotion benefit', sharedBenefits, "description: '点击到网址注册'");
 mustHave('shared benefit type', sharedBenefitsTypes, "| 'postPromotionLink'");
 mustHave('post promotion prompt copy title', clientBenefitCopies, "title: '推广链接是会员权益'");
-mustHave('post promotion prompt copy description', clientBenefitCopies, "description: '开通 Tui Plus 后，才能在发布帖子时设置推广链接。'");
-mustHave('post promotion prompt copy detail', clientBenefitCopies, "detail: '推广链接会展示在帖子图片下方，读者可直接点击进入官网、注册页或活动页。'");
-mustNotHave('post promotion prompt copy must not reuse benefit subtitle as dialog description', clientBenefitCopies, "description: '点击到网址注册'");
+mustNotHave('post promotion prompt copy subtitle', clientBenefitCopies, 'description:');
+mustHave('post promotion prompt copy detail', clientBenefitCopies, "detail: '会员可在帖子中添加推广链接。'");
+mustNotHave('post promotion prompt copy must not reuse benefit subtitle as dialog description', clientBenefitCopies, "点击到网址注册");
 
 mustHave('server benefit flags', benefitService, "postPromotionLink: 'postPromotionLink'");
 mustHave('server benefit payload', benefitService, '[TUI_PLUS_BENEFIT_FLAGS.postPromotionLink]: active');
@@ -37,9 +37,9 @@ mustHave('client status payload type', clientTypes, 'postPromotionLink?: boolean
 mustHave('member page fallback benefit', tuiPlusPage, 'postPromotionLink: false');
 mustHave('member page icon contract', tuiPlusPage, 'postPromotionLink: <Link2 aria-hidden="true" />');
 
-mustHave('post link editor server-status preflight', postCreateSections, "apiFetch('/api/tui-plus/status', { cache: 'no-store' })");
-mustHave('post link editor server-status preflight', postCreateSections, 'payload?.active');
-mustHave('post link editor loading guard', postCreateSections, 'isCheckingLinkEligibility');
+mustHave('post link editor member gate', postCreateSections, 'const tuiPlusActive = isTuiPlusActive(user);');
+mustHave('post link editor member gate', postCreateSections, 'if (!tuiPlusActive) {');
+mustHave('post link editor member prompt', postCreateSections, 'setIsLinkPromptOpen(true);');
 mustHave('post link editor does not write body', postCreateSections, 'onPromotionLinkChange?.({ title: safeTitle, url: normalizedDraftLinkUrl })');
 mustNotHave('post link editor must not append body line', postCreateSections, 'upsertPromotionLinkLine');
 mustNotHave('post link editor must not append body line', postCreateSections, 'POST_LINK_LINE_PREFIX');
@@ -57,7 +57,7 @@ mustHave('post create backend saves structured link', postCreateRoutes, '[POST_P
 
 mustHave('post card reads structured promotion link', postCard, "const POST_PROMOTION_LINK_META_KEY = '__postPromotionLink'");
 mustHave('post card renders promotion link below media', postCard, 'postPromotionLink ? <PostPromotionLinkCard link={postPromotionLink} /> : null');
-mustHave('post card uses profile website link structure', postCard, 'user-space-plus-text-link pressable post-card-promotion-link');
+mustHave('post card uses lightweight post link structure', postCard, 'className="pressable post-card-promotion-link"');
 mustHave('structured meta excludes promotion link', structuredMeta, 'isReservedStructuredMetaKey');
 mustHave('structured meta excludes promotion link', structuredMeta, "key === POST_PROMOTION_LINK_META_KEY");
 mustHave('feed promotion link scoped style', feedContentStyles, '.ins-post-card .post-card-promotion-link');

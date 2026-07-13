@@ -23,7 +23,6 @@ export default function TuiPlusBenefitPromptDialog({
     <ProfileDialog
       open={open}
       title={copy.title}
-      description={copy.description}
       onClose={onClose}
       className="tui-plus-benefit-prompt-dialog"
       footer={(
