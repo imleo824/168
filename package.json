@@ -99,7 +99,9 @@
     "@google/genai": "^1.29.0",
     "@prisma/client": "^6.4.1",
     "@supabase/supabase-js": "^2.106.2",
+    "@tailwindcss/vite": "^4.3.2",
     "@tanstack/react-query": "^5.100.10",
+    "@vitejs/plugin-react": "^5.2.0",
     "bcrypt": "^6.0.0",
     "clsx": "^2.1.1",
     "compression": "^1.8.1",
@@ -107,6 +109,7 @@
     "cors": "^2.8.6",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.3",
+    "esbuild": "^0.25.12",
     "express": "^4.21.2",
     "express-rate-limit": "^8.5.2",
     "helmet": "^8.1.0",
@@ -120,10 +123,14 @@
     "react-helmet-async": "^3.0.0",
     "react-router-dom": "^7.15.1",
     "tailwind-merge": "^3.6.0",
+    "tailwindcss": "^4.3.2",
+    "vite": "^6.4.3",
     "ws": "^8.21.0"
   },
+  "optionalDependencies": {
+    "@tailwindcss/oxide-linux-x64-gnu": "4.3.2"
+  },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.1.14",
     "@types/bcrypt": "^6.0.0",
     "@types/compression": "^1.8.1",
     "@types/cookie-parser": "^1.4.10",
@@ -134,11 +141,7 @@
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
     "@types/ws": "^8.18.1",
-    "@vitejs/plugin-react": "^5.0.4",
-    "esbuild": "^0.25.0",
-    "tailwindcss": "^4.1.14",
     "tsx": "^4.21.0",
-    "typescript": "~5.8.2",
-    "vite": "^6.2.3"
+    "typescript": "~5.8.2"
   }
 }
