@@ -14,6 +14,7 @@
     "build:strict": "npm run lint && npm run audit:architecture:strict && npm run build",
     "start": "NODE_ENV=production node dist/server.cjs",
     "railway:release": "node scripts/prisma-migrate-deploy.mjs",
+    "railway:schema-repair": "node scripts/railway-schema-repair.mjs",
     "db:deploy": "node scripts/prisma-migrate-deploy.mjs && npm run db:rank:sync",
     "db:push:dev": "prisma db push --skip-generate",
     "db:deploy:main-schema": "node scripts/deploy-main-schema.mjs",
