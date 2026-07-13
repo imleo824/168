@@ -71,7 +71,8 @@
         --initial-radius-sm: var(--initial-space-1);
         --initial-radius-md: var(--initial-space-2);
         --initial-radius-pill: 999px;
-        --initial-brand-size: calc(var(--initial-space-5));
+        --initial-brand-width: calc(var(--initial-space-8) * 5);
+        --initial-brand-height: calc(var(--initial-space-5) + var(--initial-space-3));
         --initial-profile-size: var(--initial-control-sm);
         --initial-online-badge-min-width: calc(var(--initial-space-8) * 2);
         --initial-online-dot-size: var(--initial-space-1);
@@ -90,9 +91,9 @@
         --initial-author-time-height: calc(var(--initial-space-3) + var(--initial-space-half));
         --initial-line-copy-height: calc(var(--initial-space-5) + var(--initial-space-half));
         --initial-body-to-media-gap: calc(var(--initial-space-3) + var(--initial-space-quarter));
+        --initial-media-height: min(calc(var(--initial-space-8) * 5), 34vw);
         --initial-copy-primary-width: 92%;
         --initial-copy-secondary-width: 68%;
-        --initial-brand-weight: var(--ui-font-weight-display, 700);
         --initial-surface-page: var(--ui-surface-page, Canvas);
         --initial-surface-card: var(--ui-surface-card-solid, Canvas);
         --initial-surface-muted: var(--ui-surface-muted, color-mix(in srgb, CanvasText 7%, Canvas));
@@ -223,11 +224,23 @@
         justify-content: center;
       }
 
-      .initial-home-brand-wordmark {
-        font-size: var(--initial-brand-size);
-        font-weight: var(--initial-brand-weight);
-        line-height: 1;
-        letter-spacing: -0.02em;
+      .initial-home-brand-vector {
+        display: block;
+        width: var(--initial-brand-width);
+        height: var(--initial-brand-height);
+        color: var(--initial-text);
+      }
+
+      .initial-home-brand-vector-ink {
+        fill: currentColor;
+      }
+
+      .initial-home-brand-vector-ink--secondary {
+        opacity: 0.94;
+      }
+
+      .initial-home-brand-vector-accent {
+        fill: var(--initial-online-dot);
       }
 
       .initial-home-topic-shell {
@@ -274,6 +287,7 @@
 
       .initial-post-avatar,
       .initial-line,
+      .initial-post-media,
       .initial-action-dot {
         position: relative;
         overflow: hidden;
@@ -282,6 +296,7 @@
 
       .initial-post-avatar::after,
       .initial-line::after,
+      .initial-post-media::after,
       .initial-action-dot::after,
       .initial-home-profile-skeleton::after,
       .initial-home-online-count::after,
@@ -336,6 +351,14 @@
         padding-top: var(--initial-footer-padding-top);
       }
 
+      .initial-post-media {
+        width: 100%;
+        height: var(--initial-media-height);
+        margin-top: var(--initial-body-to-media-gap);
+        border-radius: var(--initial-radius-md);
+        background: var(--initial-surface-soft);
+      }
+
       .initial-action-dot {
         width: var(--initial-action-dot-size);
         height: var(--initial-action-dot-size);
@@ -359,7 +382,18 @@
                 <span class="initial-home-profile-skeleton"></span>
               </div>
               <div class="initial-home-brand">
-                <span class="initial-home-brand-wordmark">TuiTui</span>
+                <svg class="initial-home-brand-vector" viewBox="0 0 160 44" aria-hidden="true" focusable="false">
+                  <rect class="initial-home-brand-vector-ink" x="2" y="5" width="27" height="8" rx="4"></rect>
+                  <rect class="initial-home-brand-vector-ink" x="11.5" y="5" width="8" height="31" rx="4"></rect>
+                  <path class="initial-home-brand-vector-ink" d="M36 16h8v12.2c0 3.4 2 5.3 5.2 5.3s5.2-1.9 5.2-5.3V16h8v12.4c0 7.6-5.2 12.4-13.2 12.4S36 36 36 28.4V16Z"></path>
+                  <rect class="initial-home-brand-vector-ink" x="70" y="16" width="8" height="24" rx="4"></rect>
+                  <circle class="initial-home-brand-vector-accent" cx="74" cy="7.5" r="4.4"></circle>
+                  <rect class="initial-home-brand-vector-ink initial-home-brand-vector-ink--secondary" x="82" y="5" width="27" height="8" rx="4"></rect>
+                  <rect class="initial-home-brand-vector-ink initial-home-brand-vector-ink--secondary" x="91.5" y="5" width="8" height="31" rx="4"></rect>
+                  <path class="initial-home-brand-vector-ink initial-home-brand-vector-ink--secondary" d="M116 16h8v12.2c0 3.4 2 5.3 5.2 5.3s5.2-1.9 5.2-5.3V16h8v12.4c0 7.6-5.2 12.4-13.2 12.4S116 36 116 28.4V16Z"></path>
+                  <rect class="initial-home-brand-vector-ink initial-home-brand-vector-ink--secondary" x="150" y="16" width="8" height="24" rx="4"></rect>
+                  <circle class="initial-home-brand-vector-accent" cx="154" cy="7.5" r="4.4"></circle>
+                </svg>
               </div>
               <div class="initial-home-action-slot">
                 <span class="initial-home-online-badge">
@@ -386,6 +420,7 @@
               <span class="initial-line initial-line--time"></span>
               <span class="initial-line initial-line--primary"></span>
               <span class="initial-line initial-line--secondary"></span>
+              <span class="initial-post-media"></span>
               <div class="initial-post-actions">
                 <span class="initial-action-dot"></span>
                 <span class="initial-action-dot"></span>
@@ -400,6 +435,37 @@
               <span class="initial-line initial-line--time"></span>
               <span class="initial-line initial-line--primary"></span>
               <span class="initial-line initial-line--secondary"></span>
+              <span class="initial-post-media"></span>
+              <div class="initial-post-actions">
+                <span class="initial-action-dot"></span>
+                <span class="initial-action-dot"></span>
+                <span class="initial-action-dot"></span>
+              </div>
+            </div>
+          </article>
+          <article class="initial-post-card">
+            <span class="initial-post-avatar"></span>
+            <div class="initial-post-copy">
+              <span class="initial-line initial-line--name"></span>
+              <span class="initial-line initial-line--time"></span>
+              <span class="initial-line initial-line--primary"></span>
+              <span class="initial-line initial-line--secondary"></span>
+              <span class="initial-post-media"></span>
+              <div class="initial-post-actions">
+                <span class="initial-action-dot"></span>
+                <span class="initial-action-dot"></span>
+                <span class="initial-action-dot"></span>
+              </div>
+            </div>
+          </article>
+          <article class="initial-post-card">
+            <span class="initial-post-avatar"></span>
+            <div class="initial-post-copy">
+              <span class="initial-line initial-line--name"></span>
+              <span class="initial-line initial-line--time"></span>
+              <span class="initial-line initial-line--primary"></span>
+              <span class="initial-line initial-line--secondary"></span>
+              <span class="initial-post-media"></span>
               <div class="initial-post-actions">
                 <span class="initial-action-dot"></span>
                 <span class="initial-action-dot"></span>

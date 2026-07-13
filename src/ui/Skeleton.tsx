@@ -273,13 +273,45 @@ export const UserSpaceSkeleton = memo(function UserSpaceSkeleton(_props: UserSpa
         <Skeleton className="profile-header-cover profile-header-cover--skeleton" />
         <section className="profile-identity-card user-space-profile-card user-space-profile-card--skeleton" aria-label="个人空间加载中">
           <div className="profile-identity-main user-space-profile-main">
-            <Skeleton circle className="profile-avatar user-space-avatar user-space-avatar--skeleton" />
-            <div className="profile-identity-content user-space-profile-content">
-              <Skeleton className="ui-skeleton-copy-line ui-skeleton-copy-line--short" />
-              <Skeleton className="ui-skeleton-copy-line ui-skeleton-copy-line--wide" />
+            <div className="profile-avatar-stack user-space-avatar-stack">
+              <Skeleton circle className="profile-avatar-button user-space-avatar-next user-space-avatar--skeleton" />
+            </div>
+
+            <div className="profile-stats-row user-space-stats user-space-stats-next" aria-hidden="true">
+              {[0, 1, 2, 3].map((item) => (
+                <div key={item} className="profile-stat-item user-space-stat-item">
+                  <Skeleton className="profile-stat-value ui-stat-value user-space-stat-value-skeleton" />
+                  <Skeleton className="profile-stat-label ui-stat-label user-space-stat-label-skeleton" />
+                </div>
+              ))}
             </div>
           </div>
+
+          <div className="profile-identity-copy user-space-profile-copy">
+            <div className="profile-name-row user-space-name-row">
+              <Skeleton className="profile-name-mobile profile-name-desktop user-space-name-mobile user-space-name-desktop user-space-name-skeleton" />
+            </div>
+
+            <p className="profile-bio-button profile-bio-inline user-space-bio-mobile user-space-bio-desktop">
+              <Skeleton className="profile-bio-text user-space-bio-line-skeleton" />
+            </p>
+
+            <div className="user-space-plus-links" aria-hidden="true">
+              <div className="user-space-plus-link-list">
+                <Skeleton className="user-space-plus-link user-space-plus-text-link user-space-plus-link-skeleton" />
+              </div>
+            </div>
+          </div>
+
+          <div className="user-space-actions-next" data-contact-layout="split" aria-hidden="true">
+            <Skeleton className="user-space-action user-space-action--skeleton" />
+            <Skeleton className="user-space-action user-space-action--skeleton" />
+          </div>
         </section>
+      </div>
+
+      <div className="user-space-posts-panel">
+        <HomeFeedSkeleton count={3} className="user-space-post-list-skeleton" />
       </div>
     </PageContentShell>
   );
