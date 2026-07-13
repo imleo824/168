@@ -348,7 +348,7 @@
   }
 
   :is([data-lightbox-image='true'], .lightbox-image) {
-    border-radius: var(--ui-action-radius);
+    border-radius: var(--ui-radius-none);
   }
 
   .ui-media-grid-item {

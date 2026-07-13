@@ -114,7 +114,8 @@
     --ui-home-ad-slide-sheen-opacity: 0.46;
     --feed-pull-refresh-distance: var(--ui-space-none);
     --feed-list-item-index: 0;
-    --lightbox-drag-offset: var(--ui-space-none);
+    --lightbox-track-offset: var(--ui-space-none);
+    --lightbox-zoom-scale: var(--ui-opacity-visible);
     --ui-home-topbar-blur-strong: blur(var(--ui-space-5)) saturate(1.18);
     --ui-header-avatar-size: var(--ui-control-md);
     --ui-profile-icon-compact-size: var(--ui-control-sm);
@@ -240,7 +241,11 @@
     --ui-lightbox-close-surface-active: color-mix(in srgb, var(--ui-color-white) 90%, transparent);
     --ui-lightbox-close-shadow: 0 0 0 var(--ui-border-width-hairline) color-mix(in srgb, var(--ui-color-white) 38%, transparent), 0 var(--ui-space-2) var(--ui-space-5) color-mix(in srgb, var(--ui-color-black) 24%, transparent);
     --ui-lightbox-close-shadow-active: 0 0 0 var(--ui-border-width-hairline) color-mix(in srgb, var(--ui-color-white) 44%, transparent), 0 var(--ui-space-2) var(--ui-space-5) color-mix(in srgb, var(--ui-color-black) 28%, transparent);
+    --ui-lightbox-nav-border: color-mix(in srgb, var(--ui-color-white) 14%, transparent);
+    --ui-lightbox-nav-surface-active: color-mix(in srgb, var(--ui-color-white) 18%, var(--ui-lightbox-control-surface));
+    --ui-lightbox-zoom-scale: 2;
     --ui-lightbox-counter-color: color-mix(in srgb, var(--ui-color-white) 85%, transparent);
+    --ui-lightbox-dot-surface: color-mix(in srgb, var(--ui-color-white) 36%, transparent);
     --ui-glass-saturate: saturate(1.14);
 
     --ease-standard: cubic-bezier(0.25, 1, 0.5, 1);

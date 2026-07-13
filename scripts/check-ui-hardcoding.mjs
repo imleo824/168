@@ -475,6 +475,36 @@ assertCssRuleIncludes(
   ['flex: 0 0 var(--ui-media-carousel-slide-width);', 'width: var(--ui-media-carousel-slide-width);', 'scroll-snap-align: start;', 'scroll-snap-stop: always;'],
   'feed media carousel slides must fill the rail one image at a time.',
 );
+assertIncludes(
+  'src/features/post/PostMediaGrid.tsx',
+  'const shouldEagerLoad = total > 1 || isPriorityImage;',
+  'feed media carousel must request all visible carousel images before the user swipes to the next slide.',
+);
+assertIncludes(
+  'src/features/post/PostMediaGrid.tsx',
+  "fetchPriority={fetchPriority}",
+  'feed media carousel must keep explicit fetch priority instead of relying on lazy defaults.',
+);
+assertIncludes(
+  'src/ui/ImageLightbox.tsx',
+  'className="lightbox-track"',
+  'image lightbox must render a real swipe track instead of swapping a single image in place.',
+);
+assertIncludes(
+  'src/ui/ImageLightbox.tsx',
+  'aria-roledescription={hasMulti ? \'carousel\' : undefined}',
+  'image lightbox must expose carousel semantics for multi-image posts.',
+);
+assertIncludes(
+  'src/ui/ImageLightbox.tsx',
+  'className="ui-lightbox-control ui-lightbox-nav ui-lightbox-nav--prev"',
+  'image lightbox must keep visible previous navigation for desktop and keyboard parity.',
+);
+assertIncludes(
+  'src/ui/ImageLightbox.tsx',
+  'className="ui-lightbox-picker"',
+  'image lightbox must keep direct slide picker affordance for multi-image posts.',
+);
 assertCssRuleIncludes(
   'src/styles/features/home-topic-tabs-shell.css',
   '.home-topic-tab-label',

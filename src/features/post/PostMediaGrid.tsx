@@ -126,6 +126,8 @@ const MediaTile = React.memo(function MediaTile({
   onFirstImageRatioChange,
 }: MediaTileProps) {
   const isPriorityImage = priority && index === 0;
+  const shouldEagerLoad = total > 1 || isPriorityImage;
+  const fetchPriority = isPriorityImage ? 'high' : total > 1 ? 'low' : 'auto';
   const variant = getImageVariant();
   const [imageState, setImageState] = React.useState<MediaImageState>('loading');
   const imageFallbackRef = React.useRef(false);
@@ -167,9 +169,9 @@ const MediaTile = React.memo(function MediaTile({
         src={image}
         className={MEDIA_IMAGE_CLASS}
         alt={total > 1 ? `post image ${index + 1}` : 'post image'}
-        loading={isPriorityImage ? 'eager' : 'lazy'}
+        loading={shouldEagerLoad ? 'eager' : 'lazy'}
         priority={isPriorityImage}
-        fetchPriority={isPriorityImage ? 'high' : 'auto'}
+        fetchPriority={fetchPriority}
         variant={variant}
         onLoadStateChange={handleLoadStateChange}
         onLoad={(event) => {

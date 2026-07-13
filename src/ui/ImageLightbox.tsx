@@ -1,6 +1,6 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
-import { X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut } from 'lucide-react';
 import OptimizedImage from './OptimizedImage';
 import { useScrollLock } from '@/utils/scrollLock';
 import { clampMediaIndex, normalizeImageList } from '@/utils/media';
@@ -49,14 +49,15 @@ export default function ImageLightbox({
   const hasMulti = total > 1;
   const canGoPrev = hasMulti && imageIndex > 0;
   const canGoNext = hasMulti && imageIndex >= 0 && imageIndex < total - 1;
-  const canDragNavigate = canGoPrev || canGoNext;
 
+  const [isZoomed, setIsZoomed] = React.useState(false);
   const [isDragging, setIsDragging] = React.useState(false);
   const [dragOffset, setDragOffset] = React.useState(0);
   const rootRef = React.useRef<HTMLDivElement | null>(null);
   const dragStateRef = React.useRef<PointerState | null>(null);
   const suppressCloseRef = React.useRef(false);
   const rafRef = React.useRef<number | null>(null);
+  const canDragNavigate = !isZoomed && (canGoPrev || canGoNext);
 
   useScrollLock(hasActiveImage, { fixed: false });
 
@@ -93,6 +94,7 @@ export default function ImageLightbox({
   React.useEffect(() => {
     setIsDragging(false);
     setDragOffset(0);
+    setIsZoomed(false);
     dragStateRef.current = null;
     suppressCloseRef.current = false;
   }, [imageIndex]);
@@ -159,6 +161,10 @@ export default function ImageLightbox({
     goTo(imageIndex + 1);
   }, [canGoNext, goTo, imageIndex]);
 
+  const toggleZoom = React.useCallback(() => {
+    setIsZoomed((current) => !current);
+  }, []);
+
   const handleKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
       if (event.key === 'Escape') {
@@ -166,16 +172,57 @@ export default function ImageLightbox({
         onClose();
         return;
       }
+
+      if (event.key === 'Tab') {
+        const focusable = Array.from(
+          rootRef.current?.querySelectorAll<HTMLElement>(
+            'button:not(:disabled), [href], input:not(:disabled), textarea:not(:disabled), select:not(:disabled), [tabindex]:not([tabindex="-1"])',
+          ) ?? [],
+        ).filter((element) => element.getClientRects().length > 0 || element === document.activeElement);
+
+        if (!focusable.length) {
+          event.preventDefault();
+          rootRef.current?.focus({ preventScroll: true });
+          return;
+        }
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus({ preventScroll: true });
+          return;
+        }
+
+        if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus({ preventScroll: true });
+          return;
+        }
+      }
+
       if (event.key === 'ArrowLeft' && canGoPrev) {
         event.preventDefault();
         onPrev();
+        return;
       }
       if (event.key === 'ArrowRight' && canGoNext) {
         event.preventDefault();
         onNext();
+        return;
+      }
+      if ((event.key === '+' || event.key === '=') && !isZoomed) {
+        event.preventDefault();
+        setIsZoomed(true);
+        return;
+      }
+      if ((event.key === '-' || event.key === '0') && isZoomed) {
+        event.preventDefault();
+        setIsZoomed(false);
       }
     },
-    [canGoNext, canGoPrev, onClose, onNext, onPrev],
+    [canGoNext, canGoPrev, isZoomed, onClose, onNext, onPrev],
   );
 
   const beginDrag = React.useCallback(
@@ -262,6 +309,7 @@ export default function ImageLightbox({
   const handlePointerDown = React.useCallback(
     (event: React.PointerEvent) => {
       if (!event.isPrimary) return;
+      if (!canDragNavigate) return;
       beginDrag(event.clientX, event.clientY, event.pointerId);
       try {
         (event.currentTarget as HTMLElement).setPointerCapture?.(event.pointerId);
@@ -269,7 +317,7 @@ export default function ImageLightbox({
         // Some browsers reject pointer capture when a touch is already ending.
       }
     },
-    [beginDrag],
+    [beginDrag, canDragNavigate],
   );
 
   const handlePointerMove = React.useCallback(
@@ -301,6 +349,7 @@ export default function ImageLightbox({
   const handleViewportClick = React.useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
       event.stopPropagation();
+      if (event.target !== event.currentTarget) return;
 
       if (suppressCloseRef.current) {
         suppressCloseRef.current = false;
@@ -311,6 +360,11 @@ export default function ImageLightbox({
     },
     [onClose],
   );
+
+  const lightboxTrackStyle = React.useMemo(() => ({
+    '--lightbox-track-offset': `calc(${imageIndex * -100}% + ${dragOffset}px)`,
+    '--lightbox-zoom-scale': isZoomed ? 'var(--ui-lightbox-zoom-scale)' : 'var(--ui-opacity-visible)',
+  }) as React.CSSProperties, [dragOffset, imageIndex, isZoomed]);
 
   if (!overlayRoot || !hasActiveImage || !activeImage) return null;
 
@@ -324,24 +378,87 @@ export default function ImageLightbox({
       aria-modal="true"
       aria-label="图片预览"
     >
-      <IconButton
-        onClick={(event) => {
-          event.stopPropagation();
-          onClose();
-        }}
-        variant="action"
-        context="lightbox"
-        tone="inverse"
-        shape="circle"
-        size="lg"
-        className="ui-lightbox-control ui-lightbox-control-close"
-        aria-label="关闭预览"
-      >
-        <X aria-hidden="true" />
-      </IconButton>
+      <div className="ui-lightbox-toolbar">
+        <IconButton
+          onClick={(event) => {
+            event.stopPropagation();
+            toggleZoom();
+          }}
+          variant="action"
+          context="lightbox"
+          tone="inverse"
+          shape="circle"
+          size="lg"
+          className="ui-lightbox-control ui-lightbox-control-zoom"
+          aria-label={isZoomed ? '还原图片' : '放大图片'}
+          title={isZoomed ? '还原图片' : '放大图片'}
+        >
+          {isZoomed ? <ZoomOut aria-hidden="true" /> : <ZoomIn aria-hidden="true" />}
+        </IconButton>
+
+        <IconButton
+          onClick={(event) => {
+            event.stopPropagation();
+            onClose();
+          }}
+          variant="action"
+          context="lightbox"
+          tone="inverse"
+          shape="circle"
+          size="lg"
+          className="ui-lightbox-control ui-lightbox-control-close"
+          aria-label="关闭预览"
+          title="关闭预览"
+        >
+          <X aria-hidden="true" />
+        </IconButton>
+      </div>
+
+      {hasMulti ? (
+        <IconButton
+          onClick={(event) => {
+            event.stopPropagation();
+            onPrev();
+          }}
+          variant="action"
+          context="lightbox"
+          tone="inverse"
+          shape="circle"
+          size="lg"
+          className="ui-lightbox-control ui-lightbox-nav ui-lightbox-nav--prev"
+          aria-label="上一张图片"
+          title="上一张图片"
+          disabled={!canGoPrev}
+        >
+          <ChevronLeft aria-hidden="true" />
+        </IconButton>
+      ) : null}
+
+      {hasMulti ? (
+        <IconButton
+          onClick={(event) => {
+            event.stopPropagation();
+            onNext();
+          }}
+          variant="action"
+          context="lightbox"
+          tone="inverse"
+          shape="circle"
+          size="lg"
+          className="ui-lightbox-control ui-lightbox-nav ui-lightbox-nav--next"
+          aria-label="下一张图片"
+          title="下一张图片"
+          disabled={!canGoNext}
+        >
+          <ChevronRight aria-hidden="true" />
+        </IconButton>
+      ) : null}
 
       <div
         className="lightbox-viewport"
+        role={hasMulti ? 'region' : undefined}
+        aria-roledescription={hasMulti ? 'carousel' : undefined}
+        aria-label={hasMulti ? `图片轮播，共 ${total} 张` : undefined}
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
@@ -350,30 +467,71 @@ export default function ImageLightbox({
         onClick={handleViewportClick}
       >
         <div
-          className="lightbox-slide"
+          className="lightbox-track"
           data-dragging={isDragging ? 'true' : 'false'}
-          style={{
-            '--lightbox-drag-offset': `${dragOffset}px`,
-          } as React.CSSProperties}
+          data-zoomed={isZoomed ? 'true' : 'false'}
+          style={lightboxTrackStyle}
         >
-          <OptimizedImage
-            key={activeImage}
-            data-lightbox-image="true"
-            src={activeImage}
-            alt={`preview-${imageIndex + 1}`}
-            className="lightbox-image"
-            variant="large"
-            priority
-            decoding="async"
-            sizes="100vw"
-            referrerPolicy="strict-origin-when-cross-origin"
-            draggable={false}
-            onDragStart={(event) => event.preventDefault()}
-          />
+          {normalizedImages.map((image, slideIndex) => {
+            const isActive = slideIndex === imageIndex;
+            const isAdjacent = Math.abs(slideIndex - imageIndex) <= 1;
+
+            return (
+              <div
+                key={`${image}-${slideIndex}`}
+                className="lightbox-slide"
+                data-active={isActive ? 'true' : 'false'}
+                data-zoomed={isActive && isZoomed ? 'true' : 'false'}
+                role="group"
+                aria-roledescription="slide"
+                aria-label={`${slideIndex + 1} / ${total}`}
+                aria-hidden={!isActive}
+                onClick={(event) => event.stopPropagation()}
+                onDoubleClick={(event) => {
+                  event.stopPropagation();
+                  if (isActive) toggleZoom();
+                }}
+              >
+                <OptimizedImage
+                  data-lightbox-image="true"
+                  src={image}
+                  alt={`图片预览 ${slideIndex + 1}`}
+                  className="lightbox-image"
+                  variant="large"
+                  priority={isActive}
+                  loading={isAdjacent ? 'eager' : 'lazy'}
+                  fetchPriority={isActive ? 'high' : isAdjacent ? 'low' : 'auto'}
+                  decoding="async"
+                  sizes="100vw"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  draggable={false}
+                  onDragStart={(event) => event.preventDefault()}
+                />
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      <div className="ui-lightbox-counter">
+      {hasMulti ? (
+        <div className="ui-lightbox-picker" aria-label="选择图片">
+          {normalizedImages.map((image, slideIndex) => (
+            <button
+              key={`${image}-picker-${slideIndex}`}
+              type="button"
+              className="ui-lightbox-dot"
+              aria-label={`查看第 ${slideIndex + 1} 张图片`}
+              aria-current={slideIndex === imageIndex ? 'true' : undefined}
+              onClick={(event) => {
+                event.stopPropagation();
+                goTo(slideIndex);
+              }}
+            />
+          ))}
+        </div>
+      ) : null}
+
+      <div className="ui-lightbox-counter" aria-live="polite">
         {total > 0 ? `${imageIndex + 1} / ${total}` : '0 / 0'}
       </div>
     </div>,
