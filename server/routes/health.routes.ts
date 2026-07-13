@@ -66,6 +66,8 @@ const REQUIRED_RUNTIME_COLUMNS = [
 ] as const;
 const REQUIRED_RUNTIME_ENUM_VALUES = [
   'PointAction.SIGNUP_REWARD',
+  'PointAction.PIN_CHAT',
+  'PointAction.TELEGRAM_SYNC',
   'PointAction.TUI_PLUS',
 ] as const;
 

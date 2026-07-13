@@ -7,7 +7,7 @@
   "deploy": {
     "preDeployCommand": "npm run railway:db-prepare",
     "startCommand": "npm start",
-    "healthcheckPath": "/api/readyz",
+    "healthcheckPath": "/health",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10

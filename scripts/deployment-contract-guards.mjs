@@ -29,8 +29,8 @@ assert.equal(
 
 assert.equal(
   railway.deploy.healthcheckPath,
-  '/api/readyz',
-  'Railway healthcheck must use readiness, not the shallow process-only health endpoint.',
+  '/health',
+  'Railway healthcheck must stay process-level; database/schema readiness is enforced by pre-deploy verification.',
 );
 
 assert.ok(
