@@ -6,7 +6,7 @@
   },
   "deploy": {
     "preDeployCommand": "npm run railway:release",
-    "startCommand": "npm start",
+    "startCommand": "npm run railway:release && npm start",
     "healthcheckPath": "/health",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
