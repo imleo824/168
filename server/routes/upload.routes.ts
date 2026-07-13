@@ -13,13 +13,6 @@ type UploadRouteOptions = {
   canonicalizePersistentUploadedImageUrl: (url: string) => string;
 };
 
-// Multer components for image uploads
-
-const uploadDir = path.join(process.env.NODE_ENV === 'production' ? '/tmp' : process.cwd(), 'uploads');
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
-}
-
 const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
 const ALLOWED_UPLOAD_MIME = new Set([
   'image/jpeg',
@@ -119,6 +112,27 @@ let resolvedSupabasePromise: Promise<ResolvedStorageClient | null> | null = null
 let latestStorageProbeAttempts: StorageProbeAttempt[] = [];
 export const isProduction = process.env.NODE_ENV === 'production';
 const autoEnsureUploadBucket = process.env.AUTO_ENSURE_UPLOAD_BUCKET !== '0';
+const localUploadsEnabled = process.env.DISABLE_LOCAL_UPLOAD_FALLBACK !== '1';
+const configuredLocalUploadDir = process.env.UPLOAD_STORAGE_DIR || (isProduction ? '/data/uploads' : path.join(process.cwd(), 'uploads'));
+const fallbackLocalUploadDir = path.join(isProduction ? '/tmp' : process.cwd(), 'uploads');
+
+function ensureWritableUploadDir(dir: string) {
+  try {
+    fs.mkdirSync(dir, { recursive: true });
+    fs.accessSync(dir, fs.constants.W_OK);
+    return dir;
+  } catch {
+    return '';
+  }
+}
+
+const writableUploadDir = ensureWritableUploadDir(configuredLocalUploadDir)
+  || ensureWritableUploadDir(fallbackLocalUploadDir);
+const uploadDir = writableUploadDir || fallbackLocalUploadDir;
+
+export function isLocalUploadUrlAllowed() {
+  return localUploadsEnabled && Boolean(writableUploadDir);
+}
 
 export const UPLOAD_BUCKET = 'uploads';
 const UPLOAD_STORAGE_FOLDERS: Record<string, string> = {
@@ -178,19 +192,39 @@ async function resolveUploadStorageClient() {
 }
 
 export async function getUploadStorageReadiness() {
-  if (!supabaseCandidates.length) return { ready: false, configured: false, reason: 'not_configured' };
+  const localReady = isLocalUploadUrlAllowed();
+  if (!supabaseCandidates.length) {
+    return localReady
+      ? { ready: true, configured: true, reason: 'local_fallback_ready', backend: 'local', path: uploadDir }
+      : { ready: false, configured: false, reason: 'not_configured' };
+  }
   const resolved = await resolveUploadStorageClient();
-  if (!resolved) return {
-    ready: false,
-    configured: true,
-    reason: 'storage_unreachable',
-    attempts: latestStorageProbeAttempts,
-  };
+  if (!resolved) {
+    return localReady
+      ? {
+          ready: true,
+          configured: true,
+          reason: 'supabase_unreachable_local_fallback_ready',
+          backend: 'local',
+          path: uploadDir,
+          attempts: latestStorageProbeAttempts,
+        }
+      : {
+          ready: false,
+          configured: true,
+          reason: 'storage_unreachable',
+          attempts: latestStorageProbeAttempts,
+        };
+  }
   return resolved.bucketMissing
-    ? { ready: false, configured: true, reason: 'bucket_missing' }
+    ? localReady
+      ? { ready: true, configured: true, reason: 'supabase_bucket_missing_local_fallback_ready', backend: 'local', path: uploadDir }
+      : { ready: false, configured: true, reason: 'bucket_missing' }
     : !resolved.bucketPublic
-      ? { ready: false, configured: true, reason: 'bucket_private' }
-      : { ready: true, configured: true, reason: 'ready' };
+      ? localReady
+        ? { ready: true, configured: true, reason: 'supabase_bucket_private_local_fallback_ready', backend: 'local', path: uploadDir }
+        : { ready: false, configured: true, reason: 'bucket_private' }
+      : { ready: true, configured: true, reason: 'ready', backend: 'supabase' };
 }
 
 function normalizeUploadPurpose(rawValue: unknown) {
@@ -204,6 +238,23 @@ export function buildUploadStoragePath(purpose: string, userId: string, ext: str
   const safeExt = `${ext || 'jpg'}`.replace(/[^a-z0-9]/gi, '').toLowerCase() || 'jpg';
   const safeSuffix = suffix ? `-${`${suffix}`.replace(/[^a-z0-9_-]/gi, '')}` : '';
   return `${folder}/${userId}/${dateKey}/${crypto.randomUUID()}${safeSuffix}.${safeExt}`;
+}
+
+function normalizeLocalUploadPath(value: string) {
+  const normalized = String(value || '').replace(/\\/g, '/').replace(/^\/+/, '');
+  if (!normalized || normalized.includes('..') || path.isAbsolute(normalized)) return '';
+  return normalized;
+}
+
+async function writeLocalUploadFromBuffer(filePath: string, buffer: Buffer) {
+  const safePath = normalizeLocalUploadPath(filePath);
+  if (!safePath || !isLocalUploadUrlAllowed()) return '';
+  const absolutePath = path.join(uploadDir, safePath);
+  const relativeCheck = path.relative(uploadDir, absolutePath);
+  if (!relativeCheck || relativeCheck.startsWith('..') || path.isAbsolute(relativeCheck)) return '';
+  await fsPromises.mkdir(path.dirname(absolutePath), { recursive: true });
+  await fsPromises.writeFile(absolutePath, buffer, { flag: 'wx' });
+  return `/uploads/${safePath}`;
 }
 
 export function isSupabaseBucketMissingError(error: any) {
@@ -271,8 +322,8 @@ if (supabaseCandidates.length && autoEnsureUploadBucket) {
   void ensureUploadBucket();
 }
 
-// Multer disk storage is local-development only. Production uploads must use
-// Supabase Storage so image URLs remain stable after Railway restarts.
+// Multer disk storage is local-development only. Production uses Supabase
+// first, then the controlled local fallback above when cloud storage is down.
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => {
     cb(null, uploadDir);
@@ -295,14 +346,14 @@ const uploadMemory = multer({
 });
 
 export function registerUploadRoutes(app: Express, options: UploadRouteOptions) {
-  if (!isProduction) {
-    app.use('/uploads', express.static(uploadDir, { maxAge: '1y', immutable: true }));
+  if (isLocalUploadUrlAllowed()) {
+    app.use('/uploads', express.static(uploadDir, { maxAge: '1y', immutable: true, fallthrough: false }));
   }
 
   // Image upload API
   app.post('/api/upload', uploadLimiter, authMiddleware, mustAuth, (req: any, res: any) => {
     // If Supabase is configured, use it for persistent storage
-    if (supabaseCandidates.length) {
+    if (supabaseCandidates.length || isLocalUploadUrlAllowed()) {
       uploadMemory.single('file')(req, res, async (err) => {
         if (err) return res.status(400).json({ error: '上传失败: ' + err.message });
         if (!req.file) return res.status(400).json({ error: '未选择文件' });
@@ -316,47 +367,55 @@ export function registerUploadRoutes(app: Express, options: UploadRouteOptions) 
           const purpose = normalizeUploadPurpose(req.body?.purpose);
           const filePath = buildUploadStoragePath(purpose, req.user.id, getUploadExtension(file));
 
-          // getPublicUrl() does not verify bucket visibility. Repair and verify
-          // the public-media contract before accepting an upload.
-          if (!await ensureUploadBucket()) {
-            return res.status(503).json({ error: '图片存储暂不可用，请稍后重试' });
+          if (supabaseCandidates.length) {
+            try {
+              // getPublicUrl() does not verify bucket visibility. Repair and verify
+              // the public-media contract before accepting an upload.
+              if (await ensureUploadBucket()) {
+                const resolvedStorage = await resolveUploadStorageClient();
+                if (resolvedStorage?.bucketPublic) {
+                  const storageClient = resolvedStorage.client;
+                  const uploadPayload = {
+                    contentType: file.mimetype,
+                    cacheControl: '31536000',
+                    upsert: false
+                  };
+                  let { error } = await storageClient.storage
+                    .from(UPLOAD_BUCKET)
+                    .upload(filePath, file.buffer, uploadPayload);
+
+                  if (error && isSupabaseBucketMissingError(error) && await ensureUploadBucket()) {
+                    const retryStorage = await resolveUploadStorageClient();
+                    const retry = await (retryStorage?.client || storageClient).storage
+                      .from(UPLOAD_BUCKET)
+                      .upload(filePath, file.buffer, uploadPayload);
+                    error = retry.error;
+                  }
+
+                  if (error) throw error;
+
+                  const { data: { publicUrl } } = storageClient.storage
+                    .from(UPLOAD_BUCKET)
+                    .getPublicUrl(filePath);
+
+                  if (!publicUrl) {
+                    throw new Error('云存储未返回图片地址');
+                  }
+
+                  return res.json({ url: options.canonicalizePersistentUploadedImageUrl(publicUrl) || publicUrl });
+                }
+              }
+            } catch (storageError: any) {
+              console.warn('[upload] Supabase unavailable, falling back to local uploads:', storageError?.message || storageError);
+            }
           }
-          const resolvedStorage = await resolveUploadStorageClient();
-          if (!resolvedStorage?.bucketPublic) {
-            return res.status(503).json({ error: '图片存储未就绪，请稍后重试' });
-          }
-          const storageClient = resolvedStorage.client;
 
-          const uploadPayload = {
-            contentType: file.mimetype,
-            cacheControl: '31536000',
-            upsert: false
-          };
-          let { error } = await storageClient.storage
-            .from(UPLOAD_BUCKET)
-            .upload(filePath, file.buffer, uploadPayload);
+          const localUrl = await writeLocalUploadFromBuffer(filePath, file.buffer);
+          if (localUrl) return res.json({ url: localUrl });
 
-          if (error && isSupabaseBucketMissingError(error) && await ensureUploadBucket()) {
-            const retryStorage = await resolveUploadStorageClient();
-            const retry = await (retryStorage?.client || storageClient).storage
-              .from(UPLOAD_BUCKET)
-              .upload(filePath, file.buffer, uploadPayload);
-            error = retry.error;
-          }
-
-          if (error) throw error;
-
-          const { data: { publicUrl } } = storageClient.storage
-            .from(UPLOAD_BUCKET)
-            .getPublicUrl(filePath);
-
-          if (!publicUrl) {
-            throw new Error('云存储未返回图片地址');
-          }
-
-          res.json({ url: options.canonicalizePersistentUploadedImageUrl(publicUrl) || publicUrl });
+          return res.status(503).json({ error: '图片存储暂不可用，请稍后重试' });
         } catch (err: any) {
-          console.error('Supabase upload error:', err);
+          console.error('Image upload error:', err);
           res.status(500).json({ error: '图片上传失败，请稍后重试' });
         }
       });

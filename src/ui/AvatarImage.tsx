@@ -102,21 +102,21 @@ function buildAvatarCandidates(src?: string | null, id?: string | null) {
   const candidates: string[] = [];
   const safeId = normalizeCandidate(id);
 
-  // Public Supabase media is CDN-backed and does not require browser CORS
-  // permission for a normal <img>. Keep the app proxy only as a fallback.
-  candidates.push(directSrc);
-
   if (safeId && typeof window !== 'undefined') {
     try {
       const parsed = new URL(directSrc, window.location.origin);
       const isPersistentUpload = PERSISTENT_UPLOAD_MARKERS.some((marker) => parsed.pathname.includes(marker));
       if (isPersistentUpload) {
+        // Use the same-origin avatar proxy first for persisted avatars. It
+        // avoids browser-side failures from third-party storage hosts while
+        // keeping the original URL as a fallback.
         candidates.push(`/media/avatar/${encodeURIComponent(safeId)}?v=${avatarVersion(directSrc)}`);
       }
     } catch {
       // Keep the original source as the fallback candidate.
     }
   }
+  candidates.push(directSrc);
   return Array.from(new Set(candidates.filter(Boolean)));
 }
 

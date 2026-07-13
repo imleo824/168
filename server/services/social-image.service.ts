@@ -12,6 +12,7 @@ import {
   ensureUploadBucket,
   hasValidImageSignature,
   isProduction,
+  isLocalUploadUrlAllowed,
   isSupabaseBucketMissingError,
   supabase,
   supabaseUrl,
@@ -135,11 +136,24 @@ function getImageExtensionFromContentType(contentType: string) {
 export function canonicalizePersistentUploadedImageUrl(url: string) {
   const raw = String(url || '').trim();
   if (!raw) return '';
-  if (raw.startsWith('/uploads/')) return !isProduction ? raw : '';
+  if (raw.startsWith('/uploads/')) return isLocalUploadUrlAllowed() ? raw : (!isProduction ? raw : '');
   if (!/^https?:\/\//i.test(raw)) return '';
 
   try {
     const parsed = new URL(raw);
+    if (parsed.pathname.startsWith('/uploads/')) {
+      const requestOrigin = getPublicOrigin(undefined);
+      if (requestOrigin) {
+        try {
+          const requestHost = new URL(requestOrigin).hostname.replace(/^www\./, '').toLowerCase();
+          const normalizedHost = parsed.hostname.replace(/^www\./, '').toLowerCase();
+          if (requestHost === normalizedHost && isLocalUploadUrlAllowed()) return parsed.pathname;
+        } catch {
+          // Continue with Supabase URL checks.
+        }
+      }
+    }
+
     const uploadPath = parsed.pathname;
     const marker = [
       '/storage/v1/object/public/uploads/',

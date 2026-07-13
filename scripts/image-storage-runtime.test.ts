@@ -38,6 +38,7 @@ try {
   // Exercise the request-time repair deterministically; startup repair is
   // covered by the contract guard and uses the same ensure function.
   process.env.AUTO_ENSURE_UPLOAD_BUCKET = '0';
+  process.env.DISABLE_LOCAL_UPLOAD_FALLBACK = '1';
 
   const storage = await import('../server/routes/upload.routes');
   assert.deepEqual(await storage.getUploadStorageReadiness(), {
@@ -52,6 +53,7 @@ try {
     ready: true,
     configured: true,
     reason: 'ready',
+    backend: 'supabase',
   });
 
   console.log('Image storage runtime test passed.');

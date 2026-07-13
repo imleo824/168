@@ -14,8 +14,28 @@ assert.match(
   /reason: 'bucket_private'/,
   'storage readiness must reject a private public-media bucket',
 );
+assert.match(
+  uploadRoute,
+  /supabase_unreachable_local_fallback_ready/,
+  'storage readiness must report a usable local fallback when Supabase is unreachable',
+);
+assert.match(
+  uploadRoute,
+  /function normalizeLocalUploadPath/,
+  'local upload fallback paths must be normalized before writing',
+);
+assert.match(
+  uploadRoute,
+  /async function writeLocalUploadFromBuffer/,
+  'uploads must have a local file fallback when cloud storage is unavailable',
+);
+assert.match(
+  uploadRoute,
+  /app\.use\('\/uploads', express\.static\(uploadDir/,
+  'local fallback uploads must be served by the app in production',
+);
 
-const ensureIndex = uploadRoute.indexOf('if (!await ensureUploadBucket())');
+const ensureIndex = uploadRoute.indexOf('if (await ensureUploadBucket())');
 const uploadIndex = uploadRoute.indexOf('.upload(filePath, file.buffer, uploadPayload)', ensureIndex);
 assert.ok(ensureIndex >= 0 && uploadIndex > ensureIndex, 'bucket visibility must be verified before upload');
 assert.match(
@@ -26,6 +46,6 @@ assert.match(
 
 const directIndex = avatarImage.indexOf('candidates.push(directSrc)');
 const proxyIndex = avatarImage.indexOf('candidates.push(`/media/avatar/');
-assert.ok(directIndex >= 0 && proxyIndex > directIndex, 'avatars must prefer the public CDN URL');
+assert.ok(proxyIndex >= 0 && directIndex > proxyIndex, 'avatars must prefer the same-origin proxy for persistent avatars');
 
 console.log('Image storage contract guards passed.');
