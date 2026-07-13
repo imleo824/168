@@ -445,6 +445,31 @@ assertCssRuleIncludes(
   'home topic tab items must keep stable readable widths inside the horizontal rail.',
 );
 assertCssRuleIncludes(
+  'src/styles/components/feed-card-content.css',
+  '.x-card-content-frame',
+  ['position: relative;', 'display: block;', 'min-width: 0;'],
+  'feed card expand control must anchor inside the text frame instead of occupying a separate row.',
+);
+assertCssRuleIncludes(
+  'src/styles/components/feed-card-content.css',
+  '.ins-post-card .x-card-expand-button',
+  ['position: absolute;', 'right: var(--ui-space-none);', 'bottom: var(--ui-space-none);'],
+  'feed card expand icon must sit at the bottom-right of the final text line.',
+);
+assertNotIncludes('src/styles/components/feed-card-content.css', 'grid-row: 2;', 'feed card expand icon must not return to its own second row.');
+assertCssRuleIncludes(
+  'src/styles/components/media.css',
+  '.media-carousel-track',
+  ['overflow-x: auto;', 'overscroll-behavior-x: contain;', 'scroll-snap-type: x mandatory;', 'touch-action: pan-x pan-y;'],
+  'feed media carousel must use a native horizontal snap rail that can be swiped inside the feed.',
+);
+assertCssRuleIncludes(
+  'src/styles/components/media.css',
+  '.media-carousel-slide',
+  ['flex: 0 0 var(--ui-media-carousel-slide-width);', 'width: var(--ui-media-carousel-slide-width);', 'scroll-snap-align: start;', 'scroll-snap-stop: always;'],
+  'feed media carousel slides must fill the rail one image at a time.',
+);
+assertCssRuleIncludes(
   'src/styles/features/home-topic-tabs-shell.css',
   '.home-topic-tab-label',
   [

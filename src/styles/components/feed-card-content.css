@@ -20,11 +20,8 @@
   }
 
   .ins-post-card .x-card-body {
-    display: grid;
+    display: block;
     min-width: 0;
-    grid-template-columns: minmax(0, 1fr) auto;
-    align-items: start;
-    column-gap: var(--x-card-meta-row-gap);
     padding: var(--ui-space-none) var(--ui-space-none) var(--ui-feed-card-body-to-media-gap);
   }
 
@@ -46,7 +43,9 @@
   .x-card-content-frame {
     --x-card-content-default-clamp-lines: var(--ui-feed-card-preview-lines, 8);
 
-    display: contents;
+    position: relative;
+    display: block;
+    min-width: 0;
     color: var(--ui-ins-text);
     font-size: var(--x-card-readable-font-size);
     font-weight: var(--x-card-readable-font-weight);
@@ -55,8 +54,6 @@
   }
 
   .x-card-content {
-    grid-column: 1 / -1;
-    grid-row: 1;
     min-width: 0;
     overflow-wrap: anywhere;
     color: inherit;
@@ -77,12 +74,10 @@
   }
 
   .x-card-content--collapsed {
-    display: -webkit-box;
+    display: block;
     overflow: hidden;
-    max-height: var(--ui-max-height-none);
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: var(--x-card-content-default-clamp-lines);
-    line-clamp: var(--x-card-content-default-clamp-lines);
+    max-height: calc(var(--x-card-content-default-clamp-lines) * 1lh);
+    max-block-size: calc(var(--x-card-content-default-clamp-lines) * 1lh);
   }
 
   .x-card-content--expanded {
@@ -105,20 +100,16 @@
   }
 
   .ins-post-card .x-card-tags {
-    grid-column: 1 / -1;
-    grid-row: 2;
     min-width: 0;
     margin-top: var(--x-card-meta-row-margin-top);
-    align-self: center;
-  }
-
-  .ins-post-card .x-card-body--with-expand .x-card-tags {
-    grid-column: 1;
   }
 
   .ins-post-card .x-card-expand-button {
-    grid-column: 2;
-    grid-row: 2;
+    pointer-events: auto;
+    position: absolute;
+    right: var(--ui-space-none);
+    bottom: var(--ui-space-none);
+    z-index: var(--ui-z-local-raised);
     display: inline-flex;
     width: var(--x-card-meta-control-min-height);
     min-width: var(--x-card-meta-control-min-height);
@@ -126,15 +117,15 @@
     align-items: center;
     justify-content: center;
     align-self: center;
-    margin: var(--x-card-meta-row-margin-top) var(--ui-space-none) var(--ui-space-none);
+    margin: var(--ui-space-none);
     overflow: visible;
     appearance: none;
     -webkit-appearance: none;
     border: var(--ui-border-none);
     border-color: var(--ui-color-transparent);
     border-radius: var(--ui-radius-none);
-    background: var(--ui-surface-transparent);
-    background-color: var(--ui-surface-transparent);
+    background: linear-gradient(90deg, transparent, var(--ui-surface-card) 34%, var(--ui-surface-card));
+    background-color: var(--ui-surface-card);
     padding: var(--ui-space-none);
     color: var(--ui-post-chip-text);
     box-shadow: var(--ui-shadow-none);
@@ -170,8 +161,8 @@
     -webkit-appearance: none;
     border: var(--ui-border-none);
     border-color: var(--ui-color-transparent);
-    background: var(--ui-surface-transparent);
-    background-color: var(--ui-surface-transparent);
+    background: linear-gradient(90deg, transparent, var(--ui-surface-card) 34%, var(--ui-surface-card));
+    background-color: var(--ui-surface-card);
     color: var(--ui-social-text);
     box-shadow: var(--ui-shadow-none);
     transform: var(--ui-transform-none);

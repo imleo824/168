@@ -42,8 +42,9 @@
     overscroll-behavior-x: contain;
     scroll-padding-inline: var(--ui-space-none);
     scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
-    touch-action: pan-y;
+    touch-action: pan-x pan-y;
   }
 
   .media-carousel-shell-multi .media-carousel-track {
@@ -74,7 +75,7 @@
     cursor: zoom-in;
     scroll-snap-align: start;
     scroll-snap-stop: always;
-    touch-action: manipulation;
+    touch-action: pan-x pan-y;
     transition:
       transform var(--ui-duration-press) var(--ease-standard),
       box-shadow var(--ui-duration-base) var(--ease-standard);
