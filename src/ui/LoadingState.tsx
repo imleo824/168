@@ -19,6 +19,11 @@ type LoadingBlockProps = {
   iconSize?: number;
 };
 
+type PageLoadingStateProps = {
+  text?: string;
+  className?: string;
+};
+
 type StateBlockProps = {
   title: string;
   titleAs?: ComponentProps<typeof UIStateBlock>['titleAs'];
@@ -105,6 +110,18 @@ export const LoadingBlock = memo(function LoadingBlock({
         {text}
       </UIText>
     </div>
+  );
+});
+
+export const PageLoadingState = memo(function PageLoadingState({
+  text = '正在加载',
+  className = '',
+}: PageLoadingStateProps) {
+  return (
+    <LoadingBlock
+      text={text}
+      className={cn('ui-page-loading-state', className)}
+    />
   );
 });
 

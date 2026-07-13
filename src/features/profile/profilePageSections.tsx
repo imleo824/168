@@ -8,6 +8,7 @@ import AvatarImage from '@/ui/AvatarImage';
 import EmptyStateCard from '@/ui/EmptyStateCard';
 import LinkifiedText from '@/ui/LinkifiedText';
 import ListLoadMoreState from '@/ui/ListLoadMoreState';
+import { PageLoadingState } from '@/ui/LoadingState';
 import PostFeedList from '@/features/feed/PostFeedList';
 import UserSpaceTuiPlusLinks from '@/features/profile/UserSpaceTuiPlusLinks';
 import { isTuiPlusActive } from '@/features/tui-plus/tuiPlusBenefits';
@@ -225,6 +226,7 @@ function ProfileRelationList({
   onLoadMore: () => void;
   onOpenUser: (userId: string) => void;
 }) {
+  if (loading && users.length === 0) return <PageLoadingState text={loadingText} className="profile-tab-loading" />;
   if (users.length === 0) return <EmptyStateCard title={emptyTitle} />;
 
   return (
@@ -281,7 +283,7 @@ function ProfileCommentList({
   comments: MyCommentItem[];
   loading: boolean;
 }) {
-  if (loading) return <EmptyStateCard title="正在加载评论" />;
+  if (loading) return <PageLoadingState text="正在加载评论" className="profile-tab-loading" />;
   if (comments.length === 0) return <EmptyStateCard title="暂无评论" />;
 
   return (
@@ -356,9 +358,10 @@ export function ProfileListSection({
   onOpenUser: (userId: string) => void;
 }) {
   const commonProps = { onStatusChange, onDelete, onTelegramSync, telegramChannelUrl };
+  const renderLoading = (text: string) => loadingFallback || <PageLoadingState text={text} className="profile-tab-loading" />;
 
   if (activeTab === 'POSTS') {
-    if (postsLoading) return <>{loadingFallback || <EmptyStateCard title="正在加载发布" />}</>;
+    if (postsLoading) return <>{renderLoading('正在加载发布')}</>;
     if (posts.length === 0) return <EmptyStateCard title="还没有发布内容" />;
     return <PostFeedList posts={posts} enableRecommendationControls={false} {...commonProps} />;
   }
@@ -368,13 +371,13 @@ export function ProfileListSection({
   }
 
   if (activeTab === 'QUOTES') {
-    if (quotePostsLoading) return <>{loadingFallback || <EmptyStateCard title="正在加载引用" />}</>;
+    if (quotePostsLoading) return <>{renderLoading('正在加载引用')}</>;
     if (quotePosts.length === 0) return <EmptyStateCard title="暂无引用内容" />;
     return <PostFeedList posts={quotePosts} enableRecommendationControls={false} {...commonProps} />;
   }
 
   if (activeTab === 'LIKED') {
-    if (likedLoading) return <>{loadingFallback || <EmptyStateCard title="正在加载点赞" />}</>;
+    if (likedLoading) return <>{renderLoading('正在加载点赞')}</>;
     if (likedPosts.length === 0) return <EmptyStateCard title="暂无点赞内容" />;
     return <PostFeedList posts={likedPosts} enableRecommendationControls={false} />;
   }

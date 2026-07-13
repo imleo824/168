@@ -20,7 +20,7 @@ import {
 import SegmentTabs from "@/ui/SegmentTabs";
 import AppPage from '@/ui/AppPage';
 import PageContentShell from '@/ui/PageContentShell';
-import { LoadingBlock } from "@/ui/LoadingState";
+import { PageLoadingState } from "@/ui/LoadingState";
 import {
   patchPostInCachedData,
   removePostFromCachedData,
@@ -230,7 +230,7 @@ export default function ProfileMobile() {
 
   useListReturnScroll(listReturnScope, activeListReady, `${activeTab}:${activeListVersion}`);
 
-  const profileTabLoading = <LoadingBlock compact text="正在加载" className="profile-tab-loading" />;
+  const profileTabLoading = <PageLoadingState text="正在加载" className="profile-tab-loading" />;
 
   useEffect(() => {
     if (!isSecurityOpen) return;

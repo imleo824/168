@@ -18,7 +18,7 @@ import AppPage from '@/ui/AppPage';
 import PageHeader from '@/ui/PageHeader';
 import HeaderSelectAction from '@/ui/HeaderSelectAction';
 import SEO from '@/platform/SEO';
-import { LoadingBlock, StateBlock } from '@/ui/LoadingState';
+import { PageLoadingState, StateBlock } from '@/ui/LoadingState';
 import ListLoadMoreState from '@/ui/ListLoadMoreState';
 import ActionButton from '@/ui/ActionButton';
 import EmptyStateCard from '@/ui/EmptyStateCard';
@@ -214,7 +214,7 @@ export default function TransactionHistoryMobile() {
 
         <PageContentShell className="record-page-shell ui-app-page-main">
           {isLoading ? (
-            <LoadingBlock compact text="正在加载交易记录" className="record-state-block" />
+            <PageLoadingState text="正在加载交易记录" className="record-state-block" />
           ) : isError ? (
             <StateBlock
               title="记录加载失败"

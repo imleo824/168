@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState, type MouseEvent } from 'react';
 import { MessageCircle } from 'lucide-react';
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
@@ -105,15 +105,6 @@ function getCommentAuthorName(comment: PostComment) {
   return String(comment.user?.displayName || comment.user?.username || '用户').trim() || '用户';
 }
 
-function scheduleSheetClose(callback: () => void) {
-  if (typeof window === 'undefined') {
-    callback();
-    return null;
-  }
-
-  return window.requestAnimationFrame(callback);
-}
-
 const PostCommentSheetItem = memo(function PostCommentSheetItem({ comment }: { comment: PostComment }) {
   const authorName = getCommentAuthorName(comment);
   const timeText = comment.createdAt ? formatRelativeTime(comment.createdAt) : '';
@@ -152,14 +143,7 @@ export const PostCommentSheetPanel = memo(function PostCommentSheetPanel({
   const { requireAuth, showToast } = useAuth();
   const [isComposerOpen, setIsComposerOpen] = useState(false);
   const [composerError, setComposerError] = useState('');
-  const closeSheetFrameRef = useRef<number | null>(null);
   const queryKey = useMemo(() => ['post-comments', postId] as const, [postId]);
-
-  useEffect(() => () => {
-    if (closeSheetFrameRef.current === null || typeof window === 'undefined') return;
-    window.cancelAnimationFrame(closeSheetFrameRef.current);
-    closeSheetFrameRef.current = null;
-  }, []);
 
   const commentsQuery = useInfiniteQuery({
     queryKey,
@@ -240,22 +224,14 @@ export const PostCommentSheetPanel = memo(function PostCommentSheetPanel({
     requireAuth(() => {
       setComposerError('');
       setIsComposerOpen(true);
-      if (closeSheetFrameRef.current !== null && typeof window !== 'undefined') {
-        window.cancelAnimationFrame(closeSheetFrameRef.current);
-      }
-      closeSheetFrameRef.current = scheduleSheetClose(() => {
-        closeSheetFrameRef.current = null;
-        onClose();
-      });
     });
-  }, [createMutation.isPending, onClose, postId, requireAuth]);
+  }, [createMutation.isPending, postId, requireAuth]);
 
   const handleCloseComposer = useCallback(() => {
     if (createMutation.isPending) return;
     setIsComposerOpen(false);
     setComposerError('');
-    onClose();
-  }, [createMutation.isPending, onClose]);
+  }, [createMutation.isPending]);
 
   return (
     <>

@@ -272,6 +272,12 @@
     padding: var(--ui-space-2);
   }
 
+  .ui-page-loading-state {
+    min-height: calc(var(--ui-control-lg) + var(--ui-space-8));
+    padding-block: var(--ui-secondary-state-padding-y);
+    background: transparent;
+  }
+
   .ui-loading-text {
     margin: var(--ui-space-none);
     color: var(--ui-text-muted);

@@ -11,7 +11,7 @@ import ActionButton from '@/ui/ActionButton';
 import EmptyStateCard from '@/ui/EmptyStateCard';
 import PageContentShell from '@/ui/PageContentShell';
 import SurfaceSectionCard from '@/ui/SurfaceSectionCard';
-import { LoadingBlock, StateBlock } from '@/ui/LoadingState';
+import { PageLoadingState, StateBlock } from '@/ui/LoadingState';
 import { getMyPromotionEffects } from '@/services/api';
 import PromotionEffectStatsRow from '@/features/promote/PromotionEffectStatsRow';
 import { hasAnyPromotionEffectStats } from '@/features/promote/promotionDisplayUtils';
@@ -162,7 +162,7 @@ export default function PromotionEffectsHistory() {
           ) : null}
 
           {promotionEffectsQuery.isLoading ? (
-            <LoadingBlock compact text="正在加载效果分析" className="record-state-block" />
+            <PageLoadingState text="正在加载效果分析" className="record-state-block" />
           ) : promotionEffectsQuery.isError ? (
             <StateBlock
               title="效果分析加载失败"

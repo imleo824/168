@@ -14,7 +14,7 @@ import AuthRequiredState from '@/ui/AuthRequiredState';
 import PageHeader from '@/ui/PageHeader';
 import ActionButton from '@/ui/ActionButton';
 import EmptyStateCard from '@/ui/EmptyStateCard';
-import { LoadingBlock, StateBlock } from '@/ui/LoadingState';
+import { PageLoadingState, StateBlock } from '@/ui/LoadingState';
 import PageContentShell from '@/ui/PageContentShell';
 import SegmentTabs from '@/ui/SegmentTabs';
 import SurfaceSectionCard from '@/ui/SurfaceSectionCard';
@@ -216,7 +216,7 @@ export default function SponsorMobilePage() {
         <section className="sponsor-record-section" aria-label="曝光记录内容">
           {activeRecordTab === 'effects' ? (
             <div id="sponsor-effects-panel" role="tabpanel" className="sponsor-record-panel">
-              {promotionEffectsQuery.isLoading || isAuthLoading ? <LoadingBlock compact text="正在加载曝光效果" className="sponsor-state-block" /> : promotionEffectsQuery.isError ? (
+              {promotionEffectsQuery.isLoading || isAuthLoading ? <PageLoadingState text="正在加载曝光效果" className="sponsor-state-block" /> : promotionEffectsQuery.isError ? (
                 <StateBlock title="曝光效果加载失败" description="网络恢复后可重新查看曝光效果。" tone="error" compact className="sponsor-state-block" action={<ActionButton type="button" variant="muted" size="sm" onClick={() => { void promotionEffectsQuery.refetch(); }}>重新加载</ActionButton>} />
               ) : promotionEffectsQuery.data && hasEffectTotals ? (
                 <>
@@ -233,7 +233,7 @@ export default function SponsorMobilePage() {
             </div>
           ) : activeRecordTab === 'promotions' ? (
             <div id="sponsor-promotions-panel" role="tabpanel" className="sponsor-record-panel">
-              {promotionsQuery.isLoading || isAuthLoading ? <LoadingBlock compact text="正在加载曝光记录" className="sponsor-state-block" /> : promotionsQuery.isError ? (
+              {promotionsQuery.isLoading || isAuthLoading ? <PageLoadingState text="正在加载曝光记录" className="sponsor-state-block" /> : promotionsQuery.isError ? (
                 <StateBlock title="曝光记录加载失败" description="网络恢复后可重新查看投放记录。" tone="error" compact className="sponsor-state-block" action={<ActionButton type="button" variant="muted" size="sm" onClick={() => { void promotionsQuery.refetch(); }}>重新加载</ActionButton>} />
               ) : recentPromotionGroups.length > 0 ? (
                 <>
@@ -244,7 +244,7 @@ export default function SponsorMobilePage() {
             </div>
           ) : (
             <div id="sponsor-ledger-panel" role="tabpanel" className="sponsor-record-panel">
-              {recordsLoading || isAuthLoading ? <LoadingBlock compact text="正在加载积分记录" className="sponsor-state-block" /> : recordsError ? (
+              {recordsLoading || isAuthLoading ? <PageLoadingState text="正在加载积分记录" className="sponsor-state-block" /> : recordsError ? (
                 <StateBlock title="积分记录加载失败" description="网络恢复后可重新查看充积分和消费记录。" tone="error" compact className="sponsor-state-block" action={<ActionButton type="button" variant="muted" size="sm" onClick={() => { void transactionsQuery.refetch(); void rechargeOrdersQuery.refetch(); }}>重新加载</ActionButton>} />
               ) : visibleLedgerRecords.length > 0 ? (
                 <>

@@ -357,21 +357,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     logout,
     showToast,
   }), [user, loading, isAuthenticating, showAuthModal, requireAuth, closeAuthModal, refreshUser, loginWithPassword, registerWithPassword, patchUser, logout, showToast]);
+  const ActiveToastIcon = activeToast
+    ? activeToast.type === 'success'
+      ? CheckCircle
+      : activeToast.type === 'error'
+        ? AlertCircle
+        : Info
+    : null;
 
   return (
     <AuthContext.Provider value={value}>
       {children}
-      <div className="toast-stack" role="status" aria-live="polite">
-        {toastQueue.map((toast) => {
-          const Icon = toast.type === 'success' ? CheckCircle : toast.type === 'error' ? AlertCircle : Info;
-          return (
-            <div key={toast.id} className={`toast toast--${toast.type}`}>
-              <Icon size={16} />
-              <span>{toast.message}</span>
-            </div>
-          );
-        })}
-      </div>
+      {activeToast ? (
+        <div className="ui-toast" data-toast-type={activeToast.type} role="status" aria-live="polite">
+          {ActiveToastIcon ? <ActiveToastIcon className="ui-toast-icon" aria-hidden="true" /> : null}
+          <span className="ui-toast-text">{activeToast.message}</span>
+        </div>
+      ) : null}
     </AuthContext.Provider>
   );
 }

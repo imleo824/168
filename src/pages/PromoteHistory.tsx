@@ -18,7 +18,7 @@ import { useFocusScrollStabilizer } from '@/hooks/useFocusScrollStabilizer';
 import { resolveAdTargetUrlInput } from '@/utils/adTargetUrl';
 import { updatePromotionAdCreative } from '@/services/api';
 import type { PromotionBooking } from '@/types';
-import { LoadingBlock, StateBlock } from '@/ui/LoadingState';
+import { PageLoadingState, StateBlock } from '@/ui/LoadingState';
 import EmptyStateCard from '@/ui/EmptyStateCard';
 import PageContentShell from '@/ui/PageContentShell';
 import SurfaceSectionCard from '@/ui/SurfaceSectionCard';
@@ -312,7 +312,7 @@ export default function PromoteHistory() {
             </SurfaceSectionCard>
           </div>
         ) : isLoading || isAuthLoading ? (
-          <LoadingBlock text="正在加载推广记录" className="record-state-block" />
+          <PageLoadingState text="正在加载推广记录" className="record-state-block" />
         ) : isPromotionsError ? (
           <StateBlock
             title="加载失败"

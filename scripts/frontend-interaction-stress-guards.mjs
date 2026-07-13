@@ -111,10 +111,9 @@ assert(
 
 assert(
   commentSheet.includes('instantPress={false}') &&
-    commentSheet.includes('const closeSheetFrameRef = useRef<number | null>(null);') &&
-    commentSheet.includes('function scheduleSheetClose(callback: () => void)') &&
     commentSheet.includes('event?.preventDefault();') &&
-    commentSheet.includes('event?.stopPropagation();'),
+    commentSheet.includes('event?.stopPropagation();') &&
+    commentSheet.includes('setIsComposerOpen(true);'),
   'Comment sheet CTA must disable instant press and stop propagation to avoid rapid-tap click-through into the feed/create entry.',
 );
 
@@ -124,10 +123,8 @@ assertOrderAfter(
   [
     "setComposerError('');",
     'setIsComposerOpen(true);',
-    'closeSheetFrameRef.current = scheduleSheetClose(() => {',
-    'onClose();',
   ],
-  'Comment CTA must open the composer before closing the sheet on the next frame, so the same tap cannot hit the underlying page.',
+  'Comment CTA must open the composer directly without closing the parent comment sheet.',
 );
 
 assert(
