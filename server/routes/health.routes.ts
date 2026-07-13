@@ -22,6 +22,9 @@ const REQUIRED_RUNTIME_COLUMNS = [
   'User.points',
   'User.isDisabled',
 ] as const;
+const REQUIRED_RUNTIME_ENUM_VALUES = [
+  'PointAction.SIGNUP_REWARD',
+] as const;
 
 let healthCache: { expiresAt: number; statusCode: number; payload: any } | null = null;
 let readinessCache: { expiresAt: number; statusCode: number; payload: any } | null = null;
@@ -99,7 +102,7 @@ export function registerApiHealthRoute(app: Express) {
     const checks: Record<string, any> = {
       process: { ready: true },
       database: { ready: false, configured: isDbConfigured() },
-      schema: { ready: false, missingTables: [] as string[], missingColumns: [] as string[] },
+      schema: { ready: false, missingTables: [] as string[], missingColumns: [] as string[], missingEnumValues: [] as string[] },
       imageStorage: await getUploadStorageReadiness(),
     };
 
@@ -142,7 +145,29 @@ export function registerApiHealthRoute(app: Express) {
       checks.schema.missingColumns = columnRows
         .filter((row) => !row.exists)
         .map((row) => `${row.tableName}.${row.columnName}`);
-      checks.schema.ready = checks.schema.missingTables.length === 0 && checks.schema.missingColumns.length === 0;
+      const enumRows = await prisma.$queryRaw<Array<{ enumName: string; enumValue: string; exists: boolean }>>`
+        WITH required AS (
+          SELECT
+            split_part(item, '.', 1) AS enum_name,
+            split_part(item, '.', 2) AS enum_value
+          FROM unnest(${REQUIRED_RUNTIME_ENUM_VALUES as any}::text[]) AS item
+        )
+        SELECT
+          required.enum_name AS "enumName",
+          required.enum_value AS "enumValue",
+          enum_value.enumlabel IS NOT NULL AS "exists"
+        FROM required
+        LEFT JOIN pg_type enum_type ON enum_type.typname = required.enum_name
+        LEFT JOIN pg_enum enum_value
+          ON enum_value.enumtypid = enum_type.oid
+         AND enum_value.enumlabel = required.enum_value
+      `;
+      checks.schema.missingEnumValues = enumRows
+        .filter((row) => !row.exists)
+        .map((row) => `${row.enumName}.${row.enumValue}`);
+      checks.schema.ready = checks.schema.missingTables.length === 0
+        && checks.schema.missingColumns.length === 0
+        && checks.schema.missingEnumValues.length === 0;
       const ready = checks.database.ready && checks.schema.ready;
       return respondCached(res, makeCachedReadiness(ready ? 200 : 503, {
         status: ready ? 'ready' : 'not_ready',
