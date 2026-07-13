@@ -15,6 +15,13 @@ const REQUIRED_RUNTIME_TABLES = [
   'ChatRoom',
   'ChatMessage',
 ] as const;
+const REQUIRED_RUNTIME_COLUMNS = [
+  'User.loginAccount',
+  'User.passwordHash',
+  'User.paymentPasswordHash',
+  'User.points',
+  'User.isDisabled',
+] as const;
 
 let healthCache: { expiresAt: number; statusCode: number; payload: any } | null = null;
 let readinessCache: { expiresAt: number; statusCode: number; payload: any } | null = null;
@@ -92,7 +99,7 @@ export function registerApiHealthRoute(app: Express) {
     const checks: Record<string, any> = {
       process: { ready: true },
       database: { ready: false, configured: isDbConfigured() },
-      schema: { ready: false, missingTables: [] as string[] },
+      schema: { ready: false, missingTables: [] as string[], missingColumns: [] as string[] },
       imageStorage: await getUploadStorageReadiness(),
     };
 
@@ -115,7 +122,27 @@ export function registerApiHealthRoute(app: Express) {
       `;
       const existing = new Map(rows.map((row) => [row.tableName, Boolean(row.exists)]));
       checks.schema.missingTables = REQUIRED_RUNTIME_TABLES.filter((table) => !existing.get(table));
-      checks.schema.ready = checks.schema.missingTables.length === 0;
+      const columnRows = await prisma.$queryRaw<Array<{ tableName: string; columnName: string; exists: boolean }>>`
+        WITH required AS (
+          SELECT
+            split_part(item, '.', 1) AS table_name,
+            split_part(item, '.', 2) AS column_name
+          FROM unnest(${REQUIRED_RUNTIME_COLUMNS as any}::text[]) AS item
+        )
+        SELECT
+          required.table_name AS "tableName",
+          required.column_name AS "columnName",
+          columns.column_name IS NOT NULL AS "exists"
+        FROM required
+        LEFT JOIN information_schema.columns columns
+          ON columns.table_schema = 'public'
+         AND columns.table_name = required.table_name
+         AND columns.column_name = required.column_name
+      `;
+      checks.schema.missingColumns = columnRows
+        .filter((row) => !row.exists)
+        .map((row) => `${row.tableName}.${row.columnName}`);
+      checks.schema.ready = checks.schema.missingTables.length === 0 && checks.schema.missingColumns.length === 0;
       const ready = checks.database.ready && checks.schema.ready;
       return respondCached(res, makeCachedReadiness(ready ? 200 : 503, {
         status: ready ? 'ready' : 'not_ready',
