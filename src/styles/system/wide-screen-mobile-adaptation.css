@@ -1,5 +1,6 @@
 /* Wide-screen automatic adaptation for the user mobile-first app.
- * Contract: mobile keeps its current behavior; PC shows the same user mobile app scaled as one canvas.
+ * Contract: mobile keeps its current behavior; desktop uses a real app frame
+ * with persistent navigation and context rails instead of scaling a phone canvas.
  * Admin and non-user surfaces must not receive these variables or layout rules.
  */
 
@@ -7,6 +8,18 @@
   .app-shell[data-route-surface='user'] {
     --app-mobile-canvas-target-width: calc(var(--ui-space-8) * 12 + var(--ui-space-2) + var(--ui-space-half));
     --app-mobile-canvas-width: 100vw;
+    --app-desktop-sidebar-width: calc(var(--ui-space-8) * 7 + var(--ui-space-4));
+    --app-desktop-main-width: calc(var(--ui-space-8) * 21 + var(--ui-space-4));
+    --app-desktop-context-width: calc(var(--ui-space-8) * 8 + var(--ui-space-6));
+    --app-desktop-shell-gap: var(--ui-space-6);
+    --app-desktop-shell-padding-x: var(--ui-space-6);
+    --app-desktop-shell-padding-y: var(--ui-space-5);
+    --app-desktop-shell-width: calc(
+      var(--app-desktop-sidebar-width) +
+      var(--app-desktop-main-width) +
+      var(--app-desktop-context-width) +
+      (var(--app-desktop-shell-gap) * 2)
+    );
     --app-adaptive-scale: 1;
     --app-adaptive-scale-max: 1.28;
     --app-adaptive-scale-wide: 1.32;
@@ -40,7 +53,12 @@
     background: var(--ui-surface-page);
   }
 
-  @media (min-width: 768px) {
+  .app-desktop-sidebar,
+  .app-desktop-context-rail {
+    display: none;
+  }
+
+  @media (min-width: 768px) and (max-width: 1023px) {
     .app-shell[data-route-surface='user'] {
       --app-mobile-canvas-width: var(--app-mobile-canvas-target-width);
       --app-adaptive-scale: min(var(--app-adaptive-scale-max), calc((100vw - var(--ui-space-8)) / var(--app-mobile-canvas-target-width)));
@@ -86,10 +104,238 @@
     }
   }
 
-  @media (min-width: 1200px) {
+  @media (min-width: 1024px) {
     .app-shell[data-route-surface='user'] {
-      --app-adaptive-scale: var(--app-adaptive-scale-wide);
-      --app-adaptive-visual-width: calc(var(--app-mobile-canvas-width) * var(--app-adaptive-scale));
+      display: grid;
+      width: 100%;
+      min-height: 100svh;
+      grid-template-columns:
+        minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
+        minmax(0, var(--app-desktop-main-width))
+        minmax(calc(var(--ui-space-8) * 7), var(--app-desktop-context-width));
+      gap: var(--app-desktop-shell-gap);
+      align-items: start;
+      justify-content: center;
+      overflow-x: hidden;
+      padding: var(--app-desktop-shell-padding-y) var(--app-desktop-shell-padding-x);
+      background: var(--ui-surface-page);
+    }
+
+    .app-shell[data-route-surface='user'] .app-shell-main {
+      position: relative;
+      width: 100%;
+      max-width: var(--ui-max-width-none);
+      min-height: calc(100svh - (var(--app-desktop-shell-padding-y) * 2));
+      flex: initial;
+      overflow: hidden;
+      border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+      border-radius: var(--ui-radius-2xl);
+      background: var(--ui-surface-page);
+      box-shadow: var(--ui-shadow-card);
+      transform: none;
+      transform-origin: initial;
+    }
+
+    .app-shell[data-route-surface='user'] .app-bottom-nav {
+      display: none;
+    }
+
+    .app-desktop-sidebar,
+    .app-desktop-context-rail {
+      position: sticky;
+      top: var(--app-desktop-shell-padding-y);
+      display: flex;
+      max-height: calc(100svh - (var(--app-desktop-shell-padding-y) * 2));
+      flex-direction: column;
+      gap: var(--ui-space-4);
+    }
+
+    .app-desktop-sidebar {
+      width: 100%;
+    }
+
+    .app-desktop-brand,
+    .app-desktop-nav-item,
+    .app-desktop-context-card {
+      border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+      border-radius: var(--ui-radius-2xl);
+      background: var(--ui-surface-card-solid);
+      box-shadow: var(--ui-shadow-card);
+    }
+
+    .app-desktop-brand {
+      display: grid;
+      grid-template-columns: var(--ui-control-lg) minmax(0, 1fr);
+      align-items: center;
+      gap: var(--ui-space-3);
+      padding: var(--ui-space-4);
+      color: var(--ui-text-strong);
+      text-decoration: none;
+    }
+
+    .app-desktop-brand-mark {
+      display: inline-flex;
+      width: var(--ui-control-lg);
+      height: var(--ui-control-lg);
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--ui-radius-xl);
+      background: var(--ui-brand);
+      color: var(--ui-color-white);
+      font-size: var(--ui-text-title);
+      font-weight: var(--ui-font-weight-display);
+      line-height: var(--ui-line-none);
+    }
+
+    .app-desktop-brand-copy {
+      display: grid;
+      min-width: 0;
+      gap: var(--ui-space-half);
+    }
+
+    .app-desktop-brand-name {
+      font-size: var(--ui-text-title);
+      font-weight: var(--ui-font-weight-display);
+      line-height: var(--ui-line-tight);
+    }
+
+    .app-desktop-brand-subtitle {
+      color: var(--ui-text-muted);
+      font-size: var(--ui-text-xs);
+      font-weight: var(--ui-font-weight-medium);
+      line-height: var(--ui-line-tight);
+    }
+
+    .app-desktop-nav {
+      display: grid;
+      gap: var(--ui-space-2);
+    }
+
+    .app-desktop-nav-item {
+      display: grid;
+      min-height: var(--ui-control-hit);
+      grid-template-columns: var(--ui-control-sm) minmax(0, 1fr);
+      align-items: center;
+      gap: var(--ui-space-3);
+      padding: var(--ui-space-2) var(--ui-space-4);
+      color: var(--ui-text-secondary);
+      font-size: var(--ui-text-sm);
+      font-weight: var(--ui-font-weight-strong);
+      line-height: var(--ui-line-tight);
+      text-decoration: none;
+      transition:
+        background-color var(--ui-duration-base) var(--ease-standard),
+        border-color var(--ui-duration-base) var(--ease-standard),
+        color var(--ui-duration-base) var(--ease-standard);
+    }
+
+    .app-desktop-nav-icon {
+      width: var(--ui-control-icon-md);
+      height: var(--ui-control-icon-md);
+      justify-self: center;
+      stroke-width: var(--ui-icon-stroke);
+    }
+
+    .app-desktop-nav-item:hover {
+      border-color: var(--ui-line-medium);
+      background: var(--ui-state-hover);
+      color: var(--ui-text-strong);
+    }
+
+    .app-desktop-nav-item--active,
+    .app-desktop-nav-item--active:hover {
+      border-color: var(--ui-brand-soft-25);
+      background: var(--ui-state-selected);
+      color: var(--ui-brand-strong);
+    }
+
+    .app-desktop-context-card {
+      padding: var(--ui-space-4);
+    }
+
+    .app-desktop-context-kicker {
+      color: var(--ui-text-muted);
+      font-size: var(--ui-text-xs);
+      font-weight: var(--ui-font-weight-strong);
+      line-height: var(--ui-line-tight);
+    }
+
+    .app-desktop-context-metric {
+      display: flex;
+      align-items: center;
+      gap: var(--ui-space-2);
+      margin-top: var(--ui-space-2);
+      color: var(--ui-text-strong);
+      font-size: var(--ui-type-xl-size);
+      font-weight: var(--ui-font-weight-display);
+      line-height: var(--ui-line-tight);
+    }
+
+    .app-desktop-context-dot {
+      width: var(--ui-space-2);
+      height: var(--ui-space-2);
+      border-radius: var(--ui-radius-full);
+      background: var(--ui-brand);
+      box-shadow: 0 0 0 var(--ui-space-half) var(--ui-focus-ring);
+    }
+
+    .app-desktop-context-title {
+      margin: var(--ui-space-none);
+      color: var(--ui-text-strong);
+      font-size: var(--ui-text-title);
+      font-weight: var(--ui-font-weight-title);
+      line-height: var(--ui-line-tight);
+    }
+
+    .app-desktop-context-actions {
+      display: grid;
+      gap: var(--ui-space-2);
+      margin-top: var(--ui-space-4);
+    }
+
+    .app-desktop-context-action {
+      display: flex;
+      min-height: var(--ui-control-lg);
+      align-items: center;
+      justify-content: center;
+      border: var(--ui-border-width-hairline) solid var(--ui-line-soft);
+      border-radius: var(--ui-radius-xl);
+      background: var(--ui-surface-card-solid);
+      color: var(--ui-text-strong);
+      font-size: var(--ui-text-sm);
+      font-weight: var(--ui-font-weight-strong);
+      line-height: var(--ui-line-tight);
+      text-align: center;
+      text-decoration: none;
+      transition:
+        background-color var(--ui-duration-base) var(--ease-standard),
+        border-color var(--ui-duration-base) var(--ease-standard),
+        color var(--ui-duration-base) var(--ease-standard);
+    }
+
+    .app-desktop-context-action:hover {
+      border-color: var(--ui-line-medium);
+      background: var(--ui-state-hover);
+      color: var(--ui-text-strong);
+    }
+
+    .app-desktop-context-action--primary,
+    .app-desktop-context-action--primary:hover {
+      border-color: var(--ui-brand);
+      background: var(--ui-brand);
+      color: var(--ui-color-white);
+    }
+  }
+
+  @media (min-width: 1024px) and (max-width: 1179px) {
+    .app-shell[data-route-surface='user'] {
+      grid-template-columns:
+        minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
+        minmax(0, var(--app-desktop-main-width));
+    }
+
+    .app-desktop-context-rail {
+      display: none;
     }
   }
 
