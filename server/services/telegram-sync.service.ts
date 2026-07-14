@@ -96,6 +96,23 @@ function normalizeTelegramMessageBody(text: string) {
   return normalized.join('\n').trim();
 }
 
+function escapeTelegramHtml(input: unknown) {
+  return String(input ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function escapeTelegramHtmlAttribute(input: unknown) {
+  return escapeTelegramHtml(input).replace(/"/g, '&quot;');
+}
+
+function buildTelegramHtmlLink(url: string, label: string) {
+  const normalizedUrl = String(url || '').trim();
+  if (!normalizedUrl) return '';
+  return `<a href="${escapeTelegramHtmlAttribute(normalizedUrl)}">${escapeTelegramHtml(label)}</a>`;
+}
+
 function stripInlineTagsForTelegramContent(input: unknown) {
   const text = normalizeTelegramPreservedText(input);
   if (!text) return '';
@@ -185,18 +202,27 @@ function splitTelegramCaptionAndRest(text: string) {
   return { caption: chunks[0] || '', restChunks: chunks.slice(1) };
 }
 
-function renderTelegramTemplate(template: string, values: Record<string, string>) {
+function renderTelegramTemplate(template: string, values: Record<string, string>, htmlValues: Record<string, string> = {}) {
   const placeholderReg = /\{([a-zA-Z0-9_]+)\}/g;
   return `${template || ''}`
     .split('\n')
     .map((line) => {
       const keys: string[] = [];
-      const rendered = line.replace(placeholderReg, (_match, key) => {
+      let rendered = '';
+      let cursor = 0;
+      for (const match of line.matchAll(placeholderReg)) {
+        const [token, key] = match;
+        const index = match.index ?? 0;
+        rendered += escapeTelegramHtml(line.slice(cursor, index));
         keys.push(key);
-        return Object.prototype.hasOwnProperty.call(values, key) ? (values[key] || '') : '';
-      });
+        rendered += Object.prototype.hasOwnProperty.call(htmlValues, key)
+          ? (htmlValues[key] || '')
+          : (Object.prototype.hasOwnProperty.call(values, key) ? escapeTelegramHtml(values[key] || '') : '');
+        cursor = index + token.length;
+      }
+      rendered += escapeTelegramHtml(line.slice(cursor));
       if (!keys.length) return rendered;
-      const hasAnyResolvedContent = keys.some((key) => Boolean((values[key] || '').trim()));
+      const hasAnyResolvedContent = keys.some((key) => Boolean((values[key] || htmlValues[key] || '').trim()));
       return hasAnyResolvedContent ? rendered : '';
     })
     .join('\n');
@@ -345,6 +371,21 @@ function getTelegramPostImageSources(post: any, maxCount = 10) {
   return [...unique];
 }
 
+function resolveTelegramPhotoUrlSources(params: { post: any; origin: string; maxCount?: number }) {
+  const maxCount = Math.min(Math.max(params.maxCount || 10, 1), 10);
+  const imageSources = getTelegramPostImageSources(params.post, maxCount);
+  const urls = new Set<string>();
+  for (const source of imageSources) {
+    for (const candidate of buildPostSharePreviewCandidates(source, params.origin)) {
+      if (!/^https?:\/\//i.test(candidate)) continue;
+      urls.add(candidate);
+      break;
+    }
+    if (urls.size >= maxCount) break;
+  }
+  return [...urls];
+}
+
 function makeTelegramPhotoFilename(index: number, contentType: string, postId?: string) {
   const ext = contentType.includes('png') ? 'png' : contentType.includes('webp') ? 'webp' : 'jpg';
   return `post-${postId || 'share'}-${index + 1}.${ext}`;
@@ -386,7 +427,9 @@ async function resolveTelegramPhotoAssets(params: { post: any; origin: string; m
 function ensureDetailLinkInText(text: string, shareUrl: string) {
   const normalized = normalizeTelegramMessageBody(text);
   if (!shareUrl || normalized.includes(shareUrl)) return normalized;
-  return normalizeTelegramMessageBody(`${normalized}\n\n详情：${shareUrl}`);
+  if (normalized.includes('查看详情')) return normalized;
+  const detailLink = buildTelegramHtmlLink(shareUrl, '查看详情');
+  return normalizeTelegramMessageBody(`${normalized}\n\n${detailLink}`);
 }
 
 function buildTelegramChannelPostText(params: { post: any; shareUrl: string; authorName: string; template?: string | null }) {
@@ -400,6 +443,9 @@ function buildTelegramChannelPostText(params: { post: any; shareUrl: string; aut
     contactLine: contactUrl || '',
     sourceLine: '\u200Btuitui888.com',
     categoryLine,
+    shareUrl: '查看详情',
+  }, {
+    shareUrl: buildTelegramHtmlLink(params.shareUrl, '查看详情'),
   });
   return ensureDetailLinkInText(rendered, params.shareUrl);
 }
@@ -413,6 +459,7 @@ async function sendTelegramTextChunks(params: { token: string; chatId: string; c
       payload: {
         chat_id: params.chatId,
         text: chunk,
+        parse_mode: 'HTML',
         link_preview_options: { is_disabled: true },
       },
     });
@@ -421,6 +468,7 @@ async function sendTelegramTextChunks(params: { token: string; chatId: string; c
 
 async function sendTelegramChannelPost(params: { token: string; chatId: string; text: string; post: any; origin: string }) {
   const photoAssets = await resolveTelegramPhotoAssets({ post: params.post, origin: params.origin, maxCount: 10 });
+  const photoUrls = resolveTelegramPhotoUrlSources({ post: params.post, origin: params.origin, maxCount: 10 });
   const normalizedText = normalizeTelegramPreservedText(params.text);
   const fullTextChunks = splitTelegramTextPreservingLines(normalizedText, TELEGRAM_MESSAGE_TEXT_MAX_LENGTH);
 
@@ -432,7 +480,7 @@ async function sendTelegramChannelPost(params: { token: string; chatId: string; 
       formData.append('media', JSON.stringify(photoAssets.slice(0, 10).map((_asset, index) => ({
         type: 'photo',
         media: `attach://photo_${index}`,
-        ...(index === 0 && caption ? { caption } : {}),
+        ...(index === 0 && caption ? { caption, parse_mode: 'HTML' } : {}),
       }))));
       photoAssets.slice(0, 10).forEach((asset, index) => {
         formData.append(`photo_${index}`, new Blob([asset.buffer], { type: asset.contentType }), asset.fileName);
@@ -446,6 +494,29 @@ async function sendTelegramChannelPost(params: { token: string; chatId: string; 
     }
   }
 
+  if (photoUrls.length >= 2) {
+    try {
+      const { caption, restChunks } = splitTelegramCaptionAndRest(normalizedText);
+      await callTelegramBotApi({
+        token: params.token,
+        method: 'sendMediaGroup',
+        payload: {
+          chat_id: params.chatId,
+          media: photoUrls.slice(0, 10).map((url, index) => ({
+            type: 'photo',
+            media: url,
+            ...(index === 0 && caption ? { caption, parse_mode: 'HTML' } : {}),
+          })),
+        },
+      });
+      const remainingChunks = splitTelegramTextPreservingLines(restChunks.join('\n'), TELEGRAM_MESSAGE_TEXT_MAX_LENGTH);
+      if (remainingChunks.length > 0) await sendTelegramTextChunks({ token: params.token, chatId: params.chatId, chunks: remainingChunks });
+      return;
+    } catch (error: any) {
+      console.warn('[telegram-sync] sendMediaGroup by URL failed:', error?.message || error);
+    }
+  }
+
   if (photoAssets.length >= 1) {
     try {
       const [image] = photoAssets;
@@ -453,6 +524,7 @@ async function sendTelegramChannelPost(params: { token: string; chatId: string; 
       const formData = new FormData();
       formData.append('chat_id', params.chatId);
       if (caption) formData.append('caption', caption);
+      if (caption) formData.append('parse_mode', 'HTML');
       formData.append('photo', new Blob([image.buffer], { type: image.contentType }), image.fileName);
       await callTelegramBotApiMultipart({ token: params.token, method: 'sendPhoto', formData });
       const remainingChunks = splitTelegramTextPreservingLines(restChunks.join('\n'), TELEGRAM_MESSAGE_TEXT_MAX_LENGTH);
@@ -460,6 +532,26 @@ async function sendTelegramChannelPost(params: { token: string; chatId: string; 
       return;
     } catch (error: any) {
       console.warn('[telegram-sync] sendPhoto failed:', error?.message || error);
+    }
+  }
+
+  if (photoUrls.length >= 1) {
+    try {
+      const { caption, restChunks } = splitTelegramCaptionAndRest(normalizedText);
+      await callTelegramBotApi({
+        token: params.token,
+        method: 'sendPhoto',
+        payload: {
+          chat_id: params.chatId,
+          photo: photoUrls[0],
+          ...(caption ? { caption, parse_mode: 'HTML' } : {}),
+        },
+      });
+      const remainingChunks = splitTelegramTextPreservingLines(restChunks.join('\n'), TELEGRAM_MESSAGE_TEXT_MAX_LENGTH);
+      if (remainingChunks.length > 0) await sendTelegramTextChunks({ token: params.token, chatId: params.chatId, chunks: remainingChunks });
+      return;
+    } catch (error: any) {
+      console.warn('[telegram-sync] sendPhoto by URL failed:', error?.message || error);
     }
   }
 

@@ -273,25 +273,19 @@ export function AdminSystemConfigSections({
                           className="admin-form-control admin-form-control--muted admin-form-control--textarea admin-form-control--textarea-lg"
                           value={localConfig?.telegram_share_template || ''}
                           onChange={(e) => updateConfigValue('telegram_share_template', e.target.value)}
-                          placeholder="支持变量：{author}{authorLine}{title}{content}{categoryLine}{categoryOnlyLine}{tagsLine}{topicLine}{contactLine}{sourceLine}{shareUrl}{visibility}{visibilityLine}{visibilityBadge}{category}{tags}{contact}{source}{titleLine}{contentLine}{postId}"
+                          placeholder="支持变量：{contentLine}{authorLine}{contactLine}{sourceLine}{categoryLine}{shareUrl}"
                         />
                         <div className="admin-form-note admin-form-note--compact">
                           变量说明：
-                          {` {author}/{authorLine}：作者昵称（authorLine 默认带 👤）`}
-                          {`、{title}/{titleLine}：标题文本（titleLine 为同义变量）`}
-                          {`、{content}/{contentLine}：正文文本（contentLine 为空时不自动补文案）`}
-                          {`、{categoryLine}：分类+已落库标签 hashtag（推荐）`}
-                          {`、{categoryOnlyLine}：仅分类 hashtag`}
-                          {`、{tagsLine}/{tags}：仅已落库标签 hashtag（不含分类）`}
-                          {`、{topicLine}：与 categoryLine 同义`}
-                          {`、{contactLine}/{contact}：Telegram 联系链接（无联系方式时为空）`}
-                          {`、{sourceLine}：来源链接（webhook 用 source；普通发布用站点域名）`}
-                          {`、{shareUrl}：帖子详情链接`}
-                          {`、{visibility}/{visibilityLine}/{visibilityBadge}：公开匿名状态变量`}
-                          {`、{category}/{source}/{postId}：原始文本或ID变量`}
+                          {` {contentLine}：正文文本`}
+                          {`、{authorLine}：作者昵称`}
+                          {`、{contactLine}：Telegram 联系方式（无联系方式时为空）`}
+                          {`、{sourceLine}：站点来源`}
+                          {`、{categoryLine}：分类 hashtag`}
+                          {`、{shareUrl}：可点击的“查看详情”链接`}
                         </div>
                         <p className="admin-form-note admin-form-note--compact mt-2">
-                          发送逻辑：模板中变量所在行若值为空会整行移除；建议保留 {`{shareUrl}`}。多图按 Telegram 相册自动排版，单图/无图也会正常发送。仅当「勾选同步」且满足上方过滤条件（最少正文字数/是否有图）才会实际推送。
+                          发送逻辑：模板中变量所在行若值为空会整行移除；未写 {`{shareUrl}`} 时系统会自动在末尾补“查看详情”。多图优先按 Telegram 相册发送，单图优先按图片消息发送；图片文件上传失败时会再用公开图片地址重试。仅当「勾选同步」且满足上方过滤条件（最少正文字数/是否有图）才会实际推送。
                         </p>
                       </div>
                     </div>
