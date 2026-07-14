@@ -95,6 +95,13 @@ function isPageOwnedHeaderPath(pathname: string) {
   return pathname === '/' || hasPrefix(pathname, PAGE_OWNED_HEADER_PREFIXES);
 }
 
+function getDesktopSurfaceKind(pathname: string) {
+  if (pathname === '/chat') return 'conversation';
+  if (pathname.startsWith('/post/')) return 'detail';
+  if (pathname === '/' || pathname.startsWith('/category/')) return 'feed';
+  return 'page';
+}
+
 function hasOverlayBackgroundLocation(state: unknown) {
   if (!state || typeof state !== 'object') return false;
   const backgroundLocation = (state as { backgroundLocation?: unknown }).backgroundLocation;
@@ -317,6 +324,7 @@ function AppLayout() {
   const routeSurface = isAdminRoute ? 'admin' : 'user';
   const isUserSurface = routeSurface === 'user';
   const isChatRoute = isUserSurface && pathname === '/chat';
+  const desktopSurfaceKind = isUserSurface ? getDesktopSurfaceKind(pathname) : 'admin';
 
   useMobileAddressBar(pathname);
   useBrowserPushResync(user?.id);
@@ -337,6 +345,7 @@ function AppLayout() {
     <div
       className={appClassName}
       data-route-surface={routeSurface}
+      data-desktop-surface={desktopSurfaceKind}
       data-chat-route-active={isChatRoute ? 'true' : undefined}
     >
       {isUserSurface ? <Navigation /> : null}
@@ -344,6 +353,7 @@ function AppLayout() {
       <div
         className="app-main app-shell-main"
         data-route-surface={routeSurface}
+        data-desktop-surface={desktopSurfaceKind}
         data-app-shell-width={appShellWidth}
         data-bottom-nav-visible={isUserSurface ? 'true' : undefined}
         data-route-overlay-active={isRouteOverlay ? 'true' : undefined}
