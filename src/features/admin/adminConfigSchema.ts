@@ -113,7 +113,6 @@ export function normalizeAdminPublishField(raw: unknown, index: number): Publish
       : String(item.options || '').split(/[\n,，]/);
     const normalizedOptions = options
       .map((option: unknown) => normalizeAdminPublishText(option, 40))
-      .filter(Boolean)
       .slice(0, 40);
     field.options = normalizedOptions.length > 0 ? normalizedOptions : defaultOptions;
   }

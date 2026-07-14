@@ -82,74 +82,88 @@ export function useAdminSystemConfigEditor({
     }));
   }, [setLocalConfig]);
 
+  const updatePublishCategorySchema = useCallback((updater: (schema: PublishCategoryMetaConfig[]) => PublishCategoryMetaConfig[]) => {
+    setLocalConfig((prev: any) => ({
+      ...prev,
+      publish_category_schema: updater(normalizeAdminPublishCategorySchema(prev?.publish_category_schema)),
+    }));
+  }, [setLocalConfig]);
+
   const updatePublishCategory = useCallback((index: number, patch: Partial<PublishCategoryMetaConfig>) => {
-    const nextSchema = normalizeAdminPublishCategorySchema(localConfig?.publish_category_schema);
-    if (!nextSchema[index]) return;
-    nextSchema[index] = { ...nextSchema[index], ...patch };
-    setPublishCategorySchema(nextSchema);
-  }, [localConfig?.publish_category_schema, setPublishCategorySchema]);
+    updatePublishCategorySchema((nextSchema) => {
+      if (!nextSchema[index]) return nextSchema;
+      nextSchema[index] = { ...nextSchema[index], ...patch };
+      return nextSchema;
+    });
+  }, [updatePublishCategorySchema]);
 
   const addPublishCategory = useCallback(() => {
-    const nextSchema = normalizeAdminPublishCategorySchema(localConfig?.publish_category_schema);
-    nextSchema.push({
-      name: '新分类',
-      schemaVersion: 1,
-      fields: [makeUniquePublishField()],
+    updatePublishCategorySchema((nextSchema) => {
+      nextSchema.push({
+        name: '新分类',
+        schemaVersion: 1,
+        fields: [makeUniquePublishField()],
+      });
+      return nextSchema;
     });
-    setPublishCategorySchema(nextSchema);
-  }, [localConfig?.publish_category_schema, setPublishCategorySchema]);
+  }, [updatePublishCategorySchema]);
 
   const removePublishCategory = useCallback((index: number) => {
-    const nextSchema = normalizeAdminPublishCategorySchema(localConfig?.publish_category_schema);
-    nextSchema.splice(index, 1);
-    setPublishCategorySchema(nextSchema);
-  }, [localConfig?.publish_category_schema, setPublishCategorySchema]);
+    updatePublishCategorySchema((nextSchema) => {
+      nextSchema.splice(index, 1);
+      return nextSchema;
+    });
+  }, [updatePublishCategorySchema]);
 
   const movePublishCategory = useCallback((index: number, direction: -1 | 1) => {
-    const nextSchema = normalizeAdminPublishCategorySchema(localConfig?.publish_category_schema);
-    const targetIndex = index + direction;
-    if (targetIndex < 0 || targetIndex >= nextSchema.length) return;
-    const [item] = nextSchema.splice(index, 1);
-    nextSchema.splice(targetIndex, 0, item);
-    setPublishCategorySchema(nextSchema);
-  }, [localConfig?.publish_category_schema, setPublishCategorySchema]);
+    updatePublishCategorySchema((nextSchema) => {
+      const targetIndex = index + direction;
+      if (targetIndex < 0 || targetIndex >= nextSchema.length) return nextSchema;
+      const [item] = nextSchema.splice(index, 1);
+      nextSchema.splice(targetIndex, 0, item);
+      return nextSchema;
+    });
+  }, [updatePublishCategorySchema]);
 
   const updatePublishCategoryField = useCallback((categoryIndex: number, fieldIndex: number, patch: Partial<PublishCategoryMetaFieldConfig>) => {
-    const nextSchema = normalizeAdminPublishCategorySchema(localConfig?.publish_category_schema);
-    const category = nextSchema[categoryIndex];
-    if (!category?.fields?.[fieldIndex]) return;
-    const current = category.fields[fieldIndex];
-    const nextField = { ...current, ...patch };
-    if (patch.type) {
-      delete nextField.min;
-      delete nextField.max;
-      delete nextField.maxLength;
-      delete nextField.options;
-      if (patch.type === 'text') nextField.maxLength = 80;
-      if (patch.type === 'select') nextField.options = [];
-    }
-    category.fields[fieldIndex] = nextField;
-    category.schemaVersion = nextSchemaVersion(category);
-    setPublishCategorySchema(nextSchema);
-  }, [localConfig?.publish_category_schema, setPublishCategorySchema]);
+    updatePublishCategorySchema((nextSchema) => {
+      const category = nextSchema[categoryIndex];
+      if (!category?.fields?.[fieldIndex]) return nextSchema;
+      const current = category.fields[fieldIndex];
+      const nextField = { ...current, ...patch };
+      if (patch.type) {
+        delete nextField.min;
+        delete nextField.max;
+        delete nextField.maxLength;
+        delete nextField.options;
+        if (patch.type === 'text') nextField.maxLength = 80;
+        if (patch.type === 'select') nextField.options = [];
+      }
+      category.fields[fieldIndex] = nextField;
+      category.schemaVersion = nextSchemaVersion(category);
+      return nextSchema;
+    });
+  }, [updatePublishCategorySchema]);
 
   const addPublishCategoryField = useCallback((categoryIndex: number) => {
-    const nextSchema = normalizeAdminPublishCategorySchema(localConfig?.publish_category_schema);
-    const category = nextSchema[categoryIndex];
-    if (!category) return;
-    category.fields = [...(category.fields || []), makeUniquePublishField(category.fields || [])];
-    category.schemaVersion = nextSchemaVersion(category);
-    setPublishCategorySchema(nextSchema);
-  }, [localConfig?.publish_category_schema, setPublishCategorySchema]);
+    updatePublishCategorySchema((nextSchema) => {
+      const category = nextSchema[categoryIndex];
+      if (!category) return nextSchema;
+      category.fields = [...(category.fields || []), makeUniquePublishField(category.fields || [])];
+      category.schemaVersion = nextSchemaVersion(category);
+      return nextSchema;
+    });
+  }, [updatePublishCategorySchema]);
 
   const removePublishCategoryField = useCallback((categoryIndex: number, fieldIndex: number) => {
-    const nextSchema = normalizeAdminPublishCategorySchema(localConfig?.publish_category_schema);
-    const category = nextSchema[categoryIndex];
-    if (!category) return;
-    category.fields = (category.fields || []).filter((_field, index) => index !== fieldIndex);
-    category.schemaVersion = nextSchemaVersion(category);
-    setPublishCategorySchema(nextSchema);
-  }, [localConfig?.publish_category_schema, setPublishCategorySchema]);
+    updatePublishCategorySchema((nextSchema) => {
+      const category = nextSchema[categoryIndex];
+      if (!category) return nextSchema;
+      category.fields = (category.fields || []).filter((_field, index) => index !== fieldIndex);
+      category.schemaVersion = nextSchemaVersion(category);
+      return nextSchema;
+    });
+  }, [updatePublishCategorySchema]);
 
   return {
     publishCategorySchema,

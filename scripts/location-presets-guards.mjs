@@ -175,6 +175,21 @@ assert.match(
   'Admin publish category add field must create a valid field and bump schemaVersion.',
 );
 assert.match(
+  adminSystemConfigEditorSource,
+  /updatePublishCategorySchema[\s\S]*prev\?\.publish_category_schema/,
+  'Admin publish category edits must use the latest localConfig state so continuous typing does not lose characters.',
+);
+assert.match(
+  adminSystemConfigSectionsSource,
+  /options:\s*e\.target\.value\.split\('\\n'\)/,
+  'Admin publish category select options textarea must preserve newlines while editing.',
+);
+assert.doesNotMatch(
+  adminConfigSchemaSource,
+  /normalizedOptions[\s\S]{0,120}\.filter\(Boolean\)/,
+  'Admin publish category select options must not drop blank lines while the textarea is being edited.',
+);
+assert.match(
   useDataConfigSource,
   /alwaysFresh[\s\S]*staleTime:\s*options\.alwaysFresh\s*\?\s*0\s*:\s*CONFIG_STALE_TIME/,
   'Post create must be able to bypass stale public config after admin publish category field changes.',

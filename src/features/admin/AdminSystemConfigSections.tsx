@@ -661,7 +661,7 @@ export function AdminSystemConfigSections({
                     className="mt-1 admin-form-control admin-form-control--textarea admin-form-control--textarea-sm"
                     value={fieldOptionsText}
                     onChange={(e) => updatePublishCategoryField(categoryIndex, fieldIndex, {
-                    options: e.target.value.split('\n').map((item) => item.trim()).filter(Boolean),
+                    options: e.target.value.split('\n'),
                     })}
                     placeholder={'选项 A\n选项 B'}
                     />
