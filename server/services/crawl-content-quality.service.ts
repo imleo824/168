@@ -49,6 +49,8 @@ const CONTACT_PATTERNS = [
   /\+?\d[\d\s-]{7,}\d/g,
 ];
 
+const DIRECT_REJECT_KEYWORDS = ['官网', '网址', '.com', '下载', 'TRX', '注册'] as const;
+
 function unique<T>(items: T[]) {
   return Array.from(new Set(items));
 }
@@ -69,6 +71,12 @@ function compact(raw: string) {
 
 function canonicalContent(raw: unknown) {
   return compact(cleanCrawlContent(raw));
+}
+
+function findDirectRejectKeyword(raw: string) {
+  const text = String(raw || '');
+  const lower = text.toLowerCase();
+  return DIRECT_REJECT_KEYWORDS.find((keyword) => lower.includes(keyword.toLowerCase())) || '';
 }
 
 function normalizeSemanticSymbols(raw: string) {
@@ -243,6 +251,21 @@ export function filterCrawlContentBeforePublish<T extends {
   const rawTitle = canonicalContent(input.title || '');
   const canonical = canonicalContent(input.content);
   const imageCount = Array.isArray(input.images) ? input.images.filter(Boolean).length : 0;
+  const directRejectKeyword = findDirectRejectKeyword(`${rawTitle}\n${canonical}`);
+
+  if (directRejectKeyword) {
+    return {
+      shouldPublish: false,
+      reason: 'ad_keyword',
+      score: 0,
+      cleanedTitle: cleanTitle(rawTitle, canonical),
+      cleanedContent: '',
+      contact: '',
+      flags: ['direct_reject_keyword', `keyword:${directRejectKeyword}`],
+      removed: { emojiCount: 0, emojiRatio: 0, contactLines: 0, promoLines: 0, boilerplateLines: 0, tailLines: 0, duplicateLines: 0 },
+      diagnostics: { canonicalLength: textLength(canonical), cleanedLength: 0, imageCount, rawLineCount: canonical.split('\n').filter(Boolean).length, keptLineCount: 0, removedLineRatio: 1, repeatedLineRatio: 0 },
+    };
+  }
 
   if (isTelegramServiceActionContent(rawTitle, canonical)) {
     return {

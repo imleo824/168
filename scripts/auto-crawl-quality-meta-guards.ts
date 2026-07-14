@@ -21,6 +21,18 @@ assert.doesNotMatch(quality.cleanedContent, /\$1|helper1234|t\.me|频道赞助�
 assert.ok(quality.removed.contactLines >= 2, 'contact removal must be audited.');
 assert.ok(quality.removed.tailLines >= 2, 'tail removal must be audited.');
 
+for (const keyword of ['官网', '网址', '.com', '下载', 'TRX', '注册']) {
+  const rejected = filterCrawlContentBeforePublish({
+    title: keyword === '官网' ? '官网活动入口' : '东京本地信息',
+    content: `东京本地福利内容，更多请${keyword}后查看。`,
+    images: [],
+  });
+
+  assert.equal(rejected.shouldPublish, false, `${keyword} content must be rejected before publish.`);
+  assert.equal(rejected.reason, 'ad_keyword', `${keyword} rejection must use the ad keyword reason.`);
+  assert.ok(rejected.flags.includes('direct_reject_keyword'), `${keyword} rejection must be auditable.`);
+}
+
 const meta = await normalizeCrawlCategoryMeta({
   category: { id: 'category_jobs', name: '招聘', slug: 'jobs' },
   categoryMetaSchema: {
