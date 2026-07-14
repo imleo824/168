@@ -85,7 +85,7 @@ function schemaInstruction(context: AutoCrawlExtractionContext) {
     ? `\nlocation 类型字段只能原样输出数据库地点预设之一：${JSON.stringify(locationValues(context.locationPresets))}`
     : '';
   const salaryRangeRule = hasSalaryRange
-    ? '\n薪资 select 字段必须理解原文金额再归入配置区间：U、USDT、USD、美元、刀按美元等值处理；其他明确币种按原文金额语义选择最接近区间。原文没有明确数字金额，或只写面谈、面议、待遇从优、薪资详聊、看能力，必须输出“面议”。'
+    ? '\n薪资 select 字段必须先识别金额、币种和周期，再归入配置区间：U、USDT、USD、美元、刀按美元等值处理；也要识别 RMB/CNY/人民币、PHP/披索/比索、THB/泰铢、KHR/瑞尔、VND/越南盾、AED/迪拉姆、MYR/马币/林吉特、SGD/新币、IDR/印尼盾、LAK/基普、MMK/缅币、JPY/日元、KRW/韩元、HKD/港币、MOP/澳门币、EUR/欧元等常见币种。能按原文语义合理换算到美元月薪区间时，输出最接近的 options 原文值；没有明确数字金额，或币种/周期不足以可靠判断，或只写面谈、面议、待遇从优、薪资详聊、看能力，必须输出“面议”。'
     : '';
 
   return `当前分类允许的 Meta Schema：${JSON.stringify(fields)}${locationRule}${salaryRangeRule}\nmeta 只能包含 Schema 中配置的 key。字段 key 只是输出键，原文不需要出现 key 字符串；必须结合字段 label、type、options 和完整原文上下文理解后提取，不要做关键词照抄。number 字段要从薪资、价格、数量等文本中解析数值，例如“薪资 1000USD”输出 {"salary":1000}；select 字段必须输出 options 中的原文值，不能自造新值。无法确认的非薪资字段直接省略，Meta 提取多少写多少，不完整不影响发布。`;
