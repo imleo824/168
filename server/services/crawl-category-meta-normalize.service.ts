@@ -84,6 +84,80 @@ function exactConfiguredOption(raw: unknown, field: PublishCategoryMetaFieldConf
   return matches.length === 1 ? matches[0] : null;
 }
 
+function negotiableOption(field: PublishCategoryMetaFieldConfig) {
+  return (field.options || []).find((option) => normalizedComparable(option) === normalizedComparable('面议')) || null;
+}
+
+function isSalarySelectField(field: PublishCategoryMetaFieldConfig) {
+  return field.type === 'select'
+    && /薪资|工资|待遇/i.test(field.label)
+    && (field.options || []).some((option) => /\$|面议/.test(option));
+}
+
+function salaryCurrencyRate(raw: string) {
+  if (/(?:usdt|usd|(?:^|[^a-z])u(?:$|[^a-z])|美元|美金|刀|\$)/i.test(raw)) return 1;
+  if (/(?:rmb|cny|人民币|¥)/i.test(raw)) return 0.14;
+  if (/(?:php|披索|比索|peso)/i.test(raw)) return 0.017;
+  if (/(?:thb|泰铢)/i.test(raw)) return 0.027;
+  if (/(?:khr|瑞尔)/i.test(raw)) return 0.00025;
+  if (/(?:vnd|越南盾)/i.test(raw)) return 0.000039;
+  if (/(?:aed|迪拉姆)/i.test(raw)) return 0.272;
+  if (/(?:myr|马币|林吉特)/i.test(raw)) return 0.21;
+  if (/(?:sgd|新币|新加坡元)/i.test(raw)) return 0.74;
+  if (/(?:idr|印尼盾)/i.test(raw)) return 0.000061;
+  if (/(?:lak|基普)/i.test(raw)) return 0.000046;
+  if (/(?:mmk|缅币)/i.test(raw)) return 0.00048;
+  if (/(?:jpy|日元)/i.test(raw)) return 0.0064;
+  if (/(?:krw|韩元)/i.test(raw)) return 0.00072;
+  if (/(?:hkd|港币)/i.test(raw)) return 0.128;
+  if (/(?:mop|澳门币)/i.test(raw)) return 0.124;
+  if (/(?:eur|欧元)/i.test(raw)) return 1.08;
+  return null;
+}
+
+function salaryOptionRange(option: string) {
+  const text = String(option || '').normalize('NFKC').replace(/,/g, '');
+  const numbers = (text.match(/\d+(?:\.\d+)?/g) || []).map(Number).filter(Number.isFinite);
+  if (!numbers.length) return null;
+  if (/以下/.test(text)) return { min: Number.NEGATIVE_INFINITY, max: numbers[0] };
+  if (/以上/.test(text)) return { min: numbers[0], max: Number.POSITIVE_INFINITY };
+  if (numbers.length >= 2) return { min: Math.min(numbers[0], numbers[1]), max: Math.max(numbers[0], numbers[1]) };
+  return null;
+}
+
+function chooseSalaryRangeOption(usdAmount: number, field: PublishCategoryMetaFieldConfig) {
+  for (const option of field.options || []) {
+    const range = salaryOptionRange(option);
+    if (!range) continue;
+    if (usdAmount >= range.min && usdAmount <= range.max) return option;
+  }
+  return null;
+}
+
+function semanticSalaryOption(raw: unknown, field: PublishCategoryMetaFieldConfig) {
+  if (!isSalarySelectField(field)) return null;
+
+  const option = negotiableOption(field);
+  if (typeof raw !== 'number' && typeof raw !== 'string') return option;
+  const text = String(raw).normalize('NFKC').replace(/\s+/g, ' ').trim();
+  if (!text) return option;
+  if (/面议|面谈|详聊|从优|看能力|negotiable|tbd/i.test(text)) return option;
+
+  const rate = typeof raw === 'number' ? 1 : salaryCurrencyRate(text);
+  if (!rate) return option;
+  if (/(?:时薪|小时|hourly|per hour|日薪|每天|daily|per day|年薪|annual|yearly|per year)/i.test(text)) return option;
+
+  const amounts = typeof raw === 'number'
+    ? [raw]
+    : (text.match(/[+-]?\d[\d,]*(?:\.\d+)?/g) || [])
+      .map((amount) => Number(amount.replace(/,/g, '')))
+      .filter(Number.isFinite);
+  if (!amounts.length) return option;
+  const averageAmount = amounts.reduce((sum, amount) => sum + amount, 0) / amounts.length;
+  const salaryOption = chooseSalaryRangeOption(averageAmount * rate, field);
+  return salaryOption || option;
+}
+
 function normalizeFieldValue(
   raw: unknown,
   field: PublishCategoryMetaFieldConfig,
@@ -99,9 +173,11 @@ function normalizeFieldValue(
   }
 
   if (field.type === 'select') {
-    const value = exactConfiguredOption(raw, field);
-    return value
-      ? { value, reason: 'database_option_exact' }
+    const exactValue = exactConfiguredOption(raw, field);
+    if (exactValue) return { value: exactValue, reason: 'database_option_exact' };
+    const salaryValue = semanticSalaryOption(raw, field);
+    return salaryValue
+      ? { value: salaryValue, reason: 'salary_option_semantic' }
       : { value: null, reason: 'database_option_not_matched' };
   }
 

@@ -80,4 +80,47 @@ const metaWithoutRangeGate = await normalizeCrawlCategoryMeta({
 
 assert.equal(metaWithoutRangeGate.meta.salary, 150000, 'crawl meta numbers must not be rejected by min/max range gates.');
 
+const salaryRangeSchema = {
+  categorySlug: 'jobs',
+  schemaVersion: 3,
+  name: '招聘',
+  fields: [
+    {
+      key: 'salaryRange',
+      label: '薪资',
+      type: 'select' as const,
+      required: false,
+      options: ['面议', '$800 以下', '$800 - $1,200', '$1,200 - $1,500', '$1,500 - $2,000', '$2,000 - $3,000', '$3,000 - $5,000', '$5,000 以上'],
+    },
+    { key: 'jobType', label: '类型', type: 'select' as const, required: false, options: ['全职', '兼职'] },
+  ],
+};
+
+for (const [rawSalary, expectedRange] of [
+  ['1000U/月', '$800 - $1,200'],
+  ['5000人民币', '$800 以下'],
+  ['6000 AED', '$1,500 - $2,000'],
+  ['300000日元/月', '$1,500 - $2,000'],
+  ['待遇从优，薪资详聊', '面议'],
+] as const) {
+  const normalizedSalary = await normalizeCrawlCategoryMeta({
+    category: { id: 'category_jobs', name: '招聘', slug: 'jobs' },
+    categoryMetaSchema: salaryRangeSchema,
+    rawMeta: { salaryRange: rawSalary },
+    locationPresets: [],
+  });
+
+  assert.equal(normalizedSalary.meta.salaryRange, expectedRange, `${rawSalary} must normalize to ${expectedRange}.`);
+}
+
+const nonSalarySelect = await normalizeCrawlCategoryMeta({
+  category: { id: 'category_jobs', name: '招聘', slug: 'jobs' },
+  categoryMetaSchema: salaryRangeSchema,
+  rawMeta: { jobType: '全职工作' },
+  locationPresets: [],
+});
+
+assert.equal(nonSalarySelect.meta.jobType, undefined, 'non-salary select fields must not receive loose semantic matching.');
+assert.equal(nonSalarySelect.audit.rejected.jobType?.reason, 'database_option_not_matched');
+
 console.log('[auto-crawl-quality-meta-guards] passed');
