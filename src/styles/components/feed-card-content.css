@@ -11,6 +11,7 @@
     --x-card-meta-control-min-height: var(--ui-post-chip-min-height);
     --x-card-meta-control-line-height: var(--ui-post-tag-line-height);
     --x-card-expand-icon-size: var(--ui-post-tag-icon-size);
+    --x-card-expand-icon-offset-y: var(--ui-space-half);
     --x-card-expand-hit-width: calc(var(--x-card-meta-control-min-height) + var(--ui-space-7));
     --x-card-expand-hit-height: calc(var(--x-card-meta-control-min-height) + var(--ui-space-3));
     --x-card-media-only-gap: var(--ui-space-1);
@@ -129,13 +130,13 @@
     background: linear-gradient(90deg, transparent 0%, transparent 26%, var(--ui-surface-card) 72%, var(--ui-surface-card) 100%);
     background-color: var(--ui-surface-card);
     padding: var(--ui-space-none);
-    color: var(--ui-post-chip-text);
+    color: var(--ui-brand);
     box-shadow: var(--ui-shadow-none);
     font-family: inherit;
-    font-size: var(--ui-post-tag-font-size);
+    font-size: inherit;
     font-weight: var(--ui-post-tag-font-weight);
     letter-spacing: var(--ui-post-tag-letter-spacing);
-    line-height: var(--ui-line-none);
+    line-height: inherit;
     text-decoration: var(--ui-text-decoration-none);
     vertical-align: middle;
     white-space: nowrap;
@@ -149,6 +150,7 @@
     flex: 0 0 auto;
     color: currentColor;
     stroke-width: var(--ui-icon-stroke);
+    transform: translateY(var(--x-card-expand-icon-offset-y));
     pointer-events: none;
   }
 
@@ -165,7 +167,7 @@
     border-color: var(--ui-color-transparent);
     background: linear-gradient(90deg, transparent 0%, transparent 26%, var(--ui-surface-card) 72%, var(--ui-surface-card) 100%);
     background-color: var(--ui-surface-card);
-    color: var(--ui-social-text);
+    color: var(--ui-brand-strong);
     box-shadow: var(--ui-shadow-none);
     transform: var(--ui-transform-none);
   }
