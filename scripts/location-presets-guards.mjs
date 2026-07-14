@@ -105,6 +105,11 @@ assert.match(
 );
 assert.match(
   configSource,
+  /id:\s*categoryBySlug\.get\(schema\.categorySlug\s*\|\|\s*''\)!\.id/,
+  'Admin publish category config responses must include database category id so the binding select can stay selected after save.',
+);
+assert.match(
+  configSource,
   /'telegram_sync_require_image'/,
   'ConfigService must persist the admin Telegram image requirement toggle.',
 );

@@ -416,7 +416,7 @@ export class ConfigService {
     try {
       const [configs, categories] = await Promise.all([
       prisma.systemConfig.findMany(),
-      prisma.category.findMany({ select: { slug: true, name: true } }),
+      prisma.category.findMany({ select: { id: true, slug: true, name: true } }),
     ]);
     const categoryBySlug = new Map(categories.map((category) => [category.slug, category]));
     const configMap: any = this.cloneDefaults();
@@ -442,7 +442,9 @@ export class ConfigService {
         const missing = parsedSchema.schema.filter((schema) => !categoryBySlug.has(schema.categorySlug || ''));
         if (missing.length) throw new Error(`publish_category_schema 引用了不存在的分类：${missing.map((schema) => schema.categorySlug).join('、')}`);
         (configMap as any).publish_category_schema = parsedSchema.schema.map((schema) => ({
+          id: categoryBySlug.get(schema.categorySlug || '')!.id,
           categorySlug: schema.categorySlug,
+          slug: schema.categorySlug,
           schemaVersion: schema.schemaVersion,
           name: categoryBySlug.get(schema.categorySlug || '')!.name,
           fields: schema.fields,
