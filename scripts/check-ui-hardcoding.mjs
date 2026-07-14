@@ -620,9 +620,10 @@ assertIncludes('src/features/home/HomeDesktopFeedContent.tsx', 'stateKind="home-
 assertIncludes('src/styles/features/home-feed-foundation.css', ".home-feed-state-frame[data-feed-state-kind='home-empty']", 'home empty state must have a dedicated stable layout.');
 assertIncludes('src/pages/PostDetailLegacy.tsx', 'const isOverlayDetail = !isDesktopViewport && Boolean(routeState?.backgroundLocation?.pathname);', 'desktop detail pages must render inside the framed app shell instead of using the mobile route overlay.');
 assertIncludes('src/pages/PostDetailLegacy.tsx', 'const shouldUseDetailPageScroll = isMobile && !isOverlayDetail && !isDesktopViewport;', 'overlay detail must leave the route overlay as the only mobile addressbar scroll target.');
-assertIncludes('src/styles/system/wide-screen-mobile-adaptation.css', '--app-desktop-page-content-width: min(100%, var(--app-desktop-reading-main-width));', 'desktop secondary pages must share one framed content width.');
+assertIncludes('src/styles/system/wide-screen-mobile-adaptation.css', 'calc(var(--app-desktop-main-active-width) - (var(--ui-app-shell-desktop-padding-x) * 2))', 'desktop secondary pages must use the framed app shell inner content width.');
 assertIncludes('src/styles/system/wide-screen-mobile-adaptation.css', '--ui-topbar-content-max-width: var(--app-desktop-page-content-width);', 'desktop secondary page topbars must inherit the framed content width.');
 assertIncludes('src/styles/features/recharge.css', '--ui-recharge-page-max: var(--app-desktop-page-content-width);', 'desktop recharge content must align to the shared framed content width.');
+assertIncludes('src/styles/features/sponsor.css', 'max-width: var(--app-desktop-page-content-width);', 'desktop sponsor workbench must align to the shared framed workspace content width.');
 assertIncludes('src/utils/postPresentation.ts', 'const LOCATION_SPLIT_PATTERN = /\\s+-\\s+|[·>＞、，,;；|/\\n]+/;', 'card location display must understand middle-dot location hierarchy.');
 assertIncludes('src/utils/postStructuredMeta.ts', "if (normalizeKey(key) === 'location') return selectFinestDisplayLocation(formatted) || formatted;", 'structured card location display must keep only the leaf node.');
 assertNotIncludes('src/styles/system/ui-post-tag-contract.css', 'They are text links', 'old text-link tag contract must not return.');

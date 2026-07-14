@@ -220,7 +220,7 @@
       .referral-page .referral-page-main
     ) {
       width: 100%;
-      max-width: min(100%, var(--app-desktop-reading-main-width, var(--ui-home-desktop-feed-width)));
+      max-width: var(--app-desktop-page-content-width);
       flex: 0 0 auto;
       margin-inline: auto;
       overflow: visible;

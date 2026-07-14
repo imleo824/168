@@ -245,7 +245,10 @@
     }
 
     .app-shell[data-route-surface='user'] .app-shell-main {
-      --app-desktop-page-content-width: min(100%, var(--app-desktop-reading-main-width));
+      --app-desktop-page-content-width: min(
+        100%,
+        calc(var(--app-desktop-main-active-width) - (var(--ui-app-shell-desktop-padding-x) * 2))
+      );
       --app-desktop-main-content-height: calc(
         100svh -
         (var(--app-desktop-shell-padding-y) * 2) -
