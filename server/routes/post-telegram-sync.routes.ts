@@ -66,15 +66,6 @@ export function registerPostTelegramSyncRoutes(app: Express, deps: PostTelegramS
     if (currentStatus === TELEGRAM_SYNC_STATUS_SENT || (currentStatus === TELEGRAM_SYNC_STATUS_NONE && (post as any).syncToTelegram === true)) {
       return res.status(409).json({ error: '该帖子已同步过' });
     }
-    if (currentStatus === TELEGRAM_SYNC_STATUS_PENDING) {
-      setNoStore(res);
-      return res.json({
-        success: true,
-        postId: post.id,
-        telegramSyncStatus: TELEGRAM_SYNC_STATUS_PENDING,
-        telegramSyncedAt: (post as any).telegramSyncedAt ?? null,
-      });
-    }
 
     const config = await ConfigService.getConfigs({ bypassCache: true });
     const telegramToken = deps.getTelegramBotToken(config);
@@ -98,6 +89,29 @@ export function registerPostTelegramSyncRoutes(app: Express, deps: PostTelegramS
       if (!owner || (owner.points || 0) < telegramSyncCost) {
         return res.status(400).json({ error: `积分不足，频道同步扣费失败，需 ${telegramSyncCost} 积分` });
       }
+    }
+
+    if (currentStatus === TELEGRAM_SYNC_STATUS_PENDING) {
+      const scheduled = await deps.scheduleTelegramChannelSync({
+        req,
+        post,
+        authorName: post.user?.displayName || req.user?.displayName || null,
+        configs: config,
+        telegramSyncCost,
+      });
+      if (!scheduled.queued) {
+        await deps.markTelegramSyncFailed(post.id, new Error(scheduled.reason || 'telegram_sync_queue_failed'));
+        return res.status(503).json({ error: '同步提交失败，请稍后重试' });
+      }
+      setNoStore(res);
+      return res.json({
+        success: true,
+        postId: post.id,
+        telegramSyncStatus: TELEGRAM_SYNC_STATUS_PENDING,
+        telegramSyncedAt: (post as any).telegramSyncedAt ?? null,
+        telegramSyncCost,
+        isTuiPlusMember,
+      });
     }
 
     if (currentStatus === TELEGRAM_SYNC_STATUS_FAILED && deps.isTelegramSyncPostSendChargeError((post as any).telegramSyncLastError)) {
