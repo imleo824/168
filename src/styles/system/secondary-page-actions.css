@@ -29,4 +29,19 @@
       font-size: var(--ui-text-sm);
     }
   }
+
+  @media (min-width: 1024px) {
+    .app-shell[data-route-surface='user'] :is(.detail-bottom-bar, .promote-checkout-bar, .ui-checkout-bar) {
+      box-sizing: border-box;
+      right: auto;
+      bottom: var(--app-desktop-shell-padding-y);
+      left: var(--app-desktop-main-left);
+      width: var(--app-desktop-main-active-width);
+      max-width: var(--app-desktop-main-active-width);
+      overflow: hidden;
+      border-inline: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+      border-bottom: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+      border-radius: 0 0 var(--ui-radius-2xl) var(--ui-radius-2xl);
+    }
+  }
 }
