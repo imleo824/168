@@ -60,7 +60,7 @@ function textValue(raw: unknown, maxLength: number) {
   return value ? value.slice(0, maxLength) : null;
 }
 
-function parseSmallChineseNumber(raw: string) {
+function parseChineseNumber(raw: string) {
   const values: Record<string, number> = {
     零: 0,
     一: 1,
@@ -74,16 +74,49 @@ function parseSmallChineseNumber(raw: string) {
     八: 8,
     九: 9,
   };
-  const token = raw.replace(/两/g, '二');
-  if (/^[零一二三四五六七八九]$/.test(token)) return values[token] ?? null;
-  if (token === '十') return 10;
-  const teen = token.match(/^十([一二三四五六七八九])$/);
-  if (teen) return 10 + (values[teen[1]] ?? 0);
-  const tens = token.match(/^([一二三四五六七八九])十$/);
-  if (tens) return (values[tens[1]] ?? 0) * 10;
-  const compound = token.match(/^([一二三四五六七八九])十([一二三四五六七八九])$/);
-  if (compound) return (values[compound[1]] ?? 0) * 10 + (values[compound[2]] ?? 0);
-  return null;
+  const unitValues: Record<string, number> = {
+    十: 10,
+    百: 100,
+    千: 1000,
+  };
+  const token = raw.normalize('NFKC').replace(/两/g, '二').trim();
+  if (!/^[零一二三四五六七八九十百千万]+$/.test(token)) return null;
+  if (!/[十百千万]/.test(token)) return token.length === 1 ? values[token] ?? null : null;
+
+  let total = 0;
+  let section = 0;
+  let number = 0;
+  for (const char of token) {
+    if (char in values) {
+      number = values[char];
+      continue;
+    }
+    if (char === '万') {
+      total += Math.max(section + number, 1) * 10000;
+      section = 0;
+      number = 0;
+      continue;
+    }
+    const unit = unitValues[char];
+    if (!unit) return null;
+    section += Math.max(number, 1) * unit;
+    number = 0;
+  }
+  return total + section + number;
+}
+
+function parseNumericAmounts(raw: string) {
+  const matches = [...raw.matchAll(/([+-]?\d[\d,]*(?:\.\d+)?)\s*(k|K|千|w|W|万)?/g)];
+  return matches
+    .map((match) => {
+      const parsed = Number(String(match[1] || '').replace(/,/g, ''));
+      if (!Number.isFinite(parsed)) return null;
+      const unit = match[2];
+      if (/^(?:k|K|千)$/.test(unit || '')) return parsed * 1000;
+      if (/^(?:w|W|万)$/.test(unit || '')) return parsed * 10000;
+      return parsed;
+    })
+    .filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
 }
 
 function normalizeNumber(raw: unknown) {
@@ -98,20 +131,15 @@ function normalizeNumber(raw: unknown) {
     return Number.isFinite(parsed) ? { value: parsed, reason: 'strict_number' } : { value: null, reason: 'number_not_matched' };
   }
 
-  const matches = value.match(/[+-]?\d[\d,]*(?:\.\d+)?/g) || [];
-  if (matches.length === 1) {
-    const parsed = Number(matches[0].replace(/,/g, ''));
-    return Number.isFinite(parsed)
-      ? { value: parsed, reason: 'numeric_amount_extracted' }
-      : { value: null, reason: 'number_not_matched' };
-  }
+  const matches = parseNumericAmounts(value);
+  if (matches.length === 1) return { value: matches[0], reason: /(?:k|K|千|w|W|万)/.test(value) ? 'numeric_unit_extracted' : 'numeric_amount_extracted' };
   if (matches.length > 1) return { value: null, reason: 'number_not_matched' };
 
-  const chineseMatches = value.match(/[一二两三四五六七八九十]{1,3}/g) || [];
+  const chineseMatches = value.match(/[一二两三四五六七八九十百千万]{1,12}/g) || [];
   if (chineseMatches.length !== 1) return { value: null, reason: 'number_not_matched' };
-  const parsed = parseSmallChineseNumber(chineseMatches[0]);
+  const parsed = parseChineseNumber(chineseMatches[0]);
   return parsed !== null
-    ? { value: parsed, reason: 'small_chinese_number_extracted' }
+    ? { value: parsed, reason: 'chinese_number_extracted' }
     : { value: null, reason: 'number_not_matched' };
 }
 
@@ -128,18 +156,19 @@ const OPTION_ALIASES: Record<string, string[]> = {
   推广: ['地推', '拉新', '投放', '引流', '市场推广'],
   电销: ['电话销售', '电话营销', 'telemarketing'],
   运营: ['社群运营', '内容运营', '用户运营', '活动运营'],
-  人事: ['hr', '招聘专员', '人力资源'],
+  人事: ['hr', '招聘专员', '人力资源', '人资'],
   财务: ['会计', '出纳'],
+  法务公关: ['法务', '公关', '法务公关', '政府事务', '政府关系', '外联', '许可证', '签证许可', '居留许可', '劳工移民', '合同审查', '法律培训', '合规法务'],
   后端开发: ['后端', '后台开发', 'backend', 'server', 'java开发', 'golang', 'go开发', 'php开发', 'python开发', 'nodejs'],
   前端开发: ['前端', 'web前端', 'frontend', 'react', 'vue', 'h5'],
   DBA: ['数据库', 'mysql', 'postgres', 'postgresql', 'oracle'],
   运维: ['devops', 'sre', 'linux', 'k8s', 'kubernetes'],
   产品: ['产品经理', 'pm'],
   设计: ['设计师', 'ui', '平面设计'],
-  风控: ['审核', '风控专员'],
+  风控: ['风控专员', '风险控制', '风险审核', '合规审核'],
   市场: ['market'],
   销售: ['业务', '销售代表'],
-  行政: ['助理', '文员'],
+  行政: ['助理', '文员', '档案', '档案信息', '资料员', '资料整理', '资料归档', '信息组', '行政文员', '办公室文员'],
   司机: ['驾驶员'],
   安保: ['保安', 'security'],
   厨师: ['后厨'],
@@ -187,7 +216,15 @@ function semanticConfiguredOption(raw: unknown, field: PublishCategoryMetaFieldC
   if (!rawKey) return null;
   const matches = new Set<string>();
   for (const option of field.options || []) {
-    const candidates = (OPTION_ALIASES[option] || []).map(compactComparable).filter(Boolean);
+    const optionText = String(option || '');
+    const optionParts = /[\/|、,，&+]/.test(optionText)
+      ? optionText.split(/[\/|、,，&+]+/g).map((part) => part.trim()).filter(Boolean)
+      : [];
+    const candidates = [
+      ...(OPTION_ALIASES[option] || []),
+      ...optionParts,
+      ...optionParts.flatMap((part) => OPTION_ALIASES[part] || []),
+    ].map(compactComparable).filter(Boolean);
     if (candidates.some((candidate) => rawKey === candidate || rawKey.includes(candidate))) {
       matches.add(option);
     }
@@ -245,27 +282,36 @@ function chooseSalaryRangeOption(usdAmount: number, field: PublishCategoryMetaFi
   return null;
 }
 
+function salaryPeriodMonthlyFactor(raw: string) {
+  if (/(?:时薪|小时|hourly|per hour|日薪|每天|daily|per day|周薪|weekly|per week)/i.test(raw)) return null;
+  if (/(?:年薪|annual|yearly|per year)/i.test(raw)) return 1 / 12;
+  return 1;
+}
+
+function isNegotiableSalaryText(raw: string) {
+  return /面议|面谈|详聊|从优|看能力|negotiable|tbd|薪资|工资|待遇|高薪|底薪|提成|月薪|薪酬|包吃住/i.test(raw);
+}
+
 function semanticSalaryOption(raw: unknown, field: PublishCategoryMetaFieldConfig) {
   if (!isSalarySelectField(field)) return null;
 
   const option = negotiableOption(field);
-  if (typeof raw !== 'number' && typeof raw !== 'string') return option;
+  if (typeof raw !== 'number' && typeof raw !== 'string') return null;
   const text = String(raw).normalize('NFKC').replace(/\s+/g, ' ').trim();
-  if (!text) return option;
+  if (!text) return null;
   if (/面议|面谈|详聊|从优|看能力|negotiable|tbd/i.test(text)) return option;
 
   const rate = typeof raw === 'number' ? 1 : salaryCurrencyRate(text);
-  if (!rate) return option;
-  if (/(?:时薪|小时|hourly|per hour|日薪|每天|daily|per day|年薪|annual|yearly|per year)/i.test(text)) return option;
+  const periodFactor = salaryPeriodMonthlyFactor(text);
+  if (periodFactor === null) return option;
 
   const amounts = typeof raw === 'number'
     ? [raw]
-    : (text.match(/[+-]?\d[\d,]*(?:\.\d+)?/g) || [])
-      .map((amount) => Number(amount.replace(/,/g, '')))
-      .filter(Number.isFinite);
-  if (!amounts.length) return option;
+    : parseNumericAmounts(text);
+  if (!amounts.length) return isNegotiableSalaryText(text) ? option : null;
+  if (!rate) return option;
   const averageAmount = amounts.reduce((sum, amount) => sum + amount, 0) / amounts.length;
-  const salaryOption = chooseSalaryRangeOption(averageAmount * rate, field);
+  const salaryOption = chooseSalaryRangeOption(averageAmount * rate * periodFactor, field);
   return salaryOption || option;
 }
 
@@ -326,6 +372,15 @@ function buildSchemaLabelKeyMap(fields: PublishCategoryMetaFieldConfig[]) {
   return new Map(labelEntries.filter(([label]) => counts.get(label) === 1));
 }
 
+function buildSchemaKeyMap(fields: PublishCategoryMetaFieldConfig[]) {
+  const keyEntries = fields
+    .map((field) => [normalizedComparable(fieldKey(field)), fieldKey(field)] as const)
+    .filter(([normalized, key]) => normalized && key);
+  const counts = new Map<string, number>();
+  for (const [normalized] of keyEntries) counts.set(normalized, (counts.get(normalized) || 0) + 1);
+  return new Map(keyEntries.filter(([normalized]) => counts.get(normalized) === 1));
+}
+
 function buildRawInputKeyMap(rawMeta: Record<string, unknown>) {
   const entries = Object.keys(rawMeta)
     .map((key) => [normalizedComparable(key), key] as const)
@@ -338,11 +393,15 @@ function buildRawInputKeyMap(rawMeta: Record<string, unknown>) {
 function rawFieldValue(
   rawMeta: Record<string, unknown>,
   field: PublishCategoryMetaFieldConfig,
+  schemaKeyMap: ReadonlyMap<string, string>,
   labelKeyMap: ReadonlyMap<string, string>,
   rawInputKeyMap: ReadonlyMap<string, string>,
 ) {
   const key = fieldKey(field);
   if (Object.prototype.hasOwnProperty.call(rawMeta, key)) return rawMeta[key];
+  const normalizedKey = normalizedComparable(key);
+  const rawKeyInputKey = rawInputKeyMap.get(normalizedKey);
+  if (schemaKeyMap.get(normalizedKey) === key && rawKeyInputKey) return rawMeta[rawKeyInputKey];
   const labelKey = normalizedComparable(field.label);
   const rawInputKey = rawInputKeyMap.get(labelKey);
   return labelKeyMap.get(labelKey) === key && rawInputKey ? rawMeta[rawInputKey] : undefined;
@@ -357,15 +416,16 @@ export async function normalizeCrawlCategoryMeta(
   const rawMeta = objectValue(input.rawMeta);
   const configuredKeys = fields.map(fieldKey);
   const configuredKeySet = new Set(configuredKeys);
+  const schemaKeyMap = buildSchemaKeyMap(fields);
   const labelKeyMap = buildSchemaLabelKeyMap(fields);
   const rawInputKeyMap = buildRawInputKeyMap(rawMeta);
-  const acceptedInputKeys = new Set([...configuredKeys, ...Array.from(labelKeyMap.keys())]);
+  const acceptedInputKeys = new Set([...Array.from(schemaKeyMap.keys()), ...Array.from(labelKeyMap.keys())]);
   const meta: Record<string, unknown> = {};
   const rejected: Record<string, { raw: unknown; reason: string }> = {};
 
   for (const field of fields) {
     const key = fieldKey(field);
-    const rawValue = rawFieldValue(rawMeta, field, labelKeyMap, rawInputKeyMap);
+    const rawValue = rawFieldValue(rawMeta, field, schemaKeyMap, labelKeyMap, rawInputKeyMap);
     const normalized = normalizeFieldValue(rawValue, field, input.locationPresets);
     if (normalized.value !== null && normalized.value !== undefined && normalized.value !== '') {
       meta[key] = normalized.value;

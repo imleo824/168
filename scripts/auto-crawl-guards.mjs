@@ -32,6 +32,7 @@ const crawlDatabaseConfig = read('server/services/auto-crawl-database-config.ser
 const crawlMeta = read('server/services/crawl-category-meta-normalize.service.ts');
 const crawlQuality = read('server/services/crawl-content-quality.service.ts');
 const locationNormalize = read('server/services/location-preset-normalize.service.ts');
+const strictMetaMigration = read('prisma/migrations/20260915000000_auto_crawl_meta_number_no_range_gate/migration.sql');
 const packageJson = read('package.json');
 
 mustNotHave('domain types', types, /syncToTelegram|localOnlyMode|aiEnabled|QUARANTINED|FILTERED/);
@@ -82,6 +83,13 @@ mustHave('AI extraction', crawlAi, /enrichmentStatus/);
 mustHave('AI extraction', crawlAi, /数据库 Category 是分类唯一事实源/);
 mustHave('AI extraction', crawlAi, /Meta Schema 是 Meta 唯一事实源/);
 mustHave('AI extraction', crawlAi, /输出字段只能是 title、contact、meta/);
+mustHave('AI extraction', crawlAi, /const sourceContent = publishContent\.slice\(0, 12_000\)/);
+mustHave('AI extraction', crawlAi, /title 和 meta 只能基于 SOURCE_DATA 判断/);
+mustHave('AI extraction', crawlAi, /本次只处理这些后台字段/);
+mustHave('AI extraction', crawlAi, /未配置的原文属性必须完全忽略/);
+mustHave('AI extraction', crawlAi, /年龄、性别、国籍、语言、学历、工作时间、休假、班次、人数、经验要求/);
+mustHave('AI extraction', crawlAi, /优先识别城市、地区、园区、口岸/);
+mustHave('AI extraction', crawlAi, /能匹配城市\/地区时输出“国家 · 城市”/);
 mustHave('AI extraction', crawlAi, /U、USDT、USD、美元、刀按美元等值处理/);
 mustHave('AI extraction', crawlAi, /RMB\/CNY\/人民币[\s\S]*PHP\/披索\/比索[\s\S]*THB\/泰铢[\s\S]*AED\/迪拉姆/);
 mustHave('AI extraction', crawlAi, /能按原文语义合理换算到美元月薪区间/);
@@ -92,17 +100,34 @@ mustNotHave('AI extraction', crawlAi, /import prisma|loadAutoCrawlDatabaseConfig
 mustHave('Meta normalization', crawlMeta, /database_option_exact/);
 mustHave('Meta normalization', crawlMeta, /database_option_semantic/);
 mustHave('Meta normalization', crawlMeta, /OPTION_ALIASES/);
-mustHave('Meta normalization', crawlMeta, /small_chinese_number_extracted/);
+mustHave('Meta normalization', crawlMeta, /chinese_number_extracted/);
+mustHave('Meta normalization', crawlMeta, /numeric_unit_extracted/);
+mustHave('Meta normalization', crawlMeta, /salaryPeriodMonthlyFactor/);
 mustHave('Meta normalization', crawlMeta, /strict_number/);
 mustHave('Meta normalization', crawlMeta, /strict_boolean/);
+mustHave('Meta normalization', crawlMeta, /buildSchemaKeyMap/);
 mustHave('Meta normalization', crawlMeta, /buildSchemaLabelKeyMap/);
 mustHave('Meta normalization', crawlMeta, /buildRawInputKeyMap/);
 mustHave('Meta normalization', crawlMeta, /unexpectedKeys/);
 mustHave('Meta normalization', crawlMeta, /rejected/);
 mustNotHave('Meta normalization', crawlMeta, /missingRequiredKeys|salaryBucket|normalizeCurrency|fallback/i);
 
+mustHave('strict auto-crawl meta migration', strictMetaMigration, /v_type = 'number' AND jsonb_typeof\(v_raw\) = 'number'/);
+mustHave('strict auto-crawl meta migration', strictMetaMigration, /final schema\/type fence/);
+mustNotHave('strict auto-crawl meta migration', strictMetaMigration, /\bv_min\b|\bv_max\b|v_number\s*[<>]=/);
+
 mustHave('location normalization', locationNormalize, /buildLocationPresetIndex/);
 mustHave('location normalization', locationNormalize, /const ambiguous = new Set<string>/);
+mustHave('location normalization', locationNormalize, /COUNTRY_ALIASES/);
+mustHave('location normalization', locationNormalize, /CITY_ALIASES/);
+mustHave('location normalization', locationNormalize, /containsLocationAlias/);
+mustHave('location normalization', locationNormalize, /left\.kind === 'city'/);
+mustHave('location normalization', locationNormalize, /斯里兰卡:[\s\S]*slk/);
+mustHave('location normalization', locationNormalize, /阿联酋:[\s\S]*uae/);
+mustHave('location normalization', locationNormalize, /美国:[\s\S]*usa/);
+mustHave('location normalization', locationNormalize, /英国:[\s\S]*uk/);
+mustHave('location normalization', locationNormalize, /澳大利亚:[\s\S]*au/);
+mustHave('location normalization', locationNormalize, /柬埔寨:[\s\S]*kh/);
 mustNotHave('location normalization', locationNormalize, /scan\.includes|DEFAULT_LOCATION_PRESETS|normalizeLocationCountryAlias/);
 
 mustHave('quality', crawlQuality, /canonicalContent\(input\.content\)/);
