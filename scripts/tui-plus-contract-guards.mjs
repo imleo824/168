@@ -150,9 +150,15 @@ mustHave('telegram sync routes', telegramSyncRoutes, 'isActiveTuiPlusUser');
 mustHave('telegram sync routes', telegramSyncRoutes, 'const telegramSyncCost = isTuiPlusMember ? 0 : deps.resolveTelegramSyncCost(config)');
 mustHave('telegram sync service detail link', telegramSyncService, 'buildTelegramHtmlLink(params.shareUrl, \'查看详情\')');
 mustHave('telegram sync service detail link', telegramSyncService, "parse_mode: 'HTML'");
+mustHave('telegram sync service stored post', telegramSyncService, 'const storedPost = await prisma.post.findFirst');
+mustHave('telegram sync service stored post', telegramSyncService, 'include: {');
+mustHave('telegram sync service stored post', telegramSyncService, 'const post = storedPost || job.post');
 mustHave('telegram sync service photo fallback', telegramSyncService, 'resolveTelegramPhotoUrlSources');
+mustHave('telegram sync service text only', telegramSyncService, 'await sendTelegramTextChunks({ token: params.token, chatId: params.chatId, chunks: fullTextChunks.length ? fullTextChunks : [\'\'] })');
 mustHave('telegram sync service photo fallback', telegramSyncService, "method: 'sendMediaGroup'");
 mustHave('telegram sync service photo fallback', telegramSyncService, "method: 'sendPhoto'");
+mustHave('telegram sync service single photo caption', telegramSyncService, "formData.append('caption', caption)");
+mustHave('telegram sync service multi photo caption', telegramSyncService, "index === 0 && caption ? { caption, parse_mode: 'HTML' }");
 mustHave('telegram sync service photo fallback', telegramSyncService, 'photo: photoUrls[0]');
 
 mustHave('shared benefit contract', sharedBenefits, 'TUI_PLUS_BENEFIT_ITEMS');

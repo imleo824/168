@@ -559,7 +559,15 @@ async function sendTelegramChannelPost(params: { token: string; chatId: string; 
 }
 
 async function syncPostToTelegramChannel(job: TelegramSyncJob) {
-  const post = job.post;
+  if (!job.postId && !job.post?.id) throw new Error('telegram_sync_post_missing');
+  const storedPost = await prisma.post.findFirst({
+    where: { id: job.postId || job.post?.id, deletedAt: null },
+    include: {
+      category: true,
+      user: { select: { id: true, displayName: true } },
+    },
+  });
+  const post = storedPost || job.post;
   if (!post?.id) throw new Error('telegram_sync_post_missing');
   const configs = await ConfigService.getConfigs();
   const token = getTelegramBotToken(configs);
@@ -572,7 +580,7 @@ async function syncPostToTelegramChannel(job: TelegramSyncJob) {
 
   const origin = resolvePublicOriginFromContext(job.origin);
   const shareUrl = `${origin}/share/post/${post.id}`;
-  const authorName = post.isAnonymous ? '匿名用户' : collapseText(job.authorName || '用户', 24);
+  const authorName = post.isAnonymous ? '匿名用户' : collapseText(job.authorName || storedPost?.user?.displayName || '用户', 24);
   const text = buildTelegramChannelPostText({ post, shareUrl, authorName, template: configs?.telegram_share_template });
   await sendTelegramChannelPost({ token, chatId, text, post, origin });
 }
