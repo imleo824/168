@@ -74,9 +74,31 @@
 
   .detail-page-main--desktop {
     width: 100%;
+    max-width: min(100%, var(--app-desktop-feed-main-width, var(--ui-app-shell-bounded-max-width)));
     margin-inline: auto;
     padding-top: var(--ui-home-desktop-page-padding-y);
     padding-inline: var(--ui-space-none);
     padding-bottom: calc(var(--ui-detail-page-bottom-space) + env(safe-area-inset-bottom));
+  }
+
+  @media (min-width: 1024px) {
+    .app-shell[data-route-surface='user'][data-desktop-surface='detail'] .detail-page {
+      width: 100%;
+      max-width: min(100%, var(--app-desktop-feed-main-width, var(--ui-app-shell-bounded-max-width)));
+      margin-inline: auto;
+      height: auto;
+      min-height: calc(100svh - (var(--app-desktop-shell-padding-y) * 2));
+      max-height: none;
+      overflow: visible;
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='detail'] .detail-page-main {
+      width: 100%;
+      max-width: min(100%, var(--app-desktop-feed-main-width, var(--ui-app-shell-bounded-max-width)));
+      margin-inline: auto;
+      padding-top: var(--ui-home-desktop-page-padding-y);
+      padding-inline: var(--ui-space-none);
+      padding-bottom: calc(var(--ui-detail-page-bottom-space) + env(safe-area-inset-bottom));
+    }
   }
 }

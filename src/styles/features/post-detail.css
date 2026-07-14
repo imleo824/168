@@ -25,6 +25,14 @@
     box-shadow: var(--ui-shadow-card);
   }
 
+  @media (min-width: 1024px) {
+    .app-shell[data-route-surface='user'][data-desktop-surface='detail'] .detail-article {
+      border-inline: var(--ui-border-width-hairline) solid var(--ui-social-line-soft);
+      border-radius: var(--ui-ins-card-radius);
+      box-shadow: var(--ui-shadow-card);
+    }
+  }
+
   .detail-article-body {
     display: flex;
     flex-direction: column;
