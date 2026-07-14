@@ -130,7 +130,7 @@
     background: linear-gradient(90deg, transparent 0%, transparent 26%, var(--ui-surface-card) 72%, var(--ui-surface-card) 100%);
     background-color: var(--ui-surface-card);
     padding: var(--ui-space-none);
-    color: var(--ui-brand);
+    color: var(--ui-post-chip-text);
     box-shadow: var(--ui-shadow-none);
     font-family: inherit;
     font-size: inherit;

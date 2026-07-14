@@ -98,7 +98,6 @@ function isPageOwnedHeaderPath(pathname: string) {
 function getDesktopSurfaceKind(pathname: string) {
   if (pathname === '/chat' || pathname === '/messages') return 'conversation';
   if (pathname.startsWith('/post/')) return 'detail';
-  if (pathname === '/profile' || pathname.startsWith('/profile/') || pathname.startsWith('/user/')) return 'profile';
   if (pathname === '/create') return 'compose';
   if (
     pathname === APP_ROUTES.sponsor ||
@@ -115,6 +114,7 @@ function getDesktopSurfaceKind(pathname: string) {
     pathname.startsWith(`${APP_ROUTES.tuiPlusLinkEditor}/`) ||
     pathname.startsWith('/settings/')
   ) return 'workspace';
+  if (pathname === '/profile' || pathname.startsWith('/profile/') || pathname.startsWith('/user/')) return 'profile';
   if (pathname === '/about') return 'content';
   if (pathname === '/' || pathname.startsWith('/category/')) return 'feed';
   return 'utility';

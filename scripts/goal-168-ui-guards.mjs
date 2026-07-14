@@ -118,6 +118,8 @@ assertIncludes('src/pages/PromoteHistory.tsx', '<PromotionRecordCard', 'promotio
 assertIncludes('src/features/promote/PromotionRecordCard.tsx', '<PromotionEffectStatsRow stats={effectStats} className="record-effect-stats" />', 'promotion record cards must show the shared effect metrics row.');
 assertIncludes('src/app/routePaths.ts', "promotionEffects: '/promotion-effects'", 'promotion effect history canonical route must be registered.');
 assertIncludes('src/app/routePaths.ts', "legacyPromotionEffects: '/promote/effects'", 'promotion effect history legacy route must be preserved.');
+assertMatches('src/app/AppShell.tsx', /pathname === APP_ROUTES\.profileBioEditor[\s\S]*?return 'workspace';[\s\S]*?pathname === '\/profile'/, 'profile bio editor must resolve to the desktop workspace surface before the broad profile route.');
+assertMatches('src/app/AppShell.tsx', /pathname\.startsWith\(`\$\{APP_ROUTES\.tuiPlusLinkEditor\}\/`\)[\s\S]*?return 'workspace';[\s\S]*?pathname === '\/profile'/, 'Tui Plus link editor targets must resolve to the desktop workspace surface before the broad profile route.');
 assertIncludes('src/pages/PromotionEffectsHistory.tsx', 'EFFECT_HISTORY_DEFAULT_DAYS = 30', 'promotion effect history must default to the latest thirty days.');
 assertIncludes('src/pages/PromotionEffectsHistory.tsx', 'promotion-effects-date-trigger', 'promotion effect history must expose a compact topbar date trigger.');
 assertIncludes('src/pages/PromotionEffectsHistory.tsx', 'promotion-effects-date-panel', 'promotion effect history must move full date controls out of the topbar.');

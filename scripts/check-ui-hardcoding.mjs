@@ -459,8 +459,8 @@ assertCssRuleIncludes(
 assertCssRuleIncludes(
   'src/styles/components/feed-card-content.css',
   '.ins-post-card .x-card-expand-button',
-  ['position: absolute;', 'right: var(--ui-space-none);', 'bottom: calc((1lh - var(--x-card-expand-hit-height)) / 2);', 'width: var(--x-card-expand-hit-width);', 'justify-content: flex-end;', 'color: var(--ui-brand);', 'font-size: inherit;', 'line-height: inherit;'],
-  'feed card expand icon must align to the final text line, use brand blue, and keep an enlarged left-side hit area.',
+  ['position: absolute;', 'right: var(--ui-space-none);', 'bottom: calc((1lh - var(--x-card-expand-hit-height)) / 2);', 'width: var(--x-card-expand-hit-width);', 'justify-content: flex-end;', 'color: var(--ui-post-chip-text);', 'font-size: inherit;', 'line-height: inherit;'],
+  'feed card expand icon must align to the final text line, match post chip text color, and keep an enlarged left-side hit area.',
 );
 assertCssRuleIncludes(
   'src/styles/components/feed-card-content.css',
