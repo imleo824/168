@@ -127,7 +127,7 @@ mustHave('crawl admin panel', crawlPanel, /executionLogs/);
 mustHave('crawl admin panel', crawlPanel, /categoryId/);
 mustNotHave('crawl admin panel', crawlPanel, /restoreSeeds|localOnlyMode|aiEnabled|syncToTelegram/);
 mustHave('crawl execution panel', crawlExecutionPanel, /phase/);
-mustHave('interaction panel', interactionPanel, /AdminAutoCrawlExecutionLogsPanel/);
+mustHave('interaction panel', interactionPanel, /AdminAutoCrawlExecutionLogsCompactPanel/);
 
 mustHave('auto post runner', autoPostRunner, /runAutoPostOnce/);
 mustHave('auto post runner', autoPostRunner, /module: 'auto_post'/);

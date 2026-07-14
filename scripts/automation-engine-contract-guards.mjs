@@ -208,7 +208,7 @@ for (const moduleName of ['auto_like', 'quote_publish', 'comment_publish', 'auto
 mustHave('task lock', lock, 'heartbeatStaleMsForTtl');
 mustHave('task lock', lock, 'withAutomationTaskLock');
 mustHave('task lock', lock, 'forceReleaseAutomationTaskLock');
-mustHave('admin automation logs', adminInteractionPanel, 'AdminAutoCrawlExecutionLogsPanel');
+mustHave('admin automation logs', adminInteractionPanel, 'AdminAutoCrawlExecutionLogsCompactPanel');
 mustHave('admin automation logs', adminInteractionPanel, '运行日志');
 
 // Chat automation remains observed and compatible with current user-backed bot identity model.

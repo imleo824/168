@@ -1,3 +1,4 @@
+import type { Dispatch, SetStateAction } from 'react';
 import { ArrowDown, ArrowUp, Image, Pin, Plus, Trash2 } from 'lucide-react';
 import { getPromotionTypeLabel, type LocationPresetConfig, type PublishCategoryMetaConfig, type PublishCategoryMetaFieldConfig } from '@/types';
 import { ConfigItem } from './adminChrome';
@@ -10,7 +11,7 @@ type AdminSystemConfigSectionsProps = {
   activeSectionConfigTab: SectionTab;
   configSectionId: AdConfigSection | TelegramConfigSection | OpsConfigSection;
   localConfig: any;
-  setLocalConfig: (next: any) => void;
+  setLocalConfig: Dispatch<SetStateAction<any>>;
   categories?: any[];
   telegramSyncRequireImage: boolean;
   locationPresets: LocationPresetConfig[];
@@ -49,6 +50,33 @@ export function AdminSystemConfigSections({
   updatePublishCategoryField,
   removePublishCategoryField,
 }: AdminSystemConfigSectionsProps) {
+  const updateConfigValue = (key: string, value: unknown) => {
+    setLocalConfig((current: any) => ({ ...current, [key]: value }));
+  };
+  const updatePriceValue = (key: string, value: unknown, extra: Record<string, number> = {}) => {
+    const numericValue = Number(value);
+    setLocalConfig((current: any) => ({
+      ...current,
+      prices: {
+        ...current?.prices,
+        [key]: numericValue,
+        ...extra,
+      },
+    }));
+  };
+  const updateCategoryPrice = (slug: string, value: unknown) => {
+    setLocalConfig((current: any) => ({
+      ...current,
+      prices: {
+        ...current?.prices,
+        pin_category_map: {
+          ...current?.prices?.pin_category_map,
+          [slug]: Number(value),
+        },
+      },
+    }));
+  };
+
   return (
     <>
       {activeSectionConfigTab === 'ad' ? (
@@ -61,7 +89,7 @@ export function AdminSystemConfigSections({
                       <ConfigItem
                         label="首页列表置顶"
                         value={localConfig?.prices?.pin_home}
-                        onChange={(v) => setLocalConfig({...localConfig, prices: {...localConfig.prices, pin_home: Number(v)}})}
+                        onChange={(v) => updatePriceValue('pin_home', v)}
                       />
                       <div className="space-y-3 pt-2">
                         <p className="admin-field-label admin-field-label--section">分类单独定价</p>
@@ -79,16 +107,7 @@ export function AdminSystemConfigSections({
                                   <ConfigItem
                                     label={cat.name}
                                     value={value}
-                                    onChange={(v) => setLocalConfig({
-                                      ...localConfig,
-                                      prices: {
-                                        ...localConfig.prices,
-                                        pin_category_map: {
-                                          ...localConfig?.prices?.pin_category_map,
-                                          [cat.slug]: Number(v),
-                                        },
-                                      },
-                                    })}
+                                    onChange={(v) => updateCategoryPrice(cat.slug, v)}
                                   />
                                 </div>
                               );
@@ -106,32 +125,32 @@ export function AdminSystemConfigSections({
                       <ConfigItem
                         label="首页横幅第1位置"
                         value={localConfig?.prices?.ad_home_slot_1}
-                        onChange={(v) => setLocalConfig({...localConfig, prices: {...localConfig.prices, ad_home_slot_1: Number(v)}})}
+                        onChange={(v) => updatePriceValue('ad_home_slot_1', v)}
                       />
                       <ConfigItem
                         label="首页横幅第2位置"
                         value={localConfig?.prices?.ad_home_slot_2}
-                        onChange={(v) => setLocalConfig({...localConfig, prices: {...localConfig.prices, ad_home_slot_2: Number(v)}})}
+                        onChange={(v) => updatePriceValue('ad_home_slot_2', v)}
                       />
                       <ConfigItem
                         label="首页横幅第3位置"
                         value={localConfig?.prices?.ad_home_slot_3}
-                        onChange={(v) => setLocalConfig({...localConfig, prices: {...localConfig.prices, ad_home_slot_3: Number(v)}})}
+                        onChange={(v) => updatePriceValue('ad_home_slot_3', v)}
                       />
                       <ConfigItem
                         label={`${getPromotionTypeLabel('PIN_CHAT')}第1位置`}
                         value={localConfig?.prices?.pin_chat_slot_1}
-                        onChange={(v) => setLocalConfig({...localConfig, prices: {...localConfig.prices, pin_chat_slot_1: Number(v), pin_chat: Number(v)}})}
+                        onChange={(v) => updatePriceValue('pin_chat_slot_1', v, { pin_chat: Number(v) })}
                       />
                       <ConfigItem
                         label={`${getPromotionTypeLabel('PIN_CHAT')}第2位置`}
                         value={localConfig?.prices?.pin_chat_slot_2}
-                        onChange={(v) => setLocalConfig({...localConfig, prices: {...localConfig.prices, pin_chat_slot_2: Number(v)}})}
+                        onChange={(v) => updatePriceValue('pin_chat_slot_2', v)}
                       />
                       <ConfigItem
                         label={`${getPromotionTypeLabel('PIN_CHAT')}第3位置`}
                         value={localConfig?.prices?.pin_chat_slot_3}
-                        onChange={(v) => setLocalConfig({...localConfig, prices: {...localConfig.prices, pin_chat_slot_3: Number(v)}})}
+                        onChange={(v) => updatePriceValue('pin_chat_slot_3', v)}
                       />
                     </div>
                   </div>
@@ -144,12 +163,12 @@ export function AdminSystemConfigSections({
                       <ConfigItem
                         label="匿名发布积分"
                         value={localConfig?.prices?.anonymous_publish}
-                        onChange={(v) => setLocalConfig({...localConfig, prices: {...localConfig.prices, anonymous_publish: Number(v)}})}
+                        onChange={(v) => updatePriceValue('anonymous_publish', v)}
                       />
                       <ConfigItem
                         label="同步频道价格"
                         value={localConfig?.prices?.telegram_sync}
-                        onChange={(v) => setLocalConfig({...localConfig, prices: {...localConfig.prices, telegram_sync: Number(v)}})}
+                        onChange={(v) => updatePriceValue('telegram_sync', v)}
                       />
                     </div>
                   </div>
@@ -165,19 +184,19 @@ export function AdminSystemConfigSections({
                           label="Telegram Bot Token"
                           type="text"
                           value={localConfig?.telegram_bot_token}
-                          onChange={(v) => setLocalConfig({...localConfig, telegram_bot_token: v})}
+                          onChange={(v) => updateConfigValue('telegram_bot_token', v)}
                         />
                         <ConfigItem
                           label="Telegram Channel ID"
                           type="text"
                           value={localConfig?.telegram_channel_id}
-                          onChange={(v) => setLocalConfig({...localConfig, telegram_channel_id: v})}
+                          onChange={(v) => updateConfigValue('telegram_channel_id', v)}
                         />
                         <ConfigItem
                           label="充值通知 Chat ID"
                           type="text"
                           value={localConfig?.telegram_recharge_notify_chat_id}
-                          onChange={(v) => setLocalConfig({...localConfig, telegram_recharge_notify_chat_id: v})}
+                          onChange={(v) => updateConfigValue('telegram_recharge_notify_chat_id', v)}
                           help="用户提交新充值订单后，Bot 会把运营摘要发到这个个人或私密群 Chat ID"
                         />
                         <div className="space-y-2 sm:col-span-2">
@@ -186,7 +205,7 @@ export function AdminSystemConfigSections({
                             type="text"
                             className="admin-form-control admin-form-control--xlarge admin-form-control--muted"
                             value={localConfig?.telegram_channel || ''}
-                            onChange={(e) => setLocalConfig({...localConfig, telegram_channel: e.target.value})}
+                            onChange={(e) => updateConfigValue('telegram_channel', e.target.value)}
                             placeholder="https://t.me/your_channel"
                           />
                         </div>
@@ -209,14 +228,14 @@ export function AdminSystemConfigSections({
                             label="最少正文字数"
                             type="number"
                             value={localConfig?.telegram_sync_min_content_chars ?? 0}
-                            onChange={(v) => setLocalConfig({ ...localConfig, telegram_sync_min_content_chars: Number(v) || 0 })}
+                            onChange={(v) => updateConfigValue('telegram_sync_min_content_chars', Number(v) || 0)}
                           />
                           <div className="space-y-2">
                             <label className="admin-field-label admin-field-label--section">同步需含图片</label>
                             <div className="grid grid-cols-2 gap-2">
                               <button
                                 type="button"
-                                onClick={() => setLocalConfig({ ...localConfig, telegram_sync_require_image: 'false' })}
+                                onClick={() => updateConfigValue('telegram_sync_require_image', 'false')}
                                 className={`h-11 rounded-xl border text-sm font-bold transition ${
                                   !telegramSyncRequireImage
                                     ? 'border-gray-900 bg-gray-900 text-white'
@@ -227,7 +246,7 @@ export function AdminSystemConfigSections({
                               </button>
                               <button
                                 type="button"
-                                onClick={() => setLocalConfig({ ...localConfig, telegram_sync_require_image: 'true' })}
+                                onClick={() => updateConfigValue('telegram_sync_require_image', 'true')}
                                 className={`h-11 rounded-xl border text-sm font-bold transition ${
                                   telegramSyncRequireImage
                                     ? 'border-gray-900 bg-gray-900 text-white'
@@ -253,7 +272,7 @@ export function AdminSystemConfigSections({
                         <textarea
                           className="admin-form-control admin-form-control--muted admin-form-control--textarea admin-form-control--textarea-lg"
                           value={localConfig?.telegram_share_template || ''}
-                          onChange={(e) => setLocalConfig({...localConfig, telegram_share_template: e.target.value})}
+                          onChange={(e) => updateConfigValue('telegram_share_template', e.target.value)}
                           placeholder="支持变量：{author}{authorLine}{title}{content}{categoryLine}{categoryOnlyLine}{tagsLine}{topicLine}{contactLine}{sourceLine}{shareUrl}{visibility}{visibilityLine}{visibilityBadge}{category}{tags}{contact}{source}{titleLine}{contentLine}{postId}"
                         />
                         <div className="admin-form-note admin-form-note--compact">
@@ -292,7 +311,7 @@ export function AdminSystemConfigSections({
                             inputMode="decimal"
                             className="admin-form-control admin-form-control--large admin-form-control--muted"
                             value={localConfig?.signup_reward_points ?? ''}
-                            onChange={(e) => setLocalConfig({ ...localConfig, signup_reward_points: Number(e.target.value) })}
+                            onChange={(e) => updateConfigValue('signup_reward_points', Number(e.target.value))}
                           />
                         </div>
                         <div className="admin-config-surface">
@@ -306,12 +325,12 @@ export function AdminSystemConfigSections({
                             <ConfigItem
                               label="最小在线人数"
                               value={localConfig?.online_users_min ?? 380}
-                              onChange={(v) => setLocalConfig({ ...localConfig, online_users_min: Number(v) || 0 })}
+                              onChange={(v) => updateConfigValue('online_users_min', Number(v) || 0)}
                             />
                             <ConfigItem
                               label="最大在线人数"
                               value={localConfig?.online_users_max ?? 6800}
-                              onChange={(v) => setLocalConfig({ ...localConfig, online_users_max: Number(v) || 0 })}
+                              onChange={(v) => updateConfigValue('online_users_max', Number(v) || 0)}
                             />
                           </div>
                         </div>
@@ -671,34 +690,34 @@ export function AdminSystemConfigSections({
                           <ConfigItem
                             label="每 1 USDT 兑换积分"
                             value={localConfig?.recharge_points_per_usdt ?? 10}
-                            onChange={(v) => setLocalConfig({ ...localConfig, recharge_points_per_usdt: Number(v) || 10 })}
+                            onChange={(v) => updateConfigValue('recharge_points_per_usdt', Number(v) || 10)}
                           />
                           <ConfigItem
                             label="最低入账 USDT"
                             value={localConfig?.tron_deposit_min_usdt ?? 1}
-                            onChange={(v) => setLocalConfig({ ...localConfig, tron_deposit_min_usdt: Number(v) || 0 })}
+                            onChange={(v) => updateConfigValue('tron_deposit_min_usdt', Number(v) || 0)}
                           />
                           <ConfigItem
                             label="扫描间隔秒"
                             value={localConfig?.tron_deposit_scan_interval_seconds ?? 20}
-                            onChange={(v) => setLocalConfig({ ...localConfig, tron_deposit_scan_interval_seconds: Number(v) || 20 })}
+                            onChange={(v) => updateConfigValue('tron_deposit_scan_interval_seconds', Number(v) || 20)}
                           />
                           <ConfigItem
                             label="扫描窗口分钟"
                             value={localConfig?.tron_deposit_scan_window_minutes ?? 30}
-                            onChange={(v) => setLocalConfig({ ...localConfig, tron_deposit_scan_window_minutes: Number(v) || 30 })}
+                            onChange={(v) => updateConfigValue('tron_deposit_scan_window_minutes', Number(v) || 30)}
                           />
                           <ConfigItem
                             label="最大扫描次数"
                             value={localConfig?.tron_deposit_scan_max_attempts ?? 90}
-                            onChange={(v) => setLocalConfig({ ...localConfig, tron_deposit_scan_max_attempts: Number(v) || 90 })}
+                            onChange={(v) => updateConfigValue('tron_deposit_scan_max_attempts', Number(v) || 90)}
                           />
                           <div className="space-y-2">
                             <label className="admin-field-label admin-field-label--section">链上扫描</label>
                             <div className="grid grid-cols-2 gap-2">
                               <button
                                 type="button"
-                                onClick={() => setLocalConfig({ ...localConfig, tron_deposit_scan_enabled: 'true' })}
+                                onClick={() => updateConfigValue('tron_deposit_scan_enabled', 'true')}
                                 className="admin-config-choice"
                                 data-state={String(localConfig?.tron_deposit_scan_enabled ?? 'true') === 'true' ? 'active' : 'idle'}
                               >
@@ -706,7 +725,7 @@ export function AdminSystemConfigSections({
                               </button>
                               <button
                                 type="button"
-                                onClick={() => setLocalConfig({ ...localConfig, tron_deposit_scan_enabled: 'false' })}
+                                onClick={() => updateConfigValue('tron_deposit_scan_enabled', 'false')}
                                 className="admin-config-choice"
                                 data-state={String(localConfig?.tron_deposit_scan_enabled ?? 'true') !== 'true' ? 'active' : 'idle'}
                               >
@@ -720,7 +739,7 @@ export function AdminSystemConfigSections({
                               type="text"
                               className="admin-form-control admin-form-control--large"
                               value={localConfig?.tron_usdt_contract ?? ''}
-                              onChange={(e) => setLocalConfig({ ...localConfig, tron_usdt_contract: e.target.value })}
+                              onChange={(e) => updateConfigValue('tron_usdt_contract', e.target.value)}
                             />
                           </div>
                           <div className="space-y-2 sm:col-span-2">
@@ -729,7 +748,7 @@ export function AdminSystemConfigSections({
                               type="text"
                               className="admin-form-control admin-form-control--large"
                               value={localConfig?.tron_deposit_fallback_address ?? ''}
-                              onChange={(e) => setLocalConfig({ ...localConfig, tron_deposit_fallback_address: e.target.value })}
+                              onChange={(e) => updateConfigValue('tron_deposit_fallback_address', e.target.value)}
                               placeholder="地址池用尽时展示，不自动到账"
                             />
                           </div>
@@ -739,7 +758,7 @@ export function AdminSystemConfigSections({
                               type="text"
                               className="admin-form-control admin-form-control--large"
                               value={localConfig?.tron_sweep_target_address ?? ''}
-                              onChange={(e) => setLocalConfig({ ...localConfig, tron_sweep_target_address: e.target.value })}
+                              onChange={(e) => updateConfigValue('tron_sweep_target_address', e.target.value)}
                               placeholder="自动归集只允许转入这个固定地址"
                             />
                           </div>

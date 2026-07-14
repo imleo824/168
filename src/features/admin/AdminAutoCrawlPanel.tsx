@@ -5,7 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useCategories } from '@/hooks/useData';
 import { apiFetch } from '@/services/api';
 import { ConfigItem } from './adminChrome';
-import { AdminAutoCrawlExecutionLogsPanel } from './AdminAutoCrawlExecutionLogsPanel';
+import { AdminAutoCrawlExecutionLogsCompactPanel } from './AdminAutoCrawlExecutionLogsCompactPanel';
 
 type SourceType = 'telegram' | 'rss';
 type CursorKind = 'message_id' | 'timestamp' | 'baseline_pending';
@@ -312,7 +312,7 @@ export function AdminAutoCrawlPanel({ view = 'config' }: { view?: AutoCrawlView 
 
   return (
     <>
-      {view === 'executionLogs' ? <AdminAutoCrawlExecutionLogsPanel /> : view === 'sources' ? renderSources() : renderConfig()}
+      {view === 'executionLogs' ? <AdminAutoCrawlExecutionLogsCompactPanel /> : view === 'sources' ? renderSources() : renderConfig()}
       {view === 'sources' && dialogOpen ? (
         <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/45 p-4 sm:items-center" role="dialog" aria-modal="true" aria-label={editingSourceId ? '编辑数据源' : '新增数据源'}>
           <div className="admin-config-surface admin-config-surface--comfortable max-h-[88vh] w-full max-w-4xl overflow-y-auto">

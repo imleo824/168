@@ -163,7 +163,7 @@ includes(FILES.automationHealth, `'${moduleName}'`, `heartbeat supports ${module
 }
 notIncludes(FILES.automationHealth, 'auto_crawl_ai_review', 'removed crawl AI review module must not return');
 includes(FILES.adminAutomationRoutes, '/api/admin/automation/heartbeats', 'admin heartbeat route exists');
-includes(FILES.adminPanel, 'AdminAutoCrawlExecutionLogsPanel', 'admin execution log UI exists');
+includes(FILES.adminPanel, 'AdminAutoCrawlExecutionLogsCompactPanel', 'admin execution log UI exists');
 
 assertOnlyFilesContain('runAutoCrawlOnce', new Set([path.normalize(FILES.autoCrawlService), path.normalize(FILES.autoCrawlRunner)]), 'runAutoCrawlOnce must stay behind observed runner');
 assertOnlyFilesContain('runAutoPostOnce', new Set([path.normalize(FILES.autoPostService), path.normalize(FILES.autoPostRunner)]), 'runAutoPostOnce must stay behind observed runner');

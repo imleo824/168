@@ -3,7 +3,7 @@ import { Play } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { apiFetch } from '@/services/api';
 import { AdminAutoCrawlPanel } from './AdminAutoCrawlPanel';
-import { AdminAutoCrawlExecutionLogsPanel } from './AdminAutoCrawlExecutionLogsPanel';
+import { AdminAutoCrawlExecutionLogsCompactPanel } from './AdminAutoCrawlExecutionLogsCompactPanel';
 import { AdminAutoLikePanel } from './AdminAutoLikePanel';
 import { AdminAutoPostPanel } from './AdminAutoPostPanel';
 import { AdminChatPanel } from './AdminChatPanel';
@@ -257,7 +257,7 @@ function ChatExecutionLogsPanel() {
 }
 
 function AutoCrawlLogsPanel() {
-  return <AdminAutoCrawlExecutionLogsPanel />;
+  return <AdminAutoCrawlExecutionLogsCompactPanel />;
 }
 
 export function AdminInteractionConfigPanel({
