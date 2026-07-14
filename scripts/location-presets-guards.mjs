@@ -42,6 +42,9 @@ const crawlDatabaseConfigSource = fs.readFileSync(path.join(root, 'server/servic
 const postCreateLocationSource = fs.readFileSync(path.join(root, 'src/features/post-create/postCreateLocation.ts'), 'utf8');
 const categoryMetaServiceSource = fs.readFileSync(path.join(root, 'server/services/category-meta.service.ts'), 'utf8');
 const adminConfigSchemaSource = fs.readFileSync(path.join(root, 'src/features/admin/adminConfigSchema.ts'), 'utf8');
+const postCreatePageSource = fs.readFileSync(path.join(root, 'src/features/post-create/PostCreatePage.tsx'), 'utf8');
+const postCreateCategoryMetaSource = fs.readFileSync(path.join(root, 'src/features/post-create/postCreateCategoryMeta.ts'), 'utf8');
+const useDataConfigSource = fs.readFileSync(path.join(root, 'src/hooks/useDataConfig.ts'), 'utf8');
 
 assert.doesNotMatch(
   configSource,
@@ -125,6 +128,7 @@ assert.match(
 );
 
 const adminSystemConfigSectionsSource = fs.readFileSync(path.join(root, 'src/features/admin/AdminSystemConfigSections.tsx'), 'utf8');
+const adminSystemConfigEditorSource = fs.readFileSync(path.join(root, 'src/features/admin/useAdminSystemConfigEditor.ts'), 'utf8');
 assert.match(
   adminSystemConfigSectionsSource,
   /hasCategoryOverride\s*&&\s*Number\.isFinite\(current\)\s*\?\s*current\s*:\s*fallback/,
@@ -149,6 +153,46 @@ assert.match(
   adminSystemConfigSectionsSource,
   /\{\s*id:\s*matched\.id,\s*categorySlug:\s*matched\.slug,\s*slug:\s*matched\.slug,\s*name:\s*matched\.name\s*\}/,
   'Admin publish category binding must write categorySlug, slug, and id together when selecting an existing category.',
+);
+assert.match(
+  adminSystemConfigEditorSource,
+  /function makeUniquePublishField[\s\S]*field_\$\{index\}[\s\S]*label:\s*`字段 \$\{index\}`/,
+  'Admin publish category add field must create an immediately valid unique field instead of a blank no-op template.',
+);
+assert.match(
+  adminSystemConfigEditorSource,
+  /function nextSchemaVersion[\s\S]*schemaVersion[\s\S]*\+\s*1/,
+  'Admin publish category field changes must bump schemaVersion so saved field changes are explicit.',
+);
+assert.match(
+  adminSystemConfigEditorSource,
+  /updatePublishCategoryField[\s\S]*category\.schemaVersion = nextSchemaVersion\(category\)/,
+  'Admin publish category field edits must bump schemaVersion.',
+);
+assert.match(
+  adminSystemConfigEditorSource,
+  /addPublishCategoryField[\s\S]*makeUniquePublishField\(category\.fields \|\| \[\]\)[\s\S]*category\.schemaVersion = nextSchemaVersion\(category\)/,
+  'Admin publish category add field must create a valid field and bump schemaVersion.',
+);
+assert.match(
+  useDataConfigSource,
+  /alwaysFresh[\s\S]*staleTime:\s*options\.alwaysFresh\s*\?\s*0\s*:\s*CONFIG_STALE_TIME/,
+  'Post create must be able to bypass stale public config after admin publish category field changes.',
+);
+assert.match(
+  postCreatePageSource,
+  /useConfig\(true,\s*\{\s*alwaysFresh:\s*true\s*\}\)/,
+  'Post create must always refetch public config so newly saved publish category fields become available.',
+);
+assert.match(
+  postCreateCategoryMetaSource,
+  /isSameCategoryRef\(item\.id,\s*categoryId\)[\s\S]*isSameCategoryRef\(item\.slug,\s*categoryId\)[\s\S]*isSameCategoryRef\(item\.name,\s*categoryId\)/,
+  'Post create category schema matching must accept id, slug, and name refs from public categories.',
+);
+assert.match(
+  postCreateCategoryMetaSource,
+  /\[schema\.categorySlug,\s*schema\.slug,\s*schema\.id,\s*schema\.name\][\s\S]*isSameCategoryRef\(ref,\s*selectedCategory\.slug\)[\s\S]*isSameCategoryRef\(ref,\s*selectedCategory\.id\)/,
+  'Post create category schema matching must compare all saved schema refs against selected category refs.',
 );
 
 console.log('[location-presets-guards] passed');

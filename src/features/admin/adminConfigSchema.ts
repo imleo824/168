@@ -150,12 +150,15 @@ export function normalizeAdminPublishCategorySchema(raw: unknown): PublishCatego
     .filter((item): item is PublishCategoryMetaConfig => Boolean(item));
 }
 
-export function makeAdminPublishField(type: PublishCategoryFieldType = 'text'): PublishCategoryMetaFieldConfig {
+export function makeAdminPublishField(
+  type: PublishCategoryFieldType = 'text',
+  overrides: Partial<Pick<PublishCategoryMetaFieldConfig, 'key' | 'label' | 'required'>> = {},
+): PublishCategoryMetaFieldConfig {
   return {
-    key: '',
-    label: '',
+    key: overrides.key || '',
+    label: overrides.label || '',
     type,
-    required: true,
+    required: overrides.required ?? true,
     ...(type === 'text' ? { maxLength: 80 } : {}),
   };
 }

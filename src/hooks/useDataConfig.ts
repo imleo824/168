@@ -21,19 +21,22 @@ function isHomeShellPath() {
   return window.location.pathname === '/';
 }
 
-export function useConfig(enabled: boolean = true) {
+export function useConfig(
+  enabled: boolean = true,
+  options: { alwaysFresh?: boolean } = {},
+) {
   const bootstrapSnapshot = useMemo(() => readHomeBootstrapSnapshot(), []);
   return useQuery({
     queryKey: ['config'],
     queryFn: api.getConfigs,
-    staleTime: CONFIG_STALE_TIME,
+    staleTime: options.alwaysFresh ? 0 : CONFIG_STALE_TIME,
     gcTime: LIST_GC_TIME,
-    initialData: bootstrapSnapshot?.data?.config,
-    initialDataUpdatedAt: bootstrapSnapshot?.updatedAt,
+    initialData: options.alwaysFresh ? undefined : bootstrapSnapshot?.data?.config,
+    initialDataUpdatedAt: options.alwaysFresh ? undefined : bootstrapSnapshot?.updatedAt,
     enabled: enabled && !isHomeShellPath(),
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
+    refetchOnMount: options.alwaysFresh ? 'always' : false,
+    refetchOnWindowFocus: options.alwaysFresh,
+    refetchOnReconnect: options.alwaysFresh,
   });
 }
 

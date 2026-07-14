@@ -391,12 +391,18 @@ export function findCategoryMetaSchema(
   schemas: PublishCategoryMetaConfig[],
   fallbackCategories: { id: string; name: string; slug: string }[],
 ) {
-  const selectedCategory = fallbackCategories.find((item) => item.id === categoryId);
+  const selectedCategory = fallbackCategories.find((item) => {
+    return isSameCategoryRef(item.id, categoryId) ||
+      isSameCategoryRef(item.slug, categoryId) ||
+      isSameCategoryRef(item.name, categoryId);
+  });
   if (!selectedCategory) return null;
 
   return schemas.find((schema) => {
-    if (schema.categorySlug && schema.categorySlug === selectedCategory.slug) return true;
-    if (schema.slug && schema.slug === selectedCategory.slug) return true;
-    return false;
+    return [schema.categorySlug, schema.slug, schema.id, schema.name].some((ref) => (
+      isSameCategoryRef(ref, selectedCategory.slug) ||
+      isSameCategoryRef(ref, selectedCategory.id) ||
+      isSameCategoryRef(ref, selectedCategory.name)
+    ));
   }) ?? null;
 }

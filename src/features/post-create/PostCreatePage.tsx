@@ -175,7 +175,7 @@ export default function PostCreate({
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
-  const { data: config } = useConfig();
+  const { data: config } = useConfig(true, { alwaysFresh: true });
   const quotePostId = useMemo(() => normalizeQuotePostId(location.search), [location.search]);
   const isRobotUser = user?.userType === 'ROBOT';
   const isTuiPlusContactUnlimited = useMemo(() => isTuiPlusActive(user), [user]);

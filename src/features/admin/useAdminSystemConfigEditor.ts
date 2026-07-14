@@ -15,6 +15,24 @@ type UseAdminSystemConfigEditorOptions = {
   setLocalConfig: (updater: any) => void;
 };
 
+function nextSchemaVersion(category: PublishCategoryMetaConfig) {
+  return Math.max(1, Math.floor(Number(category.schemaVersion) || 1)) + 1;
+}
+
+function makeUniquePublishField(fields: PublishCategoryMetaFieldConfig[] = []) {
+  const usedKeys = new Set(fields.map((field) => String(field?.key || '').trim()).filter(Boolean));
+  let index = fields.length + 1;
+  let key = `field_${index}`;
+  while (usedKeys.has(key)) {
+    index += 1;
+    key = `field_${index}`;
+  }
+  return makeAdminPublishField('text', {
+    key,
+    label: `字段 ${index}`,
+  });
+}
+
 export function useAdminSystemConfigEditor({
   localConfig,
   setLocalConfig,
@@ -75,7 +93,8 @@ export function useAdminSystemConfigEditor({
     const nextSchema = normalizeAdminPublishCategorySchema(localConfig?.publish_category_schema);
     nextSchema.push({
       name: '新分类',
-      fields: [makeAdminPublishField()],
+      schemaVersion: 1,
+      fields: [makeUniquePublishField()],
     });
     setPublishCategorySchema(nextSchema);
   }, [localConfig?.publish_category_schema, setPublishCategorySchema]);
@@ -110,6 +129,7 @@ export function useAdminSystemConfigEditor({
       if (patch.type === 'select') nextField.options = [];
     }
     category.fields[fieldIndex] = nextField;
+    category.schemaVersion = nextSchemaVersion(category);
     setPublishCategorySchema(nextSchema);
   }, [localConfig?.publish_category_schema, setPublishCategorySchema]);
 
@@ -117,7 +137,8 @@ export function useAdminSystemConfigEditor({
     const nextSchema = normalizeAdminPublishCategorySchema(localConfig?.publish_category_schema);
     const category = nextSchema[categoryIndex];
     if (!category) return;
-    category.fields = [...(category.fields || []), makeAdminPublishField()];
+    category.fields = [...(category.fields || []), makeUniquePublishField(category.fields || [])];
+    category.schemaVersion = nextSchemaVersion(category);
     setPublishCategorySchema(nextSchema);
   }, [localConfig?.publish_category_schema, setPublishCategorySchema]);
 
@@ -126,6 +147,7 @@ export function useAdminSystemConfigEditor({
     const category = nextSchema[categoryIndex];
     if (!category) return;
     category.fields = (category.fields || []).filter((_field, index) => index !== fieldIndex);
+    category.schemaVersion = nextSchemaVersion(category);
     setPublishCategorySchema(nextSchema);
   }, [localConfig?.publish_category_schema, setPublishCategorySchema]);
 
