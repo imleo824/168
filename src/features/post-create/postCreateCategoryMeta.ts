@@ -69,6 +69,14 @@ export function getCategoryMetaFieldKey(field: PublishCategoryMetaConfig['fields
   return String(field?.key || '').trim();
 }
 
+export function isCategoryMetaMoneyNumberField(field: PublishCategoryMetaConfig['fields'][number]) {
+  if (field?.type !== 'number') return false;
+  const key = normalizeConfigText(field?.key).toLowerCase();
+  const label = normalizeConfigText(field?.label);
+  return /price|rent|salary|cost|fee|amount/.test(key)
+    || /价格|租金|房租|薪资|工资|待遇|费用|金额|月租/.test(label);
+}
+
 export function getOrderedCategoryMetaFields(fields: PublishCategoryMetaConfig['fields']) {
   return [...fields].sort((left, right) => {
     const requiredDelta = Number(Boolean(right.required)) - Number(Boolean(left.required));
@@ -94,6 +102,9 @@ export function summarizeCategoryMetaValue(field: PublishCategoryMetaConfig['fie
   }
   if (isCategoryMetaLocationField(field)) {
     return formatCreateLocationCity(value);
+  }
+  if (isCategoryMetaMoneyNumberField(field)) {
+    return /\$$/.test(value) ? value : `${value}$`;
   }
   return value;
 }

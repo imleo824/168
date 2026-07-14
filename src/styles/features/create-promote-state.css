@@ -117,6 +117,29 @@
     text-align: right;
   }
 
+  .post-create-page .post-create-meta-number-wrap {
+    position: relative;
+    display: inline-flex;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .post-create-page .post-create-meta-number-wrap--money .post-create-meta-inline-input {
+    padding-right: var(--ui-space-6);
+  }
+
+  .post-create-page .post-create-meta-number-unit {
+    position: absolute;
+    top: 50%;
+    right: var(--ui-space-3);
+    transform: translateY(-50%);
+    color: var(--ui-text-muted);
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-none);
+    pointer-events: none;
+  }
+
   .post-create-page .post-create-meta-inline-input::placeholder {
     color: var(--ui-text-disabled);
   }

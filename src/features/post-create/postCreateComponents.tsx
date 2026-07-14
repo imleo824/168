@@ -6,6 +6,7 @@ import {
   getCategoryMetaFieldKey,
   getOrderedCategoryMetaFields,
   isCategoryMetaLocationField,
+  isCategoryMetaMoneyNumberField,
   normalizeConfigText,
   summarizeCategoryMetaValue,
 } from './postCreateCategoryMeta';
@@ -42,6 +43,7 @@ function CategoryMetaFieldRow({
   const fieldId = `category-meta-${fieldKey}`;
   const isRequired = Boolean(field.required);
   const isLocationField = isCategoryMetaLocationField(field);
+  const isMoneyNumberField = isCategoryMetaMoneyNumberField(field);
   const selectOptions = Array.isArray(field.options)
     ? field.options.map((option) => normalizeConfigText(option)).filter(Boolean)
     : [];
@@ -96,17 +98,20 @@ function CategoryMetaFieldRow({
         ) : null}
 
         {field.type === 'number' ? (
-          <input
-            id={fieldId}
-            type="number"
-            inputMode="numeric"
-            className="post-create-meta-inline-input post-create-meta-inline-input--number"
-            value={value}
-            onChange={(event) => onChange(fieldKey, event.target.value)}
-            placeholder="数字"
-            min={Number.isFinite(field.min as number) ? field.min : undefined}
-            max={Number.isFinite(field.max as number) ? field.max : undefined}
-          />
+          <span className={isMoneyNumberField ? 'post-create-meta-number-wrap post-create-meta-number-wrap--money' : 'post-create-meta-number-wrap'}>
+            <input
+              id={fieldId}
+              type="number"
+              inputMode="numeric"
+              className="post-create-meta-inline-input post-create-meta-inline-input--number"
+              value={value}
+              onChange={(event) => onChange(fieldKey, event.target.value)}
+              placeholder="数字"
+              min={Number.isFinite(field.min as number) ? field.min : undefined}
+              max={Number.isFinite(field.max as number) ? field.max : undefined}
+            />
+            {isMoneyNumberField ? <span className="post-create-meta-number-unit" aria-hidden="true">$</span> : null}
+          </span>
         ) : null}
 
         {field.type === 'boolean' ? (
