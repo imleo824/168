@@ -7,6 +7,7 @@
 
 @layer utilities {
   .detail-article {
+    min-width: 0;
     overflow: hidden;
     border: var(--ui-border-width-hairline) solid var(--ui-social-line-soft);
     background: var(--ui-surface-card);
@@ -27,9 +28,23 @@
 
   @media (min-width: 1024px) {
     .app-shell[data-route-surface='user'][data-desktop-surface='detail'] .detail-article {
+      width: 100%;
+      max-width: 100%;
+      margin-inline: auto;
       border-inline: var(--ui-border-width-hairline) solid var(--ui-social-line-soft);
       border-radius: var(--ui-ins-card-radius);
       box-shadow: var(--ui-shadow-card);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='detail'] .detail-article :is(
+      .detail-article-body,
+      .detail-media-wrap,
+      .detail-quoted-post,
+      .detail-like-wall,
+      .detail-quotes-section
+    ) {
+      min-width: 0;
+      max-width: 100%;
     }
   }
 
