@@ -159,6 +159,19 @@
       );
       --app-desktop-shell-left: calc((100vw - var(--app-desktop-shell-active-width)) / 2);
       --app-desktop-main-side-gap-total: var(--app-desktop-shell-gap);
+      --app-desktop-context-side-gap-total: calc(var(--app-desktop-shell-gap) * 2);
+      --app-desktop-context-active-width: min(
+        var(--app-desktop-context-width),
+        max(
+          var(--ui-space-none),
+          calc(
+            var(--app-desktop-shell-active-width) -
+            var(--app-desktop-sidebar-width) -
+            var(--app-desktop-context-side-gap-total) -
+            var(--app-desktop-main-width)
+          )
+        )
+      );
       --app-desktop-main-left: calc(var(--app-desktop-shell-left) + var(--app-desktop-sidebar-width) + var(--app-desktop-shell-gap));
       --app-desktop-main-active-width: min(
         var(--app-desktop-main-width),
@@ -175,7 +188,7 @@
       grid-template-columns:
         minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
         minmax(0, var(--app-desktop-main-width))
-        minmax(calc(var(--ui-space-8) * 7), var(--app-desktop-context-width));
+        minmax(var(--ui-space-none), var(--app-desktop-context-active-width));
       gap: var(--app-desktop-shell-gap);
       align-items: start;
       justify-content: center;
@@ -253,13 +266,12 @@
       --chat-shell-desktop-height: calc(100svh - (var(--app-desktop-shell-padding-y) * 2) - (var(--ui-border-width-hairline) * 2));
       --chat-shell-desktop-max-height: var(--chat-shell-desktop-height);
       --chat-shell-desktop-available-height: var(--chat-shell-desktop-height);
-      grid-template-columns:
-        minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
-        minmax(0, var(--app-desktop-main-width));
     }
 
     .app-shell[data-route-surface='user'][data-desktop-surface='conversation'] .app-shell-main {
       overflow: hidden;
+      padding-inline: var(--ui-space-none);
+      padding-block-start: var(--ui-space-none);
     }
 
     .app-shell[data-route-surface='user'][data-desktop-surface='conversation'] .chat-page {
@@ -287,6 +299,7 @@
       position: sticky;
       top: var(--app-desktop-shell-padding-y);
       display: flex;
+      min-width: var(--ui-space-none);
       max-height: calc(100svh - (var(--app-desktop-shell-padding-y) * 2));
       flex-direction: column;
       gap: var(--ui-space-4);
@@ -303,6 +316,7 @@
     .app-desktop-brand,
     .app-desktop-nav-item,
     .app-desktop-context-card {
+      min-width: var(--ui-space-none);
       border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
       border-radius: var(--ui-radius-2xl);
       background: var(--ui-surface-card-solid);
