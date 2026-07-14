@@ -120,6 +120,9 @@ assertIncludes('src/app/routePaths.ts', "promotionEffects: '/promotion-effects'"
 assertIncludes('src/app/routePaths.ts', "legacyPromotionEffects: '/promote/effects'", 'promotion effect history legacy route must be preserved.');
 assertMatches('src/app/AppShell.tsx', /pathname === APP_ROUTES\.profileBioEditor[\s\S]*?return 'workspace';[\s\S]*?pathname === '\/profile'/, 'profile bio editor must resolve to the desktop workspace surface before the broad profile route.');
 assertMatches('src/app/AppShell.tsx', /pathname\.startsWith\(`\$\{APP_ROUTES\.tuiPlusLinkEditor\}\/`\)[\s\S]*?return 'workspace';[\s\S]*?pathname === '\/profile'/, 'Tui Plus link editor targets must resolve to the desktop workspace surface before the broad profile route.');
+assertIncludes('src/styles/system/wide-screen-mobile-adaptation.css', "--app-desktop-conversation-frame-padding: var(--ui-space-2);", 'desktop conversation pages must preserve a visible outer app frame gutter.');
+assertIncludes('src/styles/system/wide-screen-mobile-adaptation.css', '(var(--app-desktop-conversation-frame-padding) * 2)', 'desktop conversation height must account for the visible outer app frame gutter.');
+assertMatches('src/styles/system/wide-screen-mobile-adaptation.css', /data-desktop-surface='conversation'[\s\S]*?\.app-shell-main[\s\S]*?padding:\s*var\(--app-desktop-conversation-frame-padding\);/, 'desktop conversation pages must expose the shared outer frame instead of filling edge-to-edge.');
 assertIncludes('src/pages/PromotionEffectsHistory.tsx', 'EFFECT_HISTORY_DEFAULT_DAYS = 30', 'promotion effect history must default to the latest thirty days.');
 assertIncludes('src/pages/PromotionEffectsHistory.tsx', 'promotion-effects-date-trigger', 'promotion effect history must expose a compact topbar date trigger.');
 assertIncludes('src/pages/PromotionEffectsHistory.tsx', 'promotion-effects-date-panel', 'promotion effect history must move full date controls out of the topbar.');

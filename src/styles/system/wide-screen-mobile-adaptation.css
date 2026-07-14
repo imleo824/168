@@ -23,6 +23,7 @@
     --app-desktop-shell-gap: var(--ui-space-6);
     --app-desktop-shell-padding-x: var(--ui-space-6);
     --app-desktop-shell-padding-y: var(--ui-space-5);
+    --app-desktop-conversation-frame-padding: var(--ui-space-2);
     --app-desktop-frame-width: calc(
       var(--app-desktop-sidebar-width) +
       var(--app-desktop-feed-main-width) +
@@ -263,19 +264,23 @@
     .app-shell[data-route-surface='user'][data-desktop-surface='conversation'] {
       --chat-shell-width: 100%;
       --chat-page-desktop-padding: var(--ui-space-none);
-      --chat-shell-desktop-height: calc(100svh - (var(--app-desktop-shell-padding-y) * 2) - (var(--ui-border-width-hairline) * 2));
+      --chat-shell-desktop-height: calc(
+        100svh -
+        (var(--app-desktop-shell-padding-y) * 2) -
+        (var(--ui-border-width-hairline) * 2) -
+        (var(--app-desktop-conversation-frame-padding) * 2)
+      );
       --chat-shell-desktop-max-height: var(--chat-shell-desktop-height);
       --chat-shell-desktop-available-height: var(--chat-shell-desktop-height);
     }
 
     .app-shell[data-route-surface='user'][data-desktop-surface='conversation'] .app-shell-main {
       overflow: hidden;
-      padding-inline: var(--ui-space-none);
-      padding-block-start: var(--ui-space-none);
+      padding: var(--app-desktop-conversation-frame-padding);
     }
 
     .app-shell[data-route-surface='user'][data-desktop-surface='conversation'] .chat-page {
-      min-height: calc(100svh - (var(--app-desktop-shell-padding-y) * 2) - (var(--ui-border-width-hairline) * 2));
+      min-height: var(--chat-shell-desktop-height);
       align-items: stretch;
       justify-content: stretch;
       padding: var(--ui-space-none);
@@ -286,7 +291,7 @@
       height: var(--chat-shell-desktop-height);
       max-height: var(--chat-shell-desktop-height);
       border: var(--ui-border-none);
-      border-radius: var(--ui-radius-none);
+      border-radius: var(--ui-radius-xl);
       box-shadow: var(--ui-shadow-none);
     }
 
