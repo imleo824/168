@@ -96,10 +96,28 @@ function isPageOwnedHeaderPath(pathname: string) {
 }
 
 function getDesktopSurfaceKind(pathname: string) {
-  if (pathname === '/chat') return 'conversation';
+  if (pathname === '/chat' || pathname === '/messages') return 'conversation';
   if (pathname.startsWith('/post/')) return 'detail';
+  if (pathname === '/profile' || pathname.startsWith('/profile/') || pathname.startsWith('/user/')) return 'profile';
+  if (pathname === '/create') return 'compose';
+  if (
+    pathname === APP_ROUTES.sponsor ||
+    pathname === APP_ROUTES.invite ||
+    pathname === APP_ROUTES.inviteRecords ||
+    pathname === APP_ROUTES.promote ||
+    pathname === APP_ROUTES.promotions ||
+    pathname === APP_ROUTES.promotionEffects ||
+    pathname === APP_ROUTES.recharge ||
+    pathname === APP_ROUTES.transactions ||
+    pathname === APP_ROUTES.tuiPlus ||
+    pathname === APP_ROUTES.profileBioEditor ||
+    pathname === APP_ROUTES.tuiPlusLinkEditor ||
+    pathname.startsWith(`${APP_ROUTES.tuiPlusLinkEditor}/`) ||
+    pathname.startsWith('/settings/')
+  ) return 'workspace';
+  if (pathname === '/about') return 'content';
   if (pathname === '/' || pathname.startsWith('/category/')) return 'feed';
-  return 'page';
+  return 'utility';
 }
 
 function hasOverlayBackgroundLocation(state: unknown) {

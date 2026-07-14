@@ -12,7 +12,11 @@
     --app-desktop-feed-main-width: calc(var(--ui-space-8) * 21 + var(--ui-space-4));
     --app-desktop-detail-main-width: calc(var(--ui-space-8) * 27 + var(--ui-space-4));
     --app-desktop-conversation-main-width: calc(var(--ui-space-8) * 26 + var(--ui-space-2));
-    --app-desktop-page-main-width: calc(var(--ui-space-8) * 23 + var(--ui-space-4));
+    --app-desktop-profile-main-width: calc(var(--ui-space-8) * 27 + var(--ui-space-4));
+    --app-desktop-compose-main-width: calc(var(--ui-space-8) * 28 + var(--ui-space-4));
+    --app-desktop-workspace-main-width: calc(var(--ui-space-8) * 29 + var(--ui-space-4));
+    --app-desktop-content-main-width: calc(var(--ui-space-8) * 29 + var(--ui-space-4));
+    --app-desktop-utility-main-width: calc(var(--ui-space-8) * 24 + var(--ui-space-4));
     --app-desktop-main-width: var(--app-desktop-feed-main-width);
     --app-desktop-context-width: calc(var(--ui-space-8) * 8 + var(--ui-space-6));
     --app-desktop-shell-gap: var(--ui-space-6);
@@ -41,8 +45,24 @@
     --app-desktop-main-width: var(--app-desktop-conversation-main-width);
   }
 
-  .app-shell[data-route-surface='user'][data-desktop-surface='page'] {
-    --app-desktop-main-width: var(--app-desktop-page-main-width);
+  .app-shell[data-route-surface='user'][data-desktop-surface='profile'] {
+    --app-desktop-main-width: var(--app-desktop-profile-main-width);
+  }
+
+  .app-shell[data-route-surface='user'][data-desktop-surface='compose'] {
+    --app-desktop-main-width: var(--app-desktop-compose-main-width);
+  }
+
+  .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] {
+    --app-desktop-main-width: var(--app-desktop-workspace-main-width);
+  }
+
+  .app-shell[data-route-surface='user'][data-desktop-surface='content'] {
+    --app-desktop-main-width: var(--app-desktop-content-main-width);
+  }
+
+  .app-shell[data-route-surface='user'][data-desktop-surface='utility'] {
+    --app-desktop-main-width: var(--app-desktop-utility-main-width);
   }
 
   .app-shell[data-route-surface='admin'],
@@ -137,6 +157,16 @@
       background: var(--ui-surface-page);
     }
 
+    .app-shell[data-route-surface='user'] > .ui-layer-header {
+      display: none;
+    }
+
+    .app-shell[data-route-surface='user']:not([data-desktop-surface='feed']) {
+      grid-template-columns:
+        minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
+        minmax(0, var(--app-desktop-main-width));
+    }
+
     .app-shell[data-route-surface='user'] .app-shell-main {
       position: relative;
       width: 100%;
@@ -183,10 +213,6 @@
       box-shadow: var(--ui-shadow-none);
     }
 
-    .app-shell[data-route-surface='user'][data-desktop-surface='conversation'] .app-desktop-context-rail {
-      display: none;
-    }
-
     .app-shell[data-route-surface='user'] .app-bottom-nav {
       display: none;
     }
@@ -203,6 +229,10 @@
 
     .app-desktop-sidebar {
       width: 100%;
+    }
+
+    .app-shell[data-route-surface='user']:not([data-desktop-surface='feed']) .app-desktop-context-rail {
+      display: none;
     }
 
     .app-desktop-brand,
