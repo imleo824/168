@@ -23,7 +23,7 @@ export type AutoPostRunStatus = 'PENDING' | 'SUCCEEDED' | 'SKIPPED' | 'FAILED';
 export type AutoPostTrigger = 'MANUAL' | 'SCHEDULED';
 export type AutoPostTopic = 'QUOTE' | 'FACT' | 'RIDDLE' | 'JOKE';
 
-export type AutoPostAfterPostCreated = (params: { post: any; user: any; syncToTelegram: boolean; req?: Request }) => Promise<void> | void;
+export type AutoPostAfterPostCreated = (params: { post: any; user: any; req?: Request }) => Promise<void> | void;
 
 export type AutoPostImportItem = {
   topic?: unknown;
@@ -48,7 +48,6 @@ const AUTO_POST_TASK_LOCK_TTL_MS = 20 * 60 * 1000;
 const AUTO_POST_SOURCE = 'auto_post_curated_content';
 const AUTO_POST_RUN_RETENTION_DAYS = 3;
 const TELEGRAM_SYNC_STATUS_NONE = 'NONE';
-const TELEGRAM_SYNC_STATUS_PENDING = 'PENDING';
 const PICK_CONTENT_LIMIT = 160;
 const PICK_RANDOM_POOL_LIMIT = 50;
 const AUTO_POST_SEED_INPUT = 'data/auto-post-content.seed.jsonl';
@@ -181,7 +180,7 @@ async function pickRunnableTopic(config: AutoPostConfig) {
   return { topic: null, reason: 'no_available_topic_content' };
 }
 async function createPostFromContent(params: { contentItem: any; author: any; category: any | null; config: AutoPostConfig }) {
-  const { contentItem, author, category, config } = params;
+  const { contentItem, author, category } = params;
   const body = buildPostBody(contentItem);
   const unsafeReason = safetyFailure(body);
   if (unsafeReason) return { post: null, skippedReason: unsafeReason, publishedContent: body };
@@ -199,9 +198,9 @@ async function createPostFromContent(params: { contentItem: any; author: any; ca
         source: AUTO_POST_SOURCE,
         isAnonymous: false,
         isPublished: true,
-        syncToTelegram: config.syncToTelegram,
-        telegramSyncStatus: config.syncToTelegram ? TELEGRAM_SYNC_STATUS_PENDING as any : TELEGRAM_SYNC_STATUS_NONE as any,
-        telegramSyncRequestedAt: config.syncToTelegram ? now : null,
+        syncToTelegram: false,
+        telegramSyncStatus: TELEGRAM_SYNC_STATUS_NONE as any,
+        telegramSyncRequestedAt: null,
         telegramSyncLastError: null,
         ...(category?.id ? { category: { connect: { id: category.id } } } : {}),
         user: { connect: { id: author.id } },
@@ -253,7 +252,7 @@ export async function runAutoPostOnce(options: RunOptions = {}) {
       activePublishedContent = created.publishedContent;
       if (!created.post) return finishRun(run.id, { status: 'SKIPPED', contentId: activeContentId, topic: activeTopic, authorUserId: activeAuthorUserId, categoryId: activeCategoryId, publishedContent: activePublishedContent, skipReason: created.skippedReason || 'content_skipped' });
       let result = await finishRun(run.id, { status: 'SUCCEEDED', contentId: activeContentId, topic: activeTopic, postId: created.post.id, authorUserId: activeAuthorUserId, categoryId: activeCategoryId, publishedContent: activePublishedContent });
-      try { await options.afterPostCreated?.({ post: created.post, user: validation.user, syncToTelegram: config.syncToTelegram, req: options.req }); } catch (error: any) { result = await markRunSideEffectError(run.id, `after_post_created_failed: ${cleanString(error?.message || error, 430)}`); }
+      try { await options.afterPostCreated?.({ post: created.post, user: validation.user, req: options.req }); } catch (error: any) { result = await markRunSideEffectError(run.id, `after_post_created_failed: ${cleanString(error?.message || error, 430)}`); }
       return result;
     });
     if (!taskLock.acquired) {

@@ -10,7 +10,6 @@ export type QuotePublishConfig = {
   humanQuoteSkipThreshold: number;
   humanShareSkipThreshold: number;
   humanTotalEngagementSkipThreshold: number;
-  syncToTelegram: boolean;
 };
 
 const CONFIG_PREFIX = 'quote_publish_';
@@ -37,7 +36,6 @@ export const DEFAULT_QUOTE_PUBLISH_CONFIG: QuotePublishConfig = {
   humanQuoteSkipThreshold: LIMITS.humanQuoteSkipThreshold.fallback,
   humanShareSkipThreshold: LIMITS.humanShareSkipThreshold.fallback,
   humanTotalEngagementSkipThreshold: LIMITS.humanTotalEngagementSkipThreshold.fallback,
-  syncToTelegram: false,
 };
 
 const CONFIG_KEYS: Array<keyof QuotePublishConfig> = [
@@ -50,7 +48,6 @@ const CONFIG_KEYS: Array<keyof QuotePublishConfig> = [
   'humanQuoteSkipThreshold',
   'humanShareSkipThreshold',
   'humanTotalEngagementSkipThreshold',
-  'syncToTelegram',
 ];
 
 let cachedConfig: { value: QuotePublishConfig; expiresAt: number } | null = null;
@@ -96,7 +93,6 @@ export function normalizeQuotePublishConfig(input: Partial<Record<keyof QuotePub
     humanQuoteSkipThreshold: hasOwn(input, 'humanQuoteSkipThreshold') ? clampInteger(input.humanQuoteSkipThreshold, LIMITS.humanQuoteSkipThreshold) : fallback.humanQuoteSkipThreshold,
     humanShareSkipThreshold: hasOwn(input, 'humanShareSkipThreshold') ? clampInteger(input.humanShareSkipThreshold, LIMITS.humanShareSkipThreshold) : fallback.humanShareSkipThreshold,
     humanTotalEngagementSkipThreshold: hasOwn(input, 'humanTotalEngagementSkipThreshold') ? clampInteger(input.humanTotalEngagementSkipThreshold, LIMITS.humanTotalEngagementSkipThreshold) : fallback.humanTotalEngagementSkipThreshold,
-    syncToTelegram: hasOwn(input, 'syncToTelegram') ? toBoolean(input.syncToTelegram, fallback.syncToTelegram) : fallback.syncToTelegram,
   } satisfies QuotePublishConfig;
 }
 

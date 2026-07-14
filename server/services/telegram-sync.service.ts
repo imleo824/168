@@ -768,7 +768,7 @@ export async function scheduleTelegramChannelSync(params: { req: Request | strin
   try {
     const syncStatus = normalizeTelegramSyncStatus(params.post?.telegramSyncStatus);
     if (syncStatus === TELEGRAM_SYNC_STATUS_SENT) return { enabled: false, queued: false } as const;
-    if (syncStatus !== TELEGRAM_SYNC_STATUS_PENDING && params.post?.syncToTelegram !== true) return { enabled: false, queued: false } as const;
+    if (syncStatus !== TELEGRAM_SYNC_STATUS_PENDING) return { enabled: false, queued: false } as const;
 
     const config = params.configs ?? await ConfigService.getConfigs();
     const telegramToken = getTelegramBotToken(config);

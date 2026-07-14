@@ -925,7 +925,7 @@ function recordUserProfileView(req: Request, userId: string) {
   return true;
 }
 
-const handleQuotePublishPostCreated: QuotePublishAfterPostCreated = async ({ post, user, syncToTelegram, req }) => {
+const handleQuotePublishPostCreated: QuotePublishAfterPostCreated = async ({ post, user }) => {
   markContentDataChanged();
   const postIds = [post?.id, post?.quotedPostId]
     .map((id) => (typeof id === 'string' ? id.trim() : ''))
@@ -938,20 +938,9 @@ const handleQuotePublishPostCreated: QuotePublishAfterPostCreated = async ({ pos
     post,
     user,
   });
-
-  if (!syncToTelegram) return;
-
-  const telegramSync = await scheduleTelegramChannelSync({
-    req: req || resolvePublicOriginFromContext(undefined),
-    post,
-    authorName: user?.displayName || null,
-  });
-  if (!telegramSync.queued) {
-    await markTelegramSyncFailed(post?.id, new Error(telegramSync.reason || 'telegram_sync_schedule_failed'));
-  }
 };
 
-const handleAutoPostCreated: AutoPostAfterPostCreated = async ({ post, user, syncToTelegram, req }) => {
+const handleAutoPostCreated: AutoPostAfterPostCreated = async ({ post, user }) => {
   markContentDataChanged();
   if (typeof post?.id === 'string' && post.id.trim()) {
     PostService.schedulePostRankingRefresh(post.id);
@@ -962,17 +951,6 @@ const handleAutoPostCreated: AutoPostAfterPostCreated = async ({ post, user, syn
       post,
       user,
     });
-  }
-
-  if (!syncToTelegram) return;
-
-  const telegramSync = await scheduleTelegramChannelSync({
-    req: req || resolvePublicOriginFromContext(undefined),
-    post,
-    authorName: user?.displayName || null,
-  });
-  if (!telegramSync.queued) {
-    await markTelegramSyncFailed(post?.id, new Error(telegramSync.reason || 'telegram_sync_schedule_failed'));
   }
 };
 

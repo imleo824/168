@@ -20,7 +20,6 @@ type AutoPostTopicConfig = {
 type AutoPostConfig = {
   enabled: boolean;
   checkIntervalMinutes: number;
-  syncToTelegram: boolean;
   topicConfigs: Record<string, AutoPostTopicConfig>;
 };
 const TOPICS: Array<{ key: AutoPostTopic; label: string }> = [
@@ -102,12 +101,9 @@ export function AdminAutoPostPanel() {
   return (
     <AdminAutomationConfigShell>
       <AdminAutomationConfigCard
-        summary="主题、发布账号、每日上限和同步规则。"
+        summary="主题、发布账号和每日上限。"
         titleActions={(
-          <>
-            <label className="admin-quote-toggle"><input type="checkbox" checked={Boolean(postDraft.enabled)} onChange={(event) => updatePostDraft('enabled', event.target.checked)} />启用自动发帖</label>
-            <label className="admin-quote-toggle"><input type="checkbox" checked={Boolean(postDraft.syncToTelegram)} onChange={(event) => updatePostDraft('syncToTelegram', event.target.checked)} />同步 Telegram</label>
-          </>
+          <label className="admin-quote-toggle"><input type="checkbox" checked={Boolean(postDraft.enabled)} onChange={(event) => updatePostDraft('enabled', event.target.checked)} />启用自动发帖</label>
         )}
       >
         <div className="admin-quote-config-grid">

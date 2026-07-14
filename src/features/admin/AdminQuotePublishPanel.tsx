@@ -19,7 +19,6 @@ type QuotePublishConfig = {
   humanQuoteSkipThreshold: number;
   humanShareSkipThreshold: number;
   humanTotalEngagementSkipThreshold: number;
-  syncToTelegram: boolean;
 };
 
 const QUOTE_CONFIG_FIELDS = [
@@ -50,10 +49,7 @@ export function AdminQuotePublishPanel() {
       <AdminAutomationConfigCard
         summary="候选窗口、冷却、每日上限和真人互动跳过阈值。"
         titleActions={(
-          <>
-            <label className="admin-quote-toggle"><input type="checkbox" checked={Boolean(draft.enabled)} onChange={(event) => updateDraft('enabled', event.target.checked)} />启用自动引用</label>
-            <label className="admin-quote-toggle"><input type="checkbox" checked={Boolean(draft.syncToTelegram)} onChange={(event) => updateDraft('syncToTelegram', event.target.checked)} />同步 Telegram</label>
-          </>
+          <label className="admin-quote-toggle"><input type="checkbox" checked={Boolean(draft.enabled)} onChange={(event) => updateDraft('enabled', event.target.checked)} />启用自动引用</label>
         )}
       >
         <div className="admin-quote-config-grid">{QUOTE_CONFIG_FIELDS.map((field) => <ConfigItem key={field.key} label={field.label} value={field.toDisplayValue ? field.toDisplayValue(draft[field.key as keyof QuotePublishConfig]) : draft[field.key as keyof QuotePublishConfig]} min={field.min} max={field.max} help={field.help} actual={field.actual} recommendation={field.recommendation} warning={field.warning} onChange={(value) => updateDraft(field.key as keyof QuotePublishConfig, field.fromDisplayValue ? field.fromDisplayValue(value) : value)} />)}</div>

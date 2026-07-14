@@ -32,7 +32,7 @@ export { getQuotePublishConfig, updateQuotePublishConfig };
 export type { QuotePublishConfig };
 export type QuotePublishRunStatus = 'PENDING' | 'SUCCEEDED' | 'SKIPPED' | 'FAILED';
 export type QuotePublishTrigger = 'MANUAL' | 'SCHEDULED';
-export type QuotePublishAfterPostCreated = (params: { post: any; user: any; syncToTelegram: boolean; req?: Request }) => Promise<void> | void;
+export type QuotePublishAfterPostCreated = (params: { post: any; user: any; req?: Request }) => Promise<void> | void;
 
 type RunOptions = { trigger?: QuotePublishTrigger; req?: Request; afterPostCreated?: QuotePublishAfterPostCreated; force?: boolean };
 type ListRunsOptions = { status?: QuotePublishRunStatus; limit?: number; cursor?: string };
@@ -70,7 +70,6 @@ const RECENT_ROBOT_ENGAGEMENT_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 const QUOTE_TASK_LOCK_NAME = 'quote_publish';
 const QUOTE_TASK_LOCK_TTL_MS = 20 * 60 * 1000;
 const TELEGRAM_SYNC_STATUS_NONE = 'NONE';
-const TELEGRAM_SYNC_STATUS_PENDING = 'PENDING';
 const RUN_STATUSES = new Set<QuotePublishRunStatus>(['PENDING', 'SUCCEEDED', 'SKIPPED', 'FAILED']);
 const SKIPPED_SOURCE_COOLDOWN_REASONS = [
   'unsupported_source_intent',
@@ -331,9 +330,9 @@ async function createQuotePost(sourcePost: CandidatePost, robot: RobotUser, cont
         source: QUOTE_SOURCE,
         isAnonymous: false,
         isPublished: true,
-        syncToTelegram: config.syncToTelegram,
-        telegramSyncStatus: config.syncToTelegram ? TELEGRAM_SYNC_STATUS_PENDING as any : TELEGRAM_SYNC_STATUS_NONE as any,
-        telegramSyncRequestedAt: config.syncToTelegram ? now : null,
+        syncToTelegram: false,
+        telegramSyncStatus: TELEGRAM_SYNC_STATUS_NONE as any,
+        telegramSyncRequestedAt: null,
         telegramSyncLastError: null,
         quotedPost: { connect: { id: sourcePost.id } },
         ...(sourcePost.categoryId ? { category: { connect: { id: sourcePost.categoryId } } } : {}),
@@ -439,7 +438,7 @@ export async function runQuotePublishOnce(options: RunOptions = {}) {
         const quotePost = await createQuotePost(sourcePost, robot, content, signature, config);
         let result = await finishRun(run.id, { status: 'SUCCEEDED', sourcePostId: sourcePost.id, quotePostId: quotePost.id, robotUserId: robot.id, generatedContent: content, candidateScore: quality.score });
         try {
-          await options.afterPostCreated?.({ post: quotePost, user: robot, syncToTelegram: config.syncToTelegram, req: options.req });
+          await options.afterPostCreated?.({ post: quotePost, user: robot, req: options.req });
         } catch (error: any) {
           const message = `after_post_created_failed: ${clean(error?.message || error, 430)}`;
           result = await markRunSideEffectError(run.id, message);

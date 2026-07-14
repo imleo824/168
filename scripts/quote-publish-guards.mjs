@@ -56,7 +56,11 @@ assertIncludes('quote-publish-v5.service.ts', service, "skipReason: 'another_ins
 assertIncludes('quote-publish-v5.service.ts', service, 'lock: taskLock.lock', 'lock conflict response must include lock details.');
 assertIncludes('quote-publish-v5.service.ts', service, 'p."quotedPostId" IS NULL', 'candidate query must exclude quote posts.');
 assertIncludes('quote-publish-v5.service.ts', service, "userType: 'ROBOT'", 'robot author selection is required.');
-assertIncludes('quote-publish-v5.service.ts', service, 'syncToTelegram: config.syncToTelegram', 'Telegram sync must be controlled by config.');
+assertIncludes('quote-publish-v5.service.ts', service, 'syncToTelegram: false', 'auto-created quote posts must not auto-sync to Telegram.');
+assertIncludes('quote-publish-v5.service.ts', service, 'telegramSyncStatus: TELEGRAM_SYNC_STATUS_NONE as any', 'auto-created quote posts must start as manually syncable.');
+assertNotIncludes('quote-publish-v5.service.ts', service, 'syncToTelegram: config.syncToTelegram', 'Telegram auto-sync must stay removed from quote publishing.');
+assertNotIncludes('quote-publish.config.ts', config, 'syncToTelegram', 'quote publish config must not expose Telegram auto-sync.');
+assertNotIncludes('AdminQuotePublishPanel.tsx', adminPanel, '同步 Telegram', 'quote publish admin must not expose Telegram auto-sync.');
 assertIncludes('quote-publish-v5.service.ts', service, 'quoteCount: { increment: 1 }', 'source quoteCount increment is required.');
 assertNotIncludes('quote-publish-v5.service.ts', service, 'CREATE TABLE IF NOT EXISTS "QuotePublishRun"', 'QuotePublishRun table creation must stay in migrations.');
 

@@ -4,7 +4,6 @@ export type AutoPostConfig = {
   enabled: boolean;
   topicConfigs: Record<string, AutoPostTopicConfig>;
   checkIntervalMinutes: number;
-  syncToTelegram: boolean;
 };
 
 export type AutoPostTopicConfig = {
@@ -30,14 +29,12 @@ export const DEFAULT_AUTO_POST_CONFIG: AutoPostConfig = {
   enabled: false,
   topicConfigs: Object.fromEntries(AUTO_POST_CONFIG_TOPICS.map((topic) => [topic, { ...DEFAULT_TOPIC_CONFIG }])),
   checkIntervalMinutes: 60,
-  syncToTelegram: false,
 };
 
 const CONFIG_KEYS: Array<keyof AutoPostConfig> = [
   'enabled',
   'topicConfigs',
   'checkIntervalMinutes',
-  'syncToTelegram',
 ];
 
 let cachedConfig: { value: AutoPostConfig; expiresAt: number } | null = null;
@@ -96,7 +93,6 @@ export function normalizeAutoPostConfig(input: Partial<Record<keyof AutoPostConf
     enabled: toBoolean(input.enabled, DEFAULT_AUTO_POST_CONFIG.enabled),
     topicConfigs,
     checkIntervalMinutes: toInteger(input.checkIntervalMinutes, DEFAULT_AUTO_POST_CONFIG.checkIntervalMinutes),
-    syncToTelegram: toBoolean(input.syncToTelegram, DEFAULT_AUTO_POST_CONFIG.syncToTelegram),
   } satisfies AutoPostConfig;
 }
 

@@ -29,7 +29,9 @@ const crawlPanel = read('src/features/admin/AdminAutoCrawlPanel.tsx');
 const crawlExecutionPanel = read('src/features/admin/AdminAutoCrawlExecutionLogsCompactPanel.tsx');
 const interactionPanel = read('src/features/admin/AdminInteractionConfigPanel.tsx');
 const autoPost = read('server/services/auto-post.service.ts');
+const autoPostConfig = read('server/services/auto-post.config.ts');
 const autoPostRunner = read('server/services/auto-post-observed-runner.service.ts');
+const autoPostPanel = read('src/features/admin/AdminAutoPostPanel.tsx');
 const interactionRunner = read('server/services/interaction-observed-runner.service.ts');
 const quote = read('server/services/quote-publish-v5.service.ts');
 const health = read('server/services/automation-health.service.ts');
@@ -132,6 +134,11 @@ mustHave('interaction panel', interactionPanel, /AdminAutoCrawlExecutionLogsComp
 mustHave('auto post runner', autoPostRunner, /runAutoPostOnce/);
 mustHave('auto post runner', autoPostRunner, /module: 'auto_post'/);
 mustNotHave('auto post service', autoPost, /startAutoPostScheduler|recordAutomationHeartbeat/);
+mustHave('auto post service manual Telegram only', autoPost, /syncToTelegram: false/);
+mustHave('auto post service manual Telegram only', autoPost, /telegramSyncStatus: TELEGRAM_SYNC_STATUS_NONE as any/);
+mustNotHave('auto post service manual Telegram only', autoPost, /syncToTelegram: config\.syncToTelegram|TELEGRAM_SYNC_STATUS_PENDING/);
+mustNotHave('auto post config manual Telegram only', autoPostConfig, /syncToTelegram/);
+mustNotHave('auto post admin manual Telegram only', autoPostPanel, /同步 Telegram|syncToTelegram/);
 for (const moduleName of ['auto_like', 'quote_publish', 'comment_publish']) {
   mustHave('interaction runner', interactionRunner, new RegExp(`module: '${moduleName}'`));
 }

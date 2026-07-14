@@ -153,6 +153,8 @@ mustHave('telegram sync service detail link', telegramSyncService, "parse_mode: 
 mustHave('telegram sync service stored post', telegramSyncService, 'const storedPost = await prisma.post.findFirst');
 mustHave('telegram sync service stored post', telegramSyncService, 'include: {');
 mustHave('telegram sync service stored post', telegramSyncService, 'const post = storedPost || job.post');
+mustHave('telegram sync service manual only', telegramSyncService, 'if (syncStatus !== TELEGRAM_SYNC_STATUS_PENDING) return { enabled: false, queued: false } as const;');
+mustNotHave('telegram sync service manual only', telegramSyncService, 'params.post?.syncToTelegram !== true');
 mustHave('telegram sync service photo fallback', telegramSyncService, 'resolveTelegramPhotoUrlSources');
 mustHave('telegram sync service text only', telegramSyncService, 'await sendTelegramTextChunks({ token: params.token, chatId: params.chatId, chunks: fullTextChunks.length ? fullTextChunks : [\'\'] })');
 mustHave('telegram sync service photo fallback', telegramSyncService, "method: 'sendMediaGroup'");
