@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Navigate, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
-import { lazy, Suspense, useEffect, type ReactNode } from 'react';
+import { lazy, Suspense, useEffect, useMemo, type ReactNode } from 'react';
 import { CirclePlus, House, Info, MessagesSquare, ShieldCheck, TrendingUp, UserRound } from 'lucide-react';
 
 import { AuthProvider, useAuth } from '@/context/AuthContext';
@@ -31,6 +31,8 @@ import { useReferralInviteAttributionCapture } from '@/app/useReferralInviteAttr
 import { isTuiPlusActive } from '@/features/tui-plus/tuiPlusBenefits';
 import { useHomeOnlineCount } from '@/features/home/useHomeOnlineCount';
 import { formatOptionalOnlineCount } from '@/features/home/onlinePresence';
+import { OnlinePresenceProvider } from '@/features/home/OnlinePresenceContext';
+import { useHomeBootstrap } from '@/hooks/useData';
 
 const AuthModal = lazy(() => import('@/features/auth/AuthModal'));
 const Recharge = lazy(() => import('@/pages/RechargeMobile'));
@@ -336,8 +338,18 @@ function AppLayout() {
   const { user } = useAuth();
   const location = useLocation();
   const pathname = location.pathname;
-  const onlineCount = useHomeOnlineCount({ enabled: true });
+  const { data: homeBootstrap } = useHomeBootstrap();
+  const onlineConfig = homeBootstrap?.config;
+  const onlineCount = useHomeOnlineCount({
+    min: onlineConfig?.online_users_min,
+    max: onlineConfig?.online_users_max,
+    enabled: Boolean(onlineConfig),
+  });
   const onlineCountText = formatOptionalOnlineCount(onlineCount);
+  const onlinePresenceValue = useMemo(
+    () => ({ onlineCount, onlineCountText }),
+    [onlineCount, onlineCountText],
+  );
   const isAdminRoute = pathname.startsWith('/168wc');
   const routeSurface = isAdminRoute ? 'admin' : 'user';
   const isUserSurface = routeSurface === 'user';
@@ -360,59 +372,61 @@ function AppLayout() {
   const appShellWidth = isAdminRoute ? 'full' : 'bounded';
 
   return (
-    <div
-      className={appClassName}
-      data-route-surface={routeSurface}
-      data-desktop-surface={desktopSurfaceKind}
-      data-chat-route-active={isChatRoute ? 'true' : undefined}
-    >
-      {isUserSurface ? <Navigation /> : null}
-      {isUserSurface ? <AppDesktopSidebar /> : null}
+    <OnlinePresenceProvider value={onlinePresenceValue}>
       <div
-        className="app-main app-shell-main"
+        className={appClassName}
         data-route-surface={routeSurface}
         data-desktop-surface={desktopSurfaceKind}
-        data-app-shell-width={appShellWidth}
-        data-bottom-nav-visible={isUserSurface ? 'true' : undefined}
-        data-route-overlay-active={isRouteOverlay ? 'true' : undefined}
+        data-chat-route-active={isChatRoute ? 'true' : undefined}
       >
-        <ErrorBoundary resetKeys={[location.key, location.pathname]}>
-          <Suspense fallback={location.pathname === '/' ? <HomePageSkeleton /> : <PageLoader />}>
-            <Routes location={location}>
-              <Route path="/" element={<Home />} />
-              <Route path="/post/:id" element={<PostDetail />} />
-              <Route path="/category/:id" element={<CategoryFeed />} />
-              <Route path="/user/:id" element={<UserSpace />} />
-              <Route path="/create" element={<AppRequireAuthRoute><PostCreate /></AppRequireAuthRoute>} />
-              <Route path="/chat" element={<AppRequireAuthRoute><Chat /></AppRequireAuthRoute>} />
-              <Route path="/messages" element={<AppRequireAuthRoute><Messages /></AppRequireAuthRoute>} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path={APP_ROUTES.profileBioEditor} element={<AppRequireAuthRoute><ProfileBioEditor /></AppRequireAuthRoute>} />
-              <Route path={APP_ROUTES.tuiPlusLinkEditor} element={<AppRequireAuthRoute><AppRequireTuiPlusRoute benefit="profileLinks"><TuiPlusLinkEditor /></AppRequireTuiPlusRoute></AppRequireAuthRoute>} />
-              <Route path={`${APP_ROUTES.tuiPlusLinkEditor}/:target`} element={<AppRequireAuthRoute><AppRequireTuiPlusRoute benefit="profileLinks"><TuiPlusLinkEditor /></AppRequireTuiPlusRoute></AppRequireAuthRoute>} />
-              <Route path={APP_ROUTES.tuiPlus} element={<AppRequireAuthRoute><TuiPlus /></AppRequireAuthRoute>} />
-              <Route path={APP_ROUTES.sponsor} element={<AppRequireAuthRoute><Sponsor /></AppRequireAuthRoute>} />
-              <Route path={APP_ROUTES.invite} element={<AppRequireAuthRoute><ReferralInvite /></AppRequireAuthRoute>} />
-              <Route path={APP_ROUTES.inviteRecords} element={<AppRequireAuthRoute><ReferralInviteRecords /></AppRequireAuthRoute>} />
-              <Route path={APP_ROUTES.promote} element={<AppRequireAuthRoute><AppRequireTuiPlusRoute benefit="promotionBooking"><Promote /></AppRequireTuiPlusRoute></AppRequireAuthRoute>} />
-              <Route path={APP_ROUTES.promotions} element={<AppRequireAuthRoute><PromoteHistory /></AppRequireAuthRoute>} />
-              <Route path={APP_ROUTES.legacyPromoteHistory} element={<Navigate to={APP_ROUTES.promotions} replace state={location.state} />} />
-              <Route path={APP_ROUTES.promotionEffects} element={<AppRequireAuthRoute><PromotionEffectsHistory /></AppRequireAuthRoute>} />
-              <Route path={APP_ROUTES.legacyPromotionEffects} element={<Navigate to={APP_ROUTES.promotionEffects} replace state={location.state} />} />
-              <Route path={APP_ROUTES.recharge} element={<AppRequireAuthRoute><Recharge /></AppRequireAuthRoute>} />
-              <Route path={APP_ROUTES.transactions} element={<AppRequireAuthRoute><TransactionHistory /></AppRequireAuthRoute>} />
-              <Route path="/settings/notifications" element={<AppRequireAuthRoute><NotificationSettings /></AppRequireAuthRoute>} />
-              <Route path="/168wc" element={<AdminRouteGate><Admin /></AdminRouteGate>} />
-              <Route path="/about" element={<BrandAbout />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </Suspense>
-        </ErrorBoundary>
+        {isUserSurface ? <Navigation /> : null}
+        {isUserSurface ? <AppDesktopSidebar /> : null}
+        <div
+          className="app-main app-shell-main"
+          data-route-surface={routeSurface}
+          data-desktop-surface={desktopSurfaceKind}
+          data-app-shell-width={appShellWidth}
+          data-bottom-nav-visible={isUserSurface ? 'true' : undefined}
+          data-route-overlay-active={isRouteOverlay ? 'true' : undefined}
+        >
+          <ErrorBoundary resetKeys={[location.key, location.pathname]}>
+            <Suspense fallback={location.pathname === '/' ? <HomePageSkeleton /> : <PageLoader />}>
+              <Routes location={location}>
+                <Route path="/" element={<Home />} />
+                <Route path="/post/:id" element={<PostDetail />} />
+                <Route path="/category/:id" element={<CategoryFeed />} />
+                <Route path="/user/:id" element={<UserSpace />} />
+                <Route path="/create" element={<AppRequireAuthRoute><PostCreate /></AppRequireAuthRoute>} />
+                <Route path="/chat" element={<AppRequireAuthRoute><Chat /></AppRequireAuthRoute>} />
+                <Route path="/messages" element={<AppRequireAuthRoute><Messages /></AppRequireAuthRoute>} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path={APP_ROUTES.profileBioEditor} element={<AppRequireAuthRoute><ProfileBioEditor /></AppRequireAuthRoute>} />
+                <Route path={APP_ROUTES.tuiPlusLinkEditor} element={<AppRequireAuthRoute><AppRequireTuiPlusRoute benefit="profileLinks"><TuiPlusLinkEditor /></AppRequireTuiPlusRoute></AppRequireAuthRoute>} />
+                <Route path={`${APP_ROUTES.tuiPlusLinkEditor}/:target`} element={<AppRequireAuthRoute><AppRequireTuiPlusRoute benefit="profileLinks"><TuiPlusLinkEditor /></AppRequireTuiPlusRoute></AppRequireAuthRoute>} />
+                <Route path={APP_ROUTES.tuiPlus} element={<AppRequireAuthRoute><TuiPlus /></AppRequireAuthRoute>} />
+                <Route path={APP_ROUTES.sponsor} element={<AppRequireAuthRoute><Sponsor /></AppRequireAuthRoute>} />
+                <Route path={APP_ROUTES.invite} element={<AppRequireAuthRoute><ReferralInvite /></AppRequireAuthRoute>} />
+                <Route path={APP_ROUTES.inviteRecords} element={<AppRequireAuthRoute><ReferralInviteRecords /></AppRequireAuthRoute>} />
+                <Route path={APP_ROUTES.promote} element={<AppRequireAuthRoute><AppRequireTuiPlusRoute benefit="promotionBooking"><Promote /></AppRequireTuiPlusRoute></AppRequireAuthRoute>} />
+                <Route path={APP_ROUTES.promotions} element={<AppRequireAuthRoute><PromoteHistory /></AppRequireAuthRoute>} />
+                <Route path={APP_ROUTES.legacyPromoteHistory} element={<Navigate to={APP_ROUTES.promotions} replace state={location.state} />} />
+                <Route path={APP_ROUTES.promotionEffects} element={<AppRequireAuthRoute><PromotionEffectsHistory /></AppRequireAuthRoute>} />
+                <Route path={APP_ROUTES.legacyPromotionEffects} element={<Navigate to={APP_ROUTES.promotionEffects} replace state={location.state} />} />
+                <Route path={APP_ROUTES.recharge} element={<AppRequireAuthRoute><Recharge /></AppRequireAuthRoute>} />
+                <Route path={APP_ROUTES.transactions} element={<AppRequireAuthRoute><TransactionHistory /></AppRequireAuthRoute>} />
+                <Route path="/settings/notifications" element={<AppRequireAuthRoute><NotificationSettings /></AppRequireAuthRoute>} />
+                <Route path="/168wc" element={<AdminRouteGate><Admin /></AdminRouteGate>} />
+                <Route path="/about" element={<BrandAbout />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </Suspense>
+          </ErrorBoundary>
+        </div>
+        {isUserSurface ? <AppDesktopContextRail onlineCountText={onlineCountText} /> : null}
+        {isUserSurface ? <AppBottomNavigation /> : null}
+        <GlobalAuthOverlay />
       </div>
-      {isUserSurface ? <AppDesktopContextRail onlineCountText={onlineCountText} /> : null}
-      {isUserSurface ? <AppBottomNavigation /> : null}
-      <GlobalAuthOverlay />
-    </div>
+    </OnlinePresenceProvider>
   );
 }
 

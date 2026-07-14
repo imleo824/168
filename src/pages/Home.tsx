@@ -26,7 +26,7 @@ import {
   sanitizeHomeStructuredFilters,
 } from '@/features/home/HomeStructuredFilterSheet';
 import { getHomeShellClassName } from '@/features/home/homeLayout';
-import { useHomeOnlineCount } from '@/features/home/useHomeOnlineCount';
+import { useOnlinePresence } from '@/features/home/OnlinePresenceContext';
 import {
   useHomeBootstrap,
   useHomeNotificationSummary,
@@ -110,6 +110,7 @@ export default function Home() {
   const stableHomeCategoriesRef = useRef<Category[]>([]);
 
   const { data: homeBootstrap } = useHomeBootstrap();
+  const { onlineCount } = useOnlinePresence();
   const rawCategories = homeBootstrap?.categories || [];
   const categories = getStableHomeCategories(rawCategories, stableHomeCategoriesRef);
   const config = homeBootstrap?.config;
@@ -596,12 +597,6 @@ export default function Home() {
   const handleBrowseAllFromFeed = useCallback(() => {
     void browseAll();
   }, [browseAll]);
-
-  const onlineCount = useHomeOnlineCount({
-    min: config?.online_users_min,
-    max: config?.online_users_max,
-    enabled: Boolean(config),
-  });
 
   const homeShellClassName = useMemo(
     () => getHomeShellClassName({

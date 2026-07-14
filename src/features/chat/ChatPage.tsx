@@ -5,10 +5,9 @@ import { Info, MessageCircle, RefreshCw, Send, X } from 'lucide-react';
 import type { ChatMessage } from '@/types';
 import { useAuth } from '@/context/AuthContext';
 import HomeAdBanner from '@/features/feed/HomeAdBanner';
-import { formatOptionalOnlineCount } from '@/features/home/onlinePresence';
-import { useHomeOnlineCount } from '@/features/home/useHomeOnlineCount';
+import { useOnlinePresence } from '@/features/home/OnlinePresenceContext';
 import SEO from '@/platform/SEO';
-import { useChatAds, useConfig } from '@/hooks/useData';
+import { useChatAds } from '@/hooks/useData';
 import { useScrollLock } from '@/utils/scrollLock';
 import PageHeader from '@/ui/PageHeader';
 import TopbarIconButton from '@/ui/TopbarIconButton';
@@ -20,11 +19,6 @@ import { useChatLive } from './useChatLive';
 type DocumentScrollSnapshot = {
   x: number;
   y: number;
-};
-
-type ChatOnlineCountConfig = {
-  online_users_min?: number | null;
-  online_users_max?: number | null;
 };
 
 const CHAT_SEND_DEDUPE_MS = 420;
@@ -47,7 +41,7 @@ function isStreamNearBottom(scroll: HTMLDivElement, threshold = 88) {
 export default function ChatPage() {
   const location = useLocation();
   const { user, requireAuth, showToast } = useAuth();
-  const { data: config } = useConfig();
+  const { onlineCountText } = useOnlinePresence();
   const { data: chatAds = [] } = useChatAds();
   const [draft, setDraft] = useState('');
   const [replyTarget, setReplyTarget] = useState<ChatMessage | null>(null);
@@ -93,18 +87,10 @@ export default function ChatPage() {
     sendMessage,
     refreshEligibility,
   } = useChatLive(onChatError, user);
-  const onlineCountConfig = config as ChatOnlineCountConfig | undefined;
-  const configuredOnlineCount = useHomeOnlineCount({
-    min: onlineCountConfig?.online_users_min,
-    max: onlineCountConfig?.online_users_max,
-    enabled: Boolean(config),
-  });
-
   const canUseComposer = Boolean(user && eligibility?.canSend);
   const canSubmit = canUseComposer && connectionState === 'open';
   const eligibilityText = getEligibilityText(eligibility);
   const draftMaxLength = Math.max(1, maxMessageLength);
-  const onlineCountText = formatOptionalOnlineCount(configuredOnlineCount);
   const scrollChatToLatest = useCallback(() => {
     const scroll = scrollRef.current;
     if (!scroll) return;

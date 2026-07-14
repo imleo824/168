@@ -880,7 +880,13 @@ assertNotIncludes('src/features/post/PostCard.tsx', 'avatarPopoverStyle', 'feed 
 assertIncludes('src/features/home/onlinePresence.ts', 'formatOptionalOnlineCount', 'online count display must use a shared formatter that never coerces null to 0.');
 assertNotIncludes('src/features/home/HomeChrome.tsx', 'Number(onlineCount)', 'home online count must not coerce null into 0.');
 assertIncludes('src/features/home/HomeChrome.tsx', 'formatOptionalOnlineCount(onlineCount)', 'home online count must use the shared optional formatter.');
-assertIncludes('src/features/chat/ChatPage.tsx', 'formatOptionalOnlineCount(configuredOnlineCount)', 'chat online count must use the shared optional formatter.');
+assertIncludes('src/features/home/OnlinePresenceContext.tsx', 'OnlinePresenceProvider', 'online count must expose one shared app-level presence provider.');
+assertIncludes('src/app/AppShell.tsx', 'min: onlineConfig?.online_users_min', 'desktop context rail online count must use the same configured min as home topbar.');
+assertIncludes('src/app/AppShell.tsx', 'max: onlineConfig?.online_users_max', 'desktop context rail online count must use the same configured max as home topbar.');
+assertIncludes('src/pages/Home.tsx', 'useOnlinePresence()', 'home topbar online count must consume the shared app-level presence value.');
+assertIncludes('src/features/chat/ChatPage.tsx', 'useOnlinePresence()', 'chat topbar online count must consume the shared app-level presence value.');
+assertNotIncludes('src/pages/Home.tsx', 'useHomeOnlineCount({', 'home page must not generate a second independent online count.');
+assertNotIncludes('src/features/chat/ChatPage.tsx', 'useHomeOnlineCount({', 'chat page must not generate a second independent online count.');
 const CHAT_STYLE_FILES = [
   'src/styles/features/chat-shell.css',
   'src/styles/features/chat-stream.css',

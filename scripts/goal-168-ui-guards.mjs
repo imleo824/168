@@ -120,6 +120,11 @@ assertIncludes('src/app/routePaths.ts', "promotionEffects: '/promotion-effects'"
 assertIncludes('src/app/routePaths.ts', "legacyPromotionEffects: '/promote/effects'", 'promotion effect history legacy route must be preserved.');
 assertMatches('src/app/AppShell.tsx', /pathname === APP_ROUTES\.profileBioEditor[\s\S]*?return 'workspace';[\s\S]*?pathname === '\/profile'/, 'profile bio editor must resolve to the desktop workspace surface before the broad profile route.');
 assertMatches('src/app/AppShell.tsx', /pathname\.startsWith\(`\$\{APP_ROUTES\.tuiPlusLinkEditor\}\/`\)[\s\S]*?return 'workspace';[\s\S]*?pathname === '\/profile'/, 'Tui Plus link editor targets must resolve to the desktop workspace surface before the broad profile route.');
+assertIncludes('src/features/home/OnlinePresenceContext.tsx', 'OnlinePresenceProvider', 'desktop online count must come from one shared app-level presence provider.');
+assertIncludes('src/app/AppShell.tsx', 'min: onlineConfig?.online_users_min', 'desktop online count must use the same configured minimum everywhere.');
+assertIncludes('src/app/AppShell.tsx', 'max: onlineConfig?.online_users_max', 'desktop online count must use the same configured maximum everywhere.');
+assertNotIncludes('src/pages/Home.tsx', 'useHomeOnlineCount({', 'home topbar must not generate a second online count.');
+assertNotIncludes('src/features/chat/ChatPage.tsx', 'useHomeOnlineCount({', 'chat topbar must not generate a second online count.');
 assertIncludes('src/styles/system/wide-screen-mobile-adaptation.css', '(var(--ui-app-shell-desktop-padding-x) * 2)', 'desktop detail frame width must include the shared outer frame padding.');
 assertNotIncludes('src/styles/system/wide-screen-mobile-adaptation.css', "[data-desktop-surface='detail'] .app-shell-main {\n      padding-inline: var(--ui-space-none);", 'desktop detail pages must not remove the shared outer frame padding.');
 assertIncludes('src/styles/features/post-detail-shell.css', 'var(--ui-bottom-nav-page-bottom-space)', 'desktop detail pages must size their internal height against the framed app shell content area.');
