@@ -50,7 +50,8 @@
   }
 
   .detail-page[data-route-overlay].detail-page--desktop {
-    max-width: var(--ui-app-shell-bounded-max-width);
+    width: min(100%, var(--app-desktop-reading-main-width, var(--ui-app-shell-bounded-max-width)));
+    max-width: min(100%, var(--app-desktop-reading-main-width, var(--ui-app-shell-bounded-max-width)));
     left: 50%;
     right: auto;
     transform: translateX(-50%);
@@ -82,6 +83,13 @@
   }
 
   @media (min-width: 1024px) {
+    .app-shell[data-route-surface='user'][data-desktop-surface='detail'] .detail-state-shell {
+      width: 100%;
+      max-width: min(100%, var(--app-desktop-reading-main-width, var(--ui-app-shell-bounded-max-width)));
+      margin-inline: auto;
+      padding-inline: var(--ui-space-none);
+    }
+
     .app-shell[data-route-surface='user'][data-desktop-surface='detail'] .detail-page {
       width: 100%;
       max-width: min(100%, var(--app-desktop-reading-main-width, var(--ui-app-shell-bounded-max-width)));

@@ -32,24 +32,25 @@
 
   @media (min-width: 1024px) {
     .app-shell[data-route-surface='user'] :is(.detail-bottom-bar, .promote-checkout-bar, .ui-checkout-bar) {
+      --secondary-page-action-width: var(--app-desktop-main-active-width);
+      --secondary-page-action-offset: var(--ui-space-none);
       box-sizing: border-box;
       right: auto;
       bottom: var(--app-desktop-shell-padding-y);
-      left: var(--app-desktop-main-left);
-      width: var(--app-desktop-main-active-width);
-      max-width: var(--app-desktop-main-active-width);
+      left: calc(var(--app-desktop-main-left) + var(--secondary-page-action-offset));
+      width: var(--secondary-page-action-width);
+      max-width: var(--secondary-page-action-width);
       overflow: hidden;
       border-inline: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
       border-bottom: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
       border-radius: 0 0 var(--ui-radius-2xl) var(--ui-radius-2xl);
     }
 
-    .app-shell[data-route-surface='user'][data-desktop-surface='detail'] .detail-bottom-bar {
-      --detail-desktop-action-width: min(var(--app-desktop-main-active-width), var(--app-desktop-reading-main-width));
-      --detail-desktop-action-offset: max(var(--ui-space-none), calc((var(--app-desktop-main-active-width) - var(--detail-desktop-action-width)) / 2));
-      left: calc(var(--app-desktop-main-left) + var(--detail-desktop-action-offset));
-      width: var(--detail-desktop-action-width);
-      max-width: var(--detail-desktop-action-width);
+    .app-shell[data-route-surface='user'][data-desktop-surface='detail'] .detail-bottom-bar,
+    .app-shell[data-route-surface='user'][data-desktop-surface='profile'] .ui-checkout-bar,
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] :is(.promote-checkout-bar, .ui-checkout-bar) {
+      --secondary-page-action-width: min(var(--app-desktop-main-active-width), var(--app-desktop-reading-main-width));
+      --secondary-page-action-offset: max(var(--ui-space-none), calc((var(--app-desktop-main-active-width) - var(--secondary-page-action-width)) / 2));
     }
   }
 }
