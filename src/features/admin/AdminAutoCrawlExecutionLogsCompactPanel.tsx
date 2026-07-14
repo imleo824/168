@@ -229,7 +229,6 @@ function postPayloadRows(event: LogEvent): DetailRow[] {
     { label: '图片数', value: formatValue(source.imagesCount ?? (Array.isArray(source.images) ? source.images.length : '')) },
     { label: '发布账号', value: formatValue(source.authorUserId) },
     { label: '是否发布', value: formatValue(source.isPublished) },
-    { label: '同步 Telegram', value: formatValue(source.syncToTelegram) },
     { label: 'categoryMeta', value: formatValue(source.categoryMeta) },
   ]);
 }

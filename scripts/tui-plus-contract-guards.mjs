@@ -107,6 +107,8 @@ mustNotHave('Tui Plus channel service', channelService, 'UPDATE "Post"');
 mustHave('Tui Plus channel service', channelService, 'ON CONFLICT ("userId", "channelHandle") DO UPDATE');
 mustNotHave('Tui Plus channel service', channelService, 'addTuiPlusTelegramChannelBase');
 mustNotHave('Tui Plus channel service', channelService, 'EXISTING_PLATFORM_SOURCE_ERROR');
+mustNotHave('Tui Plus channel service', channelService, '"syncToTelegram"');
+mustNotHave('Tui Plus channel service', channelService, 'syncToTelegram');
 
 mustHave('Tui Plus entitlement maintenance', entitlements, 'markTuiPlusUserExpired');
 mustHave('Tui Plus entitlement maintenance', entitlements, 'expireActiveSubscriptionsForUser');

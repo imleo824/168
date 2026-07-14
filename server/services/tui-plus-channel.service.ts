@@ -166,8 +166,8 @@ async function claimAutoCrawlSource(tx: any, params: { userId: string; crawlUrl:
 
   const sourceId = `plus_${stableId(`${params.userId}:${params.handle}`)}`;
   await tx.$executeRaw`
-    INSERT INTO "AutoCrawlSource" ("id", "source", "type", "sourceName", "trustLevel", "categoryId", "categoryName", "authorUserId", "showContact", "syncToTelegram", "disabled", "cursor", "cursorKind", "pollIntervalMinutes", "nextRunAt", "ownerUserId", "sourceScope", "createdAt", "updatedAt")
-    VALUES (${sourceId}, ${params.crawlUrl}, 'telegram', ${cleanString(`Tui Plus ${params.title}`, 80)}, 'NORMAL', NULL, ${categoryName}, ${params.userId}, true, false, false, '', 'baseline_pending', 30, ${now}, ${params.userId}, ${TUI_PLUS_SOURCE_SCOPE}, ${now}, ${now})
+    INSERT INTO "AutoCrawlSource" ("id", "source", "type", "sourceName", "trustLevel", "categoryId", "categoryName", "authorUserId", "showContact", "disabled", "cursor", "cursorKind", "pollIntervalMinutes", "nextRunAt", "ownerUserId", "sourceScope", "createdAt", "updatedAt")
+    VALUES (${sourceId}, ${params.crawlUrl}, 'telegram', ${cleanString(`Tui Plus ${params.title}`, 80)}, 'NORMAL', NULL, ${categoryName}, ${params.userId}, true, false, '', 'baseline_pending', 30, ${now}, ${params.userId}, ${TUI_PLUS_SOURCE_SCOPE}, ${now}, ${now})
   `;
   return sourceId;
 }

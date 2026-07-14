@@ -523,8 +523,6 @@ function extractionContext(
             source: (source.sourceName || source.source).slice(0, 80),
             isAnonymous: false,
             isPublished: true,
-            syncToTelegram: false,
-            telegramSyncStatus: 'NONE' as any,
             bumpedAt: new Date(),
             category: { connect: { id: category.id } },
             user: { connect: { id: source.authorUserId } },

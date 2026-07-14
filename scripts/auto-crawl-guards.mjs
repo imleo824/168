@@ -34,6 +34,7 @@ const crawlQuality = read('server/services/crawl-content-quality.service.ts');
 const locationNormalize = read('server/services/location-preset-normalize.service.ts');
 const strictMetaMigration = read('prisma/migrations/20260915000000_auto_crawl_meta_number_no_range_gate/migration.sql');
 const packageJson = read('package.json');
+const crawlLogsPanel = read('src/features/admin/AdminAutoCrawlExecutionLogsCompactPanel.tsx');
 
 mustNotHave('domain types', types, /syncToTelegram|localOnlyMode|aiEnabled|QUARANTINED|FILTERED/);
 mustHave('domain types', types, /RETRYABLE/);
@@ -66,8 +67,9 @@ mustHave('main flow', crawl, /duplicate_after_clean/);
 mustHave('main flow', crawl, /"contentHash"=COALESCE\(\$8,"contentHash"\)/);
 mustHave('main flow', crawl, /帖子发布失败，已进入失败队列/);
 mustHave('main flow', crawl, /auto_crawl_database_migration_required/);
-mustNotHave('main flow', crawl, /resolveCategoryById|findPublishCategoryMetaSchema|ConfigService|AutoCrawlLock|AutoCrawlCategoryAuthor|heartbeatAutoCrawlLock|resolveAutoCrawlFinalCategoryByRules|initializeAutoCrawlSourcesFromSeed|AUTO_CRAWL_SEED|CREATE TABLE IF NOT EXISTS|CREATE INDEX IF NOT EXISTS/);
+mustNotHave('main flow', crawl, /resolveCategoryById|findPublishCategoryMetaSchema|ConfigService|AutoCrawlLock|AutoCrawlCategoryAuthor|heartbeatAutoCrawlLock|resolveAutoCrawlFinalCategoryByRules|initializeAutoCrawlSourcesFromSeed|AUTO_CRAWL_SEED|CREATE TABLE IF NOT EXISTS|CREATE INDEX IF NOT EXISTS|syncToTelegram|telegramSyncStatus/);
 mustNotHave('main flow metadata', crawl, /metadata:\s*\{[\s\S]{0,160}\bcategory\s*[,}]|metadata:\s*\{[\s\S]{0,180}\bmeta\s*:/);
+mustNotHave('auto crawl logs panel', crawlLogsPanel, /同步 Telegram|syncToTelegram/);
 mustHave('source identity', crawl, /duplicateBy: 'sourcePostId' \| 'fingerprint' \| 'contentHash'/);
 mustHave('source identity', crawl, /\(\"sourceId\"=\$1 AND \"sourcePostId\"=\$2\)/);
 mustHave('source identity', crawl, /ON CONFLICT\(\"sourceId\",\"sourcePostId\"\)/);
