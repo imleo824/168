@@ -10,7 +10,8 @@
     --app-mobile-canvas-width: 100vw;
     --app-desktop-sidebar-width: calc(var(--ui-space-8) * 7 + var(--ui-space-4));
     --app-desktop-feed-main-width: calc(var(--ui-space-8) * 21 + var(--ui-space-4));
-    --app-desktop-detail-main-width: calc(var(--ui-space-8) * 27 + var(--ui-space-4));
+    --app-desktop-reading-main-width: var(--app-desktop-feed-main-width);
+    --app-desktop-detail-main-width: var(--app-desktop-reading-main-width);
     --app-desktop-conversation-main-width: calc(var(--ui-space-8) * 26 + var(--ui-space-2));
     --app-desktop-profile-main-width: calc(var(--ui-space-8) * 27 + var(--ui-space-4));
     --app-desktop-compose-main-width: calc(var(--ui-space-8) * 28 + var(--ui-space-4));
@@ -189,13 +190,25 @@
 
     .app-shell[data-route-surface='user']:not([data-desktop-surface='feed']) {
       --app-desktop-main-side-gap-total: calc(var(--app-desktop-shell-gap) * 2);
-      --app-desktop-balance-spacer-width: max(
+      --app-desktop-balance-spacer-target-width: max(
         var(--ui-space-none),
         calc(
           var(--app-desktop-frame-width) -
           var(--app-desktop-sidebar-width) -
           var(--app-desktop-main-side-gap-total) -
           var(--app-desktop-main-width)
+        )
+      );
+      --app-desktop-balance-spacer-width: min(
+        var(--app-desktop-balance-spacer-target-width),
+        max(
+          var(--ui-space-none),
+          calc(
+            var(--app-desktop-shell-active-width) -
+            var(--app-desktop-sidebar-width) -
+            var(--app-desktop-main-side-gap-total) -
+            var(--app-desktop-main-width)
+          )
         )
       );
       grid-template-columns:
@@ -227,6 +240,11 @@
       box-shadow: var(--ui-shadow-card);
       transform: none;
       transform-origin: initial;
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='detail'] .app-shell-main {
+      padding-inline: var(--ui-space-none);
+      padding-block-start: var(--ui-space-none);
     }
 
     .app-shell[data-route-surface='user'][data-desktop-surface='conversation'] {
@@ -463,6 +481,14 @@
         minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
         minmax(0, var(--app-desktop-main-width));
       justify-content: start;
+    }
+
+    .app-shell[data-route-surface='user']:not([data-desktop-surface='feed']) {
+      --app-desktop-balance-spacer-width: var(--ui-space-none);
+      --app-desktop-main-side-gap-total: var(--app-desktop-shell-gap);
+      grid-template-columns:
+        minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
+        minmax(0, var(--app-desktop-main-width));
     }
 
     .app-desktop-context-rail {
