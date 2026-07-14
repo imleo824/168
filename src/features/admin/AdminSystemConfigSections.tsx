@@ -437,11 +437,12 @@ export function AdminSystemConfigSections({
                     
                     <div className="space-y-4">
                     {publishCategorySchema.map((category, categoryIndex) => {
+                    const selectedCategorySlug = category.categorySlug || category.slug || '';
                     const selectedCategory = (categories || []).find((item) => (
-                    (category.id && item.id === category.id && (!category.slug || item.slug === category.slug)) ||
-                    (!category.id && item.slug === (category.categorySlug || category.slug))
+                    (selectedCategorySlug && (item.slug === selectedCategorySlug || item.id === selectedCategorySlug)) ||
+                    (category.id && item.id === category.id)
                     ));
-                    const selectedCategoryId = selectedCategory?.id || '';
+                    const selectedCategoryValue = selectedCategory?.slug || selectedCategory?.id || '';
                     return (
                     <div key={`${category.name || category.slug || category.id}-${categoryIndex}`} className="admin-config-card sm:p-4">
                     <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -491,9 +492,9 @@ export function AdminSystemConfigSections({
                     绑定现有分类
                     <select
                     className="mt-1 admin-form-control admin-form-control--field admin-form-control--field-muted"
-                    value={selectedCategoryId}
+                    value={selectedCategoryValue}
                     onChange={(e) => {
-                    const matched = (categories || []).find((item) => item.id === e.target.value);
+                    const matched = (categories || []).find((item) => (item.slug || item.id) === e.target.value || item.id === e.target.value);
                     updatePublishCategory(categoryIndex, matched
                     ? { id: matched.id, categorySlug: matched.slug, slug: matched.slug, name: matched.name }
                     : { id: '', categorySlug: '', slug: '', name: category.name || '' });
@@ -503,7 +504,7 @@ export function AdminSystemConfigSections({
                     {[...(categories || [])]
                     .sort((a, b) => (a.order || 0) - (b.order || 0))
                     .map((item) => (
-                    <option key={item.id} value={item.id}>{item.name}</option>
+                    <option key={item.id} value={item.slug || item.id}>{item.name}</option>
                     ))}
                     </select>
                     </label>

@@ -132,8 +132,18 @@ assert.match(
 );
 assert.match(
   adminSystemConfigSectionsSource,
-  /selectedCategory[\s\S]*item\.id === category\.id[\s\S]*item\.slug === category\.slug/,
-  'Admin publish category binding select must not stay selected when a bound slug is manually changed.',
+  /const selectedCategorySlug = category\.categorySlug \|\| category\.slug \|\| ''/,
+  'Admin publish category binding select must use slug/categorySlug as the stable selected value.',
+);
+assert.match(
+  adminSystemConfigSectionsSource,
+  /value=\{selectedCategoryValue\}/,
+  'Admin publish category binding select must not use database UUID as the option value.',
+);
+assert.match(
+  adminSystemConfigSectionsSource,
+  /<option key=\{item\.id\} value=\{item\.slug \|\| item\.id\}>/,
+  'Admin publish category binding options must use slug first because public category ids may be slugs.',
 );
 assert.match(
   adminSystemConfigSectionsSource,
