@@ -56,13 +56,24 @@ function textValue(raw: unknown, maxLength: number) {
   return value ? value.slice(0, maxLength) : null;
 }
 
-function strictNumber(raw: unknown) {
-  if (typeof raw === 'number') return Number.isFinite(raw) ? raw : null;
-  if (typeof raw !== 'string') return null;
+function normalizeNumber(raw: unknown) {
+  if (typeof raw === 'number') {
+    return Number.isFinite(raw) ? { value: raw, reason: 'strict_number' } : { value: null, reason: 'number_not_matched' };
+  }
+  if (typeof raw !== 'string') return { value: null, reason: 'number_not_matched' };
   const value = raw.normalize('NFKC').trim();
-  if (!/^[+-]?\d+(?:\.\d+)?$/.test(value)) return null;
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
+  const strict = /^[+-]?\d+(?:\.\d+)?$/.test(value);
+  if (strict) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) ? { value: parsed, reason: 'strict_number' } : { value: null, reason: 'number_not_matched' };
+  }
+
+  const matches = value.match(/[+-]?\d[\d,]*(?:\.\d+)?/g) || [];
+  if (matches.length !== 1) return { value: null, reason: 'number_not_matched' };
+  const parsed = Number(matches[0].replace(/,/g, ''));
+  return Number.isFinite(parsed)
+    ? { value: parsed, reason: 'numeric_amount_extracted' }
+    : { value: null, reason: 'number_not_matched' };
 }
 
 function exactConfiguredOption(raw: unknown, field: PublishCategoryMetaFieldConfig) {
@@ -95,11 +106,7 @@ function normalizeFieldValue(
   }
 
   if (field.type === 'number') {
-    const value = strictNumber(raw);
-    if (value === null) return { value: null, reason: 'strict_number_not_matched' };
-    if (typeof field.min === 'number' && value < field.min) return { value: null, reason: 'strict_number_below_min' };
-    if (typeof field.max === 'number' && value > field.max) return { value: null, reason: 'strict_number_above_max' };
-    return { value, reason: 'strict_number' };
+    return normalizeNumber(raw);
   }
 
   if (field.type === 'boolean') {

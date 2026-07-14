@@ -72,24 +72,6 @@ function parseField(raw: unknown, categorySlug: string, fieldIndex: number): Pub
     parsed.maxLength = Math.floor(field.maxLength);
   }
 
-  if (type === 'number') {
-    if (field.min !== undefined) {
-      if (typeof field.min !== 'number' || !Number.isFinite(field.min)) {
-        throw new Error(`auto_crawl_database_meta_min_invalid:${categorySlug}:${key}`);
-      }
-      parsed.min = field.min;
-    }
-    if (field.max !== undefined) {
-      if (typeof field.max !== 'number' || !Number.isFinite(field.max)) {
-        throw new Error(`auto_crawl_database_meta_max_invalid:${categorySlug}:${key}`);
-      }
-      parsed.max = field.max;
-    }
-    if (typeof parsed.min === 'number' && typeof parsed.max === 'number' && parsed.min > parsed.max) {
-      throw new Error(`auto_crawl_database_meta_range_invalid:${categorySlug}:${key}`);
-    }
-  }
-
   return parsed;
 }
 

@@ -39,8 +39,6 @@ type MetaFieldSpec = {
   label: string;
   type: string;
   options?: string[];
-  min?: number;
-  max?: number;
   maxLength?: number;
 };
 
@@ -69,8 +67,6 @@ function fieldSpec(field: PublishCategoryMetaFieldConfig): MetaFieldSpec {
     label: field.label,
     type: field.type,
     ...(field.options ? { options: field.options } : {}),
-    ...(typeof field.min === 'number' ? { min: field.min } : {}),
-    ...(typeof field.max === 'number' ? { max: field.max } : {}),
     ...(typeof field.maxLength === 'number' ? { maxLength: field.maxLength } : {}),
   };
 }
@@ -88,7 +84,7 @@ function schemaInstruction(context: AutoCrawlExtractionContext) {
     ? `\nlocation 类型字段只能原样输出数据库地点预设之一：${JSON.stringify(locationValues(context.locationPresets))}`
     : '';
 
-  return `当前分类允许的 Meta Schema：${JSON.stringify(fields)}${locationRule}\nmeta 只能包含 Schema 中配置的 key。无法从原文确认的字段直接省略；Meta 提取多少写多少，不完整不影响发布。`;
+  return `当前分类允许的 Meta Schema：${JSON.stringify(fields)}${locationRule}\nmeta 只能包含 Schema 中配置的 key。字段 key 只是输出键，原文不需要出现 key 字符串；必须结合字段 label、type、options 和完整原文上下文理解后提取，不要做关键词照抄。number 字段要从薪资、价格、数量等文本中解析数值，例如“薪资 1000USD”输出 {"salary":1000}；无法确认的字段直接省略，Meta 提取多少写多少，不完整不影响发布。`;
 }
 
 function locationFromMeta(meta: Record<string, unknown>, schema: PublishCategoryMetaConfig | null) {

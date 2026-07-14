@@ -47,7 +47,7 @@ const meta = await normalizeCrawlCategoryMeta({
     ],
   },
   rawMeta: {
-    薪资: '1200',
+    薪资: '1000USD',
     ' 地点 ': '日本 东京',
     类型: '兼职',
     备注: 42,
@@ -57,11 +57,27 @@ const meta = await normalizeCrawlCategoryMeta({
 });
 
 assert.deepEqual(meta.meta, {
-  salary: 1200,
+  salary: 1000,
   city: '日本 · 东京',
   jobType: '兼职',
   note: '42',
 });
 assert.deepEqual(meta.audit.unexpectedKeys, ['extra'], 'only non-schema inputs should be audited as unexpected.');
+
+const metaWithoutRangeGate = await normalizeCrawlCategoryMeta({
+  category: { id: 'category_jobs', name: '招聘', slug: 'jobs' },
+  categoryMetaSchema: {
+    categorySlug: 'jobs',
+    schemaVersion: 3,
+    name: '招聘',
+    fields: [
+      { key: 'salary', label: '薪资', type: 'number', required: false, min: 0, max: 100000 },
+    ],
+  },
+  rawMeta: { salary: '150000USD' },
+  locationPresets: [],
+});
+
+assert.equal(metaWithoutRangeGate.meta.salary, 150000, 'crawl meta numbers must not be rejected by min/max range gates.');
 
 console.log('[auto-crawl-quality-meta-guards] passed');
