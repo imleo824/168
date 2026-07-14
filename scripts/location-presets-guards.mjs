@@ -78,5 +78,35 @@ assert.doesNotMatch(
   /fields\.length\s*===\s*0[\s\S]*return null/,
   'Admin publish category normalization must allow categories without structured fields',
 );
+assert.match(
+  adminConfigSchemaSource,
+  /normalizePublishCategorySlug\(rawSlug\)/,
+  'Admin publish category normalization must submit canonical categorySlug values.',
+);
+assert.match(
+  adminConfigSchemaSource,
+  /categorySlug,\s*slug:\s*categorySlug/,
+  'Admin publish category normalization must keep categorySlug and slug aligned for backend/public compatibility.',
+);
+assert.match(
+  adminConfigSchemaSource,
+  /schemaVersion/,
+  'Admin publish category normalization must submit schemaVersion for the database schema trigger.',
+);
+assert.match(
+  configSource,
+  /entry\.categorySlug\s*\|\|\s*entry\.slug\s*\|\|\s*entry\.id/,
+  'ConfigService must accept legacy admin category identifiers before canonical save.',
+);
+assert.match(
+  configSource,
+  /normalizePublishCategorySchemaVersion\(entry\.schemaVersion\)/,
+  'ConfigService must normalize missing or malformed publish schema versions before save.',
+);
+assert.match(
+  configSource,
+  /'telegram_sync_require_image'/,
+  'ConfigService must persist the admin Telegram image requirement toggle.',
+);
 
 console.log('[location-presets-guards] passed');

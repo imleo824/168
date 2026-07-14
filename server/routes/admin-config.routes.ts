@@ -2,6 +2,7 @@ import type { Express } from 'express';
 
 import { ConfigService, parsePublishCategorySchema } from '../config.service';
 import prisma from '../db';
+import { HttpError } from '../http/errors';
 import { setNoStore } from '../http-cache';
 import { adminOnly, authMiddleware } from '../middlewares/auth';
 import { catchAsync } from '../middlewares/error';
@@ -16,8 +17,8 @@ import {
 async function assertPublishCategorySchemaUsesExistingCategories(rawSchema: unknown) {
   if (rawSchema === undefined) return;
   const parsed = parsePublishCategorySchema(rawSchema);
-  if (parsed.parseError) throw new Error(parsed.parseError);
-  if (parsed.schema.length === 0) throw new Error('发布分类配置错误：至少需要配置一个分类');
+  if (parsed.parseError) throw new HttpError(parsed.parseError, 400);
+  if (parsed.schema.length === 0) throw new HttpError('发布分类配置错误：至少需要配置一个分类', 400);
 
   const categories = await prisma.category.findMany({ select: { slug: true } });
   const existingSlugs = new Set(categories.map((category) => normalizePublishCategorySlug(category.slug)));
@@ -26,7 +27,7 @@ async function assertPublishCategorySchemaUsesExistingCategories(rawSchema: unkn
     .filter((slug) => slug && !existingSlugs.has(slug));
 
   if (missingSlugs.length > 0) {
-    throw new Error(`发布分类配置错误：以下分类未在数据库 Category 中创建：${Array.from(new Set(missingSlugs)).join('、')}`);
+    throw new HttpError(`发布分类配置错误：以下分类未在数据库 Category 中创建：${Array.from(new Set(missingSlugs)).join('、')}`, 400);
   }
 }
 
@@ -42,7 +43,7 @@ export function registerAdminConfigRoutes(app: Express) {
     setNoStore(res);
     res.json({
       success: true,
-      config: toPublicConfig(configs),
+      config: toPublicConfig(configs, { publishCategorySchema: configs.publish_category_schema }),
       categories,
     });
   }));

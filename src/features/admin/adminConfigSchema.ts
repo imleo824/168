@@ -1,4 +1,8 @@
 import type { LocationPresetConfig, PublishCategoryMetaConfig, PublishCategoryMetaFieldConfig } from '@/types';
+import {
+  normalizePublishCategorySchemaVersion,
+  normalizePublishCategorySlug,
+} from '../../../shared/publishCategorySchema';
 import type { PublishCategoryFieldType } from './adminTypes';
 
 export const toDateInputValue = (date: Date) =>
@@ -124,20 +128,24 @@ export function normalizeAdminPublishCategorySchema(raw: unknown): PublishCatego
       if (!item || typeof item !== 'object' || Array.isArray(item)) return null;
       const entry = item as Record<string, any>;
       const id = normalizeAdminPublishText(entry.id, 80);
-      const slug = normalizeAdminPublishText(entry.slug, 80);
+      const rawSlug = normalizeAdminPublishText(entry.categorySlug || entry.slug || entry.id, 80);
+      const categorySlug = normalizePublishCategorySlug(rawSlug);
       const name = normalizeAdminPublishText(entry.name || entry.label, 32);
+      const schemaVersion = normalizePublishCategorySchemaVersion(entry.schemaVersion);
       const fields = Array.isArray(entry.fields)
         ? entry.fields
           .map((field, fieldIndex) => normalizeAdminPublishField(field, fieldIndex))
           .filter((field): field is PublishCategoryMetaFieldConfig => Boolean(field))
         : [];
-      if (!id && !slug && !name) return null;
-      return {
+      if (!id && !categorySlug && !name) return null;
+      const normalizedCategory: PublishCategoryMetaConfig = {
         ...(id ? { id } : {}),
-        ...(slug ? { slug } : {}),
+        ...(categorySlug ? { categorySlug, slug: categorySlug } : {}),
         ...(name ? { name } : {}),
+        schemaVersion,
         fields: fields.slice(0, 20),
       };
+      return normalizedCategory;
     })
     .filter((item): item is PublishCategoryMetaConfig => Boolean(item));
 }

@@ -1,4 +1,5 @@
 import prisma, { isDbConfigured } from './db';
+import { HttpError } from './http/errors';
 import type {
   LocationPresetConfig,
   ParsedPublishCategorySchema,
@@ -68,6 +69,7 @@ const TOP_LEVEL_CONFIG_KEYS = new Set([
   'telegram_recharge_notify_chat_id',
   'telegram_share_template',
   'telegram_sync_min_content_chars',
+  'telegram_sync_require_image',
   'recharge_points_per_usdt',
   'tron_usdt_contract',
   'tron_deposit_min_usdt',
@@ -226,7 +228,7 @@ function normalizePublishMetaField(raw: unknown): PublishCategoryMetaFieldConfig
 function normalizePublishCategoryMetaEntry(raw: unknown): PublishCategoryMetaConfig | null {
   if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
   const entry = raw as Record<string, unknown>;
-  const categorySlug = normalizePublishCategorySlug(entry.categorySlug);
+  const categorySlug = normalizePublishCategorySlug(entry.categorySlug || entry.slug || entry.id);
   if (!categorySlug || !isValidPublishCategorySlug(categorySlug) || !Array.isArray(entry.fields)) return null;
 
   const fields = entry.fields.map(normalizePublishMetaField);
@@ -235,8 +237,7 @@ function normalizePublishCategoryMetaEntry(raw: unknown): PublishCategoryMetaCon
   const keys = configuredFields.map((field) => field.key.toLowerCase());
   if (new Set(keys).size !== keys.length) return null;
 
-  const schemaVersion = Number(entry.schemaVersion);
-  if (!Number.isInteger(schemaVersion) || schemaVersion < 1) return null;
+  const schemaVersion = normalizePublishCategorySchemaVersion(entry.schemaVersion);
   return {
     categorySlug,
     schemaVersion,
@@ -315,14 +316,14 @@ function applyTelegramConfigFallbacks<T extends Record<string, any>>(configMap: 
 
 async function validatePublishCategorySchemaForSave(raw: unknown) {
   const parsed = parsePublishCategorySchema(raw);
-  if (parsed.parseError) throw new Error(parsed.parseError);
+  if (parsed.parseError) throw new HttpError(parsed.parseError, 400);
 
   const categories = await prisma.category.findMany({ select: { slug: true, name: true } });
   const categoryBySlug = new Map(categories.map((category) => [category.slug, category]));
   const missing = parsed.schema
     .map((schema) => schema.categorySlug || '')
     .filter((slug) => !categoryBySlug.has(slug));
-  if (missing.length) throw new Error(`发布分类配置引用了不存在的数据库分类：${missing.join('、')}`);
+  if (missing.length) throw new HttpError(`发布分类配置引用了不存在的数据库分类：${missing.join('、')}`, 400);
 
   return parsed.schema.map((schema) => {
     const category = categoryBySlug.get(schema.categorySlug || '')!;
@@ -369,6 +370,7 @@ export class ConfigService {
     telegram_channel_id: '',
     telegram_recharge_notify_chat_id: '',
     telegram_sync_min_content_chars: 0,
+    telegram_sync_require_image: 'false',
     recharge_points_per_usdt: 10,
     feed_rank_profile: '{}',
     location_presets: [] as LocationPresetConfig[],

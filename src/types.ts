@@ -345,6 +345,7 @@ export interface SystemConfig {
   online_users_min?: number;
   online_users_max?: number;
   telegram_channels?: Record<string, string>;
+  telegram_sync_require_image?: string;
   recharge_points_per_usdt?: number;
   tron_deposit_min_usdt?: number;
   tron_sweep_target_address?: string;
