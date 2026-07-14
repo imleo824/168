@@ -80,11 +80,15 @@ function schemaInstruction(context: AutoCrawlExtractionContext) {
   if (!fields.length) return '当前数据库分类没有配置 Meta 字段，meta 必须返回空对象 {}。';
 
   const hasLocation = fields.some((field) => field.type === 'location');
+  const hasSalaryRange = fields.some((field) => field.type === 'select' && /薪资|工资|待遇/i.test(field.label) && (field.options || []).some((option) => /\$|面议/.test(option)));
   const locationRule = hasLocation
     ? `\nlocation 类型字段只能原样输出数据库地点预设之一：${JSON.stringify(locationValues(context.locationPresets))}`
     : '';
+  const salaryRangeRule = hasSalaryRange
+    ? '\n薪资 select 字段必须理解原文金额再归入配置区间：U、USDT、USD、美元、刀按美元等值处理；其他明确币种按原文金额语义选择最接近区间。原文没有明确数字金额，或只写面谈、面议、待遇从优、薪资详聊、看能力，必须输出“面议”。'
+    : '';
 
-  return `当前分类允许的 Meta Schema：${JSON.stringify(fields)}${locationRule}\nmeta 只能包含 Schema 中配置的 key。字段 key 只是输出键，原文不需要出现 key 字符串；必须结合字段 label、type、options 和完整原文上下文理解后提取，不要做关键词照抄。number 字段要从薪资、价格、数量等文本中解析数值，例如“薪资 1000USD”输出 {"salary":1000}；无法确认的字段直接省略，Meta 提取多少写多少，不完整不影响发布。`;
+  return `当前分类允许的 Meta Schema：${JSON.stringify(fields)}${locationRule}${salaryRangeRule}\nmeta 只能包含 Schema 中配置的 key。字段 key 只是输出键，原文不需要出现 key 字符串；必须结合字段 label、type、options 和完整原文上下文理解后提取，不要做关键词照抄。number 字段要从薪资、价格、数量等文本中解析数值，例如“薪资 1000USD”输出 {"salary":1000}；select 字段必须输出 options 中的原文值，不能自造新值。无法确认的非薪资字段直接省略，Meta 提取多少写多少，不完整不影响发布。`;
 }
 
 function locationFromMeta(meta: Record<string, unknown>, schema: PublishCategoryMetaConfig | null) {

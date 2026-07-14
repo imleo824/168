@@ -82,6 +82,8 @@ mustHave('AI extraction', crawlAi, /enrichmentStatus/);
 mustHave('AI extraction', crawlAi, /数据库 Category 是分类唯一事实源/);
 mustHave('AI extraction', crawlAi, /Meta Schema 是 Meta 唯一事实源/);
 mustHave('AI extraction', crawlAi, /输出字段只能是 title、contact、meta/);
+mustHave('AI extraction', crawlAi, /U、USDT、USD、美元、刀按美元等值处理/);
+mustHave('AI extraction', crawlAi, /没有明确数字金额[\s\S]*必须输出“面议”/);
 mustNotHave('AI extraction', crawlAi, /AUTO_CRAWL_META_REQUIRED_MISSING|auto_crawl_ai_required_failed|auto_crawl_ai_required_json_parse_failed|输出字段只能是 title、location|parsed\?\.location/);
 mustNotHave('AI extraction', crawlAi, /import prisma|loadAutoCrawlDatabaseConfig|findPublishCategoryMetaSchema|extractSchemaLabeledMeta|repairAiJson|aiRequest|rawAiMeta/);
 
