@@ -97,6 +97,10 @@ const NUMERIC_TOP_LEVEL_CONFIG_KEYS = new Set([
   'online_users_max',
   ...TUI_PLUS_NUMERIC_CONFIG_KEYS,
 ]);
+const BOOLEAN_STRING_TOP_LEVEL_CONFIG_KEYS = new Set([
+  'telegram_sync_require_image',
+  'tron_deposit_scan_enabled',
+]);
 const PRICE_CONFIG_KEYS = new Set([
   'anonymous_publish',
   'ad_home_slot_1',
@@ -305,6 +309,15 @@ function normalizeTelegramShareTemplate(raw: unknown) {
   return String(raw ?? '').trim();
 }
 
+function normalizeBooleanStringConfig(raw: unknown, fallback = false) {
+  if (typeof raw === 'boolean') return raw ? 'true' : 'false';
+  if (typeof raw === 'number') return raw !== 0 ? 'true' : 'false';
+  const value = String(raw ?? '').trim().toLowerCase();
+  if (['true', '1', 'yes', 'y', 'on', '启用', '是'].includes(value)) return 'true';
+  if (['false', '0', 'no', 'n', 'off', '禁用', '否'].includes(value)) return 'false';
+  return fallback ? 'true' : 'false';
+}
+
 function applyTelegramConfigFallbacks<T extends Record<string, any>>(configMap: T): T {
   const mutableConfig = configMap as T & { telegram_channel?: unknown; telegram_channel_id?: unknown; telegram_share_template?: unknown };
   const channelId = String(mutableConfig.telegram_channel_id || '').trim();
@@ -459,6 +472,9 @@ export class ConfigService {
         if (NUMERIC_TOP_LEVEL_CONFIG_KEYS.has(c.key)) {
           const defaultValue = Number((this.defaults as any)[c.key] ?? 0);
           (configMap as any)[c.key] = normalizeConfigNumber(c.key, c.value, defaultValue);
+        } else if (BOOLEAN_STRING_TOP_LEVEL_CONFIG_KEYS.has(c.key)) {
+          const defaultValue = String((this.defaults as any)[c.key] ?? 'false').trim().toLowerCase() === 'true';
+          (configMap as any)[c.key] = normalizeBooleanStringConfig(c.value, defaultValue);
         } else if (c.key === 'telegram_share_template') {
           (configMap as any)[c.key] = normalizeTelegramShareTemplate(c.value);
         } else {
@@ -519,6 +535,8 @@ export class ConfigService {
           } else {
             output[key] = key === 'feed_rank_profile'
               ? (typeof obj[key] === 'string' ? obj[key] : JSON.stringify(obj[key] ?? {}))
+              : BOOLEAN_STRING_TOP_LEVEL_CONFIG_KEYS.has(key)
+                ? normalizeBooleanStringConfig(obj[key], String((this.defaults as any)[key] ?? 'false').trim().toLowerCase() === 'true')
               : key === 'telegram_share_template'
                 ? normalizeTelegramShareTemplate(obj[key])
                 : obj[key];

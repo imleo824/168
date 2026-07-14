@@ -113,5 +113,32 @@ assert.match(
   /'telegram_sync_require_image'/,
   'ConfigService must persist the admin Telegram image requirement toggle.',
 );
+assert.match(
+  configSource,
+  /BOOLEAN_STRING_TOP_LEVEL_CONFIG_KEYS[\s\S]*telegram_sync_require_image[\s\S]*tron_deposit_scan_enabled/,
+  'ConfigService must normalize boolean-like admin toggles on read and save so button state echoes reliably.',
+);
+assert.match(
+  adminConfigSchemaSource,
+  /categorySlug,\s*slug:\s*categorySlug/,
+  'Admin publish category normalization must keep categorySlug and slug aligned for backend/public compatibility.',
+);
+
+const adminSystemConfigSectionsSource = fs.readFileSync(path.join(root, 'src/features/admin/AdminSystemConfigSections.tsx'), 'utf8');
+assert.match(
+  adminSystemConfigSectionsSource,
+  /hasCategoryOverride\s*&&\s*Number\.isFinite\(current\)\s*\?\s*current\s*:\s*fallback/,
+  'Admin category price overrides must echo zero values instead of falling back to the global price.',
+);
+assert.match(
+  adminSystemConfigSectionsSource,
+  /selectedCategory[\s\S]*item\.id === category\.id[\s\S]*item\.slug === category\.slug/,
+  'Admin publish category binding select must not stay selected when a bound slug is manually changed.',
+);
+assert.match(
+  adminSystemConfigSectionsSource,
+  /\{\s*id:\s*matched\.id,\s*categorySlug:\s*matched\.slug,\s*slug:\s*matched\.slug,\s*name:\s*matched\.name\s*\}/,
+  'Admin publish category binding must write categorySlug, slug, and id together when selecting an existing category.',
+);
 
 console.log('[location-presets-guards] passed');

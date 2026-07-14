@@ -70,8 +70,10 @@ export function AdminSystemConfigSections({
                             .sort((a, b) => (a.order || 0) - (b.order || 0))
                             .map((cat) => {
                               const fallback = Number(localConfig?.prices?.pin_home || 0);
-                              const current = Number(localConfig?.prices?.pin_category_map?.[cat.slug]);
-                              const value = Number.isFinite(current) && current > 0 ? current : fallback;
+                              const priceMap = localConfig?.prices?.pin_category_map || {};
+                              const hasCategoryOverride = Object.prototype.hasOwnProperty.call(priceMap, cat.slug);
+                              const current = Number(priceMap?.[cat.slug]);
+                              const value = hasCategoryOverride && Number.isFinite(current) ? current : fallback;
                               return (
                                 <div key={cat.id}>
                                   <ConfigItem
@@ -435,7 +437,11 @@ export function AdminSystemConfigSections({
                     
                     <div className="space-y-4">
                     {publishCategorySchema.map((category, categoryIndex) => {
-                    const selectedCategoryId = category.id || '';
+                    const selectedCategory = (categories || []).find((item) => (
+                    (category.id && item.id === category.id && (!category.slug || item.slug === category.slug)) ||
+                    (!category.id && item.slug === (category.categorySlug || category.slug))
+                    ));
+                    const selectedCategoryId = selectedCategory?.id || '';
                     return (
                     <div key={`${category.name || category.slug || category.id}-${categoryIndex}`} className="admin-config-card sm:p-4">
                     <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
@@ -489,8 +495,8 @@ export function AdminSystemConfigSections({
                     onChange={(e) => {
                     const matched = (categories || []).find((item) => item.id === e.target.value);
                     updatePublishCategory(categoryIndex, matched
-                    ? { id: matched.id, slug: matched.slug, name: matched.name }
-                    : { id: '', slug: '', name: category.name || '' });
+                    ? { id: matched.id, categorySlug: matched.slug, slug: matched.slug, name: matched.name }
+                    : { id: '', categorySlug: '', slug: '', name: category.name || '' });
                     }}
                     >
                     <option value="">按名称/slug 手动匹配</option>
@@ -515,7 +521,7 @@ export function AdminSystemConfigSections({
                     <input
                     className="mt-1 admin-form-control admin-form-control--field admin-form-control--field-muted"
                     value={category.slug || ''}
-                    onChange={(e) => updatePublishCategory(categoryIndex, { slug: e.target.value })}
+                    onChange={(e) => updatePublishCategory(categoryIndex, { id: '', categorySlug: '', slug: e.target.value })}
                     placeholder="jobs"
                     />
                     </label>
