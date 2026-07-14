@@ -23,6 +23,7 @@ import {
   toLocationCategoryId,
 } from '@/utils/postPresentation';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { useIsDesktopViewport } from '@/hooks/useIsDesktopViewport';
 import AvatarImage from '@/ui/AvatarImage';
 import TelegramContactIconButton from '@/ui/TelegramContactIconButton';
 import PostMediaGrid from '@/features/post/PostMediaGrid';
@@ -84,9 +85,10 @@ export default function PostDetail() {
   const location = useLocation();
   const { user: currentUser, requireAuth, showToast } = useAuth();
   const isMobile = useIsMobile();
+  const isDesktopViewport = useIsDesktopViewport();
   const routeState = getRouteState(location.state);
-  const isOverlayDetail = Boolean(routeState?.backgroundLocation?.pathname);
-  const shouldUseDetailPageScroll = isMobile && !isOverlayDetail;
+  const isOverlayDetail = !isDesktopViewport && Boolean(routeState?.backgroundLocation?.pathname);
+  const shouldUseDetailPageScroll = isMobile && !isOverlayDetail && !isDesktopViewport;
 
   const { data: post, isLoading, isFetching, isError, error, refetch: refetchPost } = usePost(id);
 

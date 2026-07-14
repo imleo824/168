@@ -7,6 +7,7 @@ import { CirclePlus, House, Info, MessagesSquare, ShieldCheck, TrendingUp, UserR
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import Home from '@/pages/Home';
 import { useMobileAddressBar } from '@/hooks/useMobileAddressBar';
+import { useIsDesktopViewport } from '@/hooks/useIsDesktopViewport';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import { useScrollLock } from '@/utils/scrollLock';
 import { primePostCreateComposerFocus } from '@/utils/postCreateFocusBridge';
@@ -355,6 +356,7 @@ function AppLayout() {
   const isUserSurface = routeSurface === 'user';
   const isChatRoute = isUserSurface && pathname === '/chat';
   const desktopSurfaceKind = isUserSurface ? getDesktopSurfaceKind(pathname) : 'admin';
+  const isDesktopViewport = useIsDesktopViewport();
 
   useMobileAddressBar(pathname);
   useBrowserPushResync(user?.id);
@@ -362,7 +364,7 @@ function AppLayout() {
   usePostCreateFocusIntentCapture(Boolean(user));
   useReferralInviteAttributionCapture(location.search);
 
-  const isRouteOverlay = isUserSurface && pathname.startsWith('/post/') && hasOverlayBackgroundLocation(location.state);
+  const isRouteOverlay = isUserSurface && !isDesktopViewport && pathname.startsWith('/post/') && hasOverlayBackgroundLocation(location.state);
   useScrollLock(isRouteOverlay, {
     fixed: true,
     allowTouchMove: (target) => target instanceof Element && Boolean(target.closest('[data-route-overlay-scroll]')),

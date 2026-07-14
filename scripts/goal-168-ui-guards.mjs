@@ -128,6 +128,10 @@ assertNotIncludes('src/features/chat/ChatPage.tsx', 'useHomeOnlineCount({', 'cha
 assertIncludes('src/styles/system/wide-screen-mobile-adaptation.css', '(var(--ui-app-shell-desktop-padding-x) * 2)', 'desktop detail frame width must include the shared outer frame padding.');
 assertNotIncludes('src/styles/system/wide-screen-mobile-adaptation.css', "[data-desktop-surface='detail'] .app-shell-main {\n      padding-inline: var(--ui-space-none);", 'desktop detail pages must not remove the shared outer frame padding.');
 assertIncludes('src/styles/features/post-detail-shell.css', 'var(--ui-bottom-nav-page-bottom-space)', 'desktop detail pages must size their internal height against the framed app shell content area.');
+assertIncludes('src/pages/PostDetailLegacy.tsx', 'const isOverlayDetail = !isDesktopViewport && Boolean(routeState?.backgroundLocation?.pathname);', 'desktop detail pages must stay inside the framed app shell instead of using the mobile route overlay.');
+assertIncludes('src/styles/system/wide-screen-mobile-adaptation.css', '--app-desktop-page-content-width: min(100%, var(--app-desktop-reading-main-width));', 'desktop secondary pages must share one framed content width.');
+assertIncludes('src/styles/system/wide-screen-mobile-adaptation.css', '--ui-topbar-content-max-width: var(--app-desktop-page-content-width);', 'desktop secondary page topbars must align to the framed content width.');
+assertIncludes('src/styles/features/recharge.css', '--ui-recharge-page-max: var(--app-desktop-page-content-width);', 'desktop recharge content must align to the framed content width.');
 assertIncludes('src/styles/system/wide-screen-mobile-adaptation.css', "--app-desktop-conversation-frame-padding: var(--ui-space-2);", 'desktop conversation pages must preserve a visible outer app frame gutter.');
 assertIncludes('src/styles/system/wide-screen-mobile-adaptation.css', '(var(--app-desktop-conversation-frame-padding) * 2)', 'desktop conversation height must account for the visible outer app frame gutter.');
 assertMatches('src/styles/system/wide-screen-mobile-adaptation.css', /data-desktop-surface='conversation'[\s\S]*?\.app-shell-main[\s\S]*?padding:\s*var\(--app-desktop-conversation-frame-padding\);/, 'desktop conversation pages must expose the shared outer frame instead of filling edge-to-edge.');
@@ -278,7 +282,7 @@ assertIncludes('src/styles/features/home-feed-state.css', '.ui-feed-empty-plain-
 assertNotIncludes('src/pages/PostDetailLegacy.tsx', 'DetailQuotesLoadingRows', 'detail quote loading must not render skeleton rows.');
 assertNotIncludes('src/styles/features/post-detail.css', 'skeleton', 'detail CSS must not keep detail skeleton selectors.');
 assertIncludes('src/pages/PostDetailLegacy.tsx', '<LoadingBlock text="正在加载帖子详情"', 'detail initial entry must render a normal loading block.');
-assertIncludes('src/pages/PostDetailLegacy.tsx', 'const shouldUseDetailPageScroll = isMobile && !isOverlayDetail;', 'overlay detail must not register a nested mobile addressbar scroll target.');
+assertIncludes('src/pages/PostDetailLegacy.tsx', 'const shouldUseDetailPageScroll = isMobile && !isOverlayDetail && !isDesktopViewport;', 'overlay detail must not register a nested mobile addressbar scroll target.');
 assertIncludes('src/utils/postPresentation.ts', 'const LOCATION_SPLIT_PATTERN = /\\s+-\\s+|[·>＞、，,;；|/\\n]+/;', 'location display splitting must support the standard middle-dot hierarchy.');
 assertIncludes('src/utils/postStructuredMeta.ts', "if (normalizeKey(key) === 'location') return selectFinestDisplayLocation(formatted) || formatted;", 'structured location meta must display the leaf node only.');
 

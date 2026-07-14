@@ -11,7 +11,7 @@
   .recharge-page .recharge-shell {
     display: flex;
     width: 100%;
-    max-width: var(--ui-page-narrow);
+    max-width: var(--ui-recharge-page-max, var(--ui-page-narrow));
     flex-direction: column;
     gap: var(--ui-space-4);
     margin-inline: auto;
@@ -19,6 +19,12 @@
     padding-top: var(--ui-space-2);
     padding-bottom: var(--ui-page-bottom-safe);
     color: var(--ui-text-strong);
+  }
+
+  @media (min-width: 1024px) {
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page {
+      --ui-recharge-page-max: var(--app-desktop-page-content-width);
+    }
   }
 
   .recharge-page .recharge-form-card {
