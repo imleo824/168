@@ -60,6 +60,9 @@ mustHave('main flow', crawl, /category: \{ connect: \{ id: category\.id \} \}/);
 mustHave('main flow', crawl, /categoryMeta: extracted\.meta/);
 mustHave('main flow', crawl, /set_config\('app\.auto_crawl_write','1',true\)/);
 mustHave('main flow', crawl, /images: item\.images/);
+mustHave('main flow', crawl, /publishContentHash/);
+mustHave('main flow', crawl, /duplicate_after_clean/);
+mustHave('main flow', crawl, /"contentHash"=COALESCE\(\$8,"contentHash"\)/);
 mustHave('main flow', crawl, /帖子发布失败，已进入失败队列/);
 mustHave('main flow', crawl, /auto_crawl_database_migration_required/);
 mustNotHave('main flow', crawl, /resolveCategoryById|findPublishCategoryMetaSchema|ConfigService|AutoCrawlLock|AutoCrawlCategoryAuthor|heartbeatAutoCrawlLock|resolveAutoCrawlFinalCategoryByRules|initializeAutoCrawlSourcesFromSeed|AUTO_CRAWL_SEED|CREATE TABLE IF NOT EXISTS|CREATE INDEX IF NOT EXISTS/);
@@ -85,6 +88,8 @@ mustNotHave('AI extraction', crawlAi, /import prisma|loadAutoCrawlDatabaseConfig
 mustHave('Meta normalization', crawlMeta, /database_option_exact/);
 mustHave('Meta normalization', crawlMeta, /strict_number/);
 mustHave('Meta normalization', crawlMeta, /strict_boolean/);
+mustHave('Meta normalization', crawlMeta, /buildSchemaLabelKeyMap/);
+mustHave('Meta normalization', crawlMeta, /buildRawInputKeyMap/);
 mustHave('Meta normalization', crawlMeta, /unexpectedKeys/);
 mustHave('Meta normalization', crawlMeta, /rejected/);
 mustNotHave('Meta normalization', crawlMeta, /missingRequiredKeys|alias|salaryBucket|normalizeCurrency|fallback/i);
@@ -97,6 +102,9 @@ mustHave('quality', crawlQuality, /canonicalContent\(input\.content\)/);
 mustHave('quality', crawlQuality, /source_tail_removed/);
 mustHave('quality', crawlQuality, /images\?: string\[\]/);
 mustHave('quality', crawlQuality, /imageCount === 0/);
+mustHave('quality', crawlQuality, /captures\[0\]/);
+mustHave('quality', crawlQuality, /removeInlineContacts\(titleSource\)/);
+mustNotHave('quality', crawlQuality, /replace\(pattern, '\$1'\)/);
 mustNotHave('quality', crawlQuality, /EMOJI_EXCESSIVE_COUNT_THRESHOLD|emojiCount >= 24|CrawlAdDecision|CrawlCategoryValueDecision|extractFirstContact|CATEGORY_INTENT_RULES/);
 
 console.log('[auto-crawl-guards] passed');

@@ -369,6 +369,9 @@ export async function deleteAutoCrawlSource(id: string) {
 function contentHash(item: AutoCrawlItem) {
   return hash(`${item.title}\n${item.content}\n${(item.images || []).join('|')}`);
 }
+function publishContentHash(item: AutoCrawlItem, quality: CrawlQualityDecision) {
+  return hash(`${quality.cleanedTitle || item.title}\n${quality.cleanedContent}\n${(item.images || []).join('|')}`);
+}
 function fingerprint(source: AutoCrawlSourceConfig, item: AutoCrawlItem) {
   return hash([source.id, item.id, item.link].join('|'));
 }
@@ -440,6 +443,7 @@ async function markItem(
     postId?: string;
     reason?: string;
     error?: string;
+    contentHash?: string;
     metadata?: Record<string, unknown>;
   },
 ) {
@@ -447,7 +451,8 @@ async function markItem(
     `UPDATE "AutoCrawlItem" SET
       "status"=$2,"cleanTitle"=COALESCE($3,"cleanTitle"),"cleanContent"=COALESCE($4,"cleanContent"),
       "postId"=COALESCE($5,"postId"),"filterReason"=$6,"errorMessage"=$7,
-      "metadata"=COALESCE("metadata",'{}'::jsonb)||$8::jsonb,"updatedAt"=CURRENT_TIMESTAMP
+      "contentHash"=COALESCE($8,"contentHash"),
+      "metadata"=COALESCE("metadata",'{}'::jsonb)||$9::jsonb,"updatedAt"=CURRENT_TIMESTAMP
      WHERE "fingerprint"=$1`,
     fp,
     status,
@@ -456,6 +461,7 @@ async function markItem(
     data.postId || null,
     data.reason || null,
     data.error || null,
+    data.contentHash || null,
     JSON.stringify(data.metadata || {}),
   );
 }
@@ -658,13 +664,42 @@ async function processSource(
           reason: quality.reason, details: qualityAudit(quality),
         });
 
+        const publishHash = publishContentHash(item, quality);
         if (!quality.shouldPublish) {
           stats.filtered += 1;
           await markItem(fp, 'REJECTED', {
             title: quality.cleanedTitle || item.title,
             content: quality.cleanedContent,
             reason: quality.reason,
-            metadata: { quality: qualityAudit(quality), parse: fetched.parseMeta, imageCount: item.images?.length || 0 },
+            contentHash: publishHash,
+            metadata: { quality: qualityAudit(quality), publishContentHash: publishHash, parse: fetched.parseMeta, imageCount: item.images?.length || 0 },
+          });
+          commitCursor(stats, item);
+          continue;
+        }
+
+        const cleanedDuplicate = publishHash === itemHash
+          ? null
+          : await findPublishedDuplicate(source, item, fp, publishHash);
+        if (cleanedDuplicate) {
+          stats.duplicate += 1;
+          await markItem(fp, 'DUPLICATE', {
+            title: quality.cleanedTitle || item.title,
+            content: quality.cleanedContent,
+            reason: cleanedDuplicate.duplicateBy,
+            contentHash: publishHash,
+            metadata: {
+              quality: qualityAudit(quality),
+              publishContentHash: publishHash,
+              duplicate: { postId: cleanedDuplicate.postId, by: cleanedDuplicate.duplicateBy },
+              parse: fetched.parseMeta,
+              imageCount: item.images?.length || 0,
+            },
+          });
+          logEvent(logger, {
+            scope: 'item', phase: 'duplicate_after_clean', message: '清洗后内容已发布，跳过重复项',
+            source, item, fingerprint: fp, status: 'DUPLICATE', reason: cleanedDuplicate.duplicateBy,
+            details: { existingPostId: cleanedDuplicate.postId, publishContentHash: publishHash },
           });
           commitCursor(stats, item);
           continue;
@@ -676,9 +711,11 @@ async function processSource(
             title: extracted.title,
             content: extracted.content,
             postId: post.id,
+            contentHash: publishHash,
             metadata: {
               quality: qualityAudit(quality),
               extraction: extractionAudit(extracted),
+              publishContentHash: publishHash,
               imageCount: item.images?.length || 0,
               parse: fetched.parseMeta,
             },
@@ -696,7 +733,8 @@ async function processSource(
           stats.error += 1;
           await markItem(fp, 'FAILED', {
             error: message,
-            metadata: { quality: qualityAudit(quality), imageCount: item.images?.length || 0, parse: fetched.parseMeta },
+            contentHash: publishHash,
+            metadata: { quality: qualityAudit(quality), publishContentHash: publishHash, imageCount: item.images?.length || 0, parse: fetched.parseMeta },
           });
           logEvent(logger, {
             level: 'error', scope: 'publish', phase: 'publish_failed',
@@ -961,15 +999,38 @@ export async function reprocessAutoCrawlItems(options: {
           }
 
           const quality = filterCrawlContentBeforePublish({ title: item.title, content: item.content, images: item.images });
+          const publishHash = publishContentHash(item, quality);
           if (!quality.shouldPublish) {
             totals.filtered += 1;
             await markItem(fp, 'REJECTED', {
               title: quality.cleanedTitle || item.title,
               content: quality.cleanedContent,
               reason: quality.reason,
-              metadata: { quality: qualityAudit(quality), reprocessedAt: new Date().toISOString() },
+              contentHash: publishHash,
+              metadata: { quality: qualityAudit(quality), publishContentHash: publishHash, reprocessedAt: new Date().toISOString() },
             });
             items.push({ id: item.id, status: 'REJECTED' });
+            continue;
+          }
+
+          const cleanedDuplicate = publishHash === itemHash
+            ? null
+            : await findPublishedDuplicate(source, item, fp, publishHash);
+          if (cleanedDuplicate && cleanedDuplicate.postId !== stored.postId) {
+            totals.duplicate += 1;
+            await markItem(fp, 'DUPLICATE', {
+              title: quality.cleanedTitle || item.title,
+              content: quality.cleanedContent,
+              reason: cleanedDuplicate.duplicateBy,
+              contentHash: publishHash,
+              metadata: {
+                quality: qualityAudit(quality),
+                publishContentHash: publishHash,
+                duplicate: { postId: cleanedDuplicate.postId, by: cleanedDuplicate.duplicateBy },
+                reprocessedAt: new Date().toISOString(),
+              },
+            });
+            items.push({ id: item.id, status: 'DUPLICATE', postId: cleanedDuplicate.postId });
             continue;
           }
 
@@ -981,9 +1042,11 @@ export async function reprocessAutoCrawlItems(options: {
               title: extracted.title,
               content: extracted.content,
               postId: post.id,
+              contentHash: publishHash,
               metadata: {
                 quality: qualityAudit(quality),
                 extraction: extractionAudit(extracted),
+                publishContentHash: publishHash,
                 reprocessedAt: new Date().toISOString(),
               },
             });
@@ -996,7 +1059,8 @@ export async function reprocessAutoCrawlItems(options: {
             totals.error += 1;
             await markItem(fp, 'FAILED', {
               error: message,
-              metadata: { quality: qualityAudit(quality), reprocessedAt: new Date().toISOString() },
+              contentHash: publishHash,
+              metadata: { quality: qualityAudit(quality), publishContentHash: publishHash, reprocessedAt: new Date().toISOString() },
             });
             items.push({ id: item.id, status: 'FAILED', error: message });
           }

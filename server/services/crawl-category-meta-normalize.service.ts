@@ -51,8 +51,8 @@ function normalizedComparable(value: unknown) {
 }
 
 function textValue(raw: unknown, maxLength: number) {
-  if (typeof raw !== 'string') return null;
-  const value = raw.normalize('NFKC').replace(/\s+/g, ' ').trim();
+  if (typeof raw !== 'string' && typeof raw !== 'number') return null;
+  const value = String(raw).normalize('NFKC').replace(/\s+/g, ' ').trim();
   return value ? value.slice(0, maxLength) : null;
 }
 
@@ -121,6 +121,37 @@ function assertSchemaMatchesCategory(category: CrawlCategoryRef, schema: Publish
   }
 }
 
+function buildSchemaLabelKeyMap(fields: PublishCategoryMetaFieldConfig[]) {
+  const labelEntries = fields
+    .map((field) => [normalizedComparable(field.label), fieldKey(field)] as const)
+    .filter(([label, key]) => label && key);
+  const counts = new Map<string, number>();
+  for (const [label] of labelEntries) counts.set(label, (counts.get(label) || 0) + 1);
+  return new Map(labelEntries.filter(([label]) => counts.get(label) === 1));
+}
+
+function buildRawInputKeyMap(rawMeta: Record<string, unknown>) {
+  const entries = Object.keys(rawMeta)
+    .map((key) => [normalizedComparable(key), key] as const)
+    .filter(([normalized]) => normalized);
+  const counts = new Map<string, number>();
+  for (const [normalized] of entries) counts.set(normalized, (counts.get(normalized) || 0) + 1);
+  return new Map(entries.filter(([normalized]) => counts.get(normalized) === 1));
+}
+
+function rawFieldValue(
+  rawMeta: Record<string, unknown>,
+  field: PublishCategoryMetaFieldConfig,
+  labelKeyMap: ReadonlyMap<string, string>,
+  rawInputKeyMap: ReadonlyMap<string, string>,
+) {
+  const key = fieldKey(field);
+  if (Object.prototype.hasOwnProperty.call(rawMeta, key)) return rawMeta[key];
+  const labelKey = normalizedComparable(field.label);
+  const rawInputKey = rawInputKeyMap.get(labelKey);
+  return labelKeyMap.get(labelKey) === key && rawInputKey ? rawMeta[rawInputKey] : undefined;
+}
+
 export async function normalizeCrawlCategoryMeta(
   input: CrawlCategoryMetaNormalizationInput,
 ): Promise<CrawlCategoryMetaNormalizationResult> {
@@ -130,12 +161,15 @@ export async function normalizeCrawlCategoryMeta(
   const rawMeta = objectValue(input.rawMeta);
   const configuredKeys = fields.map(fieldKey);
   const configuredKeySet = new Set(configuredKeys);
+  const labelKeyMap = buildSchemaLabelKeyMap(fields);
+  const rawInputKeyMap = buildRawInputKeyMap(rawMeta);
+  const acceptedInputKeys = new Set([...configuredKeys, ...Array.from(labelKeyMap.keys())]);
   const meta: Record<string, unknown> = {};
   const rejected: Record<string, { raw: unknown; reason: string }> = {};
 
   for (const field of fields) {
     const key = fieldKey(field);
-    const rawValue = rawMeta[key];
+    const rawValue = rawFieldValue(rawMeta, field, labelKeyMap, rawInputKeyMap);
     const normalized = normalizeFieldValue(rawValue, field, input.locationPresets);
     if (normalized.value !== null && normalized.value !== undefined && normalized.value !== '') {
       meta[key] = normalized.value;
@@ -155,7 +189,7 @@ export async function normalizeCrawlCategoryMeta(
         : null,
       configuredKeys,
       normalizedKeys: Object.keys(meta),
-      unexpectedKeys: Object.keys(rawMeta).filter((key) => !configuredKeySet.has(key)),
+      unexpectedKeys: Object.keys(rawMeta).filter((key) => !configuredKeySet.has(key) && !acceptedInputKeys.has(normalizedComparable(key))),
       rejected,
     },
   };

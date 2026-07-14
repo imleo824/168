@@ -95,7 +95,10 @@ function stripEmoji(raw: string) {
 
 function removeInlineContacts(line: string) {
   let next = line;
-  for (const pattern of CONTACT_PATTERNS) next = next.replace(pattern, '$1');
+  for (const pattern of CONTACT_PATTERNS) next = next.replace(pattern, (...match) => {
+    const captures = match.slice(1, -2).filter((value: unknown) => typeof value === 'string');
+    return String(captures[0] || '');
+  });
   return next
     .replace(/(?:联系|私聊|咨询|客服|飞机|电报|TG|Telegram|微信|VX|WeChat|电话)[:：\s-]*$/i, '')
     .trim();
@@ -221,7 +224,7 @@ function cleanBody(rawContent: string): BodyCleanResult {
 
 function cleanTitle(rawTitle: string, cleanedContent: string) {
   const titleSource = canonicalContent(rawTitle) || cleanedContent.split('\n').find(Boolean) || '';
-  return compact(stripEmoji(titleSource).cleaned)
+  return compact(stripEmoji(removeInlineContacts(titleSource)).cleaned)
     .replace(/https?:\/\/\S+/gi, '')
     .replace(/(?:t\.me|telegram\.me)\/\S+/gi, '')
     .replace(/(^|[^A-Za-z0-9_.@])@[A-Za-z0-9_]{4,64}(?!\.[A-Za-z])/g, '$1')

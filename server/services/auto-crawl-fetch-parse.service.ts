@@ -47,6 +47,8 @@ function decode(raw: unknown) {
 
 function stripHtml(raw: unknown) {
   return decode(String(raw || '')
+    .replace(/<!\[CDATA\[/gi, '')
+    .replace(/\]\]>/g, '')
     .replace(/<br\s*\/?>/gi, '\n')
     .replace(/<\/(?:p|div|li|tr|h[1-6])>/gi, '\n')
     .replace(/<[^>]+>/g, ' '))
@@ -97,16 +99,27 @@ function elementHtmlByClass(html: string, classToken: string) {
   return html.match(new RegExp(`<([a-zA-Z][\\w:-]*)\\b[^>]*class=["'][^"']*${classToken}[^"']*["'][^>]*>([\\s\\S]*?)<\\/\\1>`, 'i'))?.[2] || '';
 }
 
-function normalizeImageUrl(raw: unknown) {
+function normalizeHttpUrl(raw: unknown, baseUrl = '') {
   let url = decode(String(raw || '').trim()).replace(/^[ '\"]+|[ '\"]+$/g, '').replace(/\\u0026/g, '&');
   if (!url) return '';
   if (/^\/\//.test(url)) url = `https:${url}`;
+  if (!/^https?:\/\//i.test(url) && baseUrl) {
+    try {
+      url = new URL(url, baseUrl).toString();
+    } catch {
+      return '';
+    }
+  }
+  if (!/^https?:\/\//i.test(url)) return '';
   return cleanString(url, 1000);
 }
 
-function isUsefulBodyImage(raw: string) {
-  const url = normalizeImageUrl(raw);
-  if (!/^https?:\/\//i.test(url) || /^(?:data|blob):/i.test(url)) return false;
+function normalizeImageUrl(raw: unknown, baseUrl = '') {
+  return normalizeHttpUrl(raw, baseUrl);
+}
+
+function isUsefulBodyImage(url: string) {
+  if (!url || /^(?:data|blob):/i.test(url)) return false;
   let lower = url.toLowerCase();
   try { lower = decodeURIComponent(lower); } catch {}
   if (/\.(?:ico|svg|mp3|m4a|wav|ogg|mp4|webm|mov|pdf|zip)(?:$|[?#])/i.test(lower)) return false;
@@ -114,8 +127,8 @@ function isUsefulBodyImage(raw: string) {
   return true;
 }
 
-function addImage(out: string[], seen: Set<string>, raw: unknown) {
-  const url = normalizeImageUrl(raw);
+function addImage(out: string[], seen: Set<string>, raw: unknown, baseUrl = '') {
+  const url = normalizeImageUrl(raw, baseUrl);
   if (!url || seen.has(url) || !isUsefulBodyImage(url)) return;
   seen.add(url);
   out.push(url);
@@ -177,12 +190,18 @@ function xmlTag(raw: string, tag: string) {
   return stripHtml(raw.match(new RegExp(`<${tag}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${tag}>`, 'i'))?.[1] || '');
 }
 
-function extractImagesFromHtml(html: string) {
+function feedLink(chunk: string, baseUrl: string) {
+  const direct = xmlTag(chunk, 'link');
+  const raw = direct || chunk.match(/<link\b[^>]*\bhref=["']([^"']+)["'][^>]*>/i)?.[1] || '';
+  return normalizeHttpUrl(raw, baseUrl);
+}
+
+function extractImagesFromHtml(html: string, baseUrl = '') {
   const images: string[] = [];
   const seen = new Set<string>();
   for (const pattern of [/<img[^>]+(?:src|data-src|data-original)=["']([^"']+)["']/gi, /<media:content[^>]+url=["']([^"']+)["']/gi, /<enclosure[^>]+url=["']([^"']+)["'][^>]*>/gi]) {
     let match: RegExpExecArray | null;
-    while ((match = pattern.exec(html)) !== null && images.length < MAX_IMAGES_PER_ITEM) addImage(images, seen, match[1]);
+    while ((match = pattern.exec(html)) !== null && images.length < MAX_IMAGES_PER_ITEM) addImage(images, seen, match[1], baseUrl);
   }
   return images;
 }
@@ -214,12 +233,12 @@ function assignRssCursors(drafts: RssDraft[]) {
   return output.sort((left, right) => left.cursorNumber - right.cursorNumber || left.id.localeCompare(right.id));
 }
 
-function parseRss(xml: string): AutoCrawlItem[] {
+function parseRss(xml: string, baseUrl = ''): AutoCrawlItem[] {
   const chunks = xml.match(/<item[\s\S]*?<\/item>/gi) || xml.match(/<entry[\s\S]*?<\/entry>/gi) || [];
   const drafts = chunks
     .map((chunk, index): RssDraft => {
       const title = xmlTag(chunk, 'title');
-      const link = xmlTag(chunk, 'link') || attr(chunk, 'href');
+      const link = feedLink(chunk, baseUrl);
       const rawContent = chunk.match(/<content:encoded[^>]*>([\s\S]*?)<\/content:encoded>/i)?.[1]
         || chunk.match(/<description[^>]*>([\s\S]*?)<\/description>/i)?.[1]
         || chunk.match(/<summary[^>]*>([\s\S]*?)<\/summary>/i)?.[1]
@@ -236,7 +255,7 @@ function parseRss(xml: string): AutoCrawlItem[] {
         link: cleanString(link, 1000),
         timestamp: baseTimestamp,
         datetime: safeIso(baseTimestamp),
-        images: extractImagesFromHtml(`${rawContent}\n${chunk}`),
+        images: extractImagesFromHtml(`${rawContent}\n${chunk}`, link || baseUrl),
         baseTimestamp,
       };
     })
@@ -397,7 +416,7 @@ export async function fetchAutoCrawlItems(source: AutoCrawlSourceConfig, options
     telegramGap = { unresolved: result.gapUnresolved, from: result.gapFrom, to: result.gapTo, stoppedReason: result.stoppedReason };
   } else {
     const response = await fetchText(url);
-    all = parseRss(response.text);
+    all = parseRss(response.text, response.finalUrl);
     finalUrl = response.finalUrl;
     contentType = response.contentType;
     status = response.status;

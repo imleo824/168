@@ -41,6 +41,10 @@ assert.match(fetchParse, /MAX_FETCH_BYTES/, 'fetch/parse service must enforce a 
 assert.match(fetchParse, /isAllowedTextContentType/, 'fetch/parse service must validate response content type.');
 assert.match(fetchParse, /timestampOf/, 'feed timestamps must be validated without inventing moving cursors.');
 assert.match(fetchParse, /resolveAutoCrawlFetchUrl/, 'fetch/parse service must own the final source URL resolver.');
+assert.match(fetchParse, /normalizeHttpUrl/, 'feed links and images must be normalized through one HTTP URL helper.');
+assert.match(fetchParse, /parseRss\(response\.text, response\.finalUrl\)/, 'RSS parsing must receive the final feed URL for relative links and images.');
+assert.match(fetchParse, /extractImagesFromHtml\(`\$\{rawContent\}\\n\$\{chunk\}`, link \|\| baseUrl\)/, 'RSS media extraction must resolve relative image URLs against the item or feed URL.');
+assert.match(fetchParse, /<!\\\[CDATA\\\[/, 'RSS text cleanup must unwrap CDATA before stripping HTML.');
 assert.match(fetchParse, /MAX_TELEGRAM_BACKFILL_PAGES/, 'Telegram history must be backfilled before cursor advancement.');
 assert.match(fetchParse, /gapUnresolved/, 'unrecoverable Telegram history gaps must be explicitly represented in parser metadata.');
 assert.match(main, /telegram_gap_partially_recovered/, 'partially recovered Telegram gaps must be persisted as source warnings.');
