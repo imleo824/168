@@ -11,7 +11,10 @@
     --app-desktop-sidebar-width: calc(var(--ui-space-8) * 7 + var(--ui-space-4));
     --app-desktop-feed-main-width: calc(var(--ui-space-8) * 21 + var(--ui-space-4));
     --app-desktop-reading-main-width: var(--app-desktop-feed-main-width);
-    --app-desktop-detail-main-width: var(--app-desktop-reading-main-width);
+    --app-desktop-detail-main-width: calc(
+      var(--app-desktop-reading-main-width) +
+      (var(--ui-app-shell-desktop-padding-x) * 2)
+    );
     --app-desktop-conversation-main-width: calc(var(--ui-space-8) * 26 + var(--ui-space-2));
     --app-desktop-profile-main-width: calc(var(--ui-space-8) * 27 + var(--ui-space-4));
     --app-desktop-compose-main-width: calc(var(--ui-space-8) * 28 + var(--ui-space-4));
@@ -254,11 +257,6 @@
       box-shadow: var(--ui-shadow-card);
       transform: none;
       transform-origin: initial;
-    }
-
-    .app-shell[data-route-surface='user'][data-desktop-surface='detail'] .app-shell-main {
-      padding-inline: var(--ui-space-none);
-      padding-block-start: var(--ui-space-none);
     }
 
     .app-shell[data-route-surface='user'][data-desktop-surface='conversation'] {
