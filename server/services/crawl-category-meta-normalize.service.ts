@@ -50,10 +50,40 @@ function normalizedComparable(value: unknown) {
     .toLowerCase();
 }
 
+function compactComparable(value: unknown) {
+  return normalizedComparable(value).replace(/[\s#＃_\-\/\\|·.,，。:：;；、()（）\[\]【】"'“”‘’]+/g, '');
+}
+
 function textValue(raw: unknown, maxLength: number) {
   if (typeof raw !== 'string' && typeof raw !== 'number') return null;
   const value = String(raw).normalize('NFKC').replace(/\s+/g, ' ').trim();
   return value ? value.slice(0, maxLength) : null;
+}
+
+function parseSmallChineseNumber(raw: string) {
+  const values: Record<string, number> = {
+    零: 0,
+    一: 1,
+    二: 2,
+    两: 2,
+    三: 3,
+    四: 4,
+    五: 5,
+    六: 6,
+    七: 7,
+    八: 8,
+    九: 9,
+  };
+  const token = raw.replace(/两/g, '二');
+  if (/^[零一二三四五六七八九]$/.test(token)) return values[token] ?? null;
+  if (token === '十') return 10;
+  const teen = token.match(/^十([一二三四五六七八九])$/);
+  if (teen) return 10 + (values[teen[1]] ?? 0);
+  const tens = token.match(/^([一二三四五六七八九])十$/);
+  if (tens) return (values[tens[1]] ?? 0) * 10;
+  const compound = token.match(/^([一二三四五六七八九])十([一二三四五六七八九])$/);
+  if (compound) return (values[compound[1]] ?? 0) * 10 + (values[compound[2]] ?? 0);
+  return null;
 }
 
 function normalizeNumber(raw: unknown) {
@@ -69,10 +99,19 @@ function normalizeNumber(raw: unknown) {
   }
 
   const matches = value.match(/[+-]?\d[\d,]*(?:\.\d+)?/g) || [];
-  if (matches.length !== 1) return { value: null, reason: 'number_not_matched' };
-  const parsed = Number(matches[0].replace(/,/g, ''));
-  return Number.isFinite(parsed)
-    ? { value: parsed, reason: 'numeric_amount_extracted' }
+  if (matches.length === 1) {
+    const parsed = Number(matches[0].replace(/,/g, ''));
+    return Number.isFinite(parsed)
+      ? { value: parsed, reason: 'numeric_amount_extracted' }
+      : { value: null, reason: 'number_not_matched' };
+  }
+  if (matches.length > 1) return { value: null, reason: 'number_not_matched' };
+
+  const chineseMatches = value.match(/[一二两三四五六七八九十]{1,3}/g) || [];
+  if (chineseMatches.length !== 1) return { value: null, reason: 'number_not_matched' };
+  const parsed = parseSmallChineseNumber(chineseMatches[0]);
+  return parsed !== null
+    ? { value: parsed, reason: 'small_chinese_number_extracted' }
     : { value: null, reason: 'number_not_matched' };
 }
 
@@ -82,6 +121,78 @@ function exactConfiguredOption(raw: unknown, field: PublishCategoryMetaFieldConf
   if (!rawKey) return null;
   const matches = (field.options || []).filter((option) => normalizedComparable(option) === rawKey);
   return matches.length === 1 ? matches[0] : null;
+}
+
+const OPTION_ALIASES: Record<string, string[]> = {
+  客服: ['客服专员', '在线客服', '售后', '客服代表', 'cs'],
+  推广: ['地推', '拉新', '投放', '引流', '市场推广'],
+  电销: ['电话销售', '电话营销', 'telemarketing'],
+  运营: ['社群运营', '内容运营', '用户运营', '活动运营'],
+  人事: ['hr', '招聘专员', '人力资源'],
+  财务: ['会计', '出纳'],
+  后端开发: ['后端', '后台开发', 'backend', 'server', 'java开发', 'golang', 'go开发', 'php开发', 'python开发', 'nodejs'],
+  前端开发: ['前端', 'web前端', 'frontend', 'react', 'vue', 'h5'],
+  DBA: ['数据库', 'mysql', 'postgres', 'postgresql', 'oracle'],
+  运维: ['devops', 'sre', 'linux', 'k8s', 'kubernetes'],
+  产品: ['产品经理', 'pm'],
+  设计: ['设计师', 'ui', '平面设计'],
+  风控: ['审核', '风控专员'],
+  市场: ['market'],
+  销售: ['业务', '销售代表'],
+  行政: ['助理', '文员'],
+  司机: ['驾驶员'],
+  安保: ['保安', 'security'],
+  厨师: ['后厨'],
+  服务员: ['waiter'],
+  翻译: ['translator'],
+  主播: ['直播'],
+  剪辑: ['视频剪辑'],
+  手机: ['iphone', '苹果手机', '安卓手机', '华为手机', '小米手机', 'oppo', 'vivo'],
+  电脑: ['笔记本', 'laptop', 'macbook', '台式机', '台式电脑', 'pc'],
+  数码配件: ['耳机', '充电器', '数据线', '鼠标', '键盘', '移动硬盘', '硬盘'],
+  家电: ['冰箱', '洗衣机', '空调', '电视', '微波炉'],
+  家具: ['沙发', '床', '桌子', '椅子', '柜子'],
+  摩托: ['机车', '摩托车'],
+  电动车: ['电瓶车', 'e-bike', 'ebike'],
+  汽车: ['轿车', '二手车'],
+  汽车用品: ['车载', '轮胎', '行车记录仪'],
+  服饰鞋包: ['衣服', '鞋子', '包包', '服装'],
+  美妆个护: ['化妆品', '护肤品', '香水'],
+  母婴用品: ['婴儿', '奶粉', '尿不湿'],
+  运动户外: ['健身', '球拍', '帐篷'],
+  游戏娱乐: ['游戏机', 'ps5', 'switch'],
+  办公用品: ['打印机', '办公桌', '办公椅'],
+  票券卡券: ['门票', '礼品卡', '充值卡', '卡券'],
+  宠物: ['猫', '狗', '猫咪', '狗狗'],
+  签证: ['visa', '旅游签', '工签', '商务签', '办签'],
+  移民: ['永居', 'pr', '居留'],
+  护照: ['passport'],
+  工作证明: ['在职证明', '工证'],
+  保关: ['清关'],
+  捞人: ['救人', '放人', '拘留'],
+  洗白: ['黑名单解除', 'blacklist'],
+  KTV: ['会所', '夜总会'],
+  按摩: ['spa', '足疗', '马杀鸡'],
+  修车: ['开车'],
+  刷量: ['跑量', '点赞', '评论', '播放', '粉丝', '流量'],
+  数据: ['客资', '名单', '数据包'],
+  包网: ['平台搭建', '建站', '系统搭建'],
+  游戏: ['棋牌', '彩票', '电竞'],
+  支付: ['代收', '代付', '通道', '支付通道', '四方'],
+};
+
+function semanticConfiguredOption(raw: unknown, field: PublishCategoryMetaFieldConfig) {
+  if (typeof raw !== 'string') return null;
+  const rawKey = compactComparable(raw);
+  if (!rawKey) return null;
+  const matches = new Set<string>();
+  for (const option of field.options || []) {
+    const candidates = (OPTION_ALIASES[option] || []).map(compactComparable).filter(Boolean);
+    if (candidates.some((candidate) => rawKey === candidate || rawKey.includes(candidate))) {
+      matches.add(option);
+    }
+  }
+  return matches.size === 1 ? Array.from(matches)[0] : null;
 }
 
 function negotiableOption(field: PublishCategoryMetaFieldConfig) {
@@ -176,8 +287,10 @@ function normalizeFieldValue(
     const exactValue = exactConfiguredOption(raw, field);
     if (exactValue) return { value: exactValue, reason: 'database_option_exact' };
     const salaryValue = semanticSalaryOption(raw, field);
-    return salaryValue
-      ? { value: salaryValue, reason: 'salary_option_semantic' }
+    if (salaryValue) return { value: salaryValue, reason: 'salary_option_semantic' };
+    const semanticValue = semanticConfiguredOption(raw, field);
+    return semanticValue
+      ? { value: semanticValue, reason: 'database_option_semantic' }
       : { value: null, reason: 'database_option_not_matched' };
   }
 

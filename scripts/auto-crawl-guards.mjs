@@ -90,13 +90,16 @@ mustNotHave('AI extraction', crawlAi, /AUTO_CRAWL_META_REQUIRED_MISSING|auto_cra
 mustNotHave('AI extraction', crawlAi, /import prisma|loadAutoCrawlDatabaseConfig|findPublishCategoryMetaSchema|extractSchemaLabeledMeta|repairAiJson|aiRequest|rawAiMeta/);
 
 mustHave('Meta normalization', crawlMeta, /database_option_exact/);
+mustHave('Meta normalization', crawlMeta, /database_option_semantic/);
+mustHave('Meta normalization', crawlMeta, /OPTION_ALIASES/);
+mustHave('Meta normalization', crawlMeta, /small_chinese_number_extracted/);
 mustHave('Meta normalization', crawlMeta, /strict_number/);
 mustHave('Meta normalization', crawlMeta, /strict_boolean/);
 mustHave('Meta normalization', crawlMeta, /buildSchemaLabelKeyMap/);
 mustHave('Meta normalization', crawlMeta, /buildRawInputKeyMap/);
 mustHave('Meta normalization', crawlMeta, /unexpectedKeys/);
 mustHave('Meta normalization', crawlMeta, /rejected/);
-mustNotHave('Meta normalization', crawlMeta, /missingRequiredKeys|alias|salaryBucket|normalizeCurrency|fallback/i);
+mustNotHave('Meta normalization', crawlMeta, /missingRequiredKeys|salaryBucket|normalizeCurrency|fallback/i);
 
 mustHave('location normalization', locationNormalize, /buildLocationPresetIndex/);
 mustHave('location normalization', locationNormalize, /const ambiguous = new Set<string>/);

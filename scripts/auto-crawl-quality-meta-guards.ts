@@ -123,4 +123,68 @@ const nonSalarySelect = await normalizeCrawlCategoryMeta({
 assert.equal(nonSalarySelect.meta.jobType, undefined, 'non-salary select fields must not receive loose semantic matching.');
 assert.equal(nonSalarySelect.audit.rejected.jobType?.reason, 'database_option_not_matched');
 
+const allMeta = await normalizeCrawlCategoryMeta({
+  category: { id: 'category_all', name: '全量Meta测试', slug: 'all' },
+  categoryMetaSchema: {
+    categorySlug: 'all',
+    schemaVersion: 1,
+    name: '全量Meta测试',
+    fields: [
+      { key: 'position', label: '岗位', type: 'select', required: false, options: ['客服', '推广', '后端开发', '前端开发', 'DBA', '运维'] },
+      { key: 'itemCategory', label: '品类', type: 'select', required: false, options: ['手机', '电脑', '数码配件', '家电', '家具', '摩托', '电动车', '汽车', '汽车用品', '宠物'] },
+      { key: 'documentType', label: '类型', type: 'select', required: false, options: ['签证', '移民', '护照', '工作证明', '保关', '捞人', '洗白'] },
+      { key: 'nightlifeType', label: '分类', type: 'select', required: false, options: ['KTV', '按摩', '修车'] },
+      { key: 'supplyDemandType', label: '分类', type: 'select', required: false, options: ['刷量', '数据', '包网', '游戏', '支付'] },
+      { key: 'bedrooms', label: '卧室', type: 'number', required: false },
+      { key: 'depositMonths', label: '押几', type: 'number', required: false },
+      { key: 'paymentMonths', label: '付几', type: 'number', required: false },
+    ],
+  },
+  rawMeta: {
+    position: 'React 前端工程师',
+    itemCategory: 'MacBook Pro 二手转让',
+    documentType: '旅游签办理',
+    nightlifeType: 'SPA 按摩',
+    supplyDemandType: '支付通道资源',
+    bedrooms: '两室',
+    depositMonths: '押二',
+    paymentMonths: '付一',
+  },
+  locationPresets: [],
+});
+
+assert.deepEqual(allMeta.meta, {
+  position: '前端开发',
+  itemCategory: '电脑',
+  documentType: '签证',
+  nightlifeType: '按摩',
+  supplyDemandType: '支付',
+  bedrooms: 2,
+  depositMonths: 2,
+  paymentMonths: 1,
+});
+
+const ambiguousSelect = await normalizeCrawlCategoryMeta({
+  category: { id: 'category_all', name: '全量Meta测试', slug: 'all' },
+  categoryMetaSchema: {
+    categorySlug: 'all',
+    schemaVersion: 1,
+    name: '全量Meta测试',
+    fields: [
+      { key: 'position', label: '岗位', type: 'select', required: false, options: ['产品', '运营'] },
+      { key: 'depositMonths', label: '押几', type: 'number', required: false },
+    ],
+  },
+  rawMeta: {
+    position: '产品运营',
+    depositMonths: '押二付一',
+  },
+  locationPresets: [],
+});
+
+assert.equal(ambiguousSelect.meta.position, undefined, 'ambiguous select values must not be guessed.');
+assert.equal(ambiguousSelect.audit.rejected.position?.reason, 'database_option_not_matched');
+assert.equal(ambiguousSelect.meta.depositMonths, undefined, 'ambiguous numeric values with multiple Chinese numbers must not be guessed.');
+assert.equal(ambiguousSelect.audit.rejected.depositMonths?.reason, 'number_not_matched');
+
 console.log('[auto-crawl-quality-meta-guards] passed');
