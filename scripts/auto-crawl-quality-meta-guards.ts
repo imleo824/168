@@ -356,12 +356,113 @@ assert.deepEqual(allMeta.meta, {
   documentType: '签证',
   nightlifeType: '按摩',
   supplyDemandType: '支付',
-  price: 12000,
   area: 100,
   bedrooms: 2,
   depositMonths: 2,
   paymentMonths: 1,
 });
+assert.equal(allMeta.audit.rejected.price?.reason, 'money_currency_not_matched', 'money fields without currency units must be rejected.');
+
+const rentMoneyMeta = await normalizeCrawlCategoryMeta({
+  category: { id: 'category_housing', name: '租房', slug: 'housing' },
+  categoryMetaSchema: {
+    categorySlug: 'housing',
+    schemaVersion: 1,
+    name: '租房',
+    fields: [
+      { key: 'price', label: '租金', type: 'number', required: false },
+      { key: 'area', label: '面积', type: 'number', required: false },
+      { key: 'bedrooms', label: '卧室', type: 'number', required: false },
+    ],
+  },
+  rawMeta: {
+    price: '800元一个月',
+    area: '一百平',
+    bedrooms: '1房',
+  },
+  locationPresets: [],
+});
+
+assert.deepEqual(rentMoneyMeta.meta, {
+  price: 112,
+  area: 100,
+  bedrooms: 1,
+}, 'rent prices must convert currency units to USD while non-money numeric fields stay as quantities.');
+
+const usdRentMeta = await normalizeCrawlCategoryMeta({
+  category: { id: 'category_housing', name: '租房', slug: 'housing' },
+  categoryMetaSchema: {
+    categorySlug: 'housing',
+    schemaVersion: 1,
+    name: '租房',
+    fields: [
+      { key: 'price', label: '价格', type: 'number', required: false },
+    ],
+  },
+  rawMeta: { price: '700$/月' },
+  locationPresets: [],
+});
+
+assert.equal(usdRentMeta.meta.price, 700, 'USD rent should keep the USD amount.');
+
+const unitlessRentMeta = await normalizeCrawlCategoryMeta({
+  category: { id: 'category_housing', name: '租房', slug: 'housing' },
+  categoryMetaSchema: {
+    categorySlug: 'housing',
+    schemaVersion: 1,
+    name: '租房',
+    fields: [
+      { key: 'price', label: '租金', type: 'number', required: false },
+    ],
+  },
+  rawMeta: { price: '800' },
+  locationPresets: [],
+});
+
+assert.equal(unitlessRentMeta.meta.price, undefined, 'money fields must not accept unitless amounts.');
+assert.equal(unitlessRentMeta.audit.rejected.price?.reason, 'money_currency_not_matched');
+
+const secondhandNumericPriceMeta = await normalizeCrawlCategoryMeta({
+  category: { id: 'category_secondhand', name: '二手', slug: 'secondhand' },
+  categoryMetaSchema: {
+    categorySlug: 'secondhand',
+    schemaVersion: 2,
+    name: '二手',
+    fields: [
+      { key: 'itemCategory', label: '品类', type: 'select', required: false, options: ['汽车', '摩托', '电脑'] },
+      { key: 'price', label: '价格', type: 'number', required: false },
+    ],
+  },
+  rawMeta: {
+    itemCategory: '代步车带城内牌',
+    price: '6000元',
+  },
+  locationPresets: [],
+});
+
+assert.deepEqual(secondhandNumericPriceMeta.meta, {
+  itemCategory: '汽车',
+  price: 840,
+}, 'secondhand prices must remain numeric and convert currency units to USD.');
+
+const numericPriceCannotStoreNegotiable = await normalizeCrawlCategoryMeta({
+  category: { id: 'category_secondhand', name: '二手', slug: 'secondhand' },
+  categoryMetaSchema: {
+    categorySlug: 'secondhand',
+    schemaVersion: 2,
+    name: '二手',
+    fields: [
+      { key: 'price', label: '价格', type: 'number', required: false },
+    ],
+  },
+  rawMeta: {
+    price: '面议',
+  },
+  locationPresets: [],
+});
+
+assert.equal(numericPriceCannotStoreNegotiable.meta.price, undefined, 'numeric price fields cannot store negotiable text.');
+assert.equal(numericPriceCannotStoreNegotiable.audit.rejected.price?.reason, 'money_currency_not_matched');
 
 const compositeSelect = await normalizeCrawlCategoryMeta({
   category: { id: 'category_secondhand', name: '二手', slug: 'secondhand' },

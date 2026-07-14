@@ -119,7 +119,7 @@ function parseNumericAmounts(raw: string) {
     .filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
 }
 
-function normalizeNumber(raw: unknown) {
+function normalizePlainNumber(raw: unknown) {
   if (typeof raw === 'number') {
     return Number.isFinite(raw) ? { value: raw, reason: 'strict_number' } : { value: null, reason: 'number_not_matched' };
   }
@@ -183,7 +183,7 @@ const OPTION_ALIASES: Record<string, string[]> = {
   家具: ['沙发', '床', '桌子', '椅子', '柜子'],
   摩托: ['机车', '摩托车'],
   电动车: ['电瓶车', 'e-bike', 'ebike'],
-  汽车: ['轿车', '二手车'],
+  汽车: ['轿车', '二手车', '代步车', '车牌', '带牌', '城内牌'],
   汽车用品: ['车载', '轮胎', '行车记录仪'],
   服饰鞋包: ['衣服', '鞋子', '包包', '服装'],
   美妆个护: ['化妆品', '护肤品', '香水'],
@@ -242,9 +242,10 @@ function isSalarySelectField(field: PublishCategoryMetaFieldConfig) {
     && (field.options || []).some((option) => /\$|面议/.test(option));
 }
 
-function salaryCurrencyRate(raw: string) {
+function currencyRate(raw: string) {
   if (/(?:usdt|usd|(?:^|[^a-z])u(?:$|[^a-z])|美元|美金|刀|\$)/i.test(raw)) return 1;
-  if (/(?:rmb|cny|人民币|¥)/i.test(raw)) return 0.14;
+  if (/(?:jpy|日元)/i.test(raw)) return 0.0064;
+  if (/(?:rmb|cny|人民币|(?<!日)元|¥)/i.test(raw)) return 0.14;
   if (/(?:php|披索|比索|peso)/i.test(raw)) return 0.017;
   if (/(?:thb|泰铢)/i.test(raw)) return 0.027;
   if (/(?:khr|瑞尔)/i.test(raw)) return 0.00025;
@@ -255,12 +256,39 @@ function salaryCurrencyRate(raw: string) {
   if (/(?:idr|印尼盾)/i.test(raw)) return 0.000061;
   if (/(?:lak|基普)/i.test(raw)) return 0.000046;
   if (/(?:mmk|缅币)/i.test(raw)) return 0.00048;
-  if (/(?:jpy|日元)/i.test(raw)) return 0.0064;
   if (/(?:krw|韩元)/i.test(raw)) return 0.00072;
   if (/(?:hkd|港币)/i.test(raw)) return 0.128;
   if (/(?:mop|澳门币)/i.test(raw)) return 0.124;
   if (/(?:eur|欧元)/i.test(raw)) return 1.08;
   return null;
+}
+
+function moneyField(field: PublishCategoryMetaFieldConfig) {
+  const key = normalizedComparable(field.key);
+  const label = normalizedComparable(field.label);
+  return /price|rent|salary|cost|fee|amount/.test(key)
+    || /价格|租金|房租|薪资|工资|待遇|费用|金额|月租/.test(label);
+}
+
+function normalizeMoneyNumber(raw: unknown) {
+  if (typeof raw === 'number') {
+    return Number.isFinite(raw) ? { value: raw, reason: 'strict_money_number_usd' } : { value: null, reason: 'money_number_not_matched' };
+  }
+  if (typeof raw !== 'string') return { value: null, reason: 'money_number_not_matched' };
+  const text = raw.normalize('NFKC').replace(/\s+/g, ' ').trim();
+  if (!text) return { value: null, reason: 'money_number_not_matched' };
+
+  const rate = currencyRate(text);
+  if (!rate) return { value: null, reason: 'money_currency_not_matched' };
+  const amounts = parseNumericAmounts(text);
+  if (amounts.length !== 1) return { value: null, reason: 'money_number_not_matched' };
+  const usd = amounts[0] * rate;
+  if (!Number.isFinite(usd)) return { value: null, reason: 'money_number_not_matched' };
+  return { value: Math.round(usd * 100) / 100, reason: rate === 1 ? 'money_usd_amount' : 'money_currency_converted_usd' };
+}
+
+function normalizeNumber(raw: unknown, field: PublishCategoryMetaFieldConfig) {
+  return moneyField(field) ? normalizeMoneyNumber(raw) : normalizePlainNumber(raw);
 }
 
 function salaryOptionRange(option: string) {
@@ -301,7 +329,7 @@ function semanticSalaryOption(raw: unknown, field: PublishCategoryMetaFieldConfi
   if (!text) return null;
   if (/面议|面谈|详聊|从优|看能力|negotiable|tbd/i.test(text)) return option;
 
-  const rate = typeof raw === 'number' ? 1 : salaryCurrencyRate(text);
+  const rate = typeof raw === 'number' ? 1 : currencyRate(text);
   const periodFactor = salaryPeriodMonthlyFactor(text);
   if (periodFactor === null) return option;
 
@@ -341,7 +369,7 @@ function normalizeFieldValue(
   }
 
   if (field.type === 'number') {
-    return normalizeNumber(raw);
+    return normalizeNumber(raw, field);
   }
 
   if (field.type === 'boolean') {
