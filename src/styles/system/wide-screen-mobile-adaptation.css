@@ -22,6 +22,12 @@
     --app-desktop-shell-gap: var(--ui-space-6);
     --app-desktop-shell-padding-x: var(--ui-space-6);
     --app-desktop-shell-padding-y: var(--ui-space-5);
+    --app-desktop-frame-width: calc(
+      var(--app-desktop-sidebar-width) +
+      var(--app-desktop-feed-main-width) +
+      var(--app-desktop-context-width) +
+      (var(--app-desktop-shell-gap) * 2)
+    );
     --app-desktop-shell-width: calc(
       var(--app-desktop-sidebar-width) +
       var(--app-desktop-main-width) +
@@ -145,14 +151,25 @@
       display: grid;
       width: 100%;
       min-height: 100svh;
-      --app-desktop-main-left: calc(
-        var(--app-desktop-shell-padding-x) +
-        var(--app-desktop-sidebar-width) +
-        var(--app-desktop-shell-gap)
+      --app-desktop-balance-spacer-width: var(--ui-space-none);
+      --app-desktop-shell-active-width: min(
+        var(--app-desktop-frame-width),
+        calc(100vw - (var(--app-desktop-shell-padding-x) * 2))
       );
+      --app-desktop-shell-left: calc((100vw - var(--app-desktop-shell-active-width)) / 2);
+      --app-desktop-main-side-gap-total: var(--app-desktop-shell-gap);
+      --app-desktop-main-left: calc(var(--app-desktop-shell-left) + var(--app-desktop-sidebar-width) + var(--app-desktop-shell-gap));
       --app-desktop-main-active-width: min(
         var(--app-desktop-main-width),
-        calc(100vw - var(--app-desktop-main-left) - var(--app-desktop-shell-padding-x))
+        max(
+          var(--ui-space-none),
+          calc(
+            var(--app-desktop-shell-active-width) -
+            var(--app-desktop-sidebar-width) -
+            var(--app-desktop-main-side-gap-total) -
+            var(--app-desktop-balance-spacer-width)
+          )
+        )
       );
       grid-template-columns:
         minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
@@ -160,7 +177,7 @@
         minmax(calc(var(--ui-space-8) * 7), var(--app-desktop-context-width));
       gap: var(--app-desktop-shell-gap);
       align-items: start;
-      justify-content: start;
+      justify-content: center;
       overflow-x: hidden;
       padding: var(--app-desktop-shell-padding-y) var(--app-desktop-shell-padding-x);
       background: var(--ui-surface-page);
@@ -171,9 +188,30 @@
     }
 
     .app-shell[data-route-surface='user']:not([data-desktop-surface='feed']) {
+      --app-desktop-main-side-gap-total: calc(var(--app-desktop-shell-gap) * 2);
+      --app-desktop-balance-spacer-width: max(
+        var(--ui-space-none),
+        calc(
+          var(--app-desktop-frame-width) -
+          var(--app-desktop-sidebar-width) -
+          var(--app-desktop-main-side-gap-total) -
+          var(--app-desktop-main-width)
+        )
+      );
       grid-template-columns:
         minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
-        minmax(0, var(--app-desktop-main-width));
+        minmax(0, var(--app-desktop-main-width))
+        minmax(0, var(--app-desktop-balance-spacer-width));
+    }
+
+    .app-shell[data-route-surface='user']:not([data-desktop-surface='feed'])::after {
+      display: block;
+      width: var(--app-desktop-balance-spacer-width);
+      min-width: 0;
+      grid-column: 3;
+      grid-row: 1;
+      content: '';
+      pointer-events: none;
     }
 
     .app-shell[data-route-surface='user'] .app-shell-main {
@@ -419,27 +457,21 @@
 
   @media (min-width: 1024px) and (max-width: 1179px) {
     .app-shell[data-route-surface='user'] {
+      --app-desktop-balance-spacer-width: var(--ui-space-none);
+      --app-desktop-main-side-gap-total: var(--app-desktop-shell-gap);
       grid-template-columns:
         minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
         minmax(0, var(--app-desktop-main-width));
+      justify-content: start;
     }
 
     .app-desktop-context-rail {
       display: none;
     }
-  }
 
-  @media (min-width: 1024px) and (max-width: 1539px) {
-    .app-shell[data-route-surface='user'][data-desktop-surface='detail'],
-    .app-shell[data-route-surface='user'][data-desktop-surface='conversation'] {
-      grid-template-columns:
-        minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
-        minmax(0, var(--app-desktop-main-width));
-    }
-
-    .app-shell[data-route-surface='user'][data-desktop-surface='detail'] .app-desktop-context-rail,
-    .app-shell[data-route-surface='user'][data-desktop-surface='conversation'] .app-desktop-context-rail {
+    .app-shell[data-route-surface='user']:not([data-desktop-surface='feed'])::after {
       display: none;
+      content: none;
     }
   }
 
