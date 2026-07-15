@@ -70,7 +70,12 @@
     flex: 1 0 auto;
     min-height: 0;
     padding-inline: var(--ui-space-none);
+    padding-top: calc(var(--ui-topbar-height) + env(safe-area-inset-top));
     padding-bottom: calc(var(--ui-detail-page-bottom-space) + env(safe-area-inset-bottom));
+  }
+
+  .detail-page--mobile .detail-state-shell {
+    padding-top: calc(var(--ui-topbar-height) + env(safe-area-inset-top) + var(--ui-app-page-main-padding-y));
   }
 
   .detail-page-main--desktop {

@@ -149,6 +149,17 @@ assert(
 );
 
 assert(
+  postDetailCss.includes('.detail-page--mobile .detail-page-topbar.ui-topbar') &&
+    postDetailCss.includes('position: fixed;') &&
+    postDetailCss.includes('inset-block-start: var(--ui-space-none);') &&
+    postDetailCss.includes('z-index: var(--ui-z-page-header);') &&
+    postDetailCss.includes('padding-top: calc(var(--ui-topbar-height) + env(safe-area-inset-top));') &&
+    postDetailCss.includes('.detail-page--mobile .detail-state-shell') &&
+    postDetailCss.includes('padding-top: calc(var(--ui-topbar-height) + env(safe-area-inset-top) + var(--ui-app-page-main-padding-y));'),
+  'Mobile post detail must keep its topbar fixed above long content and reserve the top safe-area height in every detail state.',
+);
+
+assert(
   !mobileAddressBarHook.includes("visualViewport?.addEventListener('scroll'") &&
     !mobileAddressBarHook.includes('visualViewport?.addEventListener("scroll"'),
   'useMobileAddressBar must not listen to visualViewport.scroll because keyboard/address-bar movement must not rewrite layout scroll metrics.',
