@@ -25,7 +25,7 @@ mustHave('unchecked add pauses existing member source', channelService, 'if (!au
 mustMatch('add channel claim is gated by auto post', channelService, /const sourceId = autoPostEnabled\s*\?\s*await claimAutoCrawlSource/);
 mustMatch('update channel claim is gated by auto post', channelService, /const sourceId = autoPostEnabled\s*\?\s*await claimAutoCrawlSource/);
 mustHave('unchecked update clears source link', channelService, '? await claimAutoCrawlSource(tx, { userId, crawlUrl, handle, categoryName, title })\n      : null;');
-mustHave('unchecked update releases retained source', channelService, 'await releaseOrDeleteTuiPlusSource(tx, { sourceId: current.sourceId, userId })');
+mustHave('unchecked update keeps member source paused', channelService, 'if (autoPostEnabled) {\n        await releaseOrDeleteTuiPlusSource(tx, { sourceId: current.sourceId, userId });\n      } else {\n        await pauseOrReleaseTuiPlusSource(tx, { sourceId: current.sourceId, userId });\n      }');
 mustHave('entitlement only reopens opted-in sources', entitlementService, 'AND COALESCE(channel."autoPostEnabled", false) = true');
 mustHave('entitlement closes opted-out sources', entitlementService, 'AND COALESCE(channel."autoPostEnabled", false) = false');
 mustHave('link editor sends auto post flag', linkEditor, 'autoPostEnabled: Boolean(row?.autoPostEnabled)');

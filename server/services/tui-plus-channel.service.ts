@@ -289,8 +289,12 @@ export async function updateTuiPlusTelegramChannel(userId: string, channelId: st
     const sourceId = autoPostEnabled
       ? await claimAutoCrawlSource(tx, { userId, crawlUrl, handle, categoryName, title })
       : null;
-    if (current.sourceId && (current.sourceId !== sourceId || (handle !== current.channelHandle && !autoPostEnabled))) {
-      await releaseOrDeleteTuiPlusSource(tx, { sourceId: current.sourceId, userId });
+    if (current.sourceId && current.sourceId !== sourceId) {
+      if (autoPostEnabled) {
+        await releaseOrDeleteTuiPlusSource(tx, { sourceId: current.sourceId, userId });
+      } else {
+        await pauseOrReleaseTuiPlusSource(tx, { sourceId: current.sourceId, userId });
+      }
     }
     await tx.$executeRaw`UPDATE "TuiPlusTelegramChannel" SET "channelUrl" = ${crawlUrl}, "channelHandle" = ${handle}, "title" = ${title}, "sourceId" = ${sourceId}, "autoPostEnabled" = ${autoPostEnabled}, "status" = ${TUI_PLUS_CHANNEL_STATUS.ACTIVE}, "lastError" = NULL, "updatedAt" = ${now} WHERE "id" = ${channelId} AND "userId" = ${userId}`;
 
