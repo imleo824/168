@@ -308,7 +308,7 @@ export default function MessagesMobile() {
       <SEO title="消息｜推推" description="查看点赞、评论、引用、关注和平台提醒。" noindex />
       <PageHeader
         title={title}
-        showBack
+        showBack={false}
         titleAlign="center"
         className="messages-topbar ui-layer-header"
         right={
