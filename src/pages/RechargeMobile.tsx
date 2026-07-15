@@ -264,17 +264,20 @@ export default function RechargeMobile() {
   });
 
   const currentFlowBusy = isCreatingOrder || isRefreshingOrder || isLoadingOrders;
+  const createOrderBusy = isCreatingOrder || loadingDeposit;
 
   const handleSubmit = useCallback((event: React.FormEvent) => {
     event.preventDefault();
 
     if (step === 'AMOUNT') {
+      if (currentFlowBusy || createOrderBusy) return;
       void runCreateOrder();
       return;
     }
 
+    if (currentFlowBusy) return;
     void runRefreshOrderStatus();
-  }, [runCreateOrder, runRefreshOrderStatus, step]);
+  }, [createOrderBusy, currentFlowBusy, runCreateOrder, runRefreshOrderStatus, step]);
 
   useEffect(() => {
     return () => {
@@ -413,6 +416,7 @@ export default function RechargeMobile() {
                       className="recharge-amount-input ui-input-focus-ring"
                       value={amount}
                       onChange={(e) => onAmountChange(e.target.value)}
+                      disabled={createOrderBusy}
                     />
                     {amount && (
                       <div className="recharge-estimate">
@@ -431,6 +435,7 @@ export default function RechargeMobile() {
                       key={val}
                       type="button"
                       onClick={() => quickSelectAmount(val)}
+                      disabled={createOrderBusy}
                       className={`ui-amount-option ${amount === val.toString() ? 'ui-amount-option-active' : 'ui-amount-option-idle'}`}
                     >
                       {val} U
@@ -440,8 +445,8 @@ export default function RechargeMobile() {
 
                 <p className="recharge-note">仅支持 TRC-20 USDT，请确认金额和网络。</p>
 
-                <ActionButton disabled={isCreatingOrder} type="submit" variant="brand" className="recharge-submit">
-                  {isCreatingOrder ? (
+                <ActionButton disabled={currentFlowBusy || createOrderBusy} type="submit" variant="brand" className="recharge-submit">
+                  {createOrderBusy ? (
                     <span className="recharge-action-status">
                       <InlineSpinner size="md" className="recharge-action-spinner" />
                       生成中

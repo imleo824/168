@@ -66,6 +66,7 @@ const messagesStyles = read('src/styles/features/messages.css');
 const tuiPlusLinkEditor = read('src/pages/TuiPlusLinkEditorMobile.tsx');
 const profileBioEditor = read('src/pages/ProfileBioEditorMobile.tsx');
 const notificationSettings = read('src/pages/NotificationSettings.tsx');
+const rechargePage = read('src/pages/RechargeMobile.tsx');
 
 assert(
   /<div\s+className="app-main app-shell-main"/.test(appShell) &&
@@ -287,6 +288,15 @@ assert(
     notificationSettings.includes('onClick={() => void guardedMasterToggle()}') &&
     notificationSettings.includes('onClick={() => void guardedPreferenceToggle(item.key)}'),
   'Notification settings toggles must use real disabled states and critical interaction guards during rapid tapping.',
+);
+
+assert(
+  rechargePage.includes('const createOrderBusy = isCreatingOrder || loadingDeposit;') &&
+    rechargePage.includes('if (currentFlowBusy || createOrderBusy) return;') &&
+    rechargePage.includes('if (currentFlowBusy) return;') &&
+    rechargePage.includes('disabled={createOrderBusy}') &&
+    rechargePage.includes('disabled={currentFlowBusy || createOrderBusy}'),
+  'Recharge order creation must freeze amount controls and block rapid submit while payment flow work is in progress.',
 );
 
 if (failures.length > 0) {
