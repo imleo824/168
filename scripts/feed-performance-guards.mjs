@@ -11,6 +11,7 @@ const postService = read('server/services/post/index.ts');
 const recommendationContext = read('server/services/post/recommendation-context.ts');
 const rankingUtils = read('server/services/post/ranking-utils.ts');
 const homeFeedService = read('server/services/home-feed.service.ts');
+const feedReadCacheService = read('server/services/feed-read-cache.service.ts');
 const feedRankingService = read('server/modules/feed/feed-ranking.service.ts');
 const publicFeedCache = read('server/public-feed-cache.ts');
 const publicFeedWarmup = read('server/services/public-feed-warmup.service.ts');
@@ -175,6 +176,24 @@ assert.match(
   homeFeedService,
   /HOME_FEED_READ_CACHE_VERSION\s*=\s*'v11-config-driven-category-refs'[\s\S]*home-feed:result:\$\{HOME_FEED_READ_CACHE_VERSION\}/,
   'home feed result cache should stay versioned after category reference and avatar activity payload changes',
+);
+
+assert.match(
+  feedReadCacheService,
+  /private touchEntry\(key: string, entry: CacheEntry<unknown>\)[\s\S]*this\.entries\.delete\(key\)[\s\S]*this\.entries\.set\(key, entry\)/,
+  'feed read cache should support LRU-style touch on cache hits',
+);
+
+assert.match(
+  feedReadCacheService,
+  /if \(cached && cached\.expiresAt > now\) \{[\s\S]*this\.touchEntry\(key, cached\)[\s\S]*return cached\.value as T;/,
+  'feed read cache getOrLoad hits should refresh eviction order without extending TTL',
+);
+
+assert.match(
+  feedReadCacheService,
+  /if \(cached\.expiresAt <= Date\.now\(\)\)[\s\S]*return null;[\s\S]*this\.touchEntry\(key, cached\)[\s\S]*return cached\.value as T;/,
+  'feed read cache direct get hits should refresh eviction order without extending TTL',
 );
 
 assert.match(

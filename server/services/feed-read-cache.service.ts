@@ -40,10 +40,18 @@ export class FeedReadCache {
     this.maxEntries = Math.max(32, options.maxEntries);
   }
 
+  private touchEntry(key: string, entry: CacheEntry<unknown>) {
+    this.entries.delete(key);
+    this.entries.set(key, entry);
+  }
+
   async getOrLoad<T>(key: string, ttlMs: number, loader: () => Promise<T>): Promise<T> {
     const now = Date.now();
     const cached = this.entries.get(key);
-    if (cached && cached.expiresAt > now) return cached.value as T;
+    if (cached && cached.expiresAt > now) {
+      this.touchEntry(key, cached);
+      return cached.value as T;
+    }
 
     const pending = this.inflight.get(key);
     if (pending) return pending as Promise<T>;
@@ -68,6 +76,7 @@ export class FeedReadCache {
       this.entries.delete(key);
       return null;
     }
+    this.touchEntry(key, cached);
     return cached.value as T;
   }
 
