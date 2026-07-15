@@ -42,11 +42,11 @@ const TUI_PLUS_CONFIG_DEFAULTS = {
   tui_plus_yearly_price_points: 19900,
   tui_plus_yearly_discount_percent: 13,
   tui_plus_trial_channel_limit: 1,
-  tui_plus_monthly_channel_limit: 3,
-  tui_plus_yearly_channel_limit: 5,
+  tui_plus_monthly_channel_limit: 1,
+  tui_plus_yearly_channel_limit: 1,
   tui_plus_trial_website_limit: 1,
-  tui_plus_monthly_website_limit: 3,
-  tui_plus_yearly_website_limit: 5,
+  tui_plus_monthly_website_limit: 1,
+  tui_plus_yearly_website_limit: 1,
   tui_plus_trial_contact_limit: 1,
   tui_plus_monthly_contact_limit: 3,
   tui_plus_yearly_contact_limit: 5,
@@ -140,6 +140,7 @@ function normalizeTuiPlusConfigNumber(key: string, value: unknown, fallback: num
     case 'tui_plus_trial_website_limit':
     case 'tui_plus_monthly_website_limit':
     case 'tui_plus_yearly_website_limit':
+      return 1;
     case 'tui_plus_trial_contact_limit':
     case 'tui_plus_monthly_contact_limit':
     case 'tui_plus_yearly_contact_limit':

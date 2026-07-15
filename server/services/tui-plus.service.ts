@@ -4,6 +4,7 @@ import prisma, { isDbConfigured } from '../db';
 const TUI_PLUS_STATUS = { TRIALING: 'TRIALING', ACTIVE: 'ACTIVE', EXPIRED: 'EXPIRED', CANCELLED: 'CANCELLED' } as const;
 const TUI_PLUS_PLAN = { TRIAL: 'TRIAL', MONTHLY: 'MONTHLY', YEARLY: 'YEARLY' } as const;
 const TUI_PLUS_WEBSITE_STATUS = { ACTIVE: 'ACTIVE', PAUSED: 'PAUSED', EXPIRED: 'EXPIRED', FAILED: 'FAILED' } as const;
+export const TUI_PLUS_SINGLE_PROFILE_LINK_LIMIT = 1;
 const TUI_PLUS_DEFAULTS = {
   rankingBoostPercent: 20,
   trialDays: 7,
@@ -12,11 +13,11 @@ const TUI_PLUS_DEFAULTS = {
   monthlyPricePoints: 1900,
   yearlyPricePoints: 19900,
   trialChannelLimit: 1,
-  monthlyChannelLimit: 3,
-  yearlyChannelLimit: 5,
+  monthlyChannelLimit: TUI_PLUS_SINGLE_PROFILE_LINK_LIMIT,
+  yearlyChannelLimit: TUI_PLUS_SINGLE_PROFILE_LINK_LIMIT,
   trialWebsiteLimit: 1,
-  monthlyWebsiteLimit: 3,
-  yearlyWebsiteLimit: 5,
+  monthlyWebsiteLimit: TUI_PLUS_SINGLE_PROFILE_LINK_LIMIT,
+  yearlyWebsiteLimit: TUI_PLUS_SINGLE_PROFILE_LINK_LIMIT,
   trialContactLimit: 1,
   monthlyContactLimit: 3,
   yearlyContactLimit: 5,
@@ -190,6 +191,10 @@ function planFromBundle(plans: TuiPlusPlanBundle, plan: TuiPlusPlan | null) {
   return plans.trial;
 }
 
+function singleProfileLinkLimit() {
+  return TUI_PLUS_SINGLE_PROFILE_LINK_LIMIT;
+}
+
 function rankingBoostMultiplierFromPercent(percent: unknown) {
   const value = normalizePositiveInt(percent, TUI_PLUS_DEFAULTS.rankingBoostPercent, { min: 0, max: 100 });
   return 1 + value / 100;
@@ -213,8 +218,8 @@ export async function getTuiPlusPlans(configs?: any) {
     priceUsdt: priceUsdtFromPoints(monthlyPrice, pointsPerUsdt),
     pointsPerUsdt,
     durationDays: normalizePositiveInt(source.tui_plus_monthly_duration_days, TUI_PLUS_DEFAULTS.monthlyDays, { min: 1, max: 3660 }),
-    channelLimit: normalizePositiveInt(source.tui_plus_monthly_channel_limit, TUI_PLUS_DEFAULTS.monthlyChannelLimit, { min: 0, max: 100 }),
-    websiteLimit: normalizePositiveInt(source.tui_plus_monthly_website_limit, TUI_PLUS_DEFAULTS.monthlyWebsiteLimit, { min: 0, max: 100 }),
+    channelLimit: singleProfileLinkLimit(),
+    websiteLimit: singleProfileLinkLimit(),
     contactLimit: normalizePositiveInt(source.tui_plus_monthly_contact_limit, TUI_PLUS_DEFAULTS.monthlyContactLimit, { min: 0, max: 100 }),
     rankingBoostPercent,
   };
@@ -226,8 +231,8 @@ export async function getTuiPlusPlans(configs?: any) {
     pointsPerUsdt,
     durationDays: normalizePositiveInt(source.tui_plus_yearly_duration_days, TUI_PLUS_DEFAULTS.yearlyDays, { min: 1, max: 3660 }),
     discountPercent: yearlyDiscountPercent,
-    channelLimit: normalizePositiveInt(source.tui_plus_yearly_channel_limit, TUI_PLUS_DEFAULTS.yearlyChannelLimit, { min: 0, max: 100 }),
-    websiteLimit: normalizePositiveInt(source.tui_plus_yearly_website_limit, TUI_PLUS_DEFAULTS.yearlyWebsiteLimit, { min: 0, max: 100 }),
+    channelLimit: singleProfileLinkLimit(),
+    websiteLimit: singleProfileLinkLimit(),
     contactLimit: normalizePositiveInt(source.tui_plus_yearly_contact_limit, TUI_PLUS_DEFAULTS.yearlyContactLimit, { min: 0, max: 100 }),
     rankingBoostPercent,
   };
@@ -238,8 +243,8 @@ export async function getTuiPlusPlans(configs?: any) {
     priceUsdt: 0,
     pointsPerUsdt,
     durationDays: normalizePositiveInt(source.tui_plus_trial_days, TUI_PLUS_DEFAULTS.trialDays, { min: 1, max: 365 }),
-    channelLimit: normalizePositiveInt(source.tui_plus_trial_channel_limit, TUI_PLUS_DEFAULTS.trialChannelLimit, { min: 0, max: 100 }),
-    websiteLimit: normalizePositiveInt(source.tui_plus_trial_website_limit, TUI_PLUS_DEFAULTS.trialWebsiteLimit, { min: 0, max: 100 }),
+    channelLimit: singleProfileLinkLimit(),
+    websiteLimit: singleProfileLinkLimit(),
     contactLimit: normalizePositiveInt(source.tui_plus_trial_contact_limit, TUI_PLUS_DEFAULTS.trialContactLimit, { min: 0, max: 100 }),
     rankingBoostPercent,
   };
@@ -345,8 +350,9 @@ export async function purchaseTuiPlus(userId: string, rawPlan: unknown, configs?
 }
 
 export async function getTuiPlusChannelLimitForPlan(plan: unknown, configs?: any) {
-  const plans = await getTuiPlusPlans(configs);
-  return planFromBundle(plans, normalizePlan(plan)).channelLimit;
+  void plan;
+  void configs;
+  return singleProfileLinkLimit();
 }
 
 export async function addTuiPlusWebsite(userId: string, input: { url?: unknown; label?: unknown }) {
@@ -354,14 +360,13 @@ export async function addTuiPlusWebsite(userId: string, input: { url?: unknown; 
   const url = normalizeWebsiteUrl(input.url);
   if (!url) throw new TuiPlusError(400, '请输入正确的网址');
   const label = websiteLabelFromUrl(url, input.label);
-  const plans = await getTuiPlusPlans();
   return prisma.$transaction(async (tx) => {
     const userRows = await tx.$queryRaw<any[]>`SELECT "id", "isDisabled", "plusStatus", "plusPlan", "plusExpiresAt", "plusTrialUsed" FROM "User" WHERE "id" = ${userId} FOR UPDATE`;
-    const status = assertUserCanUseTuiPlus(userRows[0], `开通${TUI_PLUS_MEMBER_NAME}后才能添加网址`);
-    const limit = planFromBundle(plans, status.plan).websiteLimit;
+    assertUserCanUseTuiPlus(userRows[0], `开通${TUI_PLUS_MEMBER_NAME}后才能添加网址`);
+    const limit = singleProfileLinkLimit();
     const currentCount = await countActiveWebsites(tx, userId);
     const existingRows = await tx.$queryRaw<any[]>`SELECT "id" FROM "TuiPlusWebsite" WHERE "userId" = ${userId} AND "url" = ${url} LIMIT 1`;
-    if (!existingRows[0] && currentCount >= limit) throw new TuiPlusError(400, `当前套餐最多添加 ${limit} 个网址`);
+    if (!existingRows[0] && currentCount >= limit) throw new TuiPlusError(400, `会员主页最多添加 ${limit} 个网址链接`);
     const websiteId = existingRows[0]?.id || crypto.randomUUID();
     await tx.$executeRaw`INSERT INTO "TuiPlusWebsite" ("id", "userId", "url", "label", "status", "createdAt", "updatedAt") VALUES (${websiteId}, ${userId}, ${url}, ${label}, ${TUI_PLUS_WEBSITE_STATUS.ACTIVE}, ${nowDate()}, ${nowDate()}) ON CONFLICT ("userId", "url") DO UPDATE SET "label" = EXCLUDED."label", "status" = ${TUI_PLUS_WEBSITE_STATUS.ACTIVE}, "updatedAt" = EXCLUDED."updatedAt"`;
     const rows = await tx.$queryRaw<any[]>`SELECT "id", "url", "label", "status", "createdAt", "updatedAt" FROM "TuiPlusWebsite" WHERE "id" = ${websiteId} LIMIT 1`;
@@ -413,6 +418,8 @@ export async function buildTuiPlusStatusPayload(userId: string, configs?: any) {
   const plans = await getTuiPlusPlans(configs);
   const [status, channels, websites, contacts] = await Promise.all([getTuiPlusStatus(userId), listTuiPlusChannels(userId), listTuiPlusWebsites(userId), listTuiPlusContacts(userId)]);
   const currentPlan = planFromBundle(plans, status.plan);
+  const visibleChannels = channels.slice(0, TUI_PLUS_SINGLE_PROFILE_LINK_LIMIT);
+  const visibleWebsites = websites.slice(0, TUI_PLUS_SINGLE_PROFILE_LINK_LIMIT);
   return {
     ...status,
     benefits: {
@@ -427,16 +434,16 @@ export async function buildTuiPlusStatusPayload(userId: string, configs?: any) {
       avatarRing: status.active,
     },
     usage: {
-      ownedChannelsUsed: channels.filter((channel) => isTuiPlusUsageCountedStatus(channel.status)).length,
-      ownedChannelsLimit: currentPlan.channelLimit,
-      ownedWebsitesUsed: websites.filter((website) => isTuiPlusUsageCountedStatus(website.status)).length,
-      ownedWebsitesLimit: currentPlan.websiteLimit,
+      ownedChannelsUsed: Math.min(TUI_PLUS_SINGLE_PROFILE_LINK_LIMIT, channels.filter((channel) => isTuiPlusUsageCountedStatus(channel.status)).length),
+      ownedChannelsLimit: TUI_PLUS_SINGLE_PROFILE_LINK_LIMIT,
+      ownedWebsitesUsed: Math.min(TUI_PLUS_SINGLE_PROFILE_LINK_LIMIT, websites.filter((website) => isTuiPlusUsageCountedStatus(website.status)).length),
+      ownedWebsitesLimit: TUI_PLUS_SINGLE_PROFILE_LINK_LIMIT,
       ownedContactsUsed: contacts.filter((contact) => isTuiPlusUsageCountedStatus(contact.status)).length,
       ownedContactsLimit: currentPlan.contactLimit,
     },
     plans,
-    channels,
-    websites,
+    channels: visibleChannels,
+    websites: visibleWebsites,
     contacts,
   };
 }

@@ -1,6 +1,7 @@
 import prisma from '../db';
 import {
   getTuiPlusStatus,
+  TUI_PLUS_SINGLE_PROFILE_LINK_LIMIT,
   listTuiPlusChannels,
   listTuiPlusContacts,
   listTuiPlusWebsites,
@@ -38,7 +39,8 @@ async function getPublicTuiPlusLinks(userId: string) {
           title: String(channel.title || '').trim() || `@${String(channel.channelHandle || '')}`,
           status: 'ACTIVE',
         }))
-        .filter((channel) => channel.id && channel.channelUrl && channel.channelHandle),
+        .filter((channel) => channel.id && channel.channelUrl && channel.channelHandle)
+        .slice(0, TUI_PLUS_SINGLE_PROFILE_LINK_LIMIT),
       tuiPlusWebsites: websites
         .filter((website) => String(website?.status || '').toUpperCase() === 'ACTIVE')
         .map((website) => ({
@@ -47,7 +49,8 @@ async function getPublicTuiPlusLinks(userId: string) {
           label: String(website.label || '').trim() || '链接',
           status: 'ACTIVE',
         }))
-        .filter((website) => website.id && website.url),
+        .filter((website) => website.id && website.url)
+        .slice(0, TUI_PLUS_SINGLE_PROFILE_LINK_LIMIT),
       tuiPlusContacts: supportedContacts
         .filter((contact) => String((contact as any)?.status || '').toUpperCase() === 'ACTIVE')
         .map((contact) => ({

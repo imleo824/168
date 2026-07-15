@@ -13,6 +13,7 @@ type ProfileTextLink = {
   href: string;
   label: string;
 };
+const SINGLE_PROFILE_LINK_LIMIT = 1;
 
 const CONTACT_KIND_ORDER: ContactKind[] = ['telegram', 'whatsapp', 'line'];
 
@@ -219,14 +220,16 @@ export function getActiveProfileChannels(displayUser: any, options: { includeOwn
   if (!Array.isArray(displayUser?.tuiPlusChannels)) return [] as any[];
   return displayUser.tuiPlusChannels
     .filter((channel: any) => options.includeOwnSaved ? isOwnVisibleLinkStatus(channel?.status) : isPublicVisibleLinkStatus(channel?.status))
-    .filter((channel: any) => channel?.channelUrl && channel?.channelHandle);
+    .filter((channel: any) => channel?.channelUrl && channel?.channelHandle)
+    .slice(0, SINGLE_PROFILE_LINK_LIMIT);
 }
 
 export function getActiveProfileWebsites(displayUser: any, options: { includeOwnSaved?: boolean } = {}) {
   if (!Array.isArray(displayUser?.tuiPlusWebsites)) return [] as any[];
   return displayUser.tuiPlusWebsites
     .filter((website: any) => options.includeOwnSaved ? isOwnVisibleLinkStatus(website?.status) : isPublicVisibleLinkStatus(website?.status))
-    .filter((website: any) => website?.url);
+    .filter((website: any) => website?.url)
+    .slice(0, SINGLE_PROFILE_LINK_LIMIT);
 }
 
 export function getActiveProfileContacts(displayUser: any, options: { includeOwnSaved?: boolean } = {}) {
@@ -265,8 +268,8 @@ export default function UserSpaceTuiPlusLinks({ displayUser, isOwnProfile }: Pro
           isTuiPlus: Boolean(payload.active),
           tuiPlusStatus: payload.status,
           tuiPlusContacts: Array.isArray(payload.contacts) ? payload.contacts : [],
-          tuiPlusChannels: Array.isArray(payload.channels) ? payload.channels : [],
-          tuiPlusWebsites: Array.isArray(payload.websites) ? payload.websites : [],
+          tuiPlusChannels: Array.isArray(payload.channels) ? payload.channels.slice(0, SINGLE_PROFILE_LINK_LIMIT) : [],
+          tuiPlusWebsites: Array.isArray(payload.websites) ? payload.websites.slice(0, SINGLE_PROFILE_LINK_LIMIT) : [],
         });
       } catch {
         // Keep the public/profile payload if membership status refresh fails.

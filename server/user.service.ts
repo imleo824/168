@@ -3,6 +3,7 @@ import { Prisma } from '@prisma/client';
 import { TransactionAction } from '../shared/domain';
 import {
   getTuiPlusStatus,
+  TUI_PLUS_SINGLE_PROFILE_LINK_LIMIT,
   listTuiPlusChannels,
   listTuiPlusContacts,
   listTuiPlusWebsites,
@@ -22,8 +23,8 @@ async function getTuiPlusUserSnapshot(userId: string) {
       plusExpiresAt: status.expiresAt || null,
       plusTrialUsed: Boolean(status.trialUsed),
       isTuiPlus: Boolean(status.active),
-      tuiPlusChannels: Array.isArray(channels) ? channels : [],
-      tuiPlusWebsites: Array.isArray(websites) ? websites : [],
+      tuiPlusChannels: Array.isArray(channels) ? channels.slice(0, TUI_PLUS_SINGLE_PROFILE_LINK_LIMIT) : [],
+      tuiPlusWebsites: Array.isArray(websites) ? websites.slice(0, TUI_PLUS_SINGLE_PROFILE_LINK_LIMIT) : [],
       tuiPlusContacts: Array.isArray(contacts) ? contacts : [],
     };
   } catch {

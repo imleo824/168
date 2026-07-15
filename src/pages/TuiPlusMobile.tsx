@@ -63,6 +63,7 @@ const benefitRows = TUI_PLUS_BENEFIT_ITEMS.map((item) => ({
   ...item,
   icon: benefitIconMap[item.key as keyof typeof benefitIconMap] || <Sparkles aria-hidden="true" />,
 }));
+const SINGLE_PROFILE_LINK_LIMIT = 1;
 
 function asObject(raw: unknown): Record<string, unknown> {
   return raw && typeof raw === 'object' && !Array.isArray(raw) ? raw as Record<string, unknown> : {};
@@ -91,8 +92,8 @@ function normalizeStatusPayload(payload: TuiPlusStatusPayload): TuiPlusStatusPay
     ...payload,
     benefits: { ...fallbackStatus.benefits, ...(payload?.benefits || {}) },
     usage: { ...fallbackStatus.usage, ...(payload?.usage || {}) },
-    channels: Array.isArray(payload?.channels) ? payload.channels : [],
-    websites: Array.isArray(payload?.websites) ? payload.websites : [],
+    channels: Array.isArray(payload?.channels) ? payload.channels.slice(0, SINGLE_PROFILE_LINK_LIMIT) : [],
+    websites: Array.isArray(payload?.websites) ? payload.websites.slice(0, SINGLE_PROFILE_LINK_LIMIT) : [],
     contacts: Array.isArray(payload?.contacts) ? payload.contacts : [],
   };
 }

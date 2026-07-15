@@ -72,6 +72,7 @@ const CONTACT_METHODS: ContactMethod[] = [
     valuePlaceholder: 'tuitui888 或 Line 个人链接',
   },
 ];
+const SINGLE_PROFILE_LINK_LIMIT = 1;
 
 const TARGETS: TargetCopy[] = [
   {
@@ -237,10 +238,9 @@ function getQuotaFromPayload(payload: any, target: LinkTarget): AddQuota {
     : safeCount(usage.ownedWebsitesUsed);
   const limit = target === 'contact'
     ? safeCount(usage.ownedContactsLimit)
-    : target === 'channel'
-    ? safeCount(usage.ownedChannelsLimit)
-    : safeCount(usage.ownedWebsitesLimit);
-  return { used, limit, remaining: Math.max(0, limit - used) };
+    : SINGLE_PROFILE_LINK_LIMIT;
+  const normalizedUsed = target === 'contact' ? used : Math.min(SINGLE_PROFILE_LINK_LIMIT, used);
+  return { used: normalizedUsed, limit, remaining: Math.max(0, limit - normalizedUsed) };
 }
 
 function titleFromItem(target: LinkTarget, item: any) {
@@ -278,7 +278,7 @@ function buildContactRows(payload: any) {
 function buildSlotRows(target: LinkTarget, payload: any) {
   if (target === 'contact') return buildContactRows(payload);
   const config = TARGETS.find((item) => item.target === target)!;
-  const items = Array.isArray(payload?.[config.payloadKey]) ? payload[config.payloadKey] : [];
+  const items = Array.isArray(payload?.[config.payloadKey]) ? payload[config.payloadKey].slice(0, SINGLE_PROFILE_LINK_LIMIT) : [];
   const quota = getQuotaFromPayload(payload, target);
   const rows: SlotRow[] = items.map((item: any, index: number) => {
     const title = titleFromItem(target, item);
@@ -352,7 +352,7 @@ function getLinkEditorMetrics(rowsByType: Record<LinkTarget, SlotRow[]>) {
 
 function getTargetMeta(target: LinkTarget, quota: AddQuota) {
   if (target === 'contact') return '';
-  return quota.limit > 0 ? `最多 ${quota.limit} 条` : '';
+  return quota.limit > 0 ? '仅支持 1 条' : '';
 }
 
 async function readJsonResponse(res: Response) {
@@ -397,8 +397,8 @@ export default function TuiPlusLinkEditorMobile() {
     if (user?.id && payload) {
       patchUser({
         tuiPlusContacts: Array.isArray(payload.contacts) ? payload.contacts : [],
-        tuiPlusChannels: Array.isArray(payload.channels) ? payload.channels : [],
-        tuiPlusWebsites: Array.isArray(payload.websites) ? payload.websites : [],
+        tuiPlusChannels: Array.isArray(payload.channels) ? payload.channels.slice(0, SINGLE_PROFILE_LINK_LIMIT) : [],
+        tuiPlusWebsites: Array.isArray(payload.websites) ? payload.websites.slice(0, SINGLE_PROFILE_LINK_LIMIT) : [],
         isTuiPlus: Boolean(payload.active),
         plusStatus: payload.status,
         plusPlan: payload.plan,

@@ -191,7 +191,7 @@ export async function addTuiPlusTelegramChannel(userId: string, input: { channel
     const existingRows = await tx.$queryRaw<any[]>`SELECT "id" FROM "TuiPlusTelegramChannel" WHERE "userId" = ${userId} AND "channelHandle" = ${handle} LIMIT 1`;
     const limit = await getTuiPlusChannelLimitForPlan(status.plan);
     const currentCount = await countActiveChannels(tx, userId);
-    if (!existingRows[0] && currentCount >= limit) throw new TuiPlusError(400, `当前套餐最多添加 ${limit} 个 Telegram 频道`);
+    if (!existingRows[0] && currentCount >= limit) throw new TuiPlusError(400, `会员主页最多添加 ${limit} 个 Telegram 频道`);
 
     const sourceId = await claimAutoCrawlSource(tx, { userId, crawlUrl, handle, categoryName, title });
     const channelId = existingRows[0]?.id || crypto.randomUUID();
