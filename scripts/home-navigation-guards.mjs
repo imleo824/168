@@ -34,7 +34,7 @@ assert.doesNotMatch(
 
 assert.match(
   bottomNav,
-  /PRIMARY_TAB_PATHS = new Set\(\['\/', '\/chat', '\/sponsor', '\/profile'\]\)/,
+  /PRIMARY_TAB_PATHS = new Set\(\['\/', '\/messages', '\/sponsor', '\/profile'\]\)/,
   'bottom navigation must preserve the mobile primary-tab contract and must not appear on detail pages.',
 );
 

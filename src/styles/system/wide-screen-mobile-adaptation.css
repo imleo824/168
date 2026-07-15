@@ -76,6 +76,28 @@
     --app-desktop-main-width: var(--app-desktop-utility-main-width);
   }
 
+  .app-shell[data-route-surface='user'][data-desktop-surface='feed'] {
+    --app-desktop-frame-width: calc(
+      var(--app-desktop-sidebar-width) +
+      var(--app-desktop-main-width) +
+      var(--app-desktop-shell-gap)
+    );
+
+    grid-template-columns:
+      minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
+      minmax(0, var(--app-desktop-main-width));
+  }
+
+  .app-shell[data-route-surface='user'][data-desktop-surface='feed'] .app-desktop-context-rail {
+    display: none;
+  }
+
+  @media (min-width: 1180px) {
+    .app-shell[data-route-surface='user'][data-desktop-surface='feed'] {
+      --app-desktop-main-width: var(--app-desktop-workspace-main-width);
+    }
+  }
+
   .app-shell[data-route-surface='admin'],
   .app-shell[data-route-surface='admin'] .app-shell-main {
     width: 100%;

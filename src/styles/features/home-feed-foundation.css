@@ -55,4 +55,53 @@
   .home-desktop-loadmore {
     margin-top: var(--ui-space-6);
   }
+
+  @media (min-width: 1024px) {
+    .app-shell[data-route-surface='user'][data-desktop-surface='feed'] .home-mobile-shell {
+      --ui-feed-desktop-grid-min-column-width: calc(var(--ui-space-8) * 10);
+      --ui-feed-card-list-gap: var(--ui-space-3);
+      --ui-home-desktop-feed-width: var(--app-desktop-page-content-width);
+      --ui-home-desktop-shell-width: var(--app-desktop-page-content-width);
+      --ui-social-feed-list-max-width: var(--app-desktop-page-content-width);
+
+      min-height: var(--app-desktop-main-content-height);
+      padding-bottom: var(--ui-space-6);
+      background: var(--ui-surface-page);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='feed'] .home-mobile-feed-panel {
+      width: 100%;
+      max-width: var(--app-desktop-page-content-width);
+      margin-inline: auto;
+      background: var(--ui-surface-page);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='feed'] .home-mobile-feed-panel :is(
+      [data-feed-frame],
+      [data-feed-scroll-root],
+      .feed-scroll-content
+    ) {
+      width: 100%;
+      max-width: var(--ui-max-width-none);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='feed'] .post-feed-list-panel {
+      display: grid;
+      max-width: var(--app-desktop-page-content-width);
+      grid-template-columns: repeat(
+        auto-fit,
+        minmax(min(100%, var(--ui-feed-desktop-grid-min-column-width)), 1fr)
+      );
+      align-items: start;
+      gap: var(--ui-feed-card-list-gap);
+      padding: var(--ui-space-3);
+      background: var(--ui-surface-transparent);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='feed'] .feed-scroll-content > :not(.post-feed-list-panel) {
+      width: 100%;
+      max-width: var(--app-desktop-page-content-width);
+      margin-inline: auto;
+    }
+  }
 }
