@@ -54,6 +54,13 @@
     transform: scale(var(--ui-motion-press-scale));
   }
 
+  .messages-read-all-button:disabled,
+  .messages-read-all-button[aria-busy='true'] {
+    cursor: default;
+    opacity: var(--ui-opacity-disabled);
+    transform: var(--ui-transform-none);
+  }
+
   .messages-push-setting-card {
     width: 100%;
   }

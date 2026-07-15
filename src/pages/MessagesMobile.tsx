@@ -166,11 +166,24 @@ function markNotificationReadInCache(previous: NotificationResponse | undefined,
   };
 }
 
+function markAllNotificationsReadInCache(previous: NotificationResponse | undefined, readAt: string) {
+  if (!previous) return previous;
+  let changed = Number(previous.unreadCount || 0) > 0;
+  const items = (previous.items || []).map((item) => {
+    if (item.readAt) return item;
+    changed = true;
+    return { ...item, readAt };
+  });
+  if (!changed) return previous;
+  return { ...previous, items, unreadCount: 0 };
+}
+
 export default function MessagesMobile() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { user, showToast } = useAuth();
   const [activeFilter, setActiveFilter] = useState<NotificationFilter>('ALL');
+  const [isMarkingAllRead, setIsMarkingAllRead] = useState(false);
   const notificationsQuery = useQuery({
     queryKey: ['me', 'notifications', activeFilter],
     queryFn: () => fetchNotifications(activeFilter),
@@ -184,6 +197,13 @@ export default function MessagesMobile() {
   const canShowPushPrompt = notificationsQuery.isFetched || notificationsQuery.isError;
 
   const handleMarkAllRead = useCallback(async () => {
+    if (isMarkingAllRead || unreadCount <= 0) return;
+    const readAt = new Date().toISOString();
+    setIsMarkingAllRead(true);
+    queryClient.setQueriesData<NotificationResponse>(
+      { queryKey: ['me', 'notifications'] },
+      (previous) => markAllNotificationsReadInCache(previous, readAt),
+    );
     try {
       await markAllNotificationsRead();
       await Promise.all([
@@ -192,9 +212,15 @@ export default function MessagesMobile() {
       ]);
       showToast('消息已全部标记为已读', 'success');
     } catch (error: any) {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ['me', 'notifications'] }),
+        queryClient.invalidateQueries({ queryKey: ['me', 'notifications', 'unread-count'] }),
+      ]);
       showToast(error?.message || '操作失败，请稍后重试', 'error');
+    } finally {
+      setIsMarkingAllRead(false);
     }
-  }, [queryClient, showToast]);
+  }, [isMarkingAllRead, queryClient, showToast, unreadCount]);
 
   const handleOpenNotification = useCallback((item: NotificationItem, targetPath: string) => {
     if (!item.readAt) {
@@ -318,8 +344,10 @@ export default function MessagesMobile() {
                 type="button"
                 className="messages-read-all-button pressable"
                 onClick={handleMarkAllRead}
+                disabled={isMarkingAllRead}
+                aria-busy={isMarkingAllRead}
               >
-                全部已读
+                {isMarkingAllRead ? '处理中' : '全部已读'}
               </button>
             ) : null}
             <TopbarIconButton

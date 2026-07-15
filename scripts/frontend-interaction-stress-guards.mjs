@@ -61,6 +61,8 @@ const categoryFeed = read('src/pages/CategoryFeedMobile.tsx');
 const homePageSource = read('src/pages/Home.tsx');
 const sponsorPage = read('src/features/sponsor/SponsorMobilePage.tsx');
 const profileRoute = read('src/pages/ProfileMobile.tsx');
+const messagesPage = read('src/pages/MessagesMobile.tsx');
+const messagesStyles = read('src/styles/features/messages.css');
 
 assert(
   /<div\s+className="app-main app-shell-main"/.test(appShell) &&
@@ -234,6 +236,23 @@ assert(
     profileRoute.includes('cooldownMs: 520') &&
     profileRoute.includes('mode: \'drop\''),
   'Profile settings topbar entry must be guarded so rapid taps do not repeatedly proxy-click the settings sheet trigger.',
+);
+
+assert(
+  messagesPage.includes('const [isMarkingAllRead, setIsMarkingAllRead] = useState(false);') &&
+    messagesPage.includes('if (isMarkingAllRead || unreadCount <= 0) return;') &&
+    messagesPage.includes('markAllNotificationsReadInCache') &&
+    messagesPage.includes('unreadCount: 0') &&
+    messagesPage.includes('disabled={isMarkingAllRead}') &&
+    messagesPage.includes('aria-busy={isMarkingAllRead}'),
+  'Messages mark-all-read must lock rapid taps, update unread state optimistically, and expose a busy button state.',
+);
+
+assert(
+  messagesStyles.includes(".messages-read-all-button[aria-busy='true']") &&
+    messagesStyles.includes('opacity: var(--ui-opacity-disabled);') &&
+    messagesStyles.includes('transform: var(--ui-transform-none);'),
+  'Messages mark-all-read busy state must have a stable disabled visual treatment.',
 );
 
 if (failures.length > 0) {
