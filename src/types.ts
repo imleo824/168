@@ -30,6 +30,7 @@ export interface TuiPlusTelegramChannel {
   channelHandle: string;
   title?: string | null;
   sourceId?: string | null;
+  autoPostEnabled: boolean;
   status: 'ACTIVE' | 'PAUSED' | 'EXPIRED' | 'FAILED';
   lastCrawledAt?: string | null;
   lastError?: string | null;

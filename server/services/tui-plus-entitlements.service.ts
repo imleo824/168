@@ -17,7 +17,7 @@ function normalizeUserId(userId?: string | null) {
 
 async function enableActiveTuiPlusSourcesForUser(userId: string) {
   const now = new Date();
-  const result = await prisma.$executeRaw`
+  const enabled = await prisma.$executeRaw`
     UPDATE "AutoCrawlSource" AS source
     SET "disabled" = false,
         "updatedAt" = ${now}
@@ -27,8 +27,21 @@ async function enableActiveTuiPlusSourcesForUser(userId: string) {
       AND source."sourceScope" = ${TUI_PLUS_SOURCE_SCOPE}
       AND channel."userId" = ${userId}
       AND channel."status" = ${TUI_PLUS_ACTIVE_CHANNEL_STATUS}
+      AND COALESCE(channel."autoPostEnabled", false) = true
   `;
-  return Number(result || 0);
+  const disabled = await prisma.$executeRaw`
+    UPDATE "AutoCrawlSource" AS source
+    SET "disabled" = true,
+        "updatedAt" = ${now}
+    FROM "TuiPlusTelegramChannel" AS channel
+    WHERE source."id" = channel."sourceId"
+      AND source."ownerUserId" = ${userId}
+      AND source."sourceScope" = ${TUI_PLUS_SOURCE_SCOPE}
+      AND channel."userId" = ${userId}
+      AND COALESCE(channel."autoPostEnabled", false) = false
+      AND source."disabled" = false
+  `;
+  return Number(enabled || 0) + Number(disabled || 0);
 }
 
 async function disableTuiPlusSourcesForUser(userId: string) {

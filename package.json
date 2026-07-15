@@ -63,7 +63,7 @@
     "test:auto-post": "node scripts/auto-post-guards.mjs",
     "test:automation-chain": "node scripts/automation-chain-guards.mjs && node scripts/auto-crawl-guards.mjs && node scripts/auto-crawl-source-normalize-guards.mjs && node scripts/auto-crawl-fetch-parse-guards.mjs && node --import tsx scripts/auto-crawl-quality-meta-guards.ts",
     "test:automation-engine-contract": "node scripts/automation-engine-contract-guards.mjs",
-    "test:tui-plus": "node scripts/tui-plus-contract-guards.mjs && node scripts/tui-plus-avatar-ring-guards.mjs && node scripts/tui-plus-membership-integrity-guards.mjs && node scripts/tui-plus-channel-claim-guards.mjs && node scripts/tui-plus-post-contact-guards.mjs && node scripts/tui-plus-notification-guards.mjs && node scripts/tui-plus-link-editor-guards.mjs && node scripts/tui-plus-final-closure-guards.mjs",
+    "test:tui-plus": "node scripts/tui-plus-contract-guards.mjs && node scripts/tui-plus-avatar-ring-guards.mjs && node scripts/tui-plus-membership-integrity-guards.mjs && node scripts/tui-plus-channel-claim-guards.mjs && node scripts/tui-plus-channel-auto-post-toggle-guards.mjs && node scripts/tui-plus-post-contact-guards.mjs && node scripts/tui-plus-notification-guards.mjs && node scripts/tui-plus-link-editor-guards.mjs && node scripts/tui-plus-final-closure-guards.mjs",
     "test:robot-comment-generation": "node scripts/robot-comment-generation-guards.mjs",
     "test:location-presets": "node scripts/location-presets-guards.mjs",
     "test:goal-168-ui": "node scripts/goal-168-ui-guards.mjs && npm run test:image-storage",

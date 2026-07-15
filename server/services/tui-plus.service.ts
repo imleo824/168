@@ -266,7 +266,7 @@ export async function getTuiPlusStatus(userId: string): Promise<TuiPlusSnapshot>
 
 export async function listTuiPlusChannels(userId: string) {
   if (!userId || !isDbConfigured()) return [] as any[];
-  return prisma.$queryRaw<any[]>`SELECT "id", "channelUrl", "channelHandle", "title", "sourceId", "status", "lastCrawledAt", "lastError", "createdAt", "updatedAt" FROM "TuiPlusTelegramChannel" WHERE "userId" = ${userId} ORDER BY "createdAt" ASC, "id" ASC`;
+  return prisma.$queryRaw<any[]>`SELECT "id", "channelUrl", "channelHandle", "title", "sourceId", COALESCE("autoPostEnabled", false) AS "autoPostEnabled", "status", "lastCrawledAt", "lastError", "createdAt", "updatedAt" FROM "TuiPlusTelegramChannel" WHERE "userId" = ${userId} ORDER BY "createdAt" ASC, "id" ASC`;
 }
 
 export async function listTuiPlusWebsites(userId: string) {

@@ -26,6 +26,8 @@ type SlotRow = {
   originalTitle: string;
   originalValue: string;
   contactKind?: ContactKind;
+  autoPostEnabled?: boolean;
+  originalAutoPostEnabled?: boolean;
 };
 
 type TargetCopy = {
@@ -290,6 +292,8 @@ function buildSlotRows(target: LinkTarget, payload: any) {
       value,
       originalTitle: title,
       originalValue: value,
+      autoPostEnabled: target === 'channel' ? Boolean(item?.autoPostEnabled) : undefined,
+      originalAutoPostEnabled: target === 'channel' ? Boolean(item?.autoPostEnabled) : undefined,
     };
   });
   const slotCount = Math.max(quota.limit, rows.length, 1);
@@ -301,6 +305,8 @@ function buildSlotRows(target: LinkTarget, payload: any) {
       value: '',
       originalTitle: '',
       originalValue: '',
+      autoPostEnabled: target === 'channel' ? false : undefined,
+      originalAutoPostEnabled: target === 'channel' ? false : undefined,
     });
   }
   return rows;
@@ -315,7 +321,7 @@ function buildRowsByType(payload: any) {
 
 function makePayload(target: LinkTarget, cleanValue: string, cleanTitle: string, row?: SlotRow) {
   if (target === 'contact') return { contact: cleanValue, label: cleanTitle, contactKind: row?.contactKind };
-  if (target === 'channel') return { channelUrl: cleanValue, title: cleanTitle };
+  if (target === 'channel') return { channelUrl: cleanValue, title: cleanTitle, autoPostEnabled: Boolean(row?.autoPostEnabled) };
   return { url: cleanValue, label: cleanTitle };
 }
 
@@ -327,13 +333,14 @@ function getSlotSaveIntent(target: LinkTarget, row: SlotRow) {
   const touchedEmpty = !row.id && hasValue;
   const deletedExisting = Boolean(row.id) && !hasValue && Boolean(row.originalValue);
   const changedExisting = Boolean(row.id) && hasValue && (cleanTitle !== row.originalTitle || cleanValue !== normalizeValueForPayload(target, row.originalValue, row.contactKind));
+  const changedAutoPost = target === 'channel' && Boolean(row.id) && hasValue && Boolean(row.autoPostEnabled) !== Boolean(row.originalAutoPostEnabled);
   return {
     cleanValue,
     cleanTitle,
     touchedEmpty,
     deletedExisting,
     changedExisting,
-    shouldSave: touchedEmpty || deletedExisting || changedExisting,
+    shouldSave: touchedEmpty || deletedExisting || changedExisting || changedAutoPost,
   };
 }
 
@@ -434,6 +441,15 @@ export default function TuiPlusLinkEditorMobile() {
       ...current,
       [target]: (current[target] || []).map((row, rowIndex) => (
         rowIndex === index ? { ...row, [field]: nextValue } : row
+      )),
+    }));
+  }, []);
+
+  const updateChannelAutoPost = useCallback((index: number, nextValue: boolean) => {
+    setRowsByType((current) => ({
+      ...current,
+      channel: (current.channel || []).map((row, rowIndex) => (
+        rowIndex === index ? { ...row, autoPostEnabled: nextValue } : row
       )),
     }));
   }, []);
@@ -595,6 +611,16 @@ export default function TuiPlusLinkEditorMobile() {
                               inputMode={activeConfig.target === 'website' ? 'url' : 'text'}
                             />
                           </label>
+                          {activeConfig.target === 'channel' ? (
+                            <label className="tui-plus-link-editor-check">
+                              <input
+                                type="checkbox"
+                                checked={Boolean(row.autoPostEnabled)}
+                                onChange={(event) => updateChannelAutoPost(index, event.target.checked)}
+                              />
+                              <span>频道内容自动发帖</span>
+                            </label>
+                          ) : null}
                         </>
                       )}
                     </div>

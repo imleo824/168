@@ -54,6 +54,17 @@ function normalizeChannelTitle(raw: unknown, handle: string) {
   return cleanString(raw, 40) || `@${handle}`;
 }
 
+function normalizeAutoPostEnabled(raw: unknown) {
+  return raw === true || raw === 'true' || raw === 1 || raw === '1';
+}
+
+function resolveAutoPostEnabled(input: any, fallback: unknown) {
+  if (input && typeof input === 'object' && Object.prototype.hasOwnProperty.call(input, 'autoPostEnabled')) {
+    return normalizeAutoPostEnabled(input.autoPostEnabled);
+  }
+  return Boolean(fallback);
+}
+
 function isMemberOwnedSource(source: any, currentUserId: string) {
   const scope = String(source?.sourceScope || '').trim().toUpperCase();
   const ownerUserId = String(source?.ownerUserId || '').trim();
@@ -172,7 +183,7 @@ async function claimAutoCrawlSource(tx: any, params: { userId: string; crawlUrl:
   return sourceId;
 }
 
-export async function addTuiPlusTelegramChannel(userId: string, input: { channelUrl?: unknown; categoryName?: unknown; title?: unknown; label?: unknown }) {
+export async function addTuiPlusTelegramChannel(userId: string, input: { channelUrl?: unknown; categoryName?: unknown; title?: unknown; label?: unknown; autoPostEnabled?: unknown }) {
   if (!userId || !isDbConfigured()) throw new TuiPlusError(503, '数据库未配置');
 
   const status = await getTuiPlusStatus(userId);
@@ -185,29 +196,36 @@ export async function addTuiPlusTelegramChannel(userId: string, input: { channel
   await assertNewTelegramSourceReachable(crawlUrl);
   const title = normalizeChannelTitle(input.title || input.label, handle);
   const categoryName = await resolveCategoryName(input.categoryName);
+  const autoPostEnabled = normalizeAutoPostEnabled(input.autoPostEnabled);
   const now = new Date();
 
   return prisma.$transaction(async (tx) => {
-    const existingRows = await tx.$queryRaw<any[]>`SELECT "id" FROM "TuiPlusTelegramChannel" WHERE "userId" = ${userId} AND "channelHandle" = ${handle} LIMIT 1`;
+    const existingRows = await tx.$queryRaw<any[]>`SELECT "id", "sourceId" FROM "TuiPlusTelegramChannel" WHERE "userId" = ${userId} AND "channelHandle" = ${handle} LIMIT 1`;
     const limit = await getTuiPlusChannelLimitForPlan(status.plan);
     const currentCount = await countActiveChannels(tx, userId);
     if (!existingRows[0] && currentCount >= limit) throw new TuiPlusError(400, `会员主页最多添加 ${limit} 个 Telegram 频道`);
 
-    const sourceId = await claimAutoCrawlSource(tx, { userId, crawlUrl, handle, categoryName, title });
+    const sourceId = autoPostEnabled
+      ? await claimAutoCrawlSource(tx, { userId, crawlUrl, handle, categoryName, title })
+      : existingRows[0]?.sourceId || null;
+    if (!autoPostEnabled && existingRows[0]?.sourceId) {
+      await pauseOrReleaseTuiPlusSource(tx, { sourceId: existingRows[0].sourceId, userId });
+    }
     const channelId = existingRows[0]?.id || crypto.randomUUID();
     await tx.$executeRaw`
-      INSERT INTO "TuiPlusTelegramChannel" ("id", "userId", "channelUrl", "channelHandle", "title", "sourceId", "status", "createdAt", "updatedAt")
-      VALUES (${channelId}, ${userId}, ${crawlUrl}, ${handle}, ${title}, ${sourceId}, ${TUI_PLUS_CHANNEL_STATUS.ACTIVE}, ${now}, ${now})
+      INSERT INTO "TuiPlusTelegramChannel" ("id", "userId", "channelUrl", "channelHandle", "title", "sourceId", "autoPostEnabled", "status", "createdAt", "updatedAt")
+      VALUES (${channelId}, ${userId}, ${crawlUrl}, ${handle}, ${title}, ${sourceId}, ${autoPostEnabled}, ${TUI_PLUS_CHANNEL_STATUS.ACTIVE}, ${now}, ${now})
       ON CONFLICT ("userId", "channelHandle") DO UPDATE SET
         "channelUrl" = EXCLUDED."channelUrl",
         "title" = EXCLUDED."title",
         "sourceId" = EXCLUDED."sourceId",
+        "autoPostEnabled" = EXCLUDED."autoPostEnabled",
         "status" = ${TUI_PLUS_CHANNEL_STATUS.ACTIVE},
         "lastError" = NULL,
         "updatedAt" = EXCLUDED."updatedAt"
     `;
 
-    const rows = await tx.$queryRaw<any[]>`SELECT "id", "channelUrl", "channelHandle", "title", "sourceId", "status", "lastCrawledAt", "lastError", "createdAt", "updatedAt" FROM "TuiPlusTelegramChannel" WHERE "id" = ${channelId} LIMIT 1`;
+    const rows = await tx.$queryRaw<any[]>`SELECT "id", "channelUrl", "channelHandle", "title", "sourceId", COALESCE("autoPostEnabled", false) AS "autoPostEnabled", "status", "lastCrawledAt", "lastError", "createdAt", "updatedAt" FROM "TuiPlusTelegramChannel" WHERE "id" = ${channelId} LIMIT 1`;
     return rows[0];
   });
 }
@@ -221,11 +239,11 @@ export async function updateTuiPlusTelegramChannel(userId: string, channelId: st
     if (normalized !== TUI_PLUS_CHANNEL_STATUS.ACTIVE && normalized !== TUI_PLUS_CHANNEL_STATUS.PAUSED) throw new TuiPlusError(400, '频道状态不合法');
 
     return prisma.$transaction(async (tx) => {
-      const channelRows = await tx.$queryRaw<any[]>`SELECT "id", "channelUrl", "channelHandle", "title", "sourceId" FROM "TuiPlusTelegramChannel" WHERE "id" = ${channelId} AND "userId" = ${userId} LIMIT 1`;
+      const channelRows = await tx.$queryRaw<any[]>`SELECT "id", "channelUrl", "channelHandle", "title", "sourceId", COALESCE("autoPostEnabled", false) AS "autoPostEnabled" FROM "TuiPlusTelegramChannel" WHERE "id" = ${channelId} AND "userId" = ${userId} LIMIT 1`;
       const channel = channelRows[0];
       if (!channel) throw new TuiPlusError(404, '频道不存在');
 
-      if (normalized === TUI_PLUS_CHANNEL_STATUS.ACTIVE) {
+      if (normalized === TUI_PLUS_CHANNEL_STATUS.ACTIVE && channel.autoPostEnabled) {
         const status = await getTuiPlusStatus(userId);
         if (!status.active) throw new TuiPlusError(403, '开通 Tui Plus 后才能启用频道');
         const handle = normalizeTelegramHandle(channel.channelUrl || channel.channelHandle);
@@ -249,7 +267,7 @@ export async function updateTuiPlusTelegramChannel(userId: string, channelId: st
   const status = await getTuiPlusStatus(userId);
   if (!status.active) throw new TuiPlusError(403, '开通 Tui Plus 后才能编辑频道');
 
-  const currentRows = await prisma.$queryRaw<any[]>`SELECT "id", "channelUrl", "channelHandle", "title", "sourceId" FROM "TuiPlusTelegramChannel" WHERE "id" = ${channelId} AND "userId" = ${userId} LIMIT 1`;
+  const currentRows = await prisma.$queryRaw<any[]>`SELECT "id", "channelUrl", "channelHandle", "title", "sourceId", COALESCE("autoPostEnabled", false) AS "autoPostEnabled" FROM "TuiPlusTelegramChannel" WHERE "id" = ${channelId} AND "userId" = ${userId} LIMIT 1`;
   const current = currentRows[0];
   if (!current) throw new TuiPlusError(404, '频道不存在');
 
@@ -260,19 +278,25 @@ export async function updateTuiPlusTelegramChannel(userId: string, channelId: st
   if (handle !== current.channelHandle) await assertNewTelegramSourceReachable(crawlUrl);
   const title = normalizeChannelTitle(input.title || input.label || current.title, handle);
   const categoryName = await resolveCategoryName(input.categoryName);
+  const autoPostEnabled = resolveAutoPostEnabled(input, current.autoPostEnabled);
   const now = new Date();
 
   return prisma.$transaction(async (tx) => {
     const duplicateRows = await tx.$queryRaw<any[]>`SELECT "id" FROM "TuiPlusTelegramChannel" WHERE "userId" = ${userId} AND "channelHandle" = ${handle} AND "id" <> ${channelId} LIMIT 1`;
     if (duplicateRows[0]) throw new TuiPlusError(409, '该频道已经添加过');
 
-    const sourceId = await claimAutoCrawlSource(tx, { userId, crawlUrl, handle, categoryName, title });
-    if (current.sourceId && current.sourceId !== sourceId) {
+    const sourceId = autoPostEnabled
+      ? await claimAutoCrawlSource(tx, { userId, crawlUrl, handle, categoryName, title })
+      : handle === current.channelHandle ? current.sourceId || null : null;
+    if (current.sourceId && (current.sourceId !== sourceId || (handle !== current.channelHandle && !autoPostEnabled))) {
       await releaseOrDeleteTuiPlusSource(tx, { sourceId: current.sourceId, userId });
     }
-    await tx.$executeRaw`UPDATE "TuiPlusTelegramChannel" SET "channelUrl" = ${crawlUrl}, "channelHandle" = ${handle}, "title" = ${title}, "sourceId" = ${sourceId}, "status" = ${TUI_PLUS_CHANNEL_STATUS.ACTIVE}, "lastError" = NULL, "updatedAt" = ${now} WHERE "id" = ${channelId} AND "userId" = ${userId}`;
+    if (!autoPostEnabled && sourceId) {
+      await pauseOrReleaseTuiPlusSource(tx, { sourceId, userId });
+    }
+    await tx.$executeRaw`UPDATE "TuiPlusTelegramChannel" SET "channelUrl" = ${crawlUrl}, "channelHandle" = ${handle}, "title" = ${title}, "sourceId" = ${sourceId}, "autoPostEnabled" = ${autoPostEnabled}, "status" = ${TUI_PLUS_CHANNEL_STATUS.ACTIVE}, "lastError" = NULL, "updatedAt" = ${now} WHERE "id" = ${channelId} AND "userId" = ${userId}`;
 
-    const rows = await tx.$queryRaw<any[]>`SELECT "id", "channelUrl", "channelHandle", "title", "sourceId", "status", "lastCrawledAt", "lastError", "createdAt", "updatedAt" FROM "TuiPlusTelegramChannel" WHERE "id" = ${channelId} LIMIT 1`;
+    const rows = await tx.$queryRaw<any[]>`SELECT "id", "channelUrl", "channelHandle", "title", "sourceId", COALESCE("autoPostEnabled", false) AS "autoPostEnabled", "status", "lastCrawledAt", "lastError", "createdAt", "updatedAt" FROM "TuiPlusTelegramChannel" WHERE "id" = ${channelId} LIMIT 1`;
     return rows[0];
   });
 }

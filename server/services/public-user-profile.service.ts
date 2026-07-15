@@ -37,6 +37,7 @@ async function getPublicTuiPlusLinks(userId: string) {
           channelUrl: String(channel.channelUrl || ''),
           channelHandle: String(channel.channelHandle || ''),
           title: String(channel.title || '').trim() || `@${String(channel.channelHandle || '')}`,
+          autoPostEnabled: Boolean(channel.autoPostEnabled),
           status: 'ACTIVE',
         }))
         .filter((channel) => channel.id && channel.channelUrl && channel.channelHandle)

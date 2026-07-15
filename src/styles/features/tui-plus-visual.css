@@ -540,6 +540,28 @@
     box-shadow: 0 0 0 calc(var(--ui-border-width-hairline) * 3) var(--ui-ring-brand-soft);
   }
 
+  .tui-plus-link-editor-check {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+    min-height: var(--ui-control-lg);
+    border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+    border-radius: var(--ui-radius-xl);
+    background: var(--ui-surface-muted);
+    color: var(--ui-text-strong);
+    padding: var(--ui-space-2) var(--ui-space-3);
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-tight);
+  }
+
+  .tui-plus-link-editor-check input {
+    width: var(--ui-control-icon-sm);
+    height: var(--ui-control-icon-sm);
+    flex: 0 0 auto;
+    accent-color: var(--ui-brand);
+  }
+
   .profile-tui-plus-chip-icon {
     width: var(--ui-control-icon-xs);
     height: var(--ui-control-icon-xs);
