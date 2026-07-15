@@ -487,7 +487,7 @@ export function AdminSystemConfigSections({
                     
                     <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
                     <label className="admin-field-label">
-                    绑定现有分类
+                    绑定数据库分类
                     <select
                     className="mt-1 admin-form-control admin-form-control--field admin-form-control--field-muted"
                     value={selectedCategoryValue}
@@ -507,11 +507,11 @@ export function AdminSystemConfigSections({
                     </select>
                     </label>
                     <label className="admin-field-label">
-                    分类名称
+                    数据库分类名
                     <input
                     className="mt-1 admin-form-control admin-form-control--field admin-form-control--field-muted"
-                    value={category.name || ''}
-                    onChange={(e) => updatePublishCategory(categoryIndex, { name: e.target.value })}
+                    value={selectedCategory?.name || category.name || ''}
+                    readOnly
                     placeholder="招聘"
                     />
                     </label>

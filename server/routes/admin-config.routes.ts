@@ -11,6 +11,7 @@ import {
   clearCachedCategories,
   getCachedCategories,
   getConfigs,
+  listDatabaseCategoryOptions,
   toPublicConfig,
 } from './config.routes';
 
@@ -36,15 +37,17 @@ export function registerAdminConfigRoutes(app: Express) {
     await assertPublishCategorySchemaUsesExistingCategories(req.body?.publish_category_schema);
     await ConfigService.updateConfigs(req.body);
     clearCachedCategories();
-    const [configs, categories] = await Promise.all([
+    const [configs, categories, databaseCategories] = await Promise.all([
       getConfigs(),
       getCachedCategories(),
+      listDatabaseCategoryOptions(),
     ]);
     setNoStore(res);
     res.json({
       success: true,
       config: toPublicConfig(configs, { publishCategorySchema: configs.publish_category_schema }),
       categories,
+      category_options: databaseCategories,
     });
   }));
 }

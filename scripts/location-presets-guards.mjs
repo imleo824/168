@@ -129,6 +129,7 @@ assert.match(
 
 const adminSystemConfigSectionsSource = fs.readFileSync(path.join(root, 'src/features/admin/AdminSystemConfigSections.tsx'), 'utf8');
 const adminSystemConfigEditorSource = fs.readFileSync(path.join(root, 'src/features/admin/useAdminSystemConfigEditor.ts'), 'utf8');
+const configRoutesSource = fs.readFileSync(path.join(root, 'server/routes/config.routes.ts'), 'utf8');
 assert.match(
   adminSystemConfigSectionsSource,
   /hasCategoryOverride\s*&&\s*Number\.isFinite\(current\)\s*\?\s*current\s*:\s*fallback/,
@@ -153,6 +154,26 @@ assert.match(
   adminSystemConfigSectionsSource,
   /\{\s*id:\s*matched\.id,\s*categorySlug:\s*matched\.slug,\s*slug:\s*matched\.slug,\s*name:\s*matched\.name\s*\}/,
   'Admin publish category binding must write categorySlug, slug, and id together when selecting an existing category.',
+);
+assert.match(
+  configRoutesSource,
+  /category_options:\s*databaseCategories/,
+  'Admin config responses must include database category options for backend publish category binding.',
+);
+assert.match(
+  configRoutesSource,
+  /publish_category_schema:\s*configs\.publish_category_schema/,
+  'Admin config responses must return database-normalized publish category schema instead of public category display names.',
+);
+assert.match(
+  adminSystemConfigSectionsSource,
+  /绑定数据库分类/,
+  'Admin publish category binding label must make the database source explicit.',
+);
+assert.match(
+  adminSystemConfigSectionsSource,
+  /readOnly/,
+  'Admin publish category display name must be read-only because backend names come from the database Category row.',
 );
 assert.match(
   adminSystemConfigEditorSource,

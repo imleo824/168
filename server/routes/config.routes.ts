@@ -22,6 +22,22 @@ export function clearCachedCategories() {
   categoriesCachePromise = null;
 }
 
+export async function listDatabaseCategoryOptions() {
+  return await prisma.category.findMany({
+    select: {
+      id: true,
+      slug: true,
+      name: true,
+      order: true,
+    },
+    orderBy: [
+      { order: 'asc' },
+      { name: 'asc' },
+      { id: 'asc' },
+    ],
+  });
+}
+
 export async function getConfigs(options: { bypassCache?: boolean } = {}) {
   if (options.bypassCache) {
     return await ConfigService.getConfigs(options);
@@ -229,15 +245,17 @@ export function registerConfigRoutes(app: Express) {
   }));
 
   app.get('/api/admin/config', authMiddleware, adminOnly, catchAsync(async (_req, res) => {
-    const [configs, categoryPayload] = await Promise.all([
+    const [configs, categoryPayload, databaseCategories] = await Promise.all([
       getConfigs(),
       getCachedCategoryPayload(),
+      listDatabaseCategoryOptions(),
     ]);
     setNoStore(res);
     res.json({
       ...configs,
-      publish_category_schema: toPublicConfig(configs, { publishCategorySchema: categoryPayload.schema }).publish_category_schema,
+      publish_category_schema: configs.publish_category_schema,
       categories: categoryPayload.categories,
+      category_options: databaseCategories,
     });
   }));
 }

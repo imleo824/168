@@ -904,6 +904,9 @@ export default function Admin() {
   };
 
   const telegramSyncRequireImage = String(localConfig?.telegram_sync_require_image ?? 'false').trim().toLowerCase() === 'true';
+  const databaseCategoryOptions = Array.isArray(localConfig?.category_options)
+    ? localConfig.category_options
+    : categories;
   const activeConfigTab = isSystemConfigTab(activeTab) ? activeTab : null;
   const activeSectionConfigTab = hasConfigSections(activeConfigTab) ? activeConfigTab : null;
   const activeTabMeta = [...adminNavigationTabs, ...interactionSubTabs].find((tab) => tab.id === activeTab) || adminNavigationTabs[0];
@@ -967,7 +970,7 @@ export default function Admin() {
                 configSectionId={configSectionId}
                 localConfig={localConfig}
                 setLocalConfig={setLocalConfig}
-                categories={categories}
+                categories={databaseCategoryOptions}
                 telegramSyncRequireImage={telegramSyncRequireImage}
                 locationPresets={locationPresets}
                 addLocationPreset={addLocationPreset}
