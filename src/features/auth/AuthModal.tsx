@@ -226,7 +226,7 @@ export default function AuthModal({ isOpen, onClose, isAuthenticating }: AuthMod
     <>
       <SEO
         title={`登录${SITE_NAME}｜推推`}
-        description="登录或注册推推账号，继续发布、互动、聊天和管理个人记录。"
+        description="登录或注册推推账号，继续发布、互动和管理个人记录。"
         noindex
       />
       <div className="ui-auth-overlay">

@@ -102,7 +102,6 @@ export function getSlotStatusLabel(isBooked: boolean, isMine: boolean) {
 export function resolvePromotionType(type?: PromotionTypeId | string) {
   if (type === PromotionType.PIN_CATEGORY || type === 'PIN_CATEGORY') return 'PIN_CATEGORY' as const;
   if (type === PromotionType.PIN_HOME || type === 'PIN_HOME') return 'PIN_HOME' as const;
-  if (type === PromotionType.PIN_CHAT || type === 'PIN_CHAT') return 'PIN_CHAT' as const;
   if (type === PromotionType.AD_HOME || type === 'AD_HOME') return 'AD_HOME' as const;
   return undefined;
 }

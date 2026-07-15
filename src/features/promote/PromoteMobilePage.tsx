@@ -111,7 +111,7 @@ export default function PromoteMobile() {
     mobileImageUrl: '',
     targetUrl: '',
   });
-  const isBannerAdPromotion = selectedType === 'AD_HOME' || selectedType === 'PIN_CHAT';
+  const isBannerAdPromotion = selectedType === 'AD_HOME';
   const isPostPromotion = selectedType === 'PIN_HOME' || selectedType === 'PIN_CATEGORY';
   const activeSlotIndex = isBannerAdPromotion ? selectedHomeAdSlot : DAILY_SLOT_INDEX;
 
@@ -235,7 +235,6 @@ export default function PromoteMobile() {
   const {
     checkoutContextLabel,
     priceForCategoryPin,
-    priceForChatAdSlot,
     priceForHomeAdSlot,
     pricePerSlot,
     promotionTypeChoices,
@@ -507,7 +506,6 @@ export default function PromoteMobile() {
       refreshUser(true),
       queryClient.invalidateQueries({ queryKey: ['promotions'] }),
       queryClient.invalidateQueries({ queryKey: ['promotions', 'home-ads'] }),
-      queryClient.invalidateQueries({ queryKey: ['promotions', 'chat-ads'] }),
       queryClient.invalidateQueries({ queryKey: ['transactions'] }),
     ]);
   }, [fetchSlots, queryClient, refreshUser]);
@@ -674,7 +672,6 @@ export default function PromoteMobile() {
             selectedType={selectedType}
             selectedHomeAdSlot={selectedHomeAdSlot}
             priceForHomeAdSlot={priceForHomeAdSlot}
-            priceForChatAdSlot={priceForChatAdSlot}
             onHomeAdSlotChange={handleHomeAdSlotChange}
           />
         ) : null}

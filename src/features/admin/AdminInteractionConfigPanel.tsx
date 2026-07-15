@@ -6,7 +6,6 @@ import { AdminAutoCrawlPanel } from './AdminAutoCrawlPanel';
 import { AdminAutoCrawlExecutionLogsCompactPanel } from './AdminAutoCrawlExecutionLogsCompactPanel';
 import { AdminAutoLikePanel } from './AdminAutoLikePanel';
 import { AdminAutoPostPanel } from './AdminAutoPostPanel';
-import { AdminChatPanel } from './AdminChatPanel';
 import { AdminCommentPublishPanel } from './AdminCommentPublishPanel';
 import { AdminQuotePublishPanel } from './AdminQuotePublishPanel';
 import {
@@ -17,17 +16,11 @@ import {
   type AdminAutomationSection,
 } from './AdminAutomationShared';
 
-type InteractionTab = 'chat-config' | 'quote-publish' | 'comment-publish' | 'auto-like' | 'auto-post' | 'auto-crawl';
-type ManualRunModule = 'chat-config' | 'quote-publish' | 'comment-publish' | 'auto-like' | 'auto-post';
+type InteractionTab = 'quote-publish' | 'comment-publish' | 'auto-like' | 'auto-post' | 'auto-crawl';
+type ManualRunModule = 'quote-publish' | 'comment-publish' | 'auto-like' | 'auto-post';
 
 type AdminInteractionConfigPanelProps = {
   initialTab?: InteractionTab;
-  chatConfigDraft: any;
-  isLoadingChatControls: boolean;
-  isSaving: boolean;
-  fetchChatControls: () => void;
-  saveChatConfig: () => void;
-  setChatConfigDraft: (updater: any) => void;
 };
 
 const AUTO_CRAWL_SECTIONS: Array<{ id: AdminAutomationSection; label: string }> = [
@@ -37,7 +30,6 @@ const AUTO_CRAWL_SECTIONS: Array<{ id: AdminAutomationSection; label: string }> 
 ];
 
 const MODULE_LABELS: Record<ManualRunModule, string> = {
-  'chat-config': '自动聊天',
   'quote-publish': '自动引用',
   'comment-publish': '自动评论',
   'auto-like': '自动点赞',
@@ -107,7 +99,7 @@ function reasonLabel(reason?: string | null) {
     quality_failed: '质量不合格：AI 回复太水、太短、像机器人，或命中禁止话术。',
     ai_failed: 'AI 调用失败：模型没有返回可用内容。',
     bot_rate_limited_local: '本地频控拦截：一分钟内机器人发言太多。',
-    bot_rate_limited_global: '全局频控拦截：聊天室机器人发言太密。',
+    bot_rate_limited_global: '全局频控拦截：机器人发言太密。',
     author_required: '缺少发布账号：无法发布内容。',
     category_required: '缺少发布分类：无法创建帖子。',
     no_topic_enabled: '没有开启任何主题：自动发帖没有可执行主题。',
@@ -163,7 +155,7 @@ function ModuleRunLogsPanel({ module }: { module: ManualRunModule }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
   const label = MODULE_LABELS[module];
-  const endpoint = module === 'chat-config' ? '/api/admin/chat/runs?limit=20' : `/api/admin/${module}/runs?limit=20`;
+  const endpoint = `/api/admin/${module}/runs?limit=20`;
 
   const loadRuns = useCallback(async () => {
     setIsLoading(true);
@@ -179,7 +171,6 @@ function ModuleRunLogsPanel({ module }: { module: ManualRunModule }) {
   }, [endpoint]);
 
   const runNow = useCallback(async () => {
-    if (module === 'chat-config') return;
     setIsRunning(true);
     try {
       const res = await apiFetch(`/api/admin/${module}/run-now`, { method: 'POST' });
@@ -210,7 +201,7 @@ function ModuleRunLogsPanel({ module }: { module: ManualRunModule }) {
     <AdminAutomationLogsShell
       isLoading={isLoading}
       onRefresh={loadRuns}
-      actions={module === 'chat-config' ? undefined : (
+      actions={(
         <button type="button" onClick={runNow} disabled={isRunning || isLoading} className="pressable admin-quote-action">
           <Play size={15} aria-hidden="true" />
           {isRunning ? '执行中' : '手动执行一次'}
@@ -252,47 +243,22 @@ function ModuleRunLogsPanel({ module }: { module: ManualRunModule }) {
   );
 }
 
-function ChatExecutionLogsPanel() {
-  return <ModuleRunLogsPanel module="chat-config" />;
-}
-
 function AutoCrawlLogsPanel() {
   return <AdminAutoCrawlExecutionLogsCompactPanel />;
 }
 
 export function AdminInteractionConfigPanel({
-  initialTab = 'chat-config',
-  chatConfigDraft,
-  isSaving,
-  fetchChatControls,
-  saveChatConfig,
-  setChatConfigDraft,
+  initialTab = 'quote-publish',
 }: AdminInteractionConfigPanelProps) {
   const activeInteractionTab = initialTab;
   const [activeSection, setActiveSection] = useState<AdminAutomationSection>('config');
   const sections = activeInteractionTab === 'auto-crawl' ? AUTO_CRAWL_SECTIONS : ADMIN_AUTOMATION_SECTIONS;
 
   useEffect(() => {
-    if (activeInteractionTab === 'chat-config') {
-      void fetchChatControls();
-    }
-  }, [activeInteractionTab, fetchChatControls]);
-
-  useEffect(() => {
     setActiveSection('config');
   }, [activeInteractionTab]);
 
   const renderConfig = () => {
-    if (activeInteractionTab === 'chat-config') {
-      return (
-        <AdminChatPanel
-          chatConfigDraft={chatConfigDraft}
-          isSaving={isSaving}
-          saveChatConfig={saveChatConfig}
-          setChatConfigDraft={setChatConfigDraft}
-        />
-      );
-    }
     if (activeInteractionTab === 'quote-publish') return <AdminQuotePublishPanel />;
     if (activeInteractionTab === 'comment-publish') return <AdminCommentPublishPanel />;
     if (activeInteractionTab === 'auto-like') return <AdminAutoLikePanel />;
@@ -312,8 +278,7 @@ export function AdminInteractionConfigPanel({
     if (activeInteractionTab === 'comment-publish') return <ModuleRunLogsPanel module="comment-publish" />;
     if (activeInteractionTab === 'auto-like') return <ModuleRunLogsPanel module="auto-like" />;
     if (activeInteractionTab === 'auto-post') return <ModuleRunLogsPanel module="auto-post" />;
-    if (activeInteractionTab === 'chat-config') return <ChatExecutionLogsPanel />;
-    return <ChatExecutionLogsPanel />;
+    return <ModuleRunLogsPanel module="quote-publish" />;
   };
 
   return (

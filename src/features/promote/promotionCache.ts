@@ -18,12 +18,6 @@ export async function refreshHomeAdsNow(queryClient: QueryClient) {
   return homeAds;
 }
 
-export async function refreshChatAdsNow(queryClient: QueryClient) {
-  const chatAds = await api.getChatAds({ cache: 'no-store' });
-  queryClient.setQueryData(['promotions', 'chat-ads'], chatAds);
-  return chatAds;
-}
-
 export async function syncPromotionVisibilityAfterBooking(
   queryClient: QueryClient,
   type: PromotionType | string,
@@ -39,12 +33,6 @@ export async function syncPromotionVisibilityAfterBooking(
     tasks.push(queryClient.invalidateQueries({ queryKey: ['home', 'bootstrap'] }));
     tasks.push(queryClient.invalidateQueries({ queryKey: ['promotions', 'home-ads'] }));
     tasks.push(refreshHomeAdsNow(queryClient));
-    return Promise.all(tasks);
-  }
-
-  if (normalizedType === PromotionType.PIN_CHAT) {
-    tasks.push(queryClient.invalidateQueries({ queryKey: ['promotions', 'chat-ads'] }));
-    tasks.push(refreshChatAdsNow(queryClient));
     return Promise.all(tasks);
   }
 

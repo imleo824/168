@@ -1,11 +1,6 @@
 import type { Express } from 'express';
 import { createServer as createHttpServer } from 'node:http';
 
-import { registerChatGateway } from '../chat/chat.gateway';
-import { createChatBotService, ensureChatAutomationReady, startChatMaintenance } from '../chat/chat.bot.service';
-import { ensureChatSchemaReady } from '../chat/chat.schema';
-import { markChatStorageAvailable } from '../chat/chat.repository';
-import type { ChatMessagePayload } from '../chat/chat.types';
 import { createDefaultAutomationModules } from '../services/automation/default-automation-modules';
 import { startAutomationRuntime } from '../services/automation/automation-runtime';
 import type { AutoPostAfterPostCreated } from '../services/auto-post.service';
@@ -31,10 +26,6 @@ export type ServerRuntimeDeps = {
   afterQuotePublishPostCreated: QuotePublishAfterPostCreated;
   startPublicFeedWarmup: () => () => void;
   startTuiPlusEntitlementMaintenance?: () => () => void;
-  setChatRuntime: (runtime: {
-    getOnlineCount: () => number;
-    broadcastPostCreatedChatMessage: (message: ChatMessagePayload) => void;
-  }) => void;
 };
 
 export async function startServerRuntime(app: Express, deps: ServerRuntimeDeps) {
@@ -60,21 +51,7 @@ export async function startServerRuntime(app: Express, deps: ServerRuntimeDeps) 
   server.headersTimeout = 35_000;
   server.keepAliveTimeout = 8_000;
 
-  const chatGateway = registerChatGateway(server, { jwtSecret: deps.jwtSecret });
-  deps.setChatRuntime({
-    getOnlineCount: chatGateway.getOnlineCount,
-    broadcastPostCreatedChatMessage: chatGateway.broadcastMessage,
-  });
-
-  const chatBotService = createChatBotService({
-    broadcastMessage: chatGateway.broadcastMessage,
-    getOnlineCount: chatGateway.getOnlineCount,
-  });
-  chatGateway.setBotService(chatBotService);
-
   const canStartDatabaseWorkers = deps.isDbConfigured();
-  const stopChatIdleWarmup = canStartDatabaseWorkers ? chatBotService.startIdleWarmup() : () => {};
-  const stopChatMaintenance = canStartDatabaseWorkers ? startChatMaintenance() : () => {};
   const stopAutomationRuntime = canStartDatabaseWorkers
     ? startAutomationRuntime(createDefaultAutomationModules({
       afterAutoPostCreated: deps.afterAutoPostCreated,
@@ -89,11 +66,8 @@ export async function startServerRuntime(app: Express, deps: ServerRuntimeDeps) 
   process.on('SIGTERM', () => {
     console.log('SIGTERM received, shutting down gracefully');
     stopTronDepositScanner();
-    stopChatIdleWarmup();
-    stopChatMaintenance();
     stopAutomationRuntime();
     stopTuiPlusEntitlementMaintenance();
-    chatGateway.close();
     stopPublicFeedWarmup();
     server.close(() => {
       console.log('Server closed');
@@ -110,24 +84,6 @@ async function bootstrapDatabaseRuntime(deps: ServerRuntimeDeps) {
   }
 
   startTronDepositScanner();
-
-  try {
-    const chatSchemaReady = await ensureChatSchemaReady();
-    if (chatSchemaReady) {
-      markChatStorageAvailable();
-      console.log('[chat] Database schema ready.');
-    } else {
-      console.warn('[chat] Database schema is not ready; chat will retry when used.');
-    }
-  } catch (e) {
-    console.warn('Chat schema readiness check failed (non-critical):', e);
-  }
-
-  try {
-    await ensureChatAutomationReady();
-  } catch (e) {
-    console.warn('Chat automation bootstrap failed (non-critical):', e);
-  }
 
   try {
     const seedResult = await deps.seedSuperpowerCategoryPosts(deps.prisma, { useCompletionMarker: true });

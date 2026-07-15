@@ -3,7 +3,6 @@ import { useCallback, useMemo } from 'react';
 import { PromotionType } from '../../../shared/domain';
 import {
   getPromotionCategoryPinPrice,
-  getPromotionChatAdSlotPrice,
   getPromotionHomeAdSlotPrice,
   getPromotionSlotPrice,
   normalizePromotionPointPrice,
@@ -42,8 +41,6 @@ export function usePromotePricing({
 }) {
   const priceForHomeAdSlot = useCallback((slotIndex: number) => getPromotionHomeAdSlotPrice(config, slotIndex), [config]);
 
-  const priceForChatAdSlot = useCallback((slotIndex: number) => getPromotionChatAdSlotPrice(config, slotIndex), [config]);
-
   const priceForCategoryPin = useCallback((categoryId?: string) => {
     const resolvedCategoryId = categoryId || rootCategories[0]?.id || '';
     return getPromotionCategoryPinPrice(config, categorySlugForId(rootCategories, resolvedCategoryId));
@@ -79,11 +76,6 @@ export function usePromotePricing({
       price: priceForCategoryPin(selectedCategoryId || rootCategories[0]?.id),
     },
     {
-      id: 'PIN_CHAT',
-      desc: '展示在聊天顶部位置',
-      price: priceForChatAdSlot(selectedHomeAdSlot),
-    },
-    {
       id: 'AD_HOME',
       desc: '展示在首页顶部横幅',
       price: priceForHomeAdSlot(selectedHomeAdSlot),
@@ -93,7 +85,6 @@ export function usePromotePricing({
   return {
     checkoutContextLabel,
     priceForCategoryPin,
-    priceForChatAdSlot,
     priceForHomeAdSlot,
     pricePerSlot,
     promotionTypeChoices,

@@ -173,7 +173,6 @@ export function registerSeoRoutes(app: Express) {
     const disallowRules = [
       'Disallow: /api/',
       'Disallow: /168wc',
-      'Disallow: /chat',
       'Disallow: /profile',
       'Disallow: /transactions',
       'Disallow: /recharge',

@@ -137,21 +137,6 @@ export function AdminSystemConfigSections({
                         value={localConfig?.prices?.ad_home_slot_3}
                         onChange={(v) => updatePriceValue('ad_home_slot_3', v)}
                       />
-                      <ConfigItem
-                        label={`${getPromotionTypeLabel('PIN_CHAT')}第1位置`}
-                        value={localConfig?.prices?.pin_chat_slot_1}
-                        onChange={(v) => updatePriceValue('pin_chat_slot_1', v, { pin_chat: Number(v) })}
-                      />
-                      <ConfigItem
-                        label={`${getPromotionTypeLabel('PIN_CHAT')}第2位置`}
-                        value={localConfig?.prices?.pin_chat_slot_2}
-                        onChange={(v) => updatePriceValue('pin_chat_slot_2', v)}
-                      />
-                      <ConfigItem
-                        label={`${getPromotionTypeLabel('PIN_CHAT')}第3位置`}
-                        value={localConfig?.prices?.pin_chat_slot_3}
-                        onChange={(v) => updatePriceValue('pin_chat_slot_3', v)}
-                      />
                     </div>
                   </div>
 

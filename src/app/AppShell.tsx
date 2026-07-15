@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Navigate, NavLink, Route, Routes, useLocation,
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
 import { lazy, Suspense, useEffect, useMemo, type ReactNode } from 'react';
-import { CirclePlus, House, Info, MessagesSquare, ShieldCheck, TrendingUp, UserRound } from 'lucide-react';
+import { Bell, CirclePlus, House, Info, ShieldCheck, TrendingUp, UserRound } from 'lucide-react';
 
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import Home from '@/pages/Home';
@@ -51,7 +51,6 @@ const Sponsor = lazy(() => import('@/pages/SponsorMobile'));
 const ReferralInvite = lazy(() => import('@/pages/ReferralInviteMobile'));
 const ReferralInviteRecords = lazy(() => import('@/pages/ReferralInviteRecordsMobile'));
 const PostCreate = lazy(() => import('@/pages/PostCreate'));
-const Chat = lazy(() => import('@/pages/Chat'));
 const Messages = lazy(() => import('@/pages/MessagesMobile'));
 const NotificationSettings = lazy(() => import('@/pages/NotificationSettings'));
 const UserSpace = lazy(() => import('@/pages/UserSpace'));
@@ -61,7 +60,7 @@ const BrandAbout = lazy(() => import('@/pages/BrandAbout'));
 
 const DESKTOP_NAV_ITEMS = [
   { to: '/', label: '首页', icon: House, end: true },
-  { to: '/chat', label: '聊天', icon: MessagesSquare, end: false },
+  { to: '/messages', label: '消息', icon: Bell, end: false },
   { to: '/create', label: '发推', icon: CirclePlus, end: false },
   { to: APP_ROUTES.sponsor, label: '买曝光', icon: TrendingUp, end: false },
   { to: '/profile', label: '我的', icon: UserRound, end: false },
@@ -78,7 +77,6 @@ const PAGE_OWNED_HEADER_PREFIXES = [
   APP_ROUTES.sponsor,
   APP_ROUTES.invite,
   '/create',
-  '/chat',
   APP_ROUTES.promote,
   APP_ROUTES.promotions,
   APP_ROUTES.promotionEffects,
@@ -99,7 +97,7 @@ function isPageOwnedHeaderPath(pathname: string) {
 }
 
 function getDesktopSurfaceKind(pathname: string) {
-  if (pathname === '/chat' || pathname === '/messages') return 'conversation';
+  if (pathname === '/messages') return 'conversation';
   if (pathname.startsWith('/post/')) return 'detail';
   if (pathname === '/create') return 'compose';
   if (
@@ -354,7 +352,6 @@ function AppLayout() {
   const isAdminRoute = pathname.startsWith('/168wc');
   const routeSurface = isAdminRoute ? 'admin' : 'user';
   const isUserSurface = routeSurface === 'user';
-  const isChatRoute = isUserSurface && pathname === '/chat';
   const desktopSurfaceKind = isUserSurface ? getDesktopSurfaceKind(pathname) : 'admin';
   const isDesktopViewport = useIsDesktopViewport();
 
@@ -379,7 +376,6 @@ function AppLayout() {
         className={appClassName}
         data-route-surface={routeSurface}
         data-desktop-surface={desktopSurfaceKind}
-        data-chat-route-active={isChatRoute ? 'true' : undefined}
       >
         {isUserSurface ? <Navigation /> : null}
         {isUserSurface ? <AppDesktopSidebar /> : null}
@@ -399,7 +395,6 @@ function AppLayout() {
                 <Route path="/category/:id" element={<CategoryFeed />} />
                 <Route path="/user/:id" element={<UserSpace />} />
                 <Route path="/create" element={<AppRequireAuthRoute><PostCreate /></AppRequireAuthRoute>} />
-                <Route path="/chat" element={<AppRequireAuthRoute><Chat /></AppRequireAuthRoute>} />
                 <Route path="/messages" element={<AppRequireAuthRoute><Messages /></AppRequireAuthRoute>} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path={APP_ROUTES.profileBioEditor} element={<AppRequireAuthRoute><ProfileBioEditor /></AppRequireAuthRoute>} />

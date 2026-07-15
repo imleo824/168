@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { CirclePlus, House, MessagesSquare, TrendingUp, UserRound } from 'lucide-react';
+import { Bell, CirclePlus, House, TrendingUp, UserRound } from 'lucide-react';
 
 import AvatarImage from '@/ui/AvatarImage';
 import { useAuth } from '@/context/AuthContext';
@@ -12,7 +12,7 @@ import { warmupNavigationIntent } from '@/utils/routeWarmups';
 
 const DOUBLE_TAP_INTERVAL_MS = 360;
 const DOUBLE_TAP_DISTANCE_PX = 28;
-const PRIMARY_TAB_PATHS = new Set(['/', '/chat', '/sponsor', '/profile']);
+const PRIMARY_TAB_PATHS = new Set(['/', '/messages', '/sponsor', '/profile']);
 
 function scrollActivePageToTop(behavior: ScrollBehavior = 'smooth') {
   document.scrollingElement?.scrollTo({ top: 0, left: 0, behavior });
@@ -80,12 +80,15 @@ export default function AppBottomNavigation() {
     goHome({ refreshIfActive: false });
   };
 
-  const goChat = () => {
-    if (pathname === '/chat') {
-      scrollActivePageToTop('smooth');
-      return;
-    }
-    navigate('/chat');
+  const goMessages = () => {
+    warmupNavigationIntent('auth');
+    requireAuth(() => {
+      if (pathname === '/messages') {
+        scrollActivePageToTop('smooth');
+        return;
+      }
+      navigate('/messages');
+    });
   };
 
   const goCreate = () => {
@@ -126,7 +129,7 @@ export default function AppBottomNavigation() {
   });
 
   const homePressHandlers = useInstantPress<HTMLButtonElement>(handleHomeClick);
-  const chatPressHandlers = useInstantPress<HTMLButtonElement>(goChat);
+  const messagesPressHandlers = useInstantPress<HTMLButtonElement>(goMessages);
   const createPressHandlers = useInstantPress<HTMLButtonElement>(() => void guardedGoCreate());
   const sponsorPressHandlers = useInstantPress<HTMLButtonElement>(goSponsor);
   const profilePressHandlers = useInstantPress<HTMLButtonElement>(goProfile);
@@ -152,9 +155,9 @@ export default function AppBottomNavigation() {
           <span className="app-bottom-nav-icon-shell" aria-hidden="true"><House className="app-bottom-nav-icon" /></span>
           <span className="app-bottom-nav-label">首页</span>
         </button>
-        <button type="button" className="app-bottom-nav-item app-bottom-nav-item--chat" data-state={pathname === '/chat' ? 'active' : 'idle'} aria-current={pathname === '/chat' ? 'page' : undefined} aria-label="聊天" title="聊天" {...chatPressHandlers}>
-          <span className="app-bottom-nav-icon-shell" aria-hidden="true"><MessagesSquare className="app-bottom-nav-icon" /></span>
-          <span className="app-bottom-nav-label">聊天</span>
+        <button type="button" className="app-bottom-nav-item app-bottom-nav-item--messages" data-state={pathname === '/messages' ? 'active' : 'idle'} aria-current={pathname === '/messages' ? 'page' : undefined} aria-label="消息" title="消息" {...messagesPressHandlers}>
+          <span className="app-bottom-nav-icon-shell" aria-hidden="true"><Bell className="app-bottom-nav-icon" /></span>
+          <span className="app-bottom-nav-label">消息</span>
         </button>
         <button type="button" className="app-bottom-nav-item app-bottom-nav-item--publish" data-state="idle" aria-label="发推" title="发推" {...createPressHandlers}>
           <span className="app-bottom-nav-icon-shell" aria-hidden="true"><CirclePlus className="app-bottom-nav-icon" /></span>

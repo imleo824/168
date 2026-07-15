@@ -47,11 +47,6 @@ import { registerAdminConfigRoutes } from './routes/admin-config.routes';
 import { registerAdminPromotionRoutes } from './routes/admin-promotion.routes';
 import { clearAdminReportCache, registerAdminReportRoutes } from './routes/admin-report.routes';
 import { registerAdminNoStoreMiddleware } from './routes/admin-middleware.routes';
-import { registerChatRoutes } from './chat/chat.routes';
-import { registerChatAdminRoutes } from './chat/chat.admin.routes';
-import { getChatConfig } from './chat/chat.config';
-import { createUserChatMessage } from './chat/chat.repository';
-import type { ChatMessagePayload, ChatPostCreatedMetadata } from './chat/chat.types';
 import { getIncomingProtocol, getRequestOriginForCsrf, isLocalRequest, normalizeOrigin } from './http-origin';
 import { withTimeout } from './http/async';
 import {
@@ -72,7 +67,6 @@ import { PostService, type PostCategoryMetaFilter } from './post.service';
 import { HomeFeedService } from './services/home-feed.service';
 import type { AutoPostAfterPostCreated } from './services/auto-post.service';
 import type { QuotePublishAfterPostCreated } from './services/quote-publish.service';
-import { compactQuotedPostPayload } from './services/post/feed-payload';
 import {
   buildLocationPresetValueSet,
   normalizeCategoryMetaFeedFilters,
@@ -170,8 +164,6 @@ const USER_PROFILE_VIEW_DEDUPE_MAX_ENTRIES = 50_000;
 const FOLLOWING_IDS_CACHE_TTL_MS = 20_000;
 const FOLLOWING_IDS_CACHE_MAX_ENTRIES = 2_000;
 const FEED_UPDATE_BADGE_LIMIT = 50;
-let getChatOnlineCount = () => 0;
-let broadcastPostCreatedChatMessage = (_message: ChatMessagePayload) => {};
 const POST_CREATED_CHAT_QUOTE_SELECT = {
   id: true,
   userId: true,
@@ -649,7 +641,6 @@ const SAFE_PROMOTION_ERROR_PREFIXES = [
   '单次最多预约',
   '不能预约已过去的日期',
   '请选择有效的首页横幅广告位置',
-  '请选择有效的聊天室置顶位置',
   '当前仅支持按天预约推广位',
   '分类置顶必须选择分类',
   '请上传',
@@ -698,81 +689,7 @@ function normalizeCategoryIdList(rawValue: unknown, maxItems = 200) {
   ).slice(0, maxItems);
 }
 
-function normalizePostChatBody(raw: unknown, maxLength: number) {
-  const value = String(raw ?? '')
-    .replace(/\r\n/g, '\n')
-    .replace(/\r/g, '\n')
-    .replace(/\n{4,}/g, '\n\n\n')
-    .trim();
-  if (!value) return '';
-  const limit = Math.max(0, Math.floor(maxLength || 0));
-  if (!limit || value.length <= limit) return value;
-  if (limit <= 3) return value.slice(0, limit);
-  return `${value.slice(0, limit - 3)}...`;
-}
-
-function normalizePostChatImages(images: unknown) {
-  if (!Array.isArray(images)) return [] as string[];
-  const seen = new Set<string>();
-  const result: string[] = [];
-  for (const image of images) {
-    const value = typeof image === 'string' ? image.trim() : '';
-    if (!value || seen.has(value)) continue;
-    seen.add(value);
-    result.push(value);
-    if (result.length >= WEBHOOK_MAX_IMAGES) break;
-  }
-  return result;
-}
-
-function toChatMetadataDate(value: unknown) {
-  if (!value) return null;
-  if (value instanceof Date) return value.toISOString();
-  return String(value);
-}
-
-function buildPostCreatedQuotedPostPayload(
-  post: any,
-  options: { currentUserId?: string | null; currentUserRole?: string | null } = {},
-) {
-  const quotedPost = compactQuotedPostPayload(post?.quotedPost, options);
-  if (!quotedPost) return null;
-
-  return {
-    ...quotedPost,
-    createdAt: toChatMetadataDate(quotedPost.createdAt),
-    deletedAt: toChatMetadataDate(quotedPost.deletedAt),
-  };
-}
-
-function buildPostCreatedChatMetadata(
-  post: any,
-  images: string[],
-  options: { currentUserId?: string | null; currentUserRole?: string | null } = {},
-): ChatPostCreatedMetadata {
-  const category = post?.category && post.category.id && post.category.name && post.category.slug
-    ? {
-      id: String(post.category.id),
-      name: String(post.category.name),
-      slug: String(post.category.slug),
-    }
-    : undefined;
-  const quotedPost = buildPostCreatedQuotedPostPayload(post, options);
-
-  return {
-    kind: 'post_created',
-    source: 'post_create',
-    postId: String(post?.id || ''),
-    title: collapseText(post?.title, 120) || '图片动态',
-    images,
-    imageCount: images.length,
-    isAnonymous: Boolean(post?.isAnonymous),
-    ...(quotedPost ? { quotedPost } : {}),
-    ...(category ? { category } : {}),
-  };
-}
-
-async function publishPostCreatedToChat(params: {
+async function publishPostCreatedToChat(_params: {
   post: any;
   user: {
     id?: string | null;
@@ -781,35 +698,7 @@ async function publishPostCreatedToChat(params: {
     photoUrl?: string | null;
   };
 }) {
-  const postId = String(params.post?.id || '').trim();
-  const userId = String(params.user?.id || '').trim();
-  if (!postId || !userId) return;
-
-  try {
-    const config = await getChatConfig().catch(() => null);
-
-    const images = normalizePostChatImages(params.post?.images);
-    const body = normalizePostChatBody(params.post?.content, config?.maxMessageLength || 500);
-    if (!body && images.length === 0) return;
-
-    const message = await createUserChatMessage({
-      authorUserId: userId,
-      authorName: collapseText(params.user?.displayName || '用户', 40) || '用户',
-      authorPhotoUrl: params.user?.photoUrl || null,
-      body,
-      metadata: buildPostCreatedChatMetadata(params.post, images, {
-        currentUserId: userId,
-        currentUserRole: params.user?.role || null,
-      }),
-    });
-
-    broadcastPostCreatedChatMessage(message);
-  } catch (error: any) {
-    console.warn('[chat:post-sync] failed:', {
-      postId,
-      reason: error?.message || error,
-    });
-  }
+  return;
 }
 
 type AccessiblePostMeta = {
@@ -955,7 +844,6 @@ const handleAutoPostCreated: AutoPostAfterPostCreated = async ({ post, user }) =
 };
 
 registerConfigRoutes(app);
-registerChatAdminRoutes(app);
 registerAutoCrawlRoutes(app);
 registerAutoPostRoutes(app, {
   afterPostCreated: handleAutoPostCreated,
@@ -963,10 +851,6 @@ registerAutoPostRoutes(app, {
 registerQuotePublishRoutes(app, {
   afterPostCreated: handleQuotePublishPostCreated,
 });
-registerChatRoutes(app, {
-  getOnlineCount: () => getChatOnlineCount(),
-});
-
 registerApiHealthRoute(app);
 
 registerAccountRoutes(app, {
@@ -1238,10 +1122,6 @@ async function startServer() {
       intervalMs: PUBLIC_FEED_WARM_INTERVAL_MS,
       initialDelayMs: PUBLIC_FEED_INITIAL_WARM_DELAY_MS,
     }),
-    setChatRuntime: (runtime) => {
-      getChatOnlineCount = runtime.getOnlineCount;
-      broadcastPostCreatedChatMessage = runtime.broadcastPostCreatedChatMessage;
-    },
   });
 }
 

@@ -12,7 +12,6 @@ import { REFERRAL_INVITE_SOURCES, readReferralInviteCodeFromSearch } from '../..
 
 const AUTH_ROUTE_TITLES: Record<string, string> = {
   '/create': '登录后发布｜推推',
-  '/chat': '登录后聊天｜推推',
   '/messages': '登录后查看消息｜推推',
   '/sponsor': '登录后进入推广｜推推',
   '/invite': '登录后邀请好友｜推推',
@@ -49,7 +48,7 @@ export default function AppRequireAuthRoute({ children }: { children: ReactNode 
       <>
         <SEO
           title={getAuthRouteTitle(location.pathname)}
-          description="登录推推后继续访问发布、聊天、推广、充值和个人记录等账号功能。"
+          description="登录推推后继续访问发布、推广、充值和个人记录等账号功能。"
           canonicalPath={location.pathname}
           noindex
         />

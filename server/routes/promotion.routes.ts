@@ -49,12 +49,6 @@ export function registerPromotionRoutes(app: Express, deps: PromotionRoutesDeps)
     return res.json(toPublicPromotionAdPayloads(bookings));
   }));
 
-  app.get('/api/promotions/chat-ads', catchAsync(async (_req, res) => {
-    const bookings = await PromotionService.getActiveChatAds();
-    setPublicCache(res, PUBLIC_ACTIVE_AD_CACHE_SECONDS, PUBLIC_ACTIVE_AD_STALE_SECONDS, PUBLIC_ACTIVE_AD_STALE_SECONDS);
-    return res.json(toPublicPromotionAdPayloads(bookings));
-  }));
-
   app.get('/api/me/promotions', authMiddleware, mustAuth, catchAsync(async (req: AuthRequest, res) => {
     const bookings = await PromotionService.listUserBookings(req.user.id);
     setNoStore(res);

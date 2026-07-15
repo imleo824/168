@@ -1,13 +1,7 @@
 import { memo, type ComponentProps } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { Heart } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import PageHeader from '@/ui/PageHeader';
-import TopbarIconButton from '@/ui/TopbarIconButton';
 import { TopbarOnlineBadge } from '@/ui/TopbarActions';
-import { useAuth } from '@/context/AuthContext';
-import { warmupNavigationIntent } from '@/utils/routeWarmups';
-import { apiFetch } from '@/services/api';
 
 type PageHeaderProps = ComponentProps<typeof PageHeader>;
 
@@ -15,12 +9,6 @@ interface HomeTopbarProps {
   onlineCountText: string;
   className?: string;
   skeletonAvatar?: boolean;
-}
-
-async function fetchUnreadNotificationCount() {
-  const res = await apiFetch('/api/me/notifications/unread-count');
-  if (!res.ok) return { unreadCount: 0 };
-  return res.json() as Promise<{ unreadCount: number }>;
 }
 
 export const HOME_TOPBAR_TITLE = 'tuitui';
@@ -67,21 +55,6 @@ export const HomeTopbar = memo(function HomeTopbar({
   className = '',
   skeletonAvatar = false,
 }: HomeTopbarProps) {
-  const { user, requireAuth } = useAuth();
-  const navigate = useNavigate();
-  const unreadQuery = useQuery({
-    queryKey: ['me', 'notifications', 'unread-count'],
-    queryFn: fetchUnreadNotificationCount,
-    enabled: Boolean(user?.id),
-    staleTime: 30_000,
-    refetchOnWindowFocus: true,
-  });
-  const hasUnread = Math.max(0, Math.floor(Number(unreadQuery.data?.unreadCount || 0))) > 0;
-
-  const openMessages = () => {
-    warmupNavigationIntent('auth');
-    requireAuth(() => navigate('/messages'));
-  };
   const left: PageHeaderProps['left'] = skeletonAvatar ? (
     <span
       aria-hidden="true"
@@ -89,20 +62,7 @@ export const HomeTopbar = memo(function HomeTopbar({
     >
       <span className="ui-skeleton-shimmer" />
     </span>
-  ) : (
-    <TopbarIconButton
-      icon={
-        <span className="home-topbar-message-icon home-topbar-message-icon--heart" aria-hidden="true">
-          <Heart />
-          {hasUnread ? <span className="home-topbar-message-dot" /> : null}
-        </span>
-      }
-      onClick={openMessages}
-      ariaLabel={hasUnread ? '进入消息，有未读消息' : '进入消息'}
-      title="消息"
-      tone="default"
-    />
-  );
+  ) : null;
 
   return (
     <PageHeader

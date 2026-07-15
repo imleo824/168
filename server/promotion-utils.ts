@@ -16,7 +16,6 @@ const PROMOTION_TYPES = new Set<string>([
   PromotionType.AD_HOME,
   PromotionType.PIN_HOME,
   PromotionType.PIN_CATEGORY,
-  PromotionType.PIN_CHAT,
 ]);
 
 export type SlotOwnership = {
@@ -121,9 +120,9 @@ export function normalizeSlotIndices(slotIndices: unknown, type: PromotionType) 
   const normalized = Array.from(new Set(rawList.map((item) => Number(item))))
     .filter((slot) => Number.isFinite(slot) && Number.isInteger(slot));
 
-  if (type === PromotionType.AD_HOME || type === PromotionType.PIN_CHAT) {
+  if (type === PromotionType.AD_HOME) {
     if (normalized.length !== 1 || !HOME_AD_SLOT_INDICES.has(normalized[0])) {
-      throw new Error(type === PromotionType.PIN_CHAT ? '请选择有效的聊天室置顶位置' : '请选择有效的首页横幅广告位置');
+      throw new Error('请选择有效的首页横幅广告位置');
     }
     return normalized;
   }
@@ -140,7 +139,7 @@ export function homeAdSlotLabel(slotIndex: number) {
 }
 
 export function isBannerAdPromotion(type: PromotionType) {
-  return type === PromotionType.AD_HOME || type === PromotionType.PIN_CHAT;
+  return type === PromotionType.AD_HOME;
 }
 
 type NormalizeDateKeysOptions = {

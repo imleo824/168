@@ -666,7 +666,6 @@ export default function Admin() {
   );
   const isInteractionAutomationTab = (tab: AdminTab) => (
     tab === 'interaction-config' ||
-    tab === 'chat-config' ||
     tab === 'quote-publish' ||
     tab === 'comment-publish' ||
     tab === 'auto-like' ||
@@ -786,10 +785,6 @@ export default function Admin() {
   useEffect(() => {
     if (activeTab === 'report') {
       fetchOpsReport();
-      return;
-    }
-    if (activeTab === 'chat-config') {
-      void fetchChatControls();
       return;
     }
     if (activeTab === 'model-config') {
@@ -1030,13 +1025,7 @@ export default function Admin() {
 
         {isInteractionAutomationTab(activeTab) && (
           <AdminInteractionConfigPanel
-            initialTab={activeTab === 'interaction-config' ? 'chat-config' : activeTab as any}
-            chatConfigDraft={chatConfigDraft}
-            isLoadingChatControls={isLoadingChatControls}
-            isSaving={isSaving}
-            fetchChatControls={fetchChatControls}
-            saveChatConfig={saveChatConfig}
-            setChatConfigDraft={setChatConfigDraft}
+            initialTab={activeTab === 'interaction-config' ? 'quote-publish' : activeTab as any}
           />
         )}
 

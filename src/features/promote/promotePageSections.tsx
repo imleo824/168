@@ -97,34 +97,30 @@ export function PromoteSlotSection({
   selectedType,
   selectedHomeAdSlot,
   priceForHomeAdSlot,
-  priceForChatAdSlot,
   onHomeAdSlotChange,
 }: {
   selectedType: PromotionTypeId;
   selectedHomeAdSlot: number;
   priceForHomeAdSlot: (slotIndex: number) => number;
-  priceForChatAdSlot: (slotIndex: number) => number;
   onHomeAdSlotChange: (slotIndex: number) => void;
 }) {
   return (
     <section className="promote-section">
       <StepHeader
-        title={selectedType === 'PIN_CHAT' ? '聊天室置顶位置' : '首页横幅广告位置'}
+        title="首页横幅广告位置"
       />
 
       <div className="promote-slot-grid">
         {HOME_AD_SLOTS.map((slot) => {
           const active = selectedHomeAdSlot === slot.index;
-          const price = selectedType === 'PIN_CHAT'
-            ? priceForChatAdSlot(slot.index)
-            : priceForHomeAdSlot(slot.index);
+          const price = priceForHomeAdSlot(slot.index);
 
           return (
             <button
               key={slot.index}
               type="button"
               onClick={() => onHomeAdSlotChange(slot.index)}
-              aria-label={`选择${selectedType === 'PIN_CHAT' ? promotionTypeLabel('PIN_CHAT') : promotionTypeLabel('AD_HOME')}${slot.desc}，${price || 0}积分每天`}
+              aria-label={`选择${promotionTypeLabel('AD_HOME')}${slot.desc}，${price || 0}积分每天`}
               aria-pressed={active}
               className={`pressable promote-slot-card ${
                 active ? 'is-active promote-card-active' : 'promote-card-idle'

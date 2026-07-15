@@ -18,7 +18,6 @@ export const adminTabs: Array<{ id: AdminTab; label: string; icon: (size?: numbe
   { id: 'orders', label: '充值管理', icon: (size = 16) => <ShieldCheck size={size} /> },
   { id: 'transactions', label: '交易管理', icon: (size = 16) => <Coins size={size} /> },
   { id: 'referral-withdrawals', label: '邀请提现', icon: (size = 16) => <Wallet size={size} /> },
-  { id: 'chat', label: '聊天管理', icon: (size = 16) => <MessageSquare size={size} /> },
 ];
 
 export const systemConfigTabs: Array<{ id: AdminTab; label: string; icon: (size?: number) => ReactElement }> = [
@@ -31,7 +30,6 @@ export const systemConfigTabs: Array<{ id: AdminTab; label: string; icon: (size?
 ];
 
 export const interactionSubTabs: Array<{ id: AdminTab; label: string; icon: (size?: number) => ReactElement }> = [
-  { id: 'chat-config', label: '自动聊天', icon: (size = 16) => <MessageSquare size={size} /> },
   { id: 'quote-publish', label: '自动引用', icon: (size = 16) => <Quote size={size} /> },
   { id: 'comment-publish', label: '自动评论', icon: (size = 16) => <MessageSquare size={size} /> },
   { id: 'auto-like', label: '自动点赞', icon: (size = 16) => <Heart size={size} /> },

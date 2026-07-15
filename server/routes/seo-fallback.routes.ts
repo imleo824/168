@@ -894,7 +894,6 @@ export function registerSeoFallbackRoutes(app: Express, options: RegisterSeoFall
   }));
 
   app.get([
-    '/chat',
     '/create',
     '/sponsor',
     '/promote',
@@ -909,7 +908,6 @@ export function registerSeoFallbackRoutes(app: Express, options: RegisterSeoFall
 
     const origin = getPublicOrigin(req);
     const titleMap: Record<string, string> = {
-      '/chat': '聊天室',
       '/create': '发布分类信息',
       '/sponsor': '推广内容',
       '/promote': '推广内容',
