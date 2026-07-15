@@ -175,15 +175,19 @@ assert(
 assert(
   commentSheet.includes('useInteractionGuard(refetchComments') &&
     commentSheet.includes('useInteractionGuard(fetchNextComments') &&
+    commentSheet.includes('useInteractionGuard(submitComment') &&
     commentSheet.includes('const retryBusy = commentsQuery.isRefetching || refetchCommentsGuardPending;') &&
     commentSheet.includes('const loadMoreBusy = commentsQuery.isFetchingNextPage || fetchNextCommentsGuardPending;') &&
+    commentSheet.includes('const submitBusy = createMutation.isPending || submitCommentGuardPending;') &&
     commentSheet.includes('onClick={() => void guardedRefetchComments()}') &&
     commentSheet.includes('onRetry={() => void guardedRefetchComments()}') &&
     commentSheet.includes('onLoadMore={() => void guardedFetchNextComments()}') &&
+    commentSheet.includes('onSubmit={(content) => void guardedSubmitComment(content)}') &&
     !commentSheet.includes('onAction={() => void commentsQuery.refetch()}') &&
     !commentSheet.includes('onRetry={() => void commentsQuery.refetch()}') &&
-    !commentSheet.includes('onLoadMore={() => void commentsQuery.fetchNextPage()}'),
-  'Comment sheet retry and load-more actions must use guarded handlers instead of direct query calls.',
+    !commentSheet.includes('onLoadMore={() => void commentsQuery.fetchNextPage()}') &&
+    !commentSheet.includes('onSubmit={(content) => createMutation.mutate(content)}'),
+  'Comment sheet retry, load-more, and submit actions must use guarded handlers instead of direct query/mutation calls.',
 );
 
 assert(

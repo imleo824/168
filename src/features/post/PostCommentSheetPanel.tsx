@@ -228,11 +228,10 @@ export const PostCommentSheetPanel = memo(function PostCommentSheetPanel({
     });
   }, [createMutation.isPending, postId, requireAuth]);
 
-  const handleCloseComposer = useCallback(() => {
-    if (createMutation.isPending) return;
-    setIsComposerOpen(false);
-    setComposerError('');
-  }, [createMutation.isPending]);
+  const submitComment = useCallback(async (content: string) => {
+    if (!postId || createMutation.isPending) return;
+    await createMutation.mutateAsync(content);
+  }, [createMutation, postId]);
   const refetchComments = useCallback(async () => {
     await commentsQuery.refetch();
   }, [commentsQuery]);
@@ -251,8 +250,20 @@ export const PostCommentSheetPanel = memo(function PostCommentSheetPanel({
     minPendingMs: 160,
     mode: 'drop',
   });
+  const { guarded: guardedSubmitComment, isPending: submitCommentGuardPending } = useInteractionGuard(submitComment, {
+    policy: 'critical',
+    cooldownMs: 720,
+    minPendingMs: 220,
+    mode: 'drop',
+  });
   const retryBusy = commentsQuery.isRefetching || refetchCommentsGuardPending;
   const loadMoreBusy = commentsQuery.isFetchingNextPage || fetchNextCommentsGuardPending;
+  const submitBusy = createMutation.isPending || submitCommentGuardPending;
+  const handleCloseComposer = useCallback(() => {
+    if (submitBusy) return;
+    setIsComposerOpen(false);
+    setComposerError('');
+  }, [submitBusy]);
 
   return (
     <>
@@ -272,9 +283,9 @@ export const PostCommentSheetPanel = memo(function PostCommentSheetPanel({
               size="md"
               onClick={handleOpenComposer}
               instantPress={false}
-              disabled={!postId || createMutation.isPending}
-              state={!postId || createMutation.isPending ? 'disabled' : 'idle'}
-              aria-busy={createMutation.isPending || undefined}
+              disabled={!postId || submitBusy}
+              state={!postId ? 'disabled' : submitBusy ? 'loading' : 'idle'}
+              aria-busy={submitBusy || undefined}
               className="post-quote-create-action post-comment-create-action"
             >
               <MessageCircle className="post-quote-create-action-icon post-comment-create-action-icon" aria-hidden="true" />
@@ -330,9 +341,9 @@ export const PostCommentSheetPanel = memo(function PostCommentSheetPanel({
       </BottomSheet>
       <PostCommentComposerDialog
         open={isComposerOpen}
-        isSubmitting={createMutation.isPending}
+        isSubmitting={submitBusy}
         error={composerError}
-        onSubmit={(content) => createMutation.mutate(content)}
+        onSubmit={(content) => void guardedSubmitComment(content)}
         onClose={handleCloseComposer}
       />
     </>
