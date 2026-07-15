@@ -3,6 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, ty
 import { useQueryClient } from "@tanstack/react-query";
 import { useInfinitePosts, useUser, useFollowStatus } from "@/hooks/useData";
 import { useAuth } from "@/context/AuthContext";
+import { useInteractionGuard } from "@/hooks/useInteractionGuard";
 import PageHeader from '@/ui/PageHeader';
 import PostFeedList from "@/features/feed/PostFeedList";
 import SEO from "@/platform/SEO";
@@ -167,6 +168,7 @@ export default function UserSpace() {
     isError: userError,
     error: userLoadError,
     refetch: refetchUser,
+    isRefetching: isUserRefetching,
   } = useUser(safeId);
   const { data: followStatus } = useFollowStatus(safeId, !!currentUser?.id && currentUser.id !== safeId);
   const postsQuery = useInfinitePosts({ userId: safeId, enabled: !!safeId });
@@ -178,6 +180,7 @@ export default function UserSpace() {
     isLoading: postsLoading,
     isError: postsError,
     refetch: refetchPosts,
+    isRefetching: isPostsRefetching,
   } = postsQuery;
   const postsLoadMoreInFlightRef = useRef(false);
   const [postsLoadMoreError, setPostsLoadMoreError] = useState(false);
@@ -306,6 +309,36 @@ export default function UserSpace() {
         window.setTimeout(release, 260);
       });
   }, [fetchMorePosts, hasMorePostsRaw, isLoadingMorePosts]);
+  const refetchUserSpace = useCallback(async () => {
+    await Promise.all([
+      refetchUser(),
+      refetchPosts(),
+    ]);
+  }, [refetchPosts, refetchUser]);
+  const refetchUserPosts = useCallback(async () => {
+    await refetchPosts();
+  }, [refetchPosts]);
+  const { guarded: guardedRefetchUserSpace, isPending: userSpaceRefetchGuardPending } = useInteractionGuard(refetchUserSpace, {
+    policy: 'optimistic',
+    cooldownMs: 520,
+    minPendingMs: 160,
+    mode: 'drop',
+  });
+  const { guarded: guardedRefetchUserPosts, isPending: postsRefetchGuardPending } = useInteractionGuard(refetchUserPosts, {
+    policy: 'optimistic',
+    cooldownMs: 520,
+    minPendingMs: 160,
+    mode: 'drop',
+  });
+  const { guarded: guardedRequestMorePosts, isPending: loadMoreGuardPending } = useInteractionGuard(requestMorePosts, {
+    policy: 'optimistic',
+    cooldownMs: 520,
+    minPendingMs: 160,
+    mode: 'drop',
+  });
+  const userSpaceRetryBusy = isUserRefetching || isPostsRefetching || userSpaceRefetchGuardPending;
+  const postsRetryBusy = isPostsRefetching || postsRefetchGuardPending;
+  const loadMoreBusy = isLoadingMorePosts || loadMoreGuardPending;
 
   const isTitleLoading = !resolvedUserName && (userLoading || postsLoading);
   const isLoading = userLoading || postsLoading;
@@ -444,11 +477,6 @@ export default function UserSpace() {
     }
   };
 
-  const handleRetryUserSpace = useCallback(() => {
-    void refetchUser();
-    void refetchPosts();
-  }, [refetchPosts, refetchUser]);
-
   useEffect(() => {
     postsLoadMoreInFlightRef.current = false;
     setPostsLoadMoreError(false);
@@ -535,8 +563,8 @@ export default function UserSpace() {
             compact
             className="user-space-state-block"
             action={
-              <ActionButton type="button" variant="muted" onClick={handleRetryUserSpace}>
-                重新加载
+              <ActionButton type="button" variant="muted" disabled={userSpaceRetryBusy} state={userSpaceRetryBusy ? 'loading' : 'idle'} onClick={() => void guardedRefetchUserSpace()}>
+                {userSpaceRetryBusy ? '加载中' : '重新加载'}
               </ActionButton>
             }
           />
@@ -578,8 +606,8 @@ export default function UserSpace() {
       compact
       className="user-space-state-block"
       action={
-        <ActionButton type="button" variant="muted" onClick={() => void refetchPosts()}>
-          重新加载
+        <ActionButton type="button" variant="muted" disabled={postsRetryBusy} state={postsRetryBusy ? 'loading' : 'idle'} onClick={() => void guardedRefetchUserPosts()}>
+          {postsRetryBusy ? '加载中' : '重新加载'}
         </ActionButton>
       }
     />
@@ -588,7 +616,7 @@ export default function UserSpace() {
   ) : (
     <div className={isMobile ? 'user-space-posts-mobile-wrap' : 'user-space-posts-desktop-wrap'}>
       <PostFeedList posts={posts} enableRecommendationControls={currentUser?.id !== safeId} />
-      <ListLoadMoreState error={postsLoadMoreError} loading={isLoadingMorePosts} hasMore={hasMorePosts} onRetry={requestMorePosts} onLoadMore={requestMorePosts} loadingText="正在加载更多" doneText="已经到底啦" />
+      <ListLoadMoreState error={postsLoadMoreError} loading={loadMoreBusy} hasMore={hasMorePosts} onRetry={() => void guardedRequestMorePosts()} onLoadMore={() => void guardedRequestMorePosts()} loadingText="正在加载更多" doneText="已经到底啦" />
     </div>
   );
 

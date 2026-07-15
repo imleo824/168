@@ -72,6 +72,7 @@ const referralInvitePageContent = read('src/features/sponsor/ReferralInvitePageC
 const transactionHistoryPage = read('src/pages/TransactionHistoryMobile.tsx');
 const referralInviteRecordsPage = read('src/pages/ReferralInviteRecordsMobile.tsx');
 const promotionEffectsHistoryPage = read('src/pages/PromotionEffectsHistory.tsx');
+const userSpacePage = read('src/pages/UserSpace.tsx');
 
 assert(
   /<div\s+className="app-main app-shell-main"/.test(appShell) &&
@@ -394,6 +395,23 @@ assert(
     promotionEffectsHistoryPage.includes('onClick={() => void guardedRefetchPromotionEffects()}') &&
     !promotionEffectsHistoryPage.includes('void promotionEffectsQuery.refetch();'),
   'Promotion effects history retry action must use a guarded refetch instead of direct query refetch.',
+);
+
+assert(
+  userSpacePage.includes('useInteractionGuard(refetchUserSpace') &&
+    userSpacePage.includes('useInteractionGuard(refetchUserPosts') &&
+    userSpacePage.includes('useInteractionGuard(requestMorePosts') &&
+    userSpacePage.includes('const userSpaceRetryBusy = isUserRefetching || isPostsRefetching || userSpaceRefetchGuardPending;') &&
+    userSpacePage.includes('const postsRetryBusy = isPostsRefetching || postsRefetchGuardPending;') &&
+    userSpacePage.includes('const loadMoreBusy = isLoadingMorePosts || loadMoreGuardPending;') &&
+    userSpacePage.includes('onClick={() => void guardedRefetchUserSpace()}') &&
+    userSpacePage.includes('onClick={() => void guardedRefetchUserPosts()}') &&
+    userSpacePage.includes('onRetry={() => void guardedRequestMorePosts()}') &&
+    userSpacePage.includes('onLoadMore={() => void guardedRequestMorePosts()}') &&
+    !userSpacePage.includes('onClick={() => void refetchPosts()}') &&
+    !userSpacePage.includes('onRetry={requestMorePosts}') &&
+    !userSpacePage.includes('onLoadMore={requestMorePosts}'),
+  'User space profile, posts retry, and load-more actions must use guarded handlers instead of direct query calls.',
 );
 
 assert(
