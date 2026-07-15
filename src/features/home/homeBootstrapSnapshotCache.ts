@@ -1,4 +1,4 @@
-import { safeLocalStorage } from '@/utils/storage';
+import { safeJsonParse, safeLocalStorage } from '@/utils/storage';
 import type { HomeBootstrap } from '@/types';
 
 const HOME_BOOTSTRAP_SNAPSHOT_KEY = 'tuitui:home-bootstrap-snapshot:v3';
@@ -10,15 +10,6 @@ type HomeBootstrapSnapshot = {
   updatedAt: number;
   data: HomeBootstrap;
 };
-
-function safeJsonParse<T>(value: string | null): T | null {
-  if (!value) return null;
-  try {
-    return JSON.parse(value) as T;
-  } catch {
-    return null;
-  }
-}
 
 function isValidSnapshot(snapshot: HomeBootstrapSnapshot | null) {
   if (!snapshot || snapshot.version !== HOME_BOOTSTRAP_SNAPSHOT_VERSION) return false;

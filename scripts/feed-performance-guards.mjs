@@ -22,8 +22,10 @@ const prismaSchema = read('prisma/schema.prisma');
 const apiClient = read('src/services/api.ts');
 const homeFeedQueries = read('src/hooks/useHomeFeedQueries.ts');
 const homeFeedCacheKey = read('src/features/home/homeFeedCacheKey.ts');
+const homeFeedSnapshotCache = read('src/features/home/homeFeedSnapshotCache.ts');
 const homePage = read('src/pages/Home.tsx');
 const homeTopicTabs = read('src/features/home/HomeTopicTabs.tsx');
+const storageUtils = read('src/utils/storage.ts');
 
 for (const path of [
   '/api/me',
@@ -257,6 +259,24 @@ assert.match(
   homeFeedQueries,
   /function getSnapshotInitialState[\s\S]*initialDataUpdatedAt: snapshot\.updatedAt/,
   'home feed should derive initial data and timestamp from the same snapshot read',
+);
+
+assert.match(
+  storageUtils,
+  /export function getStorageKeysByPrefix[\s\S]*storage\.key\(index\)/,
+  'safe storage should expose prefix key iteration for cache cleanup paths',
+);
+
+assert.doesNotMatch(
+  homeFeedSnapshotCache,
+  /window\.localStorage/,
+  'home feed snapshot cleanup must use safe storage instead of raw localStorage',
+);
+
+assert.match(
+  homeFeedSnapshotCache,
+  /getStorageKeysByPrefix\(HOME_FEED_SNAPSHOT_PREFIX\)/,
+  'home feed snapshot cleanup should work with the safe storage fallback',
 );
 
 assert.match(

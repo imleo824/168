@@ -1,4 +1,4 @@
-import { safeLocalStorage } from '@/utils/storage';
+import { getStorageKeysByPrefix, safeJsonParse, safeLocalStorage } from '@/utils/storage';
 import type { CategoryMetaFeedFilters, Post } from '@/types';
 import type { HomeFeedKind } from '@/features/home/homeTypes';
 import { stableHomeFeedParams, stableHomeFeedParamsKey } from '@/features/home/homeFeedCacheKey';
@@ -27,15 +27,6 @@ export type HomeFeedSnapshotParams = {
   categoryMetaScope?: string;
   categoryMetaFilters?: CategoryMetaFeedFilters;
 };
-
-function safeJsonParse<T>(value: string | null): T | null {
-  if (!value) return null;
-  try {
-    return JSON.parse(value) as T;
-  } catch {
-    return null;
-  }
-}
 
 export function buildHomeFeedSnapshotKey(version: string, viewerId: string | null | undefined, params: HomeFeedSnapshotParams) {
   const viewer = viewerId ? `user:${viewerId}` : 'anonymous';
@@ -87,13 +78,7 @@ export function writeHomeFeedSnapshot(
 
 export function clearHomeFeedSnapshots() {
   try {
-    if (typeof window === 'undefined' || !window.localStorage) return;
-    const keys: string[] = [];
-    for (let index = 0; index < window.localStorage.length; index += 1) {
-      const key = window.localStorage.key(index);
-      if (key?.startsWith(HOME_FEED_SNAPSHOT_PREFIX)) keys.push(key);
-    }
-    keys.forEach((key) => safeLocalStorage.removeItem(key));
+    getStorageKeysByPrefix(HOME_FEED_SNAPSHOT_PREFIX).forEach((key) => safeLocalStorage.removeItem(key));
   } catch {
     // Snapshot cleanup is best-effort. React Query invalidation remains the source of truth.
   }

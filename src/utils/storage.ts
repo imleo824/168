@@ -1,8 +1,12 @@
 class MemoryStorage {
   private store: Record<string, string> = {};
 
+  get length(): number {
+    return Object.keys(this.store).length;
+  }
+
   getItem(key: string): string | null {
-    return this.store[key] || null;
+    return Object.prototype.hasOwnProperty.call(this.store, key) ? this.store[key] : null;
   }
 
   setItem(key: string, value: string): void {
@@ -16,34 +20,64 @@ class MemoryStorage {
   clear(): void {
     this.store = {};
   }
+
+  key(index: number): string | null {
+    return Object.keys(this.store)[index] || null;
+  }
 }
 
 export type StorageInterface = {
+  readonly length: number;
   getItem(key: string): string | null;
+  key(index: number): string | null;
   setItem(key: string, value: string): void;
   removeItem(key: string): void;
 };
 
-let safeLocalStorageInstance: StorageInterface;
-
-try {
-  const testKey = '__storage_test_key__';
-  window.localStorage.setItem(testKey, 'test');
-  const res = window.localStorage.getItem(testKey);
-  window.localStorage.removeItem(testKey);
-  if (res === 'test') {
-    safeLocalStorageInstance = window.localStorage;
-  } else {
-    throw new Error('Storage test did not retrieve the same value');
-  }
-} catch (e) {
-  console.warn('localStorage is blocked or unavailable in this environment (likely due to iframe third-party cookie/storage restrictions). Falling back to dynamic memory storage.');
-  const memoryStore = new MemoryStorage();
-  safeLocalStorageInstance = {
-    getItem: (key) => memoryStore.getItem(key),
-    setItem: (key, value) => memoryStore.setItem(key, value),
-    removeItem: (key) => memoryStore.removeItem(key),
-  };
+function createMemoryStorage(): StorageInterface {
+  return new MemoryStorage();
 }
 
-export const safeLocalStorage = safeLocalStorageInstance;
+function getAvailableBrowserLocalStorage(): StorageInterface | null {
+  if (typeof window === 'undefined') return null;
+  const testKey = '__storage_test_key__';
+  try {
+    const storage = window.localStorage;
+    storage.setItem(testKey, 'test');
+    const res = storage.getItem(testKey);
+    storage.removeItem(testKey);
+    return res === 'test' ? storage : null;
+  } catch {
+    return null;
+  }
+}
+
+const browserLocalStorage = getAvailableBrowserLocalStorage();
+
+if (!browserLocalStorage && typeof window !== 'undefined') {
+  console.warn('localStorage is blocked or unavailable in this environment (likely due to iframe third-party cookie/storage restrictions). Falling back to dynamic memory storage.');
+}
+
+export const safeLocalStorage = browserLocalStorage || createMemoryStorage();
+
+export function getStorageKeysByPrefix(prefix: string, storage: StorageInterface = safeLocalStorage) {
+  const keys: string[] = [];
+  try {
+    for (let index = 0; index < storage.length; index += 1) {
+      const key = storage.key(index);
+      if (key?.startsWith(prefix)) keys.push(key);
+    }
+  } catch {
+    return [];
+  }
+  return keys;
+}
+
+export function safeJsonParse<T>(value: string | null): T | null {
+  if (!value) return null;
+  try {
+    return JSON.parse(value) as T;
+  } catch {
+    return null;
+  }
+}
