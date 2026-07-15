@@ -65,6 +65,7 @@ const categoryFeed = read('src/pages/CategoryFeedMobile.tsx');
 const homePageSource = read('src/pages/Home.tsx');
 const sponsorPage = read('src/features/sponsor/SponsorMobilePage.tsx');
 const profileRoute = read('src/pages/ProfileMobile.tsx');
+const profileMobilePage = read('src/features/profile/ProfileMobilePage.tsx');
 const messagesPage = read('src/pages/MessagesMobile.tsx');
 const messagesStyles = read('src/styles/features/messages.css');
 const tuiPlusLinkEditor = read('src/pages/TuiPlusLinkEditorMobile.tsx');
@@ -351,6 +352,20 @@ assert(
     profileRoute.includes('cooldownMs: 520') &&
     profileRoute.includes('mode: \'drop\''),
   'Profile settings topbar entry must be guarded so rapid taps do not repeatedly proxy-click the settings sheet trigger.',
+);
+
+assert(
+  profileMobilePage.includes('useInteractionGuard(fetchNextFollowingUsersPage') &&
+    profileMobilePage.includes('useInteractionGuard(fetchNextFansPage') &&
+    profileMobilePage.includes('useInteractionGuard<[string]>(openRelationUser') &&
+    profileMobilePage.includes('if (isFetchingNextFollowingUsers || !hasMoreFollowingUsers) return;') &&
+    profileMobilePage.includes('if (isFetchingNextFans || !hasMoreFans) return;') &&
+    profileMobilePage.includes('onFetchNextFollowingUsers={() => void guardedFetchNextFollowingUsers()}') &&
+    profileMobilePage.includes('onFetchNextFans={() => void guardedFetchNextFans()}') &&
+    profileMobilePage.includes('onOpenUser={(targetUserId) => void guardedOpenRelationUser(targetUserId)}') &&
+    !profileMobilePage.includes('onFetchNextFollowingUsers={() => void fetchNextFollowingUsers()}') &&
+    !profileMobilePage.includes('onFetchNextFans={() => void fetchNextFans()}'),
+  'Profile relation list pagination and user navigation must be guarded against rapid duplicate page requests and route changes.',
 );
 
 assert(

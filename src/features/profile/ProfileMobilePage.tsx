@@ -501,6 +501,19 @@ export default function ProfileMobile() {
     }
   };
 
+  const fetchNextFollowingUsersPage = useCallback(async () => {
+    if (isFetchingNextFollowingUsers || !hasMoreFollowingUsers) return;
+    await fetchNextFollowingUsers();
+  }, [fetchNextFollowingUsers, hasMoreFollowingUsers, isFetchingNextFollowingUsers]);
+  const fetchNextFansPage = useCallback(async () => {
+    if (isFetchingNextFans || !hasMoreFans) return;
+    await fetchNextFans();
+  }, [fetchNextFans, hasMoreFans, isFetchingNextFans]);
+  const openRelationUser = useCallback((targetUserId: string) => {
+    if (!targetUserId) return;
+    navigate(user?.id === targetUserId ? '/profile' : `/user/${targetUserId}`);
+  }, [navigate, user?.id]);
+
   const { guarded: guardedStatusChange } = useInteractionGuard(handleStatusChange, 520);
   const { guarded: guardedDelete } = useInteractionGuard(handleDelete, 520);
   const { guarded: guardedSaveLoginAccount } = useInteractionGuard(handleSaveLoginAccount, 520);
@@ -508,6 +521,21 @@ export default function ProfileMobile() {
   const { guarded: guardedSaveContact } = useInteractionGuard(handleSaveContact, 520);
   const { guarded: guardedSavePassword } = useInteractionGuard(handleSavePassword, 520);
   const { guarded: guardedSavePaymentPassword } = useInteractionGuard(handleSavePaymentPassword, 520);
+  const { guarded: guardedFetchNextFollowingUsers } = useInteractionGuard(fetchNextFollowingUsersPage, {
+    policy: 'optimistic',
+    cooldownMs: 520,
+    mode: 'drop',
+  });
+  const { guarded: guardedFetchNextFans } = useInteractionGuard(fetchNextFansPage, {
+    policy: 'optimistic',
+    cooldownMs: 520,
+    mode: 'drop',
+  });
+  const { guarded: guardedOpenRelationUser } = useInteractionGuard<[string]>(openRelationUser, {
+    policy: 'instant',
+    cooldownMs: 360,
+    mode: 'drop',
+  });
 
   if (!user) {
     return (
@@ -641,9 +669,9 @@ export default function ProfileMobile() {
           onStatusChange={guardedStatusChange}
           onDelete={guardedDelete}
           onTelegramSync={handleTelegramSync}
-          onFetchNextFollowingUsers={() => void fetchNextFollowingUsers()}
-          onFetchNextFans={() => void fetchNextFans()}
-          onOpenUser={(targetUserId) => navigate(user?.id === targetUserId ? '/profile' : `/user/${targetUserId}`)}
+          onFetchNextFollowingUsers={() => void guardedFetchNextFollowingUsers()}
+          onFetchNextFans={() => void guardedFetchNextFans()}
+          onOpenUser={(targetUserId) => void guardedOpenRelationUser(targetUserId)}
         />
       </PageContentShell>
       <ProfileSecuritySheet
