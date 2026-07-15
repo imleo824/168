@@ -377,6 +377,11 @@ export default function UserSpace() {
       }
     });
   }, [displayUser?.contact, requireAuth, showToast]);
+  const { guarded: guardedContactUser } = useInteractionGuard(handleContact, {
+    policy: 'instant',
+    cooldownMs: 720,
+    mode: 'drop',
+  });
 
   const handleCoverButtonClick = useCallback(() => {
     if (!isOwnProfile) return;
@@ -589,7 +594,7 @@ export default function UserSpace() {
       postsCount={posts.length}
       isOwnProfile={isOwnProfile}
       canContact={canContactUser}
-      onContact={handleContact}
+      onContact={() => void guardedContactUser()}
       onCoverClick={handleCoverButtonClick}
       coverUrl={coverPreviewUrl}
       profileRef={profileHeaderRef}

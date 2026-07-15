@@ -4,6 +4,7 @@ import { ExternalLink, Link2 } from 'lucide-react';
 
 import { APP_ROUTES } from '@/app/routePaths';
 import { useAuth } from '@/context/AuthContext';
+import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import { apiFetch } from '@/services/api';
 
 type ContactKind = 'telegram' | 'whatsapp' | 'line' | 'generic';
@@ -290,6 +291,11 @@ export default function UserSpaceTuiPlusLinks({ displayUser, isOwnProfile }: Pro
     if (!isOwnProfile) return;
     requireAuth(() => navigate(APP_ROUTES.tuiPlusLinkEditor));
   };
+  const { guarded: guardedOpenEditor } = useInteractionGuard(openEditor, {
+    policy: 'instant',
+    cooldownMs: 520,
+    mode: 'drop',
+  });
 
   if (!hasProfileLinks && !isOwnProfile) return null;
 
@@ -354,7 +360,7 @@ export default function UserSpaceTuiPlusLinks({ displayUser, isOwnProfile }: Pro
 
       {isOwnProfile ? (
         <div className="user-space-plus-actions" aria-label="添加会员主页链接">
-          <button type="button" className="user-space-plus-action pressable" onClick={openEditor}>
+          <button type="button" className="user-space-plus-action pressable" onClick={() => void guardedOpenEditor()}>
             <span className="user-space-plus-action-copy">+链接</span>
           </button>
         </div>

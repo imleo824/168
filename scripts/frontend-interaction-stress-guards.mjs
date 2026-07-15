@@ -77,6 +77,7 @@ const transactionHistoryPage = read('src/pages/TransactionHistoryMobile.tsx');
 const referralInviteRecordsPage = read('src/pages/ReferralInviteRecordsMobile.tsx');
 const promotionEffectsHistoryPage = read('src/pages/PromotionEffectsHistory.tsx');
 const userSpacePage = read('src/pages/UserSpace.tsx');
+const userSpaceTuiPlusLinks = read('src/features/profile/UserSpaceTuiPlusLinks.tsx');
 const promoteHistoryPage = read('src/pages/PromoteHistory.tsx');
 
 assert(
@@ -502,6 +503,18 @@ assert(
     !userSpacePage.includes('onRetry={requestMorePosts}') &&
     !userSpacePage.includes('onLoadMore={requestMorePosts}'),
   'User space profile, posts retry, and load-more actions must use guarded handlers instead of direct query calls.',
+);
+
+assert(
+  userSpacePage.includes('useInteractionGuard(handleContact') &&
+    userSpacePage.includes('const { guarded: guardedContactUser }') &&
+    userSpacePage.includes('onContact={() => void guardedContactUser()}') &&
+    !userSpacePage.includes('onContact={handleContact}') &&
+    userSpaceTuiPlusLinks.includes('useInteractionGuard(openEditor') &&
+    userSpaceTuiPlusLinks.includes('const { guarded: guardedOpenEditor }') &&
+    userSpaceTuiPlusLinks.includes('onClick={() => void guardedOpenEditor()}') &&
+    !userSpaceTuiPlusLinks.includes('onClick={openEditor}'),
+  'User space contact and own profile link editor entries must be guarded against rapid duplicate external opens and route changes.',
 );
 
 assert(
