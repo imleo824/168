@@ -63,6 +63,7 @@ const sponsorPage = read('src/features/sponsor/SponsorMobilePage.tsx');
 const profileRoute = read('src/pages/ProfileMobile.tsx');
 const messagesPage = read('src/pages/MessagesMobile.tsx');
 const messagesStyles = read('src/styles/features/messages.css');
+const tuiPlusLinkEditor = read('src/pages/TuiPlusLinkEditorMobile.tsx');
 
 assert(
   /<div\s+className="app-main app-shell-main"/.test(appShell) &&
@@ -253,6 +254,16 @@ assert(
     messagesStyles.includes('opacity: var(--ui-opacity-disabled);') &&
     messagesStyles.includes('transform: var(--ui-transform-none);'),
   'Messages mark-all-read busy state must have a stable disabled visual treatment.',
+);
+
+assert(
+  tuiPlusLinkEditor.includes('useInteractionGuard(saveAll') &&
+    tuiPlusLinkEditor.includes("policy: 'critical'") &&
+    tuiPlusLinkEditor.includes('mode: \'drop\'') &&
+    tuiPlusLinkEditor.includes('const saveBusy = isSaving || saveGuardPending;') &&
+    tuiPlusLinkEditor.includes('disabled={saveBusy}') &&
+    tuiPlusLinkEditor.includes('onClick={() => void guardedSaveAll()}'),
+  'Tui Plus link editor save must use a critical interaction guard and freeze editable controls while saving.',
 );
 
 if (failures.length > 0) {

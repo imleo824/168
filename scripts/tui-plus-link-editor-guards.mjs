@@ -17,6 +17,12 @@ mustHave('link editor expired prompt', linkEditor, 'TuiPlusBenefitPromptDialog')
 mustHave('link editor expired prompt', linkEditor, 'benefit="profileLinks"');
 mustHave('link editor expired prompt route state', linkEditor, "buildTuiPlusBenefitRouteState('profileLinks', currentPath)");
 mustHave('link editor save guard', linkEditor, 'if (isSaving || !activeMember) return;');
+mustHave('link editor rapid save guard', linkEditor, 'useInteractionGuard(saveAll');
+mustHave('link editor rapid save guard', linkEditor, "policy: 'critical'");
+mustHave('link editor rapid save guard', linkEditor, "mode: 'drop'");
+mustHave('link editor save busy state', linkEditor, 'const saveBusy = isSaving || saveGuardPending;');
+mustHave('link editor save busy state', linkEditor, 'disabled={saveBusy}');
+mustHave('link editor save busy action', linkEditor, 'onClick={() => void guardedSaveAll()}');
 mustHave('link editor user cache sync', linkEditor, 'plusStatus: payload.status');
 mustHave('link editor user cache sync', linkEditor, 'plusExpiresAt: payload.expiresAt');
 mustHave('link editor user cache sync', linkEditor, 'plusTrialUsed: payload.trialUsed');

@@ -4,6 +4,7 @@ import { useQueryClient } from '@tanstack/react-query';
 
 import { APP_ROUTES } from '@/app/routePaths';
 import { useAuth } from '@/context/AuthContext';
+import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import SEO from '@/platform/SEO';
 import { apiFetch } from '@/services/api';
 import ActionButton from '@/ui/ActionButton';
@@ -514,6 +515,13 @@ export default function TuiPlusLinkEditorMobile() {
       setIsSaving(false);
     }
   }, [activeMember, isSaving, queryClient, refreshStatus, rowsByType, showToast, user?.id]);
+  const { guarded: guardedSaveAll, isPending: saveGuardPending } = useInteractionGuard(saveAll, {
+    policy: 'critical',
+    cooldownMs: 640,
+    minPendingMs: 180,
+    mode: 'drop',
+  });
+  const saveBusy = isSaving || saveGuardPending;
 
   if (!statusReady) {
     return (
@@ -559,6 +567,7 @@ export default function TuiPlusLinkEditorMobile() {
                 aria-selected={activeTarget === config.target}
                 data-state={activeTarget === config.target ? 'active' : 'idle'}
                 className="tui-plus-link-editor-tab"
+                disabled={saveBusy}
                 onClick={() => setActiveTarget(config.target)}
               >
                 {config.tabLabel}
@@ -587,6 +596,7 @@ export default function TuiPlusLinkEditorMobile() {
                             placeholder={method.valuePlaceholder}
                             autoComplete="off"
                             inputMode={row.contactKind === 'whatsapp' ? 'tel' : 'text'}
+                            disabled={saveBusy}
                           />
                         </label>
                       ) : (
@@ -599,6 +609,7 @@ export default function TuiPlusLinkEditorMobile() {
                               placeholder="标题"
                               maxLength={40}
                               autoComplete="off"
+                              disabled={saveBusy}
                             />
                           </label>
                           <label className="tui-plus-link-editor-field">
@@ -609,6 +620,7 @@ export default function TuiPlusLinkEditorMobile() {
                               placeholder={activeConfig.valuePlaceholder}
                               autoComplete={activeConfig.target === 'website' ? 'url' : 'off'}
                               inputMode={activeConfig.target === 'website' ? 'url' : 'text'}
+                              disabled={saveBusy}
                             />
                           </label>
                           {activeConfig.target === 'channel' ? (
@@ -617,6 +629,7 @@ export default function TuiPlusLinkEditorMobile() {
                                 type="checkbox"
                                 checked={Boolean(row.autoPostEnabled)}
                                 onChange={(event) => updateChannelAutoPost(index, event.target.checked)}
+                                disabled={saveBusy}
                               />
                               <span>频道内容自动发帖</span>
                             </label>
@@ -633,8 +646,8 @@ export default function TuiPlusLinkEditorMobile() {
       </PageContentShell>
       <div className="tui-plus-link-editor-sticky-action ui-checkout-bar" data-bottom-nav-spacer="true">
         <div className="tui-plus-link-editor-sticky-shell" data-compact="true">
-          <ActionButton className="tui-plus-link-editor-save" variant="brand" disabled={isSaving} state={isSaving ? 'loading' : 'idle'} onClick={() => void saveAll()}>
-            {isSaving ? <InlineSpinner /> : null}
+          <ActionButton className="tui-plus-link-editor-save" variant="brand" disabled={saveBusy} state={saveBusy ? 'loading' : 'idle'} onClick={() => void guardedSaveAll()}>
+            {saveBusy ? <InlineSpinner /> : null}
             {hasUnsavedChanges ? '保存修改' : '保存'}
           </ActionButton>
         </div>
