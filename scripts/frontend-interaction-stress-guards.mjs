@@ -62,6 +62,7 @@ const homeRefresh = read('src/hooks/useHomeRefresh.ts');
 const listLoadMoreState = read('src/ui/ListLoadMoreState.tsx');
 const postDetail = read('src/pages/PostDetailLegacy.tsx');
 const postCard = read('src/features/post/PostCard.tsx');
+const anchoredActionMenuPanel = read('src/features/post/AnchoredActionMenuPanel.tsx');
 const categoryFeed = read('src/pages/CategoryFeedMobile.tsx');
 const homePageSource = read('src/pages/Home.tsx');
 const sponsorPage = read('src/features/sponsor/SponsorMobilePage.tsx');
@@ -248,6 +249,18 @@ assert(
     postCard.includes('setIsQuoteSheetOpen(false); setIsCommentSheetOpen(true);') &&
     postCard.includes('setIsCommentSheetOpen(false); setIsQuoteSheetOpen(true);'),
   'Post card comment, quote, and contact actions must be guarded while keeping sheets mutually exclusive under rapid tapping.',
+);
+
+assert(
+  anchoredActionMenuPanel.includes('useInteractionGuard<[string]>(submitFeedback') &&
+    anchoredActionMenuPanel.includes('useInteractionGuard(blockAuthor') &&
+    anchoredActionMenuPanel.includes("void guardedSubmitFeedback('已减少相似内容出现');") &&
+    anchoredActionMenuPanel.includes('void guardedBlockAuthor();') &&
+    anchoredActionMenuPanel.includes('disabled={reduceRecommendation.isPending || feedbackGuardPending}') &&
+    anchoredActionMenuPanel.includes('disabled={!authorId || blockUser.isPending || blockAuthorGuardPending}') &&
+    !anchoredActionMenuPanel.includes("submitFeedback('已减少相似内容出现');") &&
+    !anchoredActionMenuPanel.includes('blockAuthor();'),
+  'Post options feedback and block-author actions must use critical guards before mutation pending state catches up.',
 );
 
 assert(

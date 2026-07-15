@@ -18,6 +18,7 @@ import {
 
 import { useAuth } from '@/context/AuthContext';
 import { useBlockUser, useReducePostRecommendation } from '@/hooks/useData';
+import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import { cn } from '@/utils/cn';
 import type { PostOptionsMenuProps } from './AnchoredActionMenu';
 
@@ -149,9 +150,21 @@ export const PostOptionsMenuPanel = memo(function PostOptionsMenuPanel({
         })
         .catch((error) => {
           showToast(error instanceof Error ? error.message : '操作失败，请稍后重试', 'error');
-        });
+      });
     });
   }, [authorId, blockUser, onOpenChange, requireAuth, showToast]);
+  const { guarded: guardedSubmitFeedback, isPending: feedbackGuardPending } = useInteractionGuard<[string]>(submitFeedback, {
+    policy: 'critical',
+    cooldownMs: 720,
+    minPendingMs: 120,
+    mode: 'drop',
+  });
+  const { guarded: guardedBlockAuthor, isPending: blockAuthorGuardPending } = useInteractionGuard(blockAuthor, {
+    policy: 'critical',
+    cooldownMs: 720,
+    minPendingMs: 120,
+    mode: 'drop',
+  });
 
   const runOwnerAction = useCallback((action: (() => void) | undefined) => {
     if (!action) return;
@@ -200,13 +213,13 @@ export const PostOptionsMenuPanel = memo(function PostOptionsMenuPanel({
 
   const handleFeedbackClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     stopAndPreventCardEvent(event);
-    submitFeedback('已减少相似内容出现');
-  }, [submitFeedback]);
+    void guardedSubmitFeedback('已减少相似内容出现');
+  }, [guardedSubmitFeedback]);
 
   const handleBlockAuthorClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     stopAndPreventCardEvent(event);
-    blockAuthor();
-  }, [blockAuthor]);
+    void guardedBlockAuthor();
+  }, [guardedBlockAuthor]);
 
   const handleTelegramSyncClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     stopAndPreventCardEvent(event);
@@ -308,14 +321,14 @@ export const PostOptionsMenuPanel = memo(function PostOptionsMenuPanel({
                 <PostOptionsRow
                   icon={<EyeOff />}
                   title="不感兴趣"
-                  disabled={reduceRecommendation.isPending}
+                  disabled={reduceRecommendation.isPending || feedbackGuardPending}
                   onPointerDown={handleMenuRowPointerDown}
                   onClick={handleFeedbackClick}
                 />
                 <PostOptionsRow
                   icon={<UserX />}
                   title="不看此人"
-                  disabled={!authorId || blockUser.isPending}
+                  disabled={!authorId || blockUser.isPending || blockAuthorGuardPending}
                   onPointerDown={handleMenuRowPointerDown}
                   onClick={handleBlockAuthorClick}
                 />
