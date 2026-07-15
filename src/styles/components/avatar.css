@@ -10,8 +10,7 @@
     .profile-avatar-button[data-tui-plus='true'],
     .user-space-avatar-next[data-tui-plus='true'],
     .feed-card-author-avatar-link[data-tui-plus='true'],
-    .app-bottom-nav-avatar-shell[data-tui-plus='true'],
-    .chat-message-avatar[data-tui-plus='true']
+    .app-bottom-nav-avatar-shell[data-tui-plus='true']
   ) {
     --ui-avatar-tui-plus-ring-gap: var(--ui-space-half);
     --ui-avatar-tui-plus-ring-size: calc(var(--ui-border-width-hairline) * 2);
@@ -37,8 +36,7 @@
     .profile-avatar-button[data-tui-plus='true'],
     .user-space-avatar-next[data-tui-plus='true'],
     .feed-card-author-avatar-link[data-tui-plus='true'],
-    .app-bottom-nav-avatar-shell[data-tui-plus='true'],
-    .chat-message-avatar[data-tui-plus='true']
+    .app-bottom-nav-avatar-shell[data-tui-plus='true']
   ) {
     position: relative;
     isolation: isolate;
@@ -51,16 +49,14 @@
     .ui-profile-icon-button[data-tui-plus='true'],
     .profile-avatar-button[data-tui-plus='true'],
     .user-space-avatar-next[data-tui-plus='true'],
-    .feed-card-author-avatar-link[data-tui-plus='true'],
-    .chat-message-avatar[data-tui-plus='true']
+    .feed-card-author-avatar-link[data-tui-plus='true']
   )::before,
   :where(
     .ui-avatar-action[data-tui-plus='true'],
     .ui-profile-icon-button[data-tui-plus='true'],
     .profile-avatar-button[data-tui-plus='true'],
     .user-space-avatar-next[data-tui-plus='true'],
-    .feed-card-author-avatar-link[data-tui-plus='true'],
-    .chat-message-avatar[data-tui-plus='true']
+    .feed-card-author-avatar-link[data-tui-plus='true']
   )::after {
     content: var(--ui-content-empty);
     pointer-events: none;
@@ -73,8 +69,7 @@
     .ui-profile-icon-button[data-tui-plus='true'],
     .profile-avatar-button[data-tui-plus='true'],
     .user-space-avatar-next[data-tui-plus='true'],
-    .feed-card-author-avatar-link[data-tui-plus='true'],
-    .chat-message-avatar[data-tui-plus='true']
+    .feed-card-author-avatar-link[data-tui-plus='true']
   )::before {
     inset: calc((var(--ui-avatar-tui-plus-ring-gap) + var(--ui-avatar-tui-plus-ring-size)) * -1);
     z-index: -2;
@@ -87,8 +82,7 @@
     .ui-profile-icon-button[data-tui-plus='true'],
     .profile-avatar-button[data-tui-plus='true'],
     .user-space-avatar-next[data-tui-plus='true'],
-    .feed-card-author-avatar-link[data-tui-plus='true'],
-    .chat-message-avatar[data-tui-plus='true']
+    .feed-card-author-avatar-link[data-tui-plus='true']
   )::after {
     inset: calc(var(--ui-avatar-tui-plus-ring-gap) * -1);
     z-index: -1;
@@ -109,8 +103,7 @@
     .profile-avatar-button[data-tui-plus='true'],
     .user-space-avatar-next[data-tui-plus='true'],
     .feed-card-author-avatar-link[data-tui-plus='true'],
-    .app-bottom-nav-avatar-shell[data-tui-plus='true'],
-    .chat-message-avatar[data-tui-plus='true']
+    .app-bottom-nav-avatar-shell[data-tui-plus='true']
   ) > .ui-avatar,
   :where(
     .ui-avatar-action[data-tui-plus='true'],
@@ -118,8 +111,7 @@
     .profile-avatar-button[data-tui-plus='true'],
     .user-space-avatar-next[data-tui-plus='true'],
     .feed-card-author-avatar-link[data-tui-plus='true'],
-    .app-bottom-nav-avatar-shell[data-tui-plus='true'],
-    .chat-message-avatar[data-tui-plus='true']
+    .app-bottom-nav-avatar-shell[data-tui-plus='true']
   ) .ui-avatar,
   .ui-avatar[data-tui-plus='true'] {
     position: relative;

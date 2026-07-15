@@ -99,7 +99,6 @@ assertIncludes('server/services/post/index.ts', postService, 'isHiddenAutoPostRo
 assertNotIncludes('server/services/home-feed.service.ts', homeFeedService, 'AUTO_POST_CURATED_SOURCE', 'home feed service must not source-filter recommendation candidates.');
 assertIncludes('server/repositories/feed.repository.ts', feedRepository, 'isLegacyRobotSourceExclusion', 'feed repository must guard against stale hidden auto-post source filters.');
 assertIncludes('server/bootstrap.ts', bootstrap, "HIDDEN_AUTO_POST_CURATED_SOURCE = 'auto_post_curated_content'", 'bootstrap visibility checks must know hidden auto-post source.');
-assertIncludes('server/bootstrap.ts', bootstrap, "post?.source !== HIDDEN_AUTO_POST_CURATED_SOURCE || user?.userType !== 'ROBOT'", 'auto-post robot content must not be broadcast into chat display.');
 assertIncludes('auto-post.service.ts', service, "from '../platform-time'", 'daily run limit must use the shared platform timezone helper.');
 assertIncludes('auto-post.service.ts', service, 'const todayRange = getPlatformDayRange();', 'daily run limit must be based on platform today.');
 assertIncludes('auto-post.service.ts', service, 'createdAt: { gte: todayRange.start, lt: todayRange.end }', 'daily run limit must use a closed platform-day range.');
@@ -149,7 +148,6 @@ assertIncludes('adminTypes.ts', adminTypes, "'interaction-config'", 'AdminTab mu
 assertIncludes('adminMeta.tsx', adminMeta, '互动配置', 'admin menu must include 互动配置.');
 assertIncludes('AdminPage.tsx', adminPage, 'AdminInteractionConfigPanel', 'admin page must render interaction config panel.');
 assertIncludes('adminMeta.tsx', adminMeta, 'interactionSubTabs', 'interaction automations must be exposed as sidebar submenus.');
-assertIncludes('adminMeta.tsx', adminMeta, '自动聊天', 'interaction submenu must include auto chat.');
 assertIncludes('adminMeta.tsx', adminMeta, '自动引用', 'interaction submenu must include auto quote.');
 assertIncludes('adminMeta.tsx', adminMeta, '自动评论', 'interaction submenu must include auto comment.');
 assertIncludes('adminMeta.tsx', adminMeta, '自动发帖', 'interaction submenu must include auto post.');

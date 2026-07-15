@@ -136,7 +136,7 @@
     .post-create-sheet-close,
     .post-create-picker-page-close,
     .profile-dialog-close,
-    .chat-rules-close
+    .referral-rules-close
   ):not(.ui-lightbox-control-close) {
     border: var(--ui-border-none);
     background: var(--ui-layer-panel-close-surface);
@@ -149,7 +149,7 @@
     .post-create-sheet-close,
     .post-create-picker-page-close,
     .profile-dialog-close,
-    .chat-rules-close
+    .referral-rules-close
   ):not(.ui-lightbox-control-close):is(:hover, :active, :focus-visible) {
     border: var(--ui-border-none);
     background: var(--ui-layer-panel-close-active-surface);

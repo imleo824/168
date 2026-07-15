@@ -124,7 +124,6 @@ assertIncludes('src/features/home/OnlinePresenceContext.tsx', 'OnlinePresencePro
 assertIncludes('src/app/AppShell.tsx', 'min: onlineConfig?.online_users_min', 'desktop online count must use the same configured minimum everywhere.');
 assertIncludes('src/app/AppShell.tsx', 'max: onlineConfig?.online_users_max', 'desktop online count must use the same configured maximum everywhere.');
 assertNotIncludes('src/pages/Home.tsx', 'useHomeOnlineCount({', 'home topbar must not generate a second online count.');
-assertNotIncludes('src/features/chat/ChatPage.tsx', 'useHomeOnlineCount({', 'chat topbar must not generate a second online count.');
 assertIncludes('src/styles/system/wide-screen-mobile-adaptation.css', '(var(--ui-app-shell-desktop-padding-x) * 2)', 'desktop detail frame width must include the shared outer frame padding.');
 assertNotIncludes('src/styles/system/wide-screen-mobile-adaptation.css', "[data-desktop-surface='detail'] .app-shell-main {\n      padding-inline: var(--ui-space-none);", 'desktop detail pages must not remove the shared outer frame padding.');
 assertIncludes('src/styles/features/post-detail-shell.css', 'var(--ui-bottom-nav-page-bottom-space)', 'desktop detail pages must size their internal height against the framed app shell content area.');
@@ -148,9 +147,8 @@ assertIncludes('src/styles/system/ui-primitives-auth.css', '--ui-auth-required-w
 assertIncludes('src/styles/system/ui-primitives-auth.css', 'max-width: var(--ui-auth-required-wrap-max);', 'desktop auth-required states must override the default narrow content shell max width.');
 assertIncludes('src/styles/features/tui-plus.css', '--ui-tui-plus-content-max: var(--app-desktop-page-content-width);', 'desktop Tui Plus content and CTA must align to the framed workspace content width.');
 assertIncludes('src/styles/features/messages.css', '--ui-message-settings-content-max: var(--app-desktop-page-content-width);', 'desktop message and settings content must align to the framed content width.');
-assertIncludes('src/styles/system/wide-screen-mobile-adaptation.css', "--app-desktop-conversation-frame-padding: var(--ui-space-2);", 'desktop conversation pages must preserve a visible outer app frame gutter.');
-assertIncludes('src/styles/system/wide-screen-mobile-adaptation.css', '(var(--app-desktop-conversation-frame-padding) * 2)', 'desktop conversation height must account for the visible outer app frame gutter.');
-assertMatches('src/styles/system/wide-screen-mobile-adaptation.css', /data-desktop-surface='conversation'[\s\S]*?\.app-shell-main[\s\S]*?padding:\s*var\(--app-desktop-conversation-frame-padding\);/, 'desktop conversation pages must expose the shared outer frame instead of filling edge-to-edge.');
+assertIncludes('src/styles/system/wide-screen-mobile-adaptation.css', "--app-desktop-conversation-frame-padding: var(--ui-space-2);", 'desktop message pages must preserve a visible outer app frame gutter.');
+assertMatches('src/styles/system/wide-screen-mobile-adaptation.css', /data-desktop-surface='conversation'[\s\S]*?\.app-shell-main[\s\S]*?padding:\s*var\(--app-desktop-conversation-frame-padding\);/, 'desktop message pages must expose the shared outer frame instead of filling edge-to-edge.');
 assertIncludes('src/pages/PromotionEffectsHistory.tsx', 'EFFECT_HISTORY_DEFAULT_DAYS = 30', 'promotion effect history must default to the latest thirty days.');
 assertIncludes('src/pages/PromotionEffectsHistory.tsx', 'promotion-effects-date-trigger', 'promotion effect history must expose a compact topbar date trigger.');
 assertIncludes('src/pages/PromotionEffectsHistory.tsx', 'promotion-effects-date-panel', 'promotion effect history must move full date controls out of the topbar.');
@@ -248,11 +246,6 @@ assertIncludes('src/styles/components/post-quote.css', '--quoted-post-preview-me
 assertIncludes('src/styles/components/post-quote.css', 'aspect-ratio: 1 / 1;', 'quoted post preview media must stay square.');
 assertNotIncludes('src/styles/components/feed-card-shell.css', '.ins-post-card:hover {\n    background: var(--ui-state-hover);', 'feed card rows must not change background on touch/hover.');
 assertNotIncludes('src/styles/components/feed-card-shell.css', 'background: color-mix(in srgb, var(--ui-color-black) 3%, var(--ui-color-white));', 'feed card rows must not flash a pressed background.');
-assertNotIncludes('src/features/chat/ChatPage.tsx', 'capturePageScrollSnapshot', 'chat reply focus must not restore stale page scroll snapshots.');
-assertNotIncludes('src/features/chat/ChatPage.tsx', 'restorePageScrollSnapshot', 'chat reply focus must not restore stale page scroll snapshots.');
-assertIncludes('src/features/chat/ChatPage.tsx', 'replyDocumentScrollSnapshotRef.current = captureDocumentScrollSnapshot();', 'chat reply focus must capture the current document scroll before rendering the reply context.');
-assertIncludes('src/features/chat/ChatPage.tsx', 'restoreDocumentScrollSnapshot(snapshot);', 'chat reply focus must restore document scroll while the keyboard opens.');
-assertIncludes('src/features/chat/ChatPage.tsx', 'scrollChatToLatest();', 'chat reply focus must continue to scroll the chat stream instead of moving the page.');
 assertNotIncludes('src/features/post/PostCard.tsx', 'feed-card-avatar-plus', 'feed avatar plus action must not return.');
 assertNotIncludes('src/styles/components/feed-card-shell.css', 'feed-card-avatar-plus', 'feed avatar plus styles must not return.');
 assertIncludes('src/features/post/PostCard.tsx', 'feed-card-inline-follow', 'feed card follow action must sit beside the more menu.');

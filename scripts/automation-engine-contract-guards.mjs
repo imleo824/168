@@ -37,11 +37,6 @@ const autoPost = read('server/services/auto-post.service.ts');
 const autoLike = read('server/services/auto-like.service.ts');
 const quote = read('server/services/quote-publish-v5.service.ts');
 const comment = read('server/services/comment-publish-v8.service.ts');
-const chatSchema = read('server/chat/chat.schema.ts');
-const chatRuntime = read('server/chat/chat.automation-runtime.ts');
-const chatRepository = read('server/chat/chat.repository.ts');
-const chatObservedRunner = read('server/chat/chat-observed-runner.ts');
-const chatBotService = read('server/chat/chat.bot.service.ts');
 const platformAi = read('server/services/platform-ai-config.service.ts');
 const automationAi = read('server/services/automation-ai.service.ts');
 const crawlContentAi = read('server/services/crawl-content-ai.service.ts');
@@ -75,8 +70,6 @@ mustNotHave('server runtime', serverRuntime, 'runQuotePublishOnce');
 mustNotHave('server runtime', serverRuntime, 'runCommentPublishOnce');
 mustNotHave('server runtime', serverRuntime, 'runAutoLikeOnce');
 mustNotHave('server runtime', serverRuntime, 'recordAutomationHeartbeat');
-mustHave('server runtime', serverRuntime, 'chatBotService.startIdleWarmup()');
-mustHave('server runtime', serverRuntime, 'startChatMaintenance()');
 mustHave('server runtime', serverRuntime, 'startTronDepositScanner()');
 
 // Runtime contract: scheduler is generic; modules own business behavior through observed runners.
@@ -123,7 +116,6 @@ mustHave('automation status service', automationStatus, "'auto_post'");
 mustHave('automation status service', automationStatus, "'auto_like'");
 mustHave('automation status service', automationStatus, "'quote_publish'");
 mustHave('automation status service', automationStatus, "'comment_publish'");
-mustHave('automation status service', automationStatus, "'chat_bot'");
 mustHave('admin automation routes', adminAutomationRoutes, 'registerAdminAutomationRoutes');
 mustHave('admin automation routes', adminAutomationRoutes, '/api/admin/automation/status');
 mustHave('admin automation routes', adminAutomationRoutes, '/api/admin/automation/heartbeats');
@@ -196,13 +188,14 @@ mustHave('crawl content AI', crawlContentAi, 'Meta 提取多少写多少，不�
 mustHave('crawl meta normalizer', crawlMetaNormalizer, 'assertSchemaMatchesCategory');
 mustHave('crawl meta normalizer', crawlMetaNormalizer, 'normalizeToLocationPreset');
 mustHave('crawl meta normalizer', crawlMetaNormalizer, 'exactConfiguredOption');
-mustHave('crawl meta normalizer', crawlMetaNormalizer, 'strictNumber');
+mustHave('crawl meta normalizer', crawlMetaNormalizer, 'normalizePlainNumber');
+mustHave('crawl meta normalizer', crawlMetaNormalizer, 'strict_number');
 mustHave('crawl meta normalizer', crawlMetaNormalizer, 'strict_boolean');
 mustHave('crawl meta normalizer', crawlMetaNormalizer, 'unexpectedKeys');
 mustHave('crawl meta normalizer', crawlMetaNormalizer, 'rejected');
 
 // Health and lock infrastructure are the shared substrate for modules.
-for (const moduleName of ['auto_like', 'quote_publish', 'comment_publish', 'auto_post', 'auto_crawl', 'chat_bot']) {
+for (const moduleName of ['auto_like', 'quote_publish', 'comment_publish', 'auto_post', 'auto_crawl']) {
   mustHave('automation health modules', automationHealth, `'${moduleName}'`);
 }
 mustHave('task lock', lock, 'heartbeatStaleMsForTtl');
@@ -210,21 +203,6 @@ mustHave('task lock', lock, 'withAutomationTaskLock');
 mustHave('task lock', lock, 'forceReleaseAutomationTaskLock');
 mustHave('admin automation logs', adminInteractionPanel, 'AdminAutoCrawlExecutionLogsCompactPanel');
 mustHave('admin automation logs', adminInteractionPanel, '运行日志');
-
-// Chat automation remains observed and compatible with current user-backed bot identity model.
-mustHave('chat observed runner', chatObservedRunner, 'recordObservedChatBotRun');
-mustHave('chat observed runner', chatObservedRunner, 'runObservedChatMaintenance');
-mustHave('chat observed runner', chatObservedRunner, "module: 'chat_bot'");
-mustHave('chat bot service', chatBotService, 'recordObservedChatBotRun');
-mustHave('chat bot service', chatBotService, 'runObservedChatMaintenance');
-mustHave('chat bot service', chatBotService, 'scheduleIdleWarmup()');
-mustNotHave('chat bot service', chatBotService, "from '../services/automation-health.service'");
-mustNotHave('chat bot service', chatBotService, 'recordAutomationHeartbeat');
-mustHave('chat schema', chatSchema, 'probeChatSchema');
-mustNotHave('chat schema', chatSchema, 'hasLegacyChatBotProfileArtifacts');
-mustNotHave('chat schema', chatSchema, '$executeRawUnsafe');
-mustNotHave('chat runtime', chatRuntime, 'createRateLimitedBotChatMessage', 'chat runtime must not retain an unused parallel bot-message write path.');
-mustHave('chat repository', chatRepository, 'if (!options.repair && chatStorageAvailable) return true');
 
 // AI and deposit scanner contracts stay explicit because automation quality depends on them.
 mustHave('platform AI', platformAi, 'PLATFORM_AI_API_KEY');

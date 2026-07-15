@@ -26,8 +26,6 @@ const FILES = {
   quoteService: 'server/services/quote-publish.service.ts',
   commentService: 'server/services/comment-publish.service.ts',
   autoLikeService: 'server/services/auto-like.service.ts',
-  chatService: 'server/chat/chat.bot.service.ts',
-  chatRunner: 'server/chat/chat-observed-runner.ts',
   adminAutomationRoutes: 'server/routes/admin-automation.routes.ts',
   automationHealth: 'server/services/automation-health.service.ts',
   adminPanel: 'src/features/admin/AdminInteractionConfigPanel.tsx',
@@ -87,8 +85,6 @@ for (const deletedPath of deletedPaths) {
 
 includes(FILES.serverRuntime, 'startAutomationRuntime(createDefaultAutomationModules({', 'scheduled modules start from unified runtime');
 includes(FILES.serverRuntime, 'stopAutomationRuntime()', 'runtime has one shutdown hook');
-includes(FILES.serverRuntime, 'chatBotService.startIdleWarmup()', 'chat idle automation remains explicit');
-includes(FILES.serverRuntime, 'startChatMaintenance()', 'chat maintenance remains explicit');
 notIncludes(FILES.serverRuntime, 'startAutoCrawlScheduler()', 'standalone crawl scheduler must not be used at startup');
 notIncludes(FILES.serverRuntime, 'startAutoPostScheduler({', 'standalone post scheduler must not be used at startup');
 notIncludes(FILES.serverRuntime, 'startAutomationSupervisor({', 'standalone interaction supervisor must not be used at startup');
@@ -150,15 +146,7 @@ notIncludes(FILES.commentRoutes, 'runCommentPublishOnce', 'comment route must no
 notIncludes(FILES.autoLikeRoutes, 'runAutoLikeOnce', 'auto-like route must not call business run directly');
 notIncludes(FILES.quoteService, 'startQuotePublishScheduler', 'quote facade must not expose legacy scheduler');
 
-includes(FILES.chatRunner, "module: 'chat_bot'", 'chat runner binds heartbeat module');
-includes(FILES.chatRunner, 'recordObservedChatBotRun', 'chat observed run API exists');
-includes(FILES.chatRunner, 'runObservedChatMaintenance', 'chat maintenance is observed');
-includes(FILES.chatService, 'recordObservedChatBotRun', 'chat service uses observed runner');
-includes(FILES.chatService, 'runObservedChatMaintenance', 'chat maintenance uses observed runner');
-notIncludes(FILES.chatService, "from '../services/automation-health.service'", 'chat service must not import raw heartbeat service');
-notIncludes(FILES.chatService, 'recordAutomationHeartbeat', 'chat service must not write heartbeat directly');
-
-for (const moduleName of ['auto_like', 'quote_publish', 'comment_publish', 'auto_post', 'auto_crawl', 'chat_bot']) {
+for (const moduleName of ['auto_like', 'quote_publish', 'comment_publish', 'auto_post', 'auto_crawl']) {
 includes(FILES.automationHealth, `'${moduleName}'`, `heartbeat supports ${moduleName}`);
 }
 notIncludes(FILES.automationHealth, 'auto_crawl_ai_review', 'removed crawl AI review module must not return');

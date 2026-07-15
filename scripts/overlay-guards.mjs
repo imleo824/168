@@ -44,7 +44,6 @@ function stylesheetImports(source) {
 }
 
 const app = read('src/app/AppShell.tsx');
-const chatPage = read('src/features/chat/ChatPage.tsx');
 const featureContractsCss = read('src/styles/tokens/feature-contracts.css');
 const mobileAddressBarHook = read('src/hooks/useMobileAddressBar.ts');
 const indexCss = read('src/index.css');
@@ -173,10 +172,8 @@ assert(
 
 assert(
   mobileAddressBarHook.includes('data-contained-text-entry-surface') &&
-    chatPage.includes('data-contained-text-entry-surface="true"') &&
-    !chatPage.includes('data-mobile-addressbar-scroll') &&
     !featureContractsCss.includes(':root.mobile-text-entry-active'),
-  'Chat must own its fixed text-entry surface and avoid pre-clearing keyboard clearance before the real visual viewport inset exists.',
+  'Contained text-entry surfaces must avoid pre-clearing keyboard clearance before the real visual viewport inset exists.',
 );
 
 assert(
@@ -239,7 +236,6 @@ assert(
   importsInOrder(featuresLayerCss, [
     '../features/brand.css',
     '../features/settings.css',
-    '../features/chat.css',
     '../../features/admin/AdminDesktop.css',
     '../../features/desktop/DesktopRouteFallback.css',
     '../features/home.css',

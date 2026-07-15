@@ -47,8 +47,6 @@ const adminAutoLikePanel = read('src/features/admin/AdminAutoLikePanel.tsx');
 const adminInteractionPanel = read('src/features/admin/AdminInteractionConfigPanel.tsx');
 const adminCommentPublishPanel = read('src/features/admin/AdminCommentPublishPanel.tsx');
 const adminQuotePublishPanel = read('src/features/admin/AdminQuotePublishPanel.tsx');
-const chatRepository = read('server/chat/chat.repository.ts');
-const chatBotService = read('server/chat/chat.bot.service.ts');
 const adminChatPanel = read('src/features/admin/AdminChatPanel.tsx');
 const packageJson = JSON.parse(read('package.json'));
 
@@ -137,11 +135,6 @@ assert.match(opsReportRoute, /timezone:\s*PLATFORM_TIMEZONE/, 'ops report payloa
 
 assert.doesNotMatch(adminPage, /推荐效果|recommendation-report|RecommendationReport/, 'admin ops report page must not render or request the recommendation effect module.');
 
-assert.match(chatRepository, /cleanupExpiredChatAutomationLogs/, 'auto chat backend logs must have a dedicated cleanup helper.');
-assert.match(chatRepository, /chatBotInvocation\.deleteMany/, 'auto chat log cleanup must delete only bot invocation records.');
-assert.match(chatBotService, /CHAT_AUTOMATION_LOG_RETENTION_DAYS = 3/, 'auto chat backend logs must be retained for only 3 days.');
-assert.match(chatBotService, /cleanupExpiredChatAutomationLogs\(CHAT_AUTOMATION_LOG_RETENTION_DAYS\)/, 'auto chat maintenance must clean backend logs automatically.');
-assert.doesNotMatch(chatBotService, /cleanupExpiredChatRecords\(config\.retentionDays\)/, 'auto chat maintenance must not use configurable chat message retention for backend logs.');
 assert.doesNotMatch(adminChatPanel, /运行状态|后台自动聊天日志保留 3 天|队列中|生成中|24h 成功/, 'auto chat config panel must not render runtime monitoring details.');
 
 // Admin automation closed-loop guards.
@@ -174,7 +167,7 @@ assert.match(autoLikeService, /export async function listAutoLikeRuns/, 'auto li
 assert.match(autoLikeService, /todayRunSucceeded/, 'auto like stats must include successful run count.');
 assert.match(autoLikeService, /todayRunSkipped/, 'auto like stats must include skipped run count.');
 assert.match(autoLikeService, /todayRunFailed/, 'auto like stats must include failed run count.');
-assert.match(automationHealth, /'auto_like' \| 'quote_publish' \| 'comment_publish' \| 'auto_post' \| 'auto_crawl' \| 'chat_bot'/, 'automation heartbeat module type must include all unified runtime modules.');
+assert.match(automationHealth, /'auto_like' \| 'quote_publish' \| 'comment_publish' \| 'auto_post' \| 'auto_crawl'/, 'automation heartbeat module type must include all unified runtime modules.');
 assert.match(automationRuntime, /startAutomationRuntime/, 'unified automation runtime must own scheduling startup.');
 assert.match(automationRuntime, /scheduleModule\(module, true\)/, 'unified automation runtime must schedule registered modules.');
 assert.match(automationRuntime, /getAutomationRuntimeSnapshot/, 'unified automation runtime must expose runtime state snapshots.');

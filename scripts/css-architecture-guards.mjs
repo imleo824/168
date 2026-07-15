@@ -56,6 +56,7 @@ const expectedSkeletonContractImports = [
   '@import "./ui-skeleton-primitives.css";',
   '@import "./ui-skeleton-home.css";',
   '@import "./ui-skeleton-feed.css";',
+  '@import "./ui-skeleton-user-space.css";',
   '@import "./ui-skeleton-detail.css";',
   '@import "./ui-skeleton-recharge.css";',
 ];
@@ -87,15 +88,6 @@ const expectedCreatePromotePostImports = [
   '@import "./create-promote-post-settings.css";',
   '@import "./create-promote-post-picker.css";',
   '@import "./create-promote-post-details.css";',
-];
-
-const expectedChatImports = [
-  '@import "./chat-shell.css";',
-  '@import "./chat-stream.css";',
-  '@import "./chat-messages.css";',
-  '@import "./chat-post-preview.css";',
-  '@import "./chat-composer.css";',
-  '@import "./chat-rules.css";',
 ];
 
 function read(relativePath) {
@@ -276,12 +268,6 @@ assertStableImports(
   'src/styles/features/create-promote-post.css',
   expectedCreatePromotePostImports,
   'must stay a facade for post-create owners',
-);
-
-assertStableImports(
-  'src/styles/features/chat.css',
-  expectedChatImports,
-  'must stay a facade for chat owners',
 );
 
 const productTokenSource = read('src/styles/00-product-tokens.css');
@@ -1451,16 +1437,6 @@ const selectorOwnershipRules = [
     owner: 'removed unused masonry skeleton variant token',
   },
   {
-    file: 'src/styles/features/chat-composer.css',
-    forbidden: 'chat-eligibility',
-    owner: 'removed chat eligibility selector; no current chat markup emits this class',
-  },
-  {
-    file: 'src/styles/features/chat-composer.css',
-    forbidden: 'chat-reply-context-main',
-    owner: 'removed chat reply context main selector; no current chat markup emits this class',
-  },
-  {
     file: 'src/styles/features/create-promote-state.css',
     forbidden: 'background: color-mix(in srgb, var(--ui-social-surface) 92%, transparent)',
     owner: 'src/styles/tokens/feature-contracts.css post-create meta card surface token',
@@ -1506,11 +1482,6 @@ const selectorOwnershipRules = [
     owner: 'src/styles/tokens/feature-contracts.css semantic picker panel mobile height token',
   },
   {
-    file: 'src/styles/features/chat-post-preview.css',
-    forbidden: '320px',
-    owner: 'src/styles/tokens/feature-contracts.css semantic preview width tokens',
-  },
-  {
     file: 'src/styles/features/home-feed-foundation.css',
     forbidden: 'home-floating-dock',
     owner: 'src/styles/features/home-floating-actions.css',
@@ -1544,11 +1515,6 @@ const selectorOwnershipRules = [
     file: 'src/styles/utilities/motion-scroll.css',
     forbidden: '@keyframes shimmer',
     owner: 'src/styles/system/ui-skeleton-contract.css',
-  },
-  {
-    file: 'src/styles/features/chat.css',
-    forbidden: '--ui-topbar-content-max-width',
-    owner: 'src/styles/components/topbar.css',
   },
   {
     file: 'src/styles/components/topbar.css',
@@ -1599,16 +1565,6 @@ const selectorOwnershipRules = [
     file: 'src/styles/features/home-topic-tabs-shell.css',
     forbidden: 'line-height: var(--ui-line-tight);\n    text-overflow: clip;\n    white-space: nowrap;\n  }\n\n  .home-topic-filter-row',
     owner: 'src/styles/features/home-topic-tabs-shell.css unclipped topic tab label contract',
-  },
-  {
-    file: 'src/styles/features/chat.css',
-    forbidden: 'chat-online-',
-    owner: 'src/ui/TopbarActions.tsx and src/styles/system/ui-sticky-topbar-contract.css',
-  },
-  {
-    file: 'src/styles/features/chat.css',
-    forbidden: '--chat-bottom-nav-offset: calc(',
-    owner: 'src/styles/components/bottom-nav.css shared page avoidance token',
   },
   {
     file: 'src/styles/features/create-promote-post-editor.css',

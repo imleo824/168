@@ -674,31 +674,6 @@ assertIncludes('src/styles/components/feed-card-shell.css', 'position: fixed;', 
 assertIncludes('src/styles/components/feed-card-shell.css', 'background: var(--ui-surface-card-solid);', 'feed card action sheets must use a solid layer surface.');
 assertIncludes('src/styles/00-product-tokens.css', '--ui-social-popover-surface: var(--ui-social-panel-surface);', 'anchored social overlays must not inherit transparent card glass surfaces.');
 assertIncludes('src/styles/features/profile-security-sheet.css', 'background: var(--ui-layer-panel-surface);', 'profile edit sheet must use the shared solid layer panel surface.');
-assertNotIncludes('src/features/chat/ChatPage.tsx', 'resetChatViewportScroll', 'chat composer must not force page scroll while the keyboard is opening.');
-assertNotIncludes('src/features/chat/ChatPage.tsx', 'capturePageScrollSnapshot', 'chat reply focus must not restore stale page scroll while the keyboard is opening.');
-assertNotIncludes('src/features/chat/ChatPage.tsx', 'restorePageScrollSnapshot', 'chat reply focus must not restore stale page scroll snapshots.');
-assertIncludes('src/features/chat/ChatPage.tsx', 'replyDocumentScrollSnapshotRef.current = captureDocumentScrollSnapshot();', 'chat reply focus must capture the current document scroll before rendering reply context.');
-assertIncludes('src/features/chat/ChatPage.tsx', 'restoreDocumentScrollSnapshot(snapshot);', 'chat reply focus must restore document scroll while the keyboard opens.');
-assertIncludes('src/features/chat/ChatPage.tsx', 'scrollChatToLatest();', 'chat reply focus must continue to scroll the chat stream instead of moving the page.');
-assertIncludes('src/features/chat/ChatPage.tsx', 'transformResize="contain"', 'chat image previews must use uncropped thumbnails.');
-assertIncludes('src/styles/features/chat-post-preview.css', 'object-fit: contain;', 'chat image previews must not crop thumbnails.');
-assertIncludes('src/features/chat/ChatPage.tsx', '<Reply aria-hidden="true" />', 'chat reply action must use the reply icon instead of @ or send text.');
-assertNotIncludes('src/features/chat/ChatPage.tsx', 'SendHorizontal', 'chat reply action must not use a send icon.');
-assertIncludes('src/features/chat/ChatPage.tsx', 'const ChatMessageMeta = memo(function ChatMessageMeta', 'chat message name/time/reply must render through the shared message identity contract.');
-assertIncludes('src/features/chat/ChatPage.tsx', 'data-own={isOwn ? \'true\' : \'false\'}', 'chat own-message identity alignment must be an explicit component variant.');
-assertIncludes('src/styles/tokens/feature-contracts.css', '--chat-message-avatar-size: var(--ui-social-feed-avatar-size);', 'chat message avatar size must be a shared token consumed by row and identity layout.');
-assertIncludes('src/styles/features/chat-messages.css', 'min-height: var(--chat-message-avatar-size);', 'chat message identity row must align vertically with the avatar.');
-assertIncludes('src/styles/features/chat-messages.css', 'flex-direction: row-reverse;', 'own chat messages must keep the nickname adjacent to the right-side avatar.');
-assertNotIncludes('src/styles/features/chat-messages.css', 'justify-content: flex-end;', 'own chat message identity must not rely on flex-end pushing for alignment.');
-assertNotIncludes('src/styles/features/chat-messages.css', 'margin-left: auto;', 'chat reply action must not stretch the identity row away from name/time.');
-assertIncludes('src/styles/tokens/feature-contracts.css', '--chat-mobile-bottom-clearance: max(calc(var(--chat-bottom-nav-offset) - var(--ui-keyboard-inset, var(--ui-space-none))), var(--ui-space-none));', 'chat must reduce bottom-nav clearance as the keyboard inset grows.');
-assertIncludes('src/styles/tokens/feature-contracts.css', '--chat-mobile-viewport-height: calc(var(--ui-visual-viewport-height) - var(--chat-mobile-bottom-clearance));', 'chat must size its mobile shell from the visual viewport.');
-assertNotIncludes('src/styles/tokens/feature-contracts.css', ':root.mobile-text-entry-active', 'chat must not pre-clear bottom clearance on focus before the keyboard inset exists.');
-assertIncludes('src/features/chat/ChatPage.tsx', 'data-contained-text-entry-surface="true"', 'chat must own its text-entry surface instead of using global page-scroll focus intent.');
-assertNotIncludes('src/features/chat/ChatPage.tsx', 'data-mobile-addressbar-scroll', 'chat is a fixed viewport shell and must not register as a page scroll target.');
-assertIncludes('src/features/chat/ChatPage.tsx', 'onPointerDown={handleComposerPointerDown}', 'chat composer must prevent native touch focus from scrolling the document.');
-assertIncludes('src/styles/features/chat-shell.css', 'height: var(--chat-mobile-viewport-height);', 'chat page must use visual viewport height instead of fixed bottom inset.');
-assertNotIncludes('src/styles/features/chat-shell.css', 'inset: 0 0 max(var(--chat-bottom-nav-offset), var(--ui-keyboard-inset, 0px));', 'chat page must not rely on fixed bottom inset for keyboard avoidance.');
 assertIncludes('src/features/upload/ImageUpload.tsx', 'className="ui-image-remove-btn pressable"', 'image upload remove action must use the shared readable overlay button.');
 assertCssRuleIncludes(
   'src/styles/system/ui-primitives-upload.css',
@@ -817,8 +792,6 @@ assertIncludes('src/styles/02-core-sheets-actions.css', 'margin-inline-end: var(
 assertIncludes('src/features/auth/AuthModal.tsx', 'className="ui-auth-brand-lockup"', 'auth modal brand and slogan must use the stacked brand contract.');
 assertIncludes('src/styles/system/ui-primitives-auth.css', '.ui-auth-brand-lockup', 'auth brand lockup style contract is required.');
 assertNotIncludes('src/features/auth/AuthModal.tsx', 'ui-auth-brand-divider', 'auth modal brand and slogan must not be split by an inline divider.');
-assertIncludes('src/features/chat/ChatPage.tsx', 'const canOpenUser = Boolean(message.authorUserId);', 'chat avatar navigation must be driven by authorUserId for users and bots.');
-assertNotIncludes('src/features/chat/ChatPage.tsx', "message.authorType === 'USER' && message.authorUserId", 'chat avatars must not block bot profile navigation by author type.');
 assertNotIncludes('server/chat/chat.repository.ts', 'chat-bot-profile', 'chat bot user spaces must not use a second id namespace.');
 assertIncludes('server/chat/chat.repository.ts', 'authorUserId: botProfileId || null,', 'chat bot payloads must expose the same UUID as the user-space id.');
 assertIncludes('server/chat/chat.repository.ts', 'authorUserId: input.authorUserId || input.botProfileId || null,', 'bot chat messages must store the same UUID user-space id.');
@@ -904,33 +877,11 @@ assertIncludes('src/features/home/OnlinePresenceContext.tsx', 'OnlinePresencePro
 assertIncludes('src/app/AppShell.tsx', 'min: onlineConfig?.online_users_min', 'desktop context rail online count must use the same configured min as home topbar.');
 assertIncludes('src/app/AppShell.tsx', 'max: onlineConfig?.online_users_max', 'desktop context rail online count must use the same configured max as home topbar.');
 assertIncludes('src/pages/Home.tsx', 'useOnlinePresence()', 'home topbar online count must consume the shared app-level presence value.');
-assertIncludes('src/features/chat/ChatPage.tsx', 'useOnlinePresence()', 'chat topbar online count must consume the shared app-level presence value.');
 assertNotIncludes('src/pages/Home.tsx', 'useHomeOnlineCount({', 'home page must not generate a second independent online count.');
-assertNotIncludes('src/features/chat/ChatPage.tsx', 'useHomeOnlineCount({', 'chat page must not generate a second independent online count.');
-const CHAT_STYLE_FILES = [
-  'src/styles/features/chat-shell.css',
-  'src/styles/features/chat-stream.css',
-  'src/styles/features/chat-messages.css',
-  'src/styles/features/chat-post-preview.css',
-  'src/styles/features/chat-composer.css',
-  'src/styles/features/chat-rules.css',
-];
-
-for (const file of CHAT_STYLE_FILES) {
-  assertNotIncludes(file, '--ui-topbar-content-max-width', 'chat must not override shared topbar geometry.');
-  assertNotIncludes(file, 'chat-shell > .ui-topbar', 'chat must not own topbar layout.');
-  assertNotIncludes(file, '--chat-bottom-nav-offset: calc(', 'chat must not hand-roll bottom nav geometry.');
-  assertNotIncludes(file, 'chat-online-', 'chat must not own topbar online badge styling.');
-}
-
-assertIncludes('src/styles/tokens/feature-contracts.css', '--chat-shell-bg: var(--chat-page-bg);', 'chat shell must not render a separate filled panel behind the transparent topbar.');
-assertIncludes('src/styles/tokens/feature-contracts.css', '--chat-bottom-nav-offset: var(--ui-bottom-nav-page-bottom-space);', 'chat must reserve bottom space through the bottom nav contract.');
-assertIncludes('src/styles/tokens/feature-contracts.css', '--chat-mobile-viewport-height: calc(var(--ui-visual-viewport-height) - var(--chat-mobile-bottom-clearance));', 'chat mobile viewport must be driven by visual viewport and keyboard-adjusted bottom clearance.');
-assertNotIncludes('src/features/chat/ChatPage.tsx', 'chat-online-', 'chat must use the shared topbar online badge.');
 assertNotIncludes('src/features/home/HomeChrome.tsx', 'home-topbar-online-', 'home must use the shared topbar online badge.');
 assertNotIncludes('src/styles/components/topbar-system.css', 'home-topbar-online-', 'home must not own topbar online badge styling.');
 assertIncludes('src/features/home/HomeTopbar.tsx', 'titleNode={skeletonAvatar ? <></> : <HomeBrandLockup />}', 'home brand must render in the centered title lane only outside loading skeletons.');
-assertIncludes('src/features/home/HomeTopbar.tsx', 'titleAlign="center"', 'home brand must stay centered like chat.');
+assertIncludes('src/features/home/HomeTopbar.tsx', 'titleAlign="center"', 'home brand must stay centered in the primary topbar.');
 assertNotIncludes('src/features/home/HomeTopbar.tsx', 'left={<HomeBrandLockup />}', 'home brand must not return to the left topbar lane.');
 assertIncludes('src/ui/TopbarActions.tsx', 'ui-topbar-online-badge', 'topbar online badge must be a shared topbar action component.');
 assertNotIncludes('src/styles/system/ui-foundation-clean.css', 'box-shadow: var(--ui-floating-tabbar-shadow)', 'floating tabbar must not apply an outer shadow.');
@@ -963,20 +914,21 @@ assertIncludes('src/features/sponsor/SponsorMobilePage.tsx', 'const SPONSOR_PREV
 assertIncludes('src/features/sponsor/SponsorMobilePage.tsx', 'hasMoreLedgerRecords ? (', 'sponsor transaction more link must render only when more records exist.');
 assertIncludes('src/features/sponsor/SponsorMobilePage.tsx', 'hasMorePromotionGroups ? (', 'sponsor promotion more link must render only when more records exist.');
 
-const bottomNavSource = readRel('src/App.tsx');
+const bottomNavSource = readRel('src/app/AppBottomNavigation.tsx');
 const bottomNavOrder = [
   'app-bottom-nav-label">首页',
-  'app-bottom-nav-label">聊天',
-  'app-bottom-nav-label">发布',
-  'app-bottom-nav-label">推广',
+  'app-bottom-nav-label">消息',
+  'app-bottom-nav-label">发推',
+  'app-bottom-nav-label">买曝光',
   'app-bottom-nav-label">我的',
 ];
-assertNotIncludes('src/App.tsx', 'app-bottom-nav-label">金主', 'bottom navigation must use the promotion label instead of the old sponsor wording.');
+assertNotIncludes('src/app/AppBottomNavigation.tsx', 'app-bottom-nav-label">聊天', 'bottom navigation must use messages instead of the removed chat entry.');
+assertNotIncludes('src/app/AppBottomNavigation.tsx', 'app-bottom-nav-label">金主', 'bottom navigation must use the promotion label instead of the old sponsor wording.');
 let lastBottomNavIndex = -1;
 for (const label of bottomNavOrder) {
   const index = bottomNavSource.indexOf(label);
   if (index <= lastBottomNavIndex) {
-    violations.push('src/App.tsx: bottom nav order must be 首页、聊天、发布、推广、我的.');
+    violations.push('src/app/AppBottomNavigation.tsx: bottom nav order must be 首页、消息、发推、买曝光、我的.');
     break;
   }
   lastBottomNavIndex = index;

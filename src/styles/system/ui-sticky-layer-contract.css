@@ -82,12 +82,6 @@
     flex: 0 0 auto;
   }
 
-  .chat-shell > .ui-topbar {
-    position: relative;
-    top: auto;
-    z-index: var(--ui-z-local-sticky);
-    flex: 0 0 auto;
-  }
 
   .ui-topbar.nav-blur {
     border-top: var(--ui-border-none);

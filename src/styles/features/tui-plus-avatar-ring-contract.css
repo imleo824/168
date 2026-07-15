@@ -1,4 +1,4 @@
-/* Tui Plus avatar ring contract: one full-ring system across profile, user space, feed, chat, and nav. */
+/* Tui Plus avatar ring contract: one full-ring system across profile, user space, feed, messages, and nav. */
 
 @layer utilities {
   :where(
@@ -6,13 +6,11 @@
     .ui-profile-icon-button[data-tui-plus='true'],
     .profile-avatar-button[data-tui-plus='true'],
     .user-space-avatar-next[data-tui-plus='true'],
-    .feed-card-author-avatar-link[data-tui-plus='true'],
-    .chat-message-avatar[data-tui-plus='true']
+    .feed-card-author-avatar-link[data-tui-plus='true']
   ),
   .profile-avatar-button[data-tui-plus='true'],
   .user-space-avatar-next[data-tui-plus='true'],
   .ins-post-card .feed-card-author-avatar-link[data-tui-plus='true'],
-  .chat-message-avatar[data-tui-plus='true'],
   .ui-profile-icon-button[data-tui-plus='true'] {
     position: relative;
     isolation: isolate;
@@ -27,16 +25,14 @@
     .ui-profile-icon-button[data-tui-plus='true'],
     .profile-avatar-button[data-tui-plus='true'],
     .user-space-avatar-next[data-tui-plus='true'],
-    .feed-card-author-avatar-link[data-tui-plus='true'],
-    .chat-message-avatar[data-tui-plus='true']
+    .feed-card-author-avatar-link[data-tui-plus='true']
   )::before,
   :where(
     .ui-avatar-action[data-tui-plus='true'],
     .ui-profile-icon-button[data-tui-plus='true'],
     .profile-avatar-button[data-tui-plus='true'],
     .user-space-avatar-next[data-tui-plus='true'],
-    .feed-card-author-avatar-link[data-tui-plus='true'],
-    .chat-message-avatar[data-tui-plus='true']
+    .feed-card-author-avatar-link[data-tui-plus='true']
   )::after,
   .profile-avatar-button[data-tui-plus='true']::before,
   .profile-avatar-button[data-tui-plus='true']::after,
@@ -44,8 +40,6 @@
   .user-space-avatar-next[data-tui-plus='true']::after,
   .ins-post-card .feed-card-author-avatar-link[data-tui-plus='true']::before,
   .ins-post-card .feed-card-author-avatar-link[data-tui-plus='true']::after,
-  .chat-message-avatar[data-tui-plus='true']::before,
-  .chat-message-avatar[data-tui-plus='true']::after,
   .ui-profile-icon-button[data-tui-plus='true']::before,
   .ui-profile-icon-button[data-tui-plus='true']::after {
     content: var(--ui-content-empty);
@@ -61,13 +55,11 @@
     .ui-profile-icon-button[data-tui-plus='true'],
     .profile-avatar-button[data-tui-plus='true'],
     .user-space-avatar-next[data-tui-plus='true'],
-    .feed-card-author-avatar-link[data-tui-plus='true'],
-    .chat-message-avatar[data-tui-plus='true']
+    .feed-card-author-avatar-link[data-tui-plus='true']
   )::before,
   .profile-avatar-button[data-tui-plus='true']::before,
   .user-space-avatar-next[data-tui-plus='true']::before,
   .ins-post-card .feed-card-author-avatar-link[data-tui-plus='true']::before,
-  .chat-message-avatar[data-tui-plus='true']::before,
   .ui-profile-icon-button[data-tui-plus='true']::before {
     inset: calc((var(--ui-avatar-tui-plus-ring-gap) + var(--ui-avatar-tui-plus-ring-size)) * -1);
     z-index: -2;
@@ -79,13 +71,11 @@
     .ui-profile-icon-button[data-tui-plus='true'],
     .profile-avatar-button[data-tui-plus='true'],
     .user-space-avatar-next[data-tui-plus='true'],
-    .feed-card-author-avatar-link[data-tui-plus='true'],
-    .chat-message-avatar[data-tui-plus='true']
+    .feed-card-author-avatar-link[data-tui-plus='true']
   )::after,
   .profile-avatar-button[data-tui-plus='true']::after,
   .user-space-avatar-next[data-tui-plus='true']::after,
   .ins-post-card .feed-card-author-avatar-link[data-tui-plus='true']::after,
-  .chat-message-avatar[data-tui-plus='true']::after,
   .ui-profile-icon-button[data-tui-plus='true']::after {
     inset: calc(var(--ui-avatar-tui-plus-ring-gap) * -1);
     z-index: -1;
@@ -97,13 +87,11 @@
     .ui-profile-icon-button[data-tui-plus='true'],
     .profile-avatar-button[data-tui-plus='true'],
     .user-space-avatar-next[data-tui-plus='true'],
-    .feed-card-author-avatar-link[data-tui-plus='true'],
-    .chat-message-avatar[data-tui-plus='true']
-  ) :where(.ui-avatar, img, .chat-message-avatar-image, .chat-message-avatar-fallback),
+    .feed-card-author-avatar-link[data-tui-plus='true']
+  ) :where(.ui-avatar, img),
   .profile-avatar-button[data-tui-plus='true'] :where(.ui-avatar, img),
   .user-space-avatar-next[data-tui-plus='true'] :where(.ui-avatar, img),
   .ins-post-card .feed-card-author-avatar-link[data-tui-plus='true'] :where(.ui-avatar, img),
-  .chat-message-avatar[data-tui-plus='true'] :where(.ui-avatar, img, .chat-message-avatar-image, .chat-message-avatar-fallback),
   .ui-profile-icon-button[data-tui-plus='true'] :where(.ui-avatar, img) {
     position: relative;
     z-index: 1;

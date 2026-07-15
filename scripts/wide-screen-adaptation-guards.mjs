@@ -76,10 +76,9 @@ for (const forbidden of [
 for (const required of [
   'data-route-surface={routeSurface}',
   'const isUserSurface = routeSurface === \'user\';',
-  '<div className="app-user-mobile-canvas" data-user-mobile-canvas>',
   '<AppBottomNavigation />',
   '<Route path="/" element={<Home />} />',
-  '<Route path="/chat" element={<Chat />} />',
+  '<Route path="/messages" element={<AppRequireAuthRoute><Messages /></AppRequireAuthRoute>} />',
   '<Route path="/sponsor" element={<Sponsor />} />',
   '<Route path="/post/:id" element={<PostDetail />} />',
 ]) {

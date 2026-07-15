@@ -1387,7 +1387,6 @@ export const allowedSelectorPropertyOverlapManifests = [
   {
     selector: "to",
     files: [
-      "src/styles/features/chat-stream.css",
       "src/styles/features/home-motion.css",
       "src/styles/system/ui-primitives-feedback.css",
       "src/styles/system/ui-skeleton-primitives.css",
@@ -1404,5 +1403,14 @@ export const allowedSelectorPropertyOverlapManifests = [
     ],
     property: "opacity",
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
+  },
+  {
+    selector: ".home-page-skeleton .home-topbar .ui-profile-icon-button::before",
+    files: [
+      "src/styles/system/ui-skeleton-chrome-contract.css",
+      "src/styles/system/ui-skeleton-home.css",
+    ],
+    properties: ["animation", "opacity", "transform"],
+    reason: "The home skeleton topbar uses the shared skeleton chrome shimmer while the home skeleton facade owns the route-specific avatar placeholder.",
   },
 ];

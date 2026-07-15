@@ -60,7 +60,6 @@ const postDetail = read('src/pages/PostDetailLegacy.tsx');
 const categoryFeed = read('src/pages/CategoryFeedMobile.tsx');
 const homePageSource = read('src/pages/Home.tsx');
 const sponsorPage = read('src/features/sponsor/SponsorMobilePage.tsx');
-const chatPage = read('src/features/chat/ChatPage.tsx');
 const profileRoute = read('src/pages/ProfileMobile.tsx');
 
 assert(
@@ -228,21 +227,6 @@ assert(
     sponsorPage.includes('guardedGoPromote') &&
     sponsorPage.includes('guardedGoTransactions'),
   'Sponsor page navigation CTAs must be guarded so rapid taps do not repeat route changes and loading flashes.',
-);
-
-assert(
-  chatPage.includes('useScrollLock(isRulesOpen') &&
-    chatPage.includes('data-chat-rules-scroll') &&
-    chatPage.includes("target.closest('[data-chat-rules-scroll]')"),
-  'Chat rules sheet must lock background scroll and allow only the rules sheet to scroll.',
-);
-
-assert(
-  chatPage.includes('CHAT_SEND_DEDUPE_MS') &&
-    chatPage.includes('sendDedupeLockedRef') &&
-    chatPage.includes('if (sendDedupeLockedRef.current) return;') &&
-    chatPage.includes('sendDedupeLockedRef.current = true;'),
-  'Chat composer must dedupe rapid send taps before React clears the draft value.',
 );
 
 assert(
