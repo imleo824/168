@@ -64,6 +64,7 @@ const profileRoute = read('src/pages/ProfileMobile.tsx');
 const messagesPage = read('src/pages/MessagesMobile.tsx');
 const messagesStyles = read('src/styles/features/messages.css');
 const tuiPlusLinkEditor = read('src/pages/TuiPlusLinkEditorMobile.tsx');
+const profileBioEditor = read('src/pages/ProfileBioEditorMobile.tsx');
 
 assert(
   /<div\s+className="app-main app-shell-main"/.test(appShell) &&
@@ -264,6 +265,16 @@ assert(
     tuiPlusLinkEditor.includes('disabled={saveBusy}') &&
     tuiPlusLinkEditor.includes('onClick={() => void guardedSaveAll()}'),
   'Tui Plus link editor save must use a critical interaction guard and freeze editable controls while saving.',
+);
+
+assert(
+  profileBioEditor.includes('useInteractionGuard(saveBio') &&
+    profileBioEditor.includes("policy: 'critical'") &&
+    profileBioEditor.includes('mode: \'drop\'') &&
+    profileBioEditor.includes('const saveBusy = isSaving || saveGuardPending;') &&
+    profileBioEditor.includes('disabled={saveBusy}') &&
+    profileBioEditor.includes('onClick={() => void guardedSaveBio()}'),
+  'Profile bio save must use a critical interaction guard and freeze editing while saving.',
 );
 
 if (failures.length > 0) {

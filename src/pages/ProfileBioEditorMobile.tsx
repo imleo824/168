@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { useAuth } from '@/context/AuthContext';
+import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import SEO from '@/platform/SEO';
 import { apiFetch } from '@/services/api';
 import ActionButton from '@/ui/ActionButton';
@@ -57,6 +58,14 @@ export default function ProfileBioEditorMobile() {
     }
   }, [cleanBio, isSaving, navigate, patchUser, queryClient, refreshUser, showToast, user?.id]);
 
+  const { guarded: guardedSaveBio, isPending: saveGuardPending } = useInteractionGuard(saveBio, {
+    policy: 'critical',
+    cooldownMs: 640,
+    minPendingMs: 180,
+    mode: 'drop',
+  });
+  const saveBusy = isSaving || saveGuardPending;
+
   return (
     <AppPage mobileAddressBarScroll bottomSafe className="profile-bio-editor-page surface-page">
       <SEO title="编辑简介｜推推" description="编辑推推个人主页简介。" noindex />
@@ -72,6 +81,7 @@ export default function ProfileBioEditorMobile() {
             maxLength={PROFILE_BIO_MAX_LENGTH}
             onChange={(event) => setBio(event.target.value.slice(0, PROFILE_BIO_MAX_LENGTH))}
             placeholder="介绍一下自己，让大家更快认识你"
+            disabled={saveBusy}
             autoFocus
           />
           <div className="profile-bio-editor-meta">
@@ -85,14 +95,14 @@ export default function ProfileBioEditorMobile() {
         <div className="profile-bio-editor-sticky-shell">
           <ActionButton
             type="button"
-            variant={isDirty && !isSaving ? 'brand' : 'disabled'}
-            disabled={!isDirty || isSaving}
-            state={isSaving ? 'loading' : 'idle'}
+            variant={isDirty && !saveBusy ? 'brand' : 'disabled'}
+            disabled={!isDirty || saveBusy}
+            state={saveBusy ? 'loading' : 'idle'}
             className="profile-bio-editor-save"
-            onClick={() => void saveBio()}
+            onClick={() => void guardedSaveBio()}
           >
-            {isSaving ? <InlineSpinner /> : null}
-            {isSaving ? '保存中...' : '保存'}
+            {saveBusy ? <InlineSpinner /> : null}
+            {saveBusy ? '保存中...' : '保存'}
           </ActionButton>
         </div>
       </section>
