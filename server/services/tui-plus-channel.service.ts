@@ -77,6 +77,7 @@ async function assertNoOtherMemberChannelClaim(tx: any, params: { userId: string
     FROM "TuiPlusTelegramChannel"
     WHERE "userId" <> ${params.userId}
       AND "status" IN (${TUI_PLUS_CHANNEL_STATUS.ACTIVE}, ${TUI_PLUS_CHANNEL_STATUS.PAUSED})
+      AND COALESCE("autoPostEnabled", false) = true
       AND (
         "channelHandle" = ${params.handle}
         OR (${params.sourceId || null} IS NOT NULL AND "sourceId" = ${params.sourceId || null})
@@ -207,7 +208,7 @@ export async function addTuiPlusTelegramChannel(userId: string, input: { channel
 
     const sourceId = autoPostEnabled
       ? await claimAutoCrawlSource(tx, { userId, crawlUrl, handle, categoryName, title })
-      : existingRows[0]?.sourceId || null;
+      : null;
     if (!autoPostEnabled && existingRows[0]?.sourceId) {
       await pauseOrReleaseTuiPlusSource(tx, { sourceId: existingRows[0].sourceId, userId });
     }
@@ -287,12 +288,9 @@ export async function updateTuiPlusTelegramChannel(userId: string, channelId: st
 
     const sourceId = autoPostEnabled
       ? await claimAutoCrawlSource(tx, { userId, crawlUrl, handle, categoryName, title })
-      : handle === current.channelHandle ? current.sourceId || null : null;
+      : null;
     if (current.sourceId && (current.sourceId !== sourceId || (handle !== current.channelHandle && !autoPostEnabled))) {
       await releaseOrDeleteTuiPlusSource(tx, { sourceId: current.sourceId, userId });
-    }
-    if (!autoPostEnabled && sourceId) {
-      await pauseOrReleaseTuiPlusSource(tx, { sourceId, userId });
     }
     await tx.$executeRaw`UPDATE "TuiPlusTelegramChannel" SET "channelUrl" = ${crawlUrl}, "channelHandle" = ${handle}, "title" = ${title}, "sourceId" = ${sourceId}, "autoPostEnabled" = ${autoPostEnabled}, "status" = ${TUI_PLUS_CHANNEL_STATUS.ACTIVE}, "lastError" = NULL, "updatedAt" = ${now} WHERE "id" = ${channelId} AND "userId" = ${userId}`;
 

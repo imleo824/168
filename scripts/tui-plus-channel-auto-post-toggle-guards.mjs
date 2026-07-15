@@ -19,11 +19,13 @@ mustHave('channel auto post migration stops historical sources', migration, 'sou
 mustHave('channel status payload', coreService, 'COALESCE("autoPostEnabled", false) AS "autoPostEnabled"');
 mustHave('channel auto post parser', channelService, 'function normalizeAutoPostEnabled');
 mustHave('channel update compatibility', channelService, 'resolveAutoPostEnabled(input, current.autoPostEnabled)');
-mustHave('unchecked add keeps link only', channelService, ': existingRows[0]?.sourceId || null');
+mustHave('unchecked claims ignored by conflict check', channelService, 'AND COALESCE("autoPostEnabled", false) = true');
+mustHave('unchecked add keeps link only', channelService, ': null;');
 mustHave('unchecked add pauses existing member source', channelService, 'if (!autoPostEnabled && existingRows[0]?.sourceId)');
 mustMatch('add channel claim is gated by auto post', channelService, /const sourceId = autoPostEnabled\s*\?\s*await claimAutoCrawlSource/);
 mustMatch('update channel claim is gated by auto post', channelService, /const sourceId = autoPostEnabled\s*\?\s*await claimAutoCrawlSource/);
-mustHave('unchecked update pauses retained source', channelService, 'if (!autoPostEnabled && sourceId)');
+mustHave('unchecked update clears source link', channelService, '? await claimAutoCrawlSource(tx, { userId, crawlUrl, handle, categoryName, title })\n      : null;');
+mustHave('unchecked update releases retained source', channelService, 'await releaseOrDeleteTuiPlusSource(tx, { sourceId: current.sourceId, userId })');
 mustHave('entitlement only reopens opted-in sources', entitlementService, 'AND COALESCE(channel."autoPostEnabled", false) = true');
 mustHave('entitlement closes opted-out sources', entitlementService, 'AND COALESCE(channel."autoPostEnabled", false) = false');
 mustHave('link editor sends auto post flag', linkEditor, 'autoPostEnabled: Boolean(row?.autoPostEnabled)');
