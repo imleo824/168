@@ -57,6 +57,7 @@ export type AutoCrawlConfig = {
   checkIntervalMinutes: number;
   maxItemsPerSource: number;
   maxSourcesPerRun: number;
+  categoryOptions: Array<{ id: string; name: string; slug: string }>;
   sources: AutoCrawlSourceConfig[];
   recentRuns: AutoCrawlRunRecord[];
 };

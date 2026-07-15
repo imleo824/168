@@ -250,6 +250,18 @@ function mapRun(row: any): AutoCrawlRunRecord {
   };
 }
 
+async function listAutoCrawlCategoryOptions() {
+  const categories = await db().category.findMany({
+    select: { id: true, name: true, slug: true },
+    orderBy: [{ order: 'asc' }, { name: 'asc' }, { id: 'asc' }],
+  });
+  return categories.map((category: any) => ({
+    id: String(category.id || ''),
+    name: cleanString(category.name, 120) || String(category.id || ''),
+    slug: cleanString(category.slug, 120),
+  }));
+}
+
 export async function getAutoCrawlConfig(): Promise<AutoCrawlConfig> {
   if (!isDbConfigured()) {
     return {
@@ -257,19 +269,21 @@ export async function getAutoCrawlConfig(): Promise<AutoCrawlConfig> {
       checkIntervalMinutes: DEFAULT_CHECK_INTERVAL_MINUTES,
       maxItemsPerSource: DEFAULT_MAX_ITEMS_PER_SOURCE,
       maxSourcesPerRun: DEFAULT_MAX_SOURCES_PER_RUN,
+      categoryOptions: [],
       sources: [],
       recentRuns: [],
     };
   }
 
   await ensureAutoCrawlStorage();
-  const [configs, sources, runs] = await Promise.all([
+  const [configs, sources, runs, categoryOptions] = await Promise.all([
     rows<any>(`SELECT "enabled","checkIntervalMinutes","maxItemsPerSource","maxSourcesPerRun" FROM "AutoCrawlConfig" WHERE "id"='default' LIMIT 1`),
     rows<any>(`SELECT s."id",s."source",s."type",s."sourceName",s."categoryId",s."authorUserId",s."showContact",s."disabled",s."cursor",s."cursorKind",s."pollIntervalMinutes",s."nextRunAt",s."lastSyncAt",s."lastFetchedCount",s."lastParsedCount",s."lastCandidateCount",s."lastDeliveredCount",s."lastFilteredCount",s."lastDuplicateCount",s."failCount",s."lastError",s."lastVisibleMinCursor",s."lastVisibleMaxCursor",s."sourceHealth",s."createdAt",s."updatedAt",c."name" AS "resolvedCategoryName"
       FROM "AutoCrawlSource" s
       LEFT JOIN "Category" c ON c."id"=s."categoryId"
       ORDER BY s."disabled" ASC,c."name" ASC NULLS LAST,s."updatedAt" DESC`),
     rows<any>(`SELECT * FROM "AutoCrawlRun" ORDER BY "startedAt" DESC,"id" DESC LIMIT $1::integer`, CONFIG_RUN_LIMIT),
+    listAutoCrawlCategoryOptions(),
   ]);
   const config = configs[0] || {};
   return {
@@ -277,6 +291,7 @@ export async function getAutoCrawlConfig(): Promise<AutoCrawlConfig> {
     checkIntervalMinutes: clampInterval(config.checkIntervalMinutes, DEFAULT_CHECK_INTERVAL_MINUTES),
     maxItemsPerSource: clampRun(config.maxItemsPerSource, DEFAULT_MAX_ITEMS_PER_SOURCE, MAX_ITEMS_PER_SOURCE),
     maxSourcesPerRun: clampRun(config.maxSourcesPerRun, DEFAULT_MAX_SOURCES_PER_RUN, MAX_RUN_SOURCES),
+    categoryOptions,
     sources: sources.map(mapSource),
     recentRuns: runs.map(mapRun),
   };

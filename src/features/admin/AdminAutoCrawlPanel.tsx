@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Plus, Save, Trash2, X } from 'lucide-react';
 
 import { useAuth } from '@/context/AuthContext';
-import { useCategories } from '@/hooks/useData';
 import { apiFetch } from '@/services/api';
 import { ConfigItem } from './adminChrome';
 import { AdminAutoCrawlExecutionLogsCompactPanel } from './AdminAutoCrawlExecutionLogsCompactPanel';
@@ -53,6 +52,7 @@ type AutoCrawlConfig = {
   checkIntervalMinutes: number;
   maxItemsPerSource: number;
   maxSourcesPerRun: number;
+  categoryOptions: AdminCategoryOption[];
   sources: AutoCrawlSource[];
   recentRuns: AutoCrawlRun[];
 };
@@ -91,7 +91,6 @@ function shortId(id?: string | null) {
 
 export function AdminAutoCrawlPanel({ view = 'config' }: { view?: AutoCrawlView }) {
   const { showToast } = useAuth();
-  const { data: categories } = useCategories();
   const [config, setConfig] = useState<AutoCrawlConfig | null>(null);
   const [draft, setDraft] = useState<Partial<AutoCrawlConfig>>({});
   const [sourceDraft, setSourceDraft] = useState<Partial<AutoCrawlSource>>(EMPTY_SOURCE);
@@ -102,8 +101,8 @@ export function AdminAutoCrawlPanel({ view = 'config' }: { view?: AutoCrawlView 
   const [togglingSourceId, setTogglingSourceId] = useState('');
 
   const sortedCategories = useMemo(
-    () => [...(categories || [])].sort((a, b) => (a.order || 0) - (b.order || 0)),
-    [categories],
+    () => [...(config?.categoryOptions || [])].sort((a, b) => (a.order || 0) - (b.order || 0) || cleanText(a.name).localeCompare(cleanText(b.name), 'zh-CN')),
+    [config?.categoryOptions],
   );
   const sources = config?.sources || [];
   const editingSource = sources.find((source) => source.id === editingSourceId) || null;
@@ -112,6 +111,8 @@ export function AdminAutoCrawlPanel({ view = 'config' }: { view?: AutoCrawlView 
     const category = sortedCategories.find((item) => item.id === source.categoryId);
     return category?.name || cleanText(source.categoryName) || '未绑定分类';
   };
+  const selectedCategoryMissing = Boolean(sourceDraft.categoryId)
+    && !sortedCategories.some((category) => category.id === sourceDraft.categoryId);
 
   const loadConfig = useCallback(async () => {
     try {
@@ -321,7 +322,7 @@ export function AdminAutoCrawlPanel({ view = 'config' }: { view?: AutoCrawlView 
               <label className="admin-field-label">类型<select className="mt-1 admin-form-control admin-form-control--field" value={sourceDraft.type || 'telegram'} onChange={(event) => setSourceDraft((current) => ({ ...current, type: event.target.value as SourceType }))}><option value="telegram">Telegram</option><option value="rss">RSS</option></select></label>
               <label className="admin-field-label">来源地址<input className="mt-1 admin-form-control admin-form-control--field" value={sourceDraft.source || ''} onChange={(event) => setSourceDraft((current) => ({ ...current, source: event.target.value }))} placeholder="https://t.me/s/channel 或 RSS URL" /></label>
               <label className="admin-field-label">数据源名称<input className="mt-1 admin-form-control admin-form-control--field" value={sourceDraft.sourceName || ''} onChange={(event) => setSourceDraft((current) => ({ ...current, sourceName: event.target.value }))} /></label>
-              <label className="admin-field-label">发布分类<select className="mt-1 admin-form-control admin-form-control--field" value={sourceDraft.categoryId || ''} onChange={(event) => setSourceDraft((current) => ({ ...current, categoryId: event.target.value }))}><option value="">选择分类</option>{sortedCategories.map((category: AdminCategoryOption) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
+              <label className="admin-field-label">发布分类<select className="mt-1 admin-form-control admin-form-control--field" value={sourceDraft.categoryId || ''} onChange={(event) => setSourceDraft((current) => ({ ...current, categoryId: event.target.value }))}><option value="">选择数据库分类</option>{selectedCategoryMissing ? <option value={sourceDraft.categoryId}>{cleanText(sourceDraft.categoryName) || `已删除分类 ${shortId(sourceDraft.categoryId)}`}</option> : null}{sortedCategories.map((category: AdminCategoryOption) => <option key={category.id} value={category.id}>{category.name}</option>)}</select></label>
               <label className="admin-field-label">发布账号ID<input className="mt-1 admin-form-control admin-form-control--field" value={sourceDraft.authorUserId || ''} onChange={(event) => setSourceDraft((current) => ({ ...current, authorUserId: event.target.value }))} /></label>
               <label className="admin-field-label">抓取间隔（分钟）<input type="number" className="mt-1 admin-form-control admin-form-control--field" value={sourceDraft.pollIntervalMinutes ?? 30} onChange={(event) => setSourceDraft((current) => ({ ...current, pollIntervalMinutes: numberOrRaw(event.target.value) as any }))} /></label>
               <label className="admin-field-label">Cursor 类型<select className="mt-1 admin-form-control admin-form-control--field" value={sourceDraft.cursorKind || 'baseline_pending'} onChange={(event) => setSourceDraft((current) => ({ ...current, cursorKind: event.target.value as CursorKind }))}><option value="baseline_pending">首次基线</option><option value="message_id">消息 ID</option><option value="timestamp">时间戳</option></select></label>

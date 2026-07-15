@@ -35,6 +35,7 @@ const locationNormalize = read('server/services/location-preset-normalize.servic
 const strictMetaMigration = read('prisma/migrations/20260915000000_auto_crawl_meta_number_no_range_gate/migration.sql');
 const packageJson = read('package.json');
 const crawlLogsPanel = read('src/features/admin/AdminAutoCrawlExecutionLogsCompactPanel.tsx');
+const crawlPanel = read('src/features/admin/AdminAutoCrawlPanel.tsx');
 
 mustNotHave('domain types', types, /syncToTelegram|localOnlyMode|aiEnabled|QUARANTINED|FILTERED/);
 mustHave('domain types', types, /RETRYABLE/);
@@ -56,6 +57,8 @@ mustHave('crawl database config', crawlDatabaseConfig, /auto_crawl_database_meta
 mustNotHave('crawl database config', crawlDatabaseConfig, /ConfigService|getDefaultConfigs|DEFAULT_|fallback|entry\.slug|entry\.id/);
 
 mustHave('main flow', crawl, /loadAutoCrawlDatabaseConfig/);
+mustHave('config payload', crawl, /categoryOptions/);
+mustHave('config payload', crawl, /listAutoCrawlCategoryOptions/);
 mustHave('main flow', crawl, /getAutoCrawlDatabaseCategory\(databaseConfig, source\.categoryId\)/);
 mustHave('main flow', crawl, /getAutoCrawlCategorySchema\(databaseConfig, category\)/);
 mustHave('main flow', crawl, /category: \{ connect: \{ id: category\.id \} \}/);
@@ -70,6 +73,8 @@ mustHave('main flow', crawl, /auto_crawl_database_migration_required/);
 mustNotHave('main flow', crawl, /resolveCategoryById|findPublishCategoryMetaSchema|ConfigService|AutoCrawlLock|AutoCrawlCategoryAuthor|heartbeatAutoCrawlLock|resolveAutoCrawlFinalCategoryByRules|initializeAutoCrawlSourcesFromSeed|AUTO_CRAWL_SEED|CREATE TABLE IF NOT EXISTS|CREATE INDEX IF NOT EXISTS|syncToTelegram|telegramSyncStatus/);
 mustNotHave('main flow metadata', crawl, /metadata:\s*\{[\s\S]{0,160}\bcategory\s*[,}]|metadata:\s*\{[\s\S]{0,180}\bmeta\s*:/);
 mustNotHave('auto crawl logs panel', crawlLogsPanel, /同步 Telegram|syncToTelegram/);
+mustHave('auto crawl admin panel category options', crawlPanel, /categoryOptions/);
+mustNotHave('auto crawl admin panel category options', crawlPanel, /useCategories|@\/hooks\/useData/);
 mustHave('source identity', crawl, /duplicateBy: 'sourcePostId' \| 'fingerprint' \| 'contentHash'/);
 mustHave('source identity', crawl, /\(\"sourceId\"=\$1 AND \"sourcePostId\"=\$2\)/);
 mustHave('source identity', crawl, /ON CONFLICT\(\"sourceId\",\"sourcePostId\"\)/);
