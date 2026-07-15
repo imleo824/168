@@ -246,6 +246,17 @@ assert(
 );
 
 assert(
+  sponsorPage.includes('useInteractionGuard(refetchActiveSponsorRecords') &&
+    sponsorPage.includes('const retryRecordsBusy = activeRecordRefetching || refetchRecordsGuardPending;') &&
+    sponsorPage.includes('disabled={retryRecordsBusy}') &&
+    sponsorPage.includes('onClick={() => void guardedRefetchActiveSponsorRecords()}') &&
+    !sponsorPage.includes('onClick={() => { void promotionEffectsQuery.refetch(); }}') &&
+    !sponsorPage.includes('onClick={() => { void promotionsQuery.refetch(); }}') &&
+    !sponsorPage.includes('onClick={() => { void transactionsQuery.refetch(); void rechargeOrdersQuery.refetch(); }}'),
+  'Sponsor record retry actions must share a guarded active-tab refetch instead of direct query refetch handlers.',
+);
+
+assert(
   profileRoute.includes('guardedOpenProfileSettings') &&
     profileRoute.includes('cooldownMs: 520') &&
     profileRoute.includes('mode: \'drop\''),
