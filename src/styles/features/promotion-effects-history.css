@@ -32,7 +32,7 @@
   .promotion-effects-date-panel {
     display: grid;
     width: 100%;
-    max-width: var(--ui-page-narrow);
+    max-width: var(--ui-promotion-effects-content-max, var(--ui-page-narrow));
     margin-inline: auto;
     margin-top: var(--ui-space-2);
     gap: var(--ui-space-3);
@@ -41,6 +41,12 @@
     background: var(--ui-surface-card);
     padding: var(--ui-space-3);
     box-shadow: var(--ui-shadow-none);
+  }
+
+  @media (min-width: 1024px) {
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .promotion-effects-page {
+      --ui-promotion-effects-content-max: var(--app-desktop-page-content-width);
+    }
   }
 
   .promotion-effects-date-presets {

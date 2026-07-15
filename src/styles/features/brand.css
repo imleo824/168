@@ -224,4 +224,12 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
+
+  @media (min-width: 1024px) {
+    .app-shell[data-route-surface='user'][data-desktop-surface='content'] .brand-about-main {
+      width: 100%;
+      max-width: var(--app-desktop-page-content-width);
+      margin-inline: auto;
+    }
+  }
 }

@@ -19,11 +19,17 @@
   .record-list {
     display: flex;
     width: 100%;
-    max-width: var(--ui-page-narrow);
+    max-width: var(--ui-record-list-content-max, var(--ui-page-narrow));
     flex-direction: column;
     gap: var(--ui-space-2);
     margin-inline: auto;
     margin-top: var(--ui-space-2);
+  }
+
+  @media (min-width: 1024px) {
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .record-page {
+      --ui-record-list-content-max: var(--app-desktop-page-content-width);
+    }
   }
 
   .record-id-row {

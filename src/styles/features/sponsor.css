@@ -240,5 +240,9 @@
     .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .sponsor-page .sponsor-record-panel {
       padding-bottom: var(--ui-space-6);
     }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .sponsor-page .sponsor-record-list {
+      max-width: var(--app-desktop-page-content-width);
+    }
   }
 }

@@ -4,7 +4,7 @@
   .promote-history-edit-stack {
     display: grid;
     width: 100%;
-    max-width: var(--ui-page-narrow);
+    max-width: var(--ui-promote-history-edit-content-max, var(--ui-page-narrow));
     margin-inline: auto;
     gap: var(--ui-space-4);
   }
@@ -81,5 +81,11 @@
       var(--ui-surface-page) 72%,
       color-mix(in srgb, var(--ui-surface-page) 0%, transparent)
     );
+  }
+
+  @media (min-width: 1024px) {
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .promote-history-edit-stack {
+      --ui-promote-history-edit-content-max: var(--app-desktop-page-content-width);
+    }
   }
 }

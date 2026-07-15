@@ -468,9 +468,17 @@
   }
 
   .ui-auth-required-wrap {
-    width: min(100%, var(--ui-page-content-max-width));
+    width: min(100%, var(--ui-auth-required-wrap-max, var(--ui-page-content-max-width)));
     margin-inline: auto;
     padding: var(--ui-space-6) var(--ui-page-edge-padding-x) var(--ui-space-8);
+  }
+
+  @media (min-width: 1024px) {
+    .app-shell[data-route-surface='user'] .ui-auth-required-wrap {
+      --ui-auth-required-wrap-max: var(--app-desktop-page-content-width);
+
+      max-width: var(--ui-auth-required-wrap-max);
+    }
   }
 
   .ui-auth-required-card {

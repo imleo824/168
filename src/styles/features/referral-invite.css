@@ -10,7 +10,7 @@
     display: grid;
     width: 100%;
     min-width: 0;
-    max-width: var(--ui-page-narrow);
+    max-width: var(--ui-referral-page-content-max, var(--ui-page-narrow));
     margin-inline: auto;
     gap: var(--ui-space-3);
   }
@@ -231,7 +231,7 @@
     display: grid;
     width: 100%;
     min-width: 0;
-    max-width: var(--ui-page-narrow);
+    max-width: var(--ui-referral-page-content-max, var(--ui-page-narrow));
     margin-inline: auto;
     gap: var(--ui-space-2);
   }
@@ -339,6 +339,12 @@
     .referral-link-panel .ui-button {
       width: 100%;
       justify-content: center;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .referral-page {
+      --ui-referral-page-content-max: var(--app-desktop-page-content-width);
     }
   }
 }

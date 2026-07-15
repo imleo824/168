@@ -624,6 +624,11 @@ assertIncludes('src/styles/system/wide-screen-mobile-adaptation.css', 'calc(var(
 assertIncludes('src/styles/system/wide-screen-mobile-adaptation.css', '--ui-topbar-content-max-width: var(--app-desktop-page-content-width);', 'desktop secondary page topbars must inherit the framed content width.');
 assertIncludes('src/styles/features/recharge.css', '--ui-recharge-page-max: var(--app-desktop-page-content-width);', 'desktop recharge content must align to the shared framed content width.');
 assertIncludes('src/styles/features/sponsor.css', 'max-width: var(--app-desktop-page-content-width);', 'desktop sponsor workbench must align to the shared framed workspace content width.');
+assertIncludes('src/styles/features/referral-invite.css', '--ui-referral-page-content-max: var(--app-desktop-page-content-width);', 'desktop referral invite content must align to the shared framed workspace content width.');
+assertIncludes('src/styles/features/brand.css', "data-desktop-surface='content'] .brand-about-main", 'desktop about page content must align to the shared framed content width.');
+assertIncludes('src/styles/system/record-card-contract.css', '--ui-record-list-content-max: var(--app-desktop-page-content-width);', 'desktop record pages must align lists to the shared framed workspace content width.');
+assertIncludes('src/styles/system/ui-primitives-auth.css', '--ui-auth-required-wrap-max: var(--app-desktop-page-content-width);', 'desktop auth-required states must align to the shared framed page content width.');
+assertIncludes('src/styles/system/ui-primitives-auth.css', 'max-width: var(--ui-auth-required-wrap-max);', 'desktop auth-required states must override the default narrow content shell max width.');
 assertIncludes('src/utils/postPresentation.ts', 'const LOCATION_SPLIT_PATTERN = /\\s+-\\s+|[·>＞、，,;；|/\\n]+/;', 'card location display must understand middle-dot location hierarchy.');
 assertIncludes('src/utils/postStructuredMeta.ts', "if (normalizeKey(key) === 'location') return selectFinestDisplayLocation(formatted) || formatted;", 'structured card location display must keep only the leaf node.');
 assertNotIncludes('src/styles/system/ui-post-tag-contract.css', 'They are text links', 'old text-link tag contract must not return.');
