@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState, type MouseEvent } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heart, Megaphone, MessageCircle, Pin, Repeat2, Settings2, UserPlus, WalletCards } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -15,6 +15,7 @@ import TopbarIconButton from '@/ui/TopbarIconButton';
 import { apiFetch } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 import PushNotificationSetting from '@/features/notifications/PushNotificationSetting';
+import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 
 type NotificationType = 'LIKE' | 'COMMENT' | 'QUOTE' | 'FOLLOW' | 'SYSTEM' | 'RECHARGE' | 'PROMOTION';
 type NotificationFilter = 'ALL' | NotificationType;
@@ -222,7 +223,7 @@ export default function MessagesMobile() {
     }
   }, [isMarkingAllRead, queryClient, showToast, unreadCount]);
 
-  const handleOpenNotification = useCallback((item: NotificationItem, targetPath: string) => {
+  const openNotification = useCallback((item: NotificationItem, targetPath: string) => {
     if (!item.readAt) {
       const readAt = new Date().toISOString();
       queryClient.setQueriesData<NotificationResponse>(
@@ -237,12 +238,30 @@ export default function MessagesMobile() {
     }
     navigate(targetPath);
   }, [navigate, queryClient]);
+  const { guarded: guardedOpenNotification } = useInteractionGuard<[NotificationItem, string]>(openNotification, {
+    policy: 'optimistic',
+    cooldownMs: 360,
+    mode: 'drop',
+  });
 
-  const openActorSpace = useCallback((actorId: string, event?: MouseEvent<HTMLButtonElement>) => {
-    event?.stopPropagation();
+  const openActorSpace = useCallback((actorId: string) => {
     if (!actorId) return;
     navigate(`/user/${actorId}`);
   }, [navigate]);
+  const { guarded: guardedOpenActorSpace } = useInteractionGuard<[string]>(openActorSpace, {
+    policy: 'instant',
+    cooldownMs: 360,
+    mode: 'drop',
+  });
+
+  const goNotificationSettings = useCallback(() => {
+    navigate('/settings/notifications');
+  }, [navigate]);
+  const { guarded: guardedGoNotificationSettings } = useInteractionGuard(goNotificationSettings, {
+    policy: 'instant',
+    cooldownMs: 520,
+    mode: 'drop',
+  });
 
   const renderContent = useMemo(() => {
     if (notificationsQuery.isLoading) {
@@ -287,7 +306,10 @@ export default function MessagesMobile() {
                   type="button"
                   className="messages-avatar-button pressable"
                   aria-label={`进入${actorName}的个人空间`}
-                  onClick={(event) => openActorSpace(actor.id, event)}
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    void guardedOpenActorSpace(actor.id);
+                  }}
                 >
                   <AvatarImage
                     src={actor.photoUrl || ''}
@@ -311,7 +333,7 @@ export default function MessagesMobile() {
               <button
                 type="button"
                 className="messages-item-content-button pressable"
-                onClick={() => handleOpenNotification(item, targetPath)}
+                onClick={() => void guardedOpenNotification(item, targetPath)}
               >
                 <span className="messages-item-main">
                   <span className="messages-item-line">
@@ -327,7 +349,7 @@ export default function MessagesMobile() {
         })}
       </div>
     );
-  }, [handleOpenNotification, items, notificationsQuery.error, notificationsQuery.isError, notificationsQuery.isLoading, openActorSpace]);
+  }, [guardedOpenActorSpace, guardedOpenNotification, items, notificationsQuery.error, notificationsQuery.isError, notificationsQuery.isLoading]);
 
   return (
     <AppPage mobileAddressBarScroll bottomSafe className="messages-page surface-page">
@@ -352,7 +374,7 @@ export default function MessagesMobile() {
             ) : null}
             <TopbarIconButton
               icon={<Settings2 aria-hidden="true" />}
-              onClick={() => navigate('/settings/notifications')}
+              onClick={() => void guardedGoNotificationSettings()}
               ariaLabel="通知设置"
               title="通知设置"
               tone="default"

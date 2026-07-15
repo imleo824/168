@@ -364,6 +364,18 @@ assert(
 );
 
 assert(
+  messagesPage.includes('useInteractionGuard<[NotificationItem, string]>(openNotification') &&
+    messagesPage.includes('useInteractionGuard<[string]>(openActorSpace') &&
+    messagesPage.includes('useInteractionGuard(goNotificationSettings') &&
+    messagesPage.includes('void guardedOpenNotification(item, targetPath)') &&
+    messagesPage.includes('void guardedOpenActorSpace(actor.id)') &&
+    messagesPage.includes('void guardedGoNotificationSettings()') &&
+    !messagesPage.includes('onClick={() => handleOpenNotification(item, targetPath)}') &&
+    !messagesPage.includes("onClick={() => navigate('/settings/notifications')}"),
+  'Messages item, actor, and settings navigations must be guarded against rapid duplicate route changes.',
+);
+
+assert(
   messagesStyles.includes(".messages-read-all-button[aria-busy='true']") &&
     messagesStyles.includes('opacity: var(--ui-opacity-disabled);') &&
     messagesStyles.includes('transform: var(--ui-transform-none);'),
