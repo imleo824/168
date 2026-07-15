@@ -69,6 +69,7 @@ const profileBioEditor = read('src/pages/ProfileBioEditorMobile.tsx');
 const notificationSettings = read('src/pages/NotificationSettings.tsx');
 const rechargePage = read('src/pages/RechargeMobile.tsx');
 const referralInvitePageContent = read('src/features/sponsor/ReferralInvitePageContent.tsx');
+const transactionHistoryPage = read('src/pages/TransactionHistoryMobile.tsx');
 
 assert(
   /<div\s+className="app-main app-shell-main"/.test(appShell) &&
@@ -317,6 +318,16 @@ assert(
     referralInvitePageContent.includes('onConfirm={() => void guardedConfirmWithdrawal()}') &&
     referralInvitePageContent.includes('onConfirm={() => void guardedConfirmConversion()}'),
   'Referral withdrawal and conversion confirmations must use critical interaction guards across payment mutations.',
+);
+
+assert(
+  transactionHistoryPage.includes('useInteractionGuard(fetchNextPage') &&
+    transactionHistoryPage.includes('useInteractionGuard(refetchCurrentPage') &&
+    transactionHistoryPage.includes('const loadMoreBusy = isFetchingNextPage || fetchNextPageGuardPending;') &&
+    transactionHistoryPage.includes('const retryBusy = refetchGuardPending;') &&
+    transactionHistoryPage.includes('onClick={() => void guardedRefetchCurrentPage()}') &&
+    transactionHistoryPage.includes('onLoadMore={() => void guardedFetchNextPage()}'),
+  'Transaction history retry and load-more actions must be guarded against rapid duplicate page requests.',
 );
 
 if (failures.length > 0) {

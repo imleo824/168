@@ -14,6 +14,7 @@ import {
 import LedgerRecordCard from '@/features/records/LedgerRecordCard';
 import { useAuth } from '@/context/AuthContext';
 import { useConfig } from '@/hooks/useData';
+import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import AppPage from '@/ui/AppPage';
 import PageHeader from '@/ui/PageHeader';
 import HeaderSelectAction from '@/ui/HeaderSelectAction';
@@ -178,6 +179,20 @@ export default function TransactionHistoryMobile() {
     if (includeRechargeOrders) tasks.push(refetchOrders());
     await Promise.all(tasks);
   };
+  const { guarded: guardedFetchNextPage, isPending: fetchNextPageGuardPending } = useInteractionGuard(fetchNextPage, {
+    policy: 'optimistic',
+    cooldownMs: 420,
+    minPendingMs: 120,
+    mode: 'drop',
+  });
+  const { guarded: guardedRefetchCurrentPage, isPending: refetchGuardPending } = useInteractionGuard(refetchCurrentPage, {
+    policy: 'optimistic',
+    cooldownMs: 520,
+    minPendingMs: 160,
+    mode: 'drop',
+  });
+  const loadMoreBusy = isFetchingNextPage || fetchNextPageGuardPending;
+  const retryBusy = refetchGuardPending;
 
   const handleRecordTypeChange = (value: UnifiedRecordType) => {
     const nextType = normalizeRecordTypeFilter(value);
@@ -226,9 +241,11 @@ export default function TransactionHistoryMobile() {
                 <ActionButton
                   variant="muted"
                   size="sm"
-                  onClick={() => void refetchCurrentPage()}
+                  disabled={retryBusy}
+                  state={retryBusy ? 'loading' : 'idle'}
+                  onClick={() => void guardedRefetchCurrentPage()}
                 >
-                  重新加载
+                  {retryBusy ? '加载中' : '重新加载'}
                 </ActionButton>
               }
             />
@@ -248,9 +265,9 @@ export default function TransactionHistoryMobile() {
               )}
 
               <ListLoadMoreState
-                loading={Boolean(isFetchingNextPage)}
+                loading={Boolean(loadMoreBusy)}
                 hasMore={Boolean(hasNextPage)}
-                onLoadMore={() => void fetchNextPage()}
+                onLoadMore={() => void guardedFetchNextPage()}
                 loadingText="加载中"
                 loadMoreText="加载更多"
                 doneText=""
