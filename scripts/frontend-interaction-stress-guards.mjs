@@ -71,6 +71,7 @@ const rechargePage = read('src/pages/RechargeMobile.tsx');
 const referralInvitePageContent = read('src/features/sponsor/ReferralInvitePageContent.tsx');
 const transactionHistoryPage = read('src/pages/TransactionHistoryMobile.tsx');
 const referralInviteRecordsPage = read('src/pages/ReferralInviteRecordsMobile.tsx');
+const promotionEffectsHistoryPage = read('src/pages/PromotionEffectsHistory.tsx');
 
 assert(
   /<div\s+className="app-main app-shell-main"/.test(appShell) &&
@@ -384,6 +385,15 @@ assert(
     transactionHistoryPage.includes('onClick={() => void guardedRefetchCurrentPage()}') &&
     transactionHistoryPage.includes('onLoadMore={() => void guardedFetchNextPage()}'),
   'Transaction history retry and load-more actions must be guarded against rapid duplicate page requests.',
+);
+
+assert(
+  promotionEffectsHistoryPage.includes('useInteractionGuard(refetchPromotionEffects') &&
+    promotionEffectsHistoryPage.includes('const retryBusy = promotionEffectsQuery.isRefetching || refetchGuardPending;') &&
+    promotionEffectsHistoryPage.includes('disabled={retryBusy}') &&
+    promotionEffectsHistoryPage.includes('onClick={() => void guardedRefetchPromotionEffects()}') &&
+    !promotionEffectsHistoryPage.includes('void promotionEffectsQuery.refetch();'),
+  'Promotion effects history retry action must use a guarded refetch instead of direct query refetch.',
 );
 
 assert(

@@ -12,6 +12,7 @@ import EmptyStateCard from '@/ui/EmptyStateCard';
 import PageContentShell from '@/ui/PageContentShell';
 import SurfaceSectionCard from '@/ui/SurfaceSectionCard';
 import { PageLoadingState, StateBlock } from '@/ui/LoadingState';
+import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import { getMyPromotionEffects } from '@/services/api';
 import PromotionEffectStatsRow from '@/features/promote/PromotionEffectStatsRow';
 import { hasAnyPromotionEffectStats } from '@/features/promote/promotionDisplayUtils';
@@ -70,6 +71,16 @@ export default function PromotionEffectsHistory() {
     queryKey: ['promotion-effects-history', effectRange.startDate, effectRange.endDate],
     queryFn: () => getMyPromotionEffects({ ...effectRange, includeItems: false }),
   });
+  const refetchPromotionEffects = async () => {
+    await promotionEffectsQuery.refetch();
+  };
+  const { guarded: guardedRefetchPromotionEffects, isPending: refetchGuardPending } = useInteractionGuard(refetchPromotionEffects, {
+    policy: 'optimistic',
+    cooldownMs: 520,
+    minPendingMs: 160,
+    mode: 'drop',
+  });
+  const retryBusy = promotionEffectsQuery.isRefetching || refetchGuardPending;
 
   const dailyItems = useMemo(() => {
     return [...(promotionEffectsQuery.data?.dailyItems || [])].reverse();
@@ -175,11 +186,11 @@ export default function PromotionEffectsHistory() {
                   type="button"
                   variant="muted"
                   size="sm"
-                  onClick={() => {
-                    void promotionEffectsQuery.refetch();
-                  }}
+                  disabled={retryBusy}
+                  state={retryBusy ? 'loading' : 'idle'}
+                  onClick={() => void guardedRefetchPromotionEffects()}
                 >
-                  重新加载
+                  {retryBusy ? '加载中' : '重新加载'}
                 </ActionButton>
               }
             />
