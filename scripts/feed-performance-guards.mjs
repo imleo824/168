@@ -137,6 +137,42 @@ assert.match(
 );
 
 assert.match(
+  publicFeedCache,
+  /function touchPublicFeedResultCache\(key: string, cached: PublicFeedResultCacheEntry\)[\s\S]*publicFeedResultCache\.delete\(key\)[\s\S]*publicFeedResultCache\.set\(key, cached\)/,
+  'public feed result cache should support LRU-style touch on cache hits',
+);
+
+assert.match(
+  publicFeedCache,
+  /if \(cached\.expiresAt > now\) \{[\s\S]*touchPublicFeedResultCache\(key, cached\)[\s\S]*cacheState: 'HIT'/,
+  'fresh public feed result cache hits should refresh eviction order without extending TTL',
+);
+
+assert.match(
+  publicFeedCache,
+  /if \(cached\.staleExpiresAt > now\) \{[\s\S]*touchPublicFeedResultCache\(key, cached\)[\s\S]*cacheState: 'STALE'/,
+  'stale public feed result cache hits should refresh eviction order while background refresh runs',
+);
+
+assert.match(
+  publicFeedCache,
+  /function touchPublicFeedLastGoodCache\(key: string, cached: PublicFeedLastGoodCacheEntry\)[\s\S]*publicFeedLastGoodCache\.delete\(key\)[\s\S]*publicFeedLastGoodCache\.set\(key, cached\)/,
+  'public feed last-good fallback cache should support LRU-style touch on fallback hits',
+);
+
+assert.match(
+  publicFeedCache,
+  /const stableCached = publicFeedLastGoodCache\.get\(stableKey\)[\s\S]*touchPublicFeedLastGoodCache\(stableKey, stableCached\)/,
+  'versionless public feed fallback hits should refresh last-good eviction order',
+);
+
+assert.match(
+  publicFeedCache,
+  /prunePublicFeedResultCache\(now\);[\s\S]*prunePublicFeedLastGoodCache\(\);/,
+  'public feed result and last-good caches should be pruned independently after writes',
+);
+
+assert.match(
   httpCache,
   /return false;/,
   'public feed responses should remain eligible for HTTP compression to reduce concurrent transfer time',

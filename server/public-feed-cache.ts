@@ -46,22 +46,25 @@ export type PublicFeedCachedPayload = PublicFeedResultPayload & {
   cacheState: 'HIT' | 'STALE' | 'FALLBACK';
 };
 
-let publicFeedCacheVersion = 1;
-const publicFeedResultCache = new Map<string, {
+type PublicFeedResultCacheEntry = {
   expiresAt: number;
   staleExpiresAt: number;
   items: any[];
   body: string;
   nextCursor: string | null;
   hasMore: boolean;
-}>();
-const publicFeedLastGoodCache = new Map<string, {
-  createdAt: number;
+};
+
+type PublicFeedLastGoodCacheEntry = {
   items: any[];
   body: string;
   nextCursor: string | null;
   hasMore: boolean;
-}>();
+};
+
+let publicFeedCacheVersion = 1;
+const publicFeedResultCache = new Map<string, PublicFeedResultCacheEntry>();
+const publicFeedLastGoodCache = new Map<string, PublicFeedLastGoodCacheEntry>();
 const publicFeedResultInflight = new Map<string, Promise<PublicFeedResultPayload>>();
 
 function toVersionlessFeedCacheKey(key: string | null) {
@@ -70,6 +73,33 @@ function toVersionlessFeedCacheKey(key: string | null) {
     .split('|')
     .filter((part) => part && !part.startsWith('feedVersion='))
     .join('|');
+}
+
+function touchPublicFeedResultCache(key: string, cached: PublicFeedResultCacheEntry) {
+  publicFeedResultCache.delete(key);
+  publicFeedResultCache.set(key, cached);
+}
+
+function touchPublicFeedLastGoodCache(key: string, cached: PublicFeedLastGoodCacheEntry) {
+  publicFeedLastGoodCache.delete(key);
+  publicFeedLastGoodCache.set(key, cached);
+}
+
+function prunePublicFeedResultCache(now = Date.now()) {
+  for (const [cacheKey, cached] of publicFeedResultCache) {
+    if (cached.staleExpiresAt <= now || publicFeedResultCache.size > PUBLIC_FEED_RESULT_CACHE_MAX_ENTRIES) {
+      publicFeedResultCache.delete(cacheKey);
+    }
+    if (publicFeedResultCache.size <= PUBLIC_FEED_RESULT_CACHE_MAX_ENTRIES) break;
+  }
+}
+
+function prunePublicFeedLastGoodCache() {
+  while (publicFeedLastGoodCache.size > PUBLIC_FEED_RESULT_CACHE_MAX_ENTRIES) {
+    const oldestKey = publicFeedLastGoodCache.keys().next().value;
+    if (!oldestKey) break;
+    publicFeedLastGoodCache.delete(oldestKey);
+  }
 }
 
 function createAsyncLimiter(maxConcurrent: number) {
@@ -207,6 +237,7 @@ export function getPublicFeedResultCache(key: string | null): PublicFeedCachedPa
 
   const now = Date.now();
   if (cached.expiresAt > now) {
+    touchPublicFeedResultCache(key, cached);
     return {
       items: cached.items,
       body: cached.body,
@@ -217,6 +248,7 @@ export function getPublicFeedResultCache(key: string | null): PublicFeedCachedPa
   }
 
   if (cached.staleExpiresAt > now) {
+    touchPublicFeedResultCache(key, cached);
     return {
       items: cached.items,
       body: cached.body,
@@ -232,17 +264,32 @@ export function getPublicFeedResultCache(key: string | null): PublicFeedCachedPa
 
 export function getPublicFeedFallbackCache(key: string | null): PublicFeedCachedPayload | null {
   if (!key) return null;
-  const cached = publicFeedLastGoodCache.get(key) ||
-    publicFeedLastGoodCache.get(toVersionlessFeedCacheKey(key));
-  if (!cached) return null;
+  const cached = publicFeedLastGoodCache.get(key);
+  if (cached) {
+    touchPublicFeedLastGoodCache(key, cached);
+    return {
+      items: cached.items,
+      body: cached.body,
+      nextCursor: cached.nextCursor,
+      hasMore: cached.hasMore,
+      cacheState: 'FALLBACK',
+    };
+  }
 
-  return {
-    items: cached.items,
-    body: cached.body,
-    nextCursor: cached.nextCursor,
-    hasMore: cached.hasMore,
-    cacheState: 'FALLBACK',
-  };
+  const stableKey = toVersionlessFeedCacheKey(key);
+  const stableCached = publicFeedLastGoodCache.get(stableKey);
+  if (stableCached) {
+    touchPublicFeedLastGoodCache(stableKey, stableCached);
+    return {
+      items: stableCached.items,
+      body: stableCached.body,
+      nextCursor: stableCached.nextCursor,
+      hasMore: stableCached.hasMore,
+      cacheState: 'FALLBACK',
+    };
+  }
+
+  return null;
 }
 
 export function refreshPublicFeedResultCache(
@@ -280,7 +327,6 @@ export function setPublicFeedResultCache(
     hasMore: result.hasMore,
   });
   publicFeedLastGoodCache.set(key, {
-    createdAt: now,
     items,
     body,
     nextCursor: result.nextCursor,
@@ -289,7 +335,6 @@ export function setPublicFeedResultCache(
   const stableKey = toVersionlessFeedCacheKey(key);
   if (stableKey) {
     publicFeedLastGoodCache.set(stableKey, {
-      createdAt: now,
       items,
       body,
       nextCursor: result.nextCursor,
@@ -297,27 +342,8 @@ export function setPublicFeedResultCache(
     });
   }
 
-  if (publicFeedResultCache.size <= PUBLIC_FEED_RESULT_CACHE_MAX_ENTRIES) return;
-  const pruneNow = Date.now();
-  for (const [cacheKey, cached] of publicFeedResultCache) {
-    if (cached.staleExpiresAt <= pruneNow || publicFeedResultCache.size > PUBLIC_FEED_RESULT_CACHE_MAX_ENTRIES) {
-      publicFeedResultCache.delete(cacheKey);
-    }
-    if (publicFeedResultCache.size <= PUBLIC_FEED_RESULT_CACHE_MAX_ENTRIES) break;
-  }
-
-  while (publicFeedLastGoodCache.size > PUBLIC_FEED_RESULT_CACHE_MAX_ENTRIES) {
-    let oldestKey = '';
-    let oldestAt = Number.POSITIVE_INFINITY;
-    for (const [cacheKey, cached] of publicFeedLastGoodCache) {
-      if (cached.createdAt < oldestAt) {
-        oldestAt = cached.createdAt;
-        oldestKey = cacheKey;
-      }
-    }
-    if (!oldestKey) break;
-    publicFeedLastGoodCache.delete(oldestKey);
-  }
+  prunePublicFeedResultCache(now);
+  prunePublicFeedLastGoodCache();
 }
 
 export function getPublicFeedInflight(key: string | null) {
