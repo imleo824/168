@@ -73,6 +73,7 @@ const transactionHistoryPage = read('src/pages/TransactionHistoryMobile.tsx');
 const referralInviteRecordsPage = read('src/pages/ReferralInviteRecordsMobile.tsx');
 const promotionEffectsHistoryPage = read('src/pages/PromotionEffectsHistory.tsx');
 const userSpacePage = read('src/pages/UserSpace.tsx');
+const promoteHistoryPage = read('src/pages/PromoteHistory.tsx');
 
 assert(
   /<div\s+className="app-main app-shell-main"/.test(appShell) &&
@@ -395,6 +396,21 @@ assert(
     promotionEffectsHistoryPage.includes('onClick={() => void guardedRefetchPromotionEffects()}') &&
     !promotionEffectsHistoryPage.includes('void promotionEffectsQuery.refetch();'),
   'Promotion effects history retry action must use a guarded refetch instead of direct query refetch.',
+);
+
+assert(
+  promoteHistoryPage.includes('useInteractionGuard(saveEdit') &&
+    promoteHistoryPage.includes('useInteractionGuard(refetchPromotionHistory') &&
+    promoteHistoryPage.includes('useInteractionGuard(goPromote') &&
+    promoteHistoryPage.includes('const saveBusy = isSaving || saveEditGuardPending;') &&
+    promoteHistoryPage.includes('const retryBusy = isPromotionsRefetching || refetchPromotionsGuardPending;') &&
+    promoteHistoryPage.includes('onClick={() => void guardedSaveEdit()}') &&
+    promoteHistoryPage.includes('onClick={() => void guardedRefetchPromotions()}') &&
+    promoteHistoryPage.includes('onClick={() => void guardedGoPromote()}') &&
+    !promoteHistoryPage.includes('onClick={saveEdit}') &&
+    !promoteHistoryPage.includes('onClick={() => refetchPromotions()}') &&
+    !promoteHistoryPage.includes("onClick={() => navigate('/promote')}"),
+  'Promotion history save, retry, and empty-state promote actions must use guarded handlers instead of direct calls.',
 );
 
 assert(

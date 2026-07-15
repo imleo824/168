@@ -15,6 +15,7 @@ import PromotionRecordCard from '@/features/promote/PromotionRecordCard';
 import { useAuth } from '@/context/AuthContext';
 import { useMyPromotions } from '@/hooks/useData';
 import { useFocusScrollStabilizer } from '@/hooks/useFocusScrollStabilizer';
+import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import { resolveAdTargetUrlInput } from '@/utils/adTargetUrl';
 import { updatePromotionAdCreative } from '@/services/api';
 import type { PromotionBooking } from '@/types';
@@ -62,6 +63,7 @@ export default function PromoteHistory() {
     isLoading,
     isError: isPromotionsError,
     refetch: refetchPromotions,
+    isRefetching: isPromotionsRefetching,
   } = useMyPromotions(Boolean(user?.id));
   const [statusFilter, setStatusFilter] = useState<PromotionStatusFilter>('ALL');
   const [editingGroup, setEditingGroup] = useState<PromotionGroup | null>(null);
@@ -149,6 +151,35 @@ export default function PromoteHistory() {
       setIsSaving(false);
     }
   }, [editForm.desktopImageUrl, editForm.mobileImageUrl, editForm.targetUrl, editingGroup, queryClient, showToast]);
+
+  const refetchPromotionHistory = useCallback(async () => {
+    await refetchPromotions();
+  }, [refetchPromotions]);
+
+  const goPromote = useCallback(() => {
+    navigate('/promote');
+  }, [navigate]);
+
+  const { guarded: guardedSaveEdit, isPending: saveEditGuardPending } = useInteractionGuard(saveEdit, {
+    policy: 'optimistic',
+    cooldownMs: 720,
+    minPendingMs: 220,
+    mode: 'drop',
+  });
+  const { guarded: guardedRefetchPromotions, isPending: refetchPromotionsGuardPending } = useInteractionGuard(refetchPromotionHistory, {
+    policy: 'optimistic',
+    cooldownMs: 520,
+    minPendingMs: 160,
+    mode: 'drop',
+  });
+  const { guarded: guardedGoPromote } = useInteractionGuard(goPromote, {
+    policy: 'optimistic',
+    cooldownMs: 520,
+    minPendingMs: 160,
+    mode: 'drop',
+  });
+  const saveBusy = isSaving || saveEditGuardPending;
+  const retryBusy = isPromotionsRefetching || refetchPromotionsGuardPending;
 
   const handleCopyPromotionRecordId = useCallback((value: string) => {
     if (!value) return;
@@ -301,12 +332,12 @@ export default function PromoteHistory() {
                 <ActionButton
                   type="button"
                   variant="brand"
-                  onClick={saveEdit}
-                  disabled={isSaving}
-                  state={isSaving ? 'loading' : 'idle'}
+                  onClick={() => void guardedSaveEdit()}
+                  disabled={saveBusy}
+                  state={saveBusy ? 'loading' : 'idle'}
                   className="promote-history-save-action"
                 >
-                  保存修改
+                  {saveBusy ? '保存中' : '保存修改'}
                 </ActionButton>
               </div>
             </SurfaceSectionCard>
@@ -319,8 +350,8 @@ export default function PromoteHistory() {
             description="网络恢复后可重新查看推广记录。"
             tone="error"
             action={
-              <ActionButton type="button" variant="muted" size="sm" onClick={() => refetchPromotions()}>
-                重新加载
+              <ActionButton type="button" variant="muted" size="sm" disabled={retryBusy} state={retryBusy ? 'loading' : 'idle'} onClick={() => void guardedRefetchPromotions()}>
+                {retryBusy ? '加载中' : '重新加载'}
               </ActionButton>
             }
             className="record-state-block"
@@ -342,7 +373,7 @@ export default function PromoteHistory() {
             description="预约推广后，推广明细会在这里展示。"
             compact
             action={
-              <ActionButton type="button" variant="muted" size="sm" onClick={() => navigate('/promote')}>
+              <ActionButton type="button" variant="muted" size="sm" onClick={() => void guardedGoPromote()}>
                 去推广
               </ActionButton>
             }
