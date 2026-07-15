@@ -120,9 +120,7 @@ export const PostQuoteSheetPanel = memo(function PostQuoteSheetPanel({
     });
   }, [onClose, open, resolvedPostId]);
 
-  const handleCreateQuote = useCallback((event: MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
+  const createQuoteFromSheet = useCallback(() => {
     if (!canCreateQuote) return;
 
     requireAuth(() => {
@@ -139,6 +137,17 @@ export const PostQuoteSheetPanel = memo(function PostQuoteSheetPanel({
       });
     });
   }, [canCreateQuote, location.pathname, location.search, navigate, onClose, requireAuth, resolvedPostId, targetPost]);
+  const { guarded: guardedCreateQuoteFromSheet, isPending: createQuoteGuardPending } = useInteractionGuard(createQuoteFromSheet, {
+    policy: 'optimistic',
+    cooldownMs: 520,
+    minPendingMs: 160,
+    mode: 'drop',
+  });
+  const handleCreateQuote = useCallback((event: MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    void guardedCreateQuoteFromSheet();
+  }, [guardedCreateQuoteFromSheet]);
   const refetchQuotes = useCallback(async () => {
     await refetch();
   }, [refetch]);
@@ -159,6 +168,7 @@ export const PostQuoteSheetPanel = memo(function PostQuoteSheetPanel({
   });
   const retryBusy = isRefetching || refetchQuotesGuardPending;
   const loadMoreBusy = isFetchingNextPage || fetchNextQuotesGuardPending;
+  const createQuoteBusy = createQuoteGuardPending;
 
   return (
     <BottomSheet
@@ -177,8 +187,8 @@ export const PostQuoteSheetPanel = memo(function PostQuoteSheetPanel({
             size="md"
             onClick={handleCreateQuote}
             instantPress={false}
-            disabled={!canCreateQuote}
-            state={canCreateQuote ? 'idle' : 'disabled'}
+            disabled={!canCreateQuote || createQuoteBusy}
+            state={!canCreateQuote ? 'disabled' : createQuoteBusy ? 'loading' : 'idle'}
             className="post-quote-create-action"
           >
             <Quote className="post-quote-create-action-icon" aria-hidden="true" />

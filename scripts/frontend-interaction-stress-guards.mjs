@@ -194,8 +194,13 @@ assert(
   quoteSheet.includes('instantPress={false}') &&
     quoteSheet.includes('primePostCreateComposerFocus();') &&
     quoteSheet.includes('markPostCreateComposerFocusIntent();') &&
-    quoteSheet.includes('scheduleAfterSheetHandoff'),
-  'Quote sheet CTA must avoid instant press, close the sheet, and carry explicit create-page focus intent during rapid tapping.',
+    quoteSheet.includes('scheduleAfterSheetHandoff') &&
+    quoteSheet.includes('useInteractionGuard(createQuoteFromSheet') &&
+    quoteSheet.includes('const createQuoteBusy = createQuoteGuardPending;') &&
+    quoteSheet.includes('void guardedCreateQuoteFromSheet();') &&
+    quoteSheet.includes('disabled={!canCreateQuote || createQuoteBusy}') &&
+    quoteSheet.includes("state={!canCreateQuote ? 'disabled' : createQuoteBusy ? 'loading' : 'idle'}"),
+  'Quote sheet CTA must avoid instant press, guard rapid navigation, close the sheet, and carry explicit create-page focus intent.',
 );
 
 assert(
