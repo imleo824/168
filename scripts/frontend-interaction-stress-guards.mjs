@@ -67,6 +67,7 @@ const tuiPlusLinkEditor = read('src/pages/TuiPlusLinkEditorMobile.tsx');
 const profileBioEditor = read('src/pages/ProfileBioEditorMobile.tsx');
 const notificationSettings = read('src/pages/NotificationSettings.tsx');
 const rechargePage = read('src/pages/RechargeMobile.tsx');
+const referralInvitePageContent = read('src/features/sponsor/ReferralInvitePageContent.tsx');
 
 assert(
   /<div\s+className="app-main app-shell-main"/.test(appShell) &&
@@ -297,6 +298,18 @@ assert(
     rechargePage.includes('disabled={createOrderBusy}') &&
     rechargePage.includes('disabled={currentFlowBusy || createOrderBusy}'),
   'Recharge order creation must freeze amount controls and block rapid submit while payment flow work is in progress.',
+);
+
+assert(
+  referralInvitePageContent.includes('useInteractionGuard(handleConfirmWithdrawal') &&
+    referralInvitePageContent.includes('useInteractionGuard(handleConfirmConversion') &&
+    referralInvitePageContent.includes('const withdrawalBusy = baseWithdrawalBusy || withdrawalGuardPending;') &&
+    referralInvitePageContent.includes('const conversionBusy = baseConversionBusy || conversionGuardPending;') &&
+    referralInvitePageContent.includes('await withdrawalMutation.mutateAsync().catch(() => undefined);') &&
+    referralInvitePageContent.includes('await convertMutation.mutateAsync().catch(() => undefined);') &&
+    referralInvitePageContent.includes('onConfirm={() => void guardedConfirmWithdrawal()}') &&
+    referralInvitePageContent.includes('onConfirm={() => void guardedConfirmConversion()}'),
+  'Referral withdrawal and conversion confirmations must use critical interaction guards across payment mutations.',
 );
 
 if (failures.length > 0) {

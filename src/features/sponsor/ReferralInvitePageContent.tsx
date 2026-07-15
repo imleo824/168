@@ -12,6 +12,7 @@ import SurfaceSectionCard from '@/ui/SurfaceSectionCard';
 import SegmentTabs from '@/ui/SegmentTabs';
 import RecordMoreLink from '@/ui/RecordMoreLink';
 import { useAuth } from '@/context/AuthContext';
+import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import { useScrollLock } from '@/utils/scrollLock';
 import { updatePaymentPassword } from '@/services/api';
 import {
@@ -97,19 +98,73 @@ export default function ReferralInvitePageContent({ isRulesOpen, onCloseRules }:
 
   const convertMutation = useMutation({ mutationFn: () => convertReferralCommissionToPoints({ amount: parsedConvertAmount }), onSuccess: (result) => { queryClient.setQueryData(['referrals', 'summary'], result.summary); queryClient.invalidateQueries({ queryKey: ['me'] }); queryClient.invalidateQueries({ queryKey: ['referrals', 'commissions'] }); queryClient.invalidateQueries({ queryKey: ['referrals', 'withdrawals'] }); queryClient.invalidateQueries({ queryKey: ['sponsor', 'transactions-preview'] }); setActiveRecordTab('withdrawals'); setIsConvertSheetOpen(false); setConvertAmount(''); setConvertError(''); showToast(result.points > 0 ? `已转为 ${result.points} 积分` : '暂无可转换返佣', result.points > 0 ? 'success' : 'info'); }, onError: (error: any) => { const message = error?.message || '转积分失败'; setConvertError(message); showToast(message, 'error'); } });
   const withdrawalMutation = useMutation({ mutationFn: () => requestReferralWithdrawal({ amount: parsedWithdrawAmount, address: withdrawAddress, network: 'TRC20', paymentPassword: normalizedPaymentPassword }), onSuccess: (result) => { queryClient.setQueryData(['referrals', 'summary'], result.summary); queryClient.invalidateQueries({ queryKey: ['referrals', 'commissions'] }); queryClient.invalidateQueries({ queryKey: ['referrals', 'withdrawals'] }); setActiveRecordTab('withdrawals'); setIsWithdrawSheetOpen(false); resetWithdrawInputs(); showToast('提现申请已提交，等待人工审核', 'success'); }, onError: (error: any) => { const message = error?.message || '提现申请失败'; setPaymentError(message); showToast(message, 'error'); } });
-  const withdrawalBusy = isSavingPaymentPassword || withdrawalMutation.isPending;
   const canSetPaymentPassword = normalizedNewPaymentPassword.length >= 6 && normalizedNewPaymentPassword === normalizedConfirmPaymentPassword;
-  const canSubmitWithdrawal = Boolean(summary) && parsedWithdrawAmount >= (summary?.settings.minWithdrawAmount || 0) && parsedWithdrawAmount <= (summary?.availableCommission || 0) && Boolean(withdrawAddress.trim()) && !withdrawalBusy && (needsPaymentPasswordSetup ? canSetPaymentPassword : normalizedPaymentPassword.length >= 6);
-  const canSubmitConversion = Boolean(summary) && parsedConvertAmount > 0 && parsedConvertAmount <= (summary?.availableCommission || 0) && previewConvertPoints > 0 && !convertMutation.isPending;
+  const baseWithdrawalBusy = isSavingPaymentPassword || withdrawalMutation.isPending;
+  const baseConversionBusy = convertMutation.isPending;
 
   function resetWithdrawInputs() { setWithdrawAmount(''); setWithdrawAddress(''); setPaymentPassword(''); setNewPaymentPassword(''); setConfirmPaymentPassword(''); setPaymentError(''); setPaymentPasswordSetupDone(false); }
   const openWithdrawSheet = () => { if (!summary || summary.availableCommission <= 0) return showToast('暂无可提现返佣', 'info'); if (summary.availableCommission < summary.settings.minWithdrawAmount) return showToast(`最低提现 ${formatMoney(summary.settings.minWithdrawAmount)}U，当前可提现 ${formatMoney(summary.availableCommission)}U`, 'info'); setPaymentError(''); setWithdrawAmount(''); setIsWithdrawSheetOpen(true); };
   const openConvertSheet = () => { if (!summary || summary.availableCommission <= 0) return showToast('暂无可转换返佣', 'info'); setConvertError(''); setConvertAmount(''); setIsConvertSheetOpen(true); };
-  const closeWithdrawSheet = () => { if (withdrawalBusy) return; setIsWithdrawSheetOpen(false); resetWithdrawInputs(); };
-  const closeConvertSheet = () => { if (convertMutation.isPending) return; setIsConvertSheetOpen(false); setConvertAmount(''); setConvertError(''); };
+  const closeWithdrawSheet = () => { if (baseWithdrawalBusy) return; setIsWithdrawSheetOpen(false); resetWithdrawInputs(); };
+  const closeConvertSheet = () => { if (baseConversionBusy) return; setIsConvertSheetOpen(false); setConvertAmount(''); setConvertError(''); };
   const goFullRecords = (tab: ReferralRecordTab) => { navigate(`${APP_ROUTES.inviteRecords}?tab=${tab}`, { state: { from: APP_ROUTES.invite } }); };
-  const handleConfirmWithdrawal = async () => { setPaymentError(''); if (!summary || summary.availableCommission <= 0) return setPaymentError('暂无可提现返佣'); if (parsedWithdrawAmount <= 0) return setPaymentError('请输入提现金额'); if (parsedWithdrawAmount < summary.settings.minWithdrawAmount) return setPaymentError(`最低提现 ${formatMoney(summary.settings.minWithdrawAmount)}U`); if (parsedWithdrawAmount > summary.availableCommission) return setPaymentError(`最多可提现 ${formatMoney(summary.availableCommission)}U`); if (!withdrawAddress.trim()) return setPaymentError('请输入提现地址'); if (needsPaymentPasswordSetup) { if (normalizedNewPaymentPassword.length < 6) return setPaymentError('支付密码至少需要6位'); if (normalizedNewPaymentPassword !== normalizedConfirmPaymentPassword) return setPaymentError('两次输入的支付密码不一致'); setIsSavingPaymentPassword(true); try { await updatePaymentPassword({ password: normalizedNewPaymentPassword }); patchUser({ hasPaymentPassword: true }); setPaymentPassword(normalizedNewPaymentPassword); setNewPaymentPassword(''); setConfirmPaymentPassword(''); setPaymentPasswordSetupDone(true); showToast('支付密码已设置，请确认本次提现', 'success'); } catch (error: any) { const message = error?.message || '支付密码设置失败，请重试'; setPaymentError(message); showToast(message, 'error'); } finally { setIsSavingPaymentPassword(false); } return; } if (normalizedPaymentPassword.length < 6) return setPaymentError('请输入支付密码'); withdrawalMutation.mutate(); };
-  const handleConfirmConversion = () => { setConvertError(''); if (!summary || summary.availableCommission <= 0) return setConvertError('暂无可转换返佣'); if (parsedConvertAmount <= 0) return setConvertError('请输入转换金额'); if (parsedConvertAmount > summary.availableCommission) return setConvertError(`最多可转换 ${formatMoney(summary.availableCommission)}U`); if (previewConvertPoints <= 0) return setConvertError('转换金额不足以生成积分'); convertMutation.mutate(); };
+  const handleConfirmWithdrawal = async () => {
+    if (baseWithdrawalBusy) return;
+    setPaymentError('');
+    if (!summary || summary.availableCommission <= 0) return setPaymentError('暂无可提现返佣');
+    if (parsedWithdrawAmount <= 0) return setPaymentError('请输入提现金额');
+    if (parsedWithdrawAmount < summary.settings.minWithdrawAmount) return setPaymentError(`最低提现 ${formatMoney(summary.settings.minWithdrawAmount)}U`);
+    if (parsedWithdrawAmount > summary.availableCommission) return setPaymentError(`最多可提现 ${formatMoney(summary.availableCommission)}U`);
+    if (!withdrawAddress.trim()) return setPaymentError('请输入提现地址');
+    if (needsPaymentPasswordSetup) {
+      if (normalizedNewPaymentPassword.length < 6) return setPaymentError('支付密码至少需要6位');
+      if (normalizedNewPaymentPassword !== normalizedConfirmPaymentPassword) return setPaymentError('两次输入的支付密码不一致');
+      setIsSavingPaymentPassword(true);
+      try {
+        await updatePaymentPassword({ password: normalizedNewPaymentPassword });
+        patchUser({ hasPaymentPassword: true });
+        setPaymentPassword(normalizedNewPaymentPassword);
+        setNewPaymentPassword('');
+        setConfirmPaymentPassword('');
+        setPaymentPasswordSetupDone(true);
+        showToast('支付密码已设置，请确认本次提现', 'success');
+      } catch (error: any) {
+        const message = error?.message || '支付密码设置失败，请重试';
+        setPaymentError(message);
+        showToast(message, 'error');
+      } finally {
+        setIsSavingPaymentPassword(false);
+      }
+      return;
+    }
+    if (normalizedPaymentPassword.length < 6) return setPaymentError('请输入支付密码');
+    await withdrawalMutation.mutateAsync().catch(() => undefined);
+  };
+  const handleConfirmConversion = async () => {
+    if (baseConversionBusy) return;
+    setConvertError('');
+    if (!summary || summary.availableCommission <= 0) return setConvertError('暂无可转换返佣');
+    if (parsedConvertAmount <= 0) return setConvertError('请输入转换金额');
+    if (parsedConvertAmount > summary.availableCommission) return setConvertError(`最多可转换 ${formatMoney(summary.availableCommission)}U`);
+    if (previewConvertPoints <= 0) return setConvertError('转换金额不足以生成积分');
+    await convertMutation.mutateAsync().catch(() => undefined);
+  };
+  const { guarded: guardedConfirmWithdrawal, isPending: withdrawalGuardPending } = useInteractionGuard(handleConfirmWithdrawal, {
+    policy: 'critical',
+    cooldownMs: 720,
+    minPendingMs: 180,
+    mode: 'drop',
+  });
+  const { guarded: guardedConfirmConversion, isPending: conversionGuardPending } = useInteractionGuard(handleConfirmConversion, {
+    policy: 'critical',
+    cooldownMs: 720,
+    minPendingMs: 180,
+    mode: 'drop',
+  });
+  const withdrawalBusy = baseWithdrawalBusy || withdrawalGuardPending;
+  const conversionBusy = baseConversionBusy || conversionGuardPending;
+  const canSubmitWithdrawal = Boolean(summary) && parsedWithdrawAmount >= (summary?.settings.minWithdrawAmount || 0) && parsedWithdrawAmount <= (summary?.availableCommission || 0) && Boolean(withdrawAddress.trim()) && !withdrawalBusy && (needsPaymentPasswordSetup ? canSetPaymentPassword : normalizedPaymentPassword.length >= 6);
+  const canSubmitConversion = Boolean(summary) && parsedConvertAmount > 0 && parsedConvertAmount <= (summary?.availableCommission || 0) && previewConvertPoints > 0 && !conversionBusy;
   const copyValue = async (value: string, label: string) => { if (!value) return; try { await navigator.clipboard.writeText(value); showToast(`${label}已复制`, 'success'); } catch { showToast('复制失败，请手动复制', 'error'); } };
 
   if (summaryQuery.isLoading) return <LoadingBlock compact text="正在加载邀请数据" className="referral-page-loading" />;
@@ -147,7 +202,7 @@ export default function ReferralInvitePageContent({ isRulesOpen, onCloseRules }:
           </div>
           <div className="referral-available-actions">
             <ActionButton type="button" variant="brand" size="sm" disabled={summary.availableCommission <= 0 || withdrawalBusy} onClick={openWithdrawSheet}>去提现</ActionButton>
-            <ActionButton type="button" variant="muted" size="sm" disabled={summary.availableCommission <= 0 || convertMutation.isPending} onClick={openConvertSheet}>换积分</ActionButton>
+            <ActionButton type="button" variant="muted" size="sm" disabled={summary.availableCommission <= 0 || conversionBusy} onClick={openConvertSheet}>换积分</ActionButton>
           </div>
         </div>
         <HeroStats summary={summary} />
@@ -175,8 +230,8 @@ export default function ReferralInvitePageContent({ isRulesOpen, onCloseRules }:
       </section>
 
       {isRulesOpen && typeof document !== 'undefined' ? createPortal(<ReferralRulesSheet summary={summary} onClose={onCloseRules} />, document.body) : null}
-      <ReferralConvertSheet open={isConvertSheetOpen} summary={summary} amount={convertAmount} error={convertError} isBusy={convertMutation.isPending} canSubmit={canSubmitConversion} previewPoints={previewConvertPoints} onAmountChange={(value) => { setConvertAmount(value); if (convertError) setConvertError(''); }} onClose={closeConvertSheet} onConfirm={handleConfirmConversion} />
-      <ReferralWithdrawSheet open={isWithdrawSheetOpen} summary={summary} amount={withdrawAmount} address={withdrawAddress} paymentPassword={paymentPassword} newPaymentPassword={newPaymentPassword} confirmPaymentPassword={confirmPaymentPassword} paymentError={paymentError} isBusy={withdrawalBusy} isSavingPaymentPassword={isSavingPaymentPassword} needsPaymentPasswordSetup={needsPaymentPasswordSetup} canSubmit={canSubmitWithdrawal} onAmountChange={(value) => { setWithdrawAmount(value); if (paymentError) setPaymentError(''); }} onAddressChange={(value) => { setWithdrawAddress(value); if (paymentError) setPaymentError(''); }} onPaymentPasswordChange={(value) => { setPaymentPassword(value); if (paymentError) setPaymentError(''); }} onNewPaymentPasswordChange={(value) => { setNewPaymentPassword(value); if (paymentError) setPaymentError(''); }} onConfirmPaymentPasswordChange={(value) => { setConfirmPaymentPassword(value); if (paymentError) setPaymentError(''); }} onClose={closeWithdrawSheet} onConfirm={handleConfirmWithdrawal} />
+      <ReferralConvertSheet open={isConvertSheetOpen} summary={summary} amount={convertAmount} error={convertError} isBusy={conversionBusy} canSubmit={canSubmitConversion} previewPoints={previewConvertPoints} onAmountChange={(value) => { setConvertAmount(value); if (convertError) setConvertError(''); }} onClose={closeConvertSheet} onConfirm={() => void guardedConfirmConversion()} />
+      <ReferralWithdrawSheet open={isWithdrawSheetOpen} summary={summary} amount={withdrawAmount} address={withdrawAddress} paymentPassword={paymentPassword} newPaymentPassword={newPaymentPassword} confirmPaymentPassword={confirmPaymentPassword} paymentError={paymentError} isBusy={withdrawalBusy} isSavingPaymentPassword={isSavingPaymentPassword} needsPaymentPasswordSetup={needsPaymentPasswordSetup} canSubmit={canSubmitWithdrawal} onAmountChange={(value) => { setWithdrawAmount(value); if (paymentError) setPaymentError(''); }} onAddressChange={(value) => { setWithdrawAddress(value); if (paymentError) setPaymentError(''); }} onPaymentPasswordChange={(value) => { setPaymentPassword(value); if (paymentError) setPaymentError(''); }} onNewPaymentPasswordChange={(value) => { setNewPaymentPassword(value); if (paymentError) setPaymentError(''); }} onConfirmPaymentPasswordChange={(value) => { setConfirmPaymentPassword(value); if (paymentError) setPaymentError(''); }} onClose={closeWithdrawSheet} onConfirm={() => void guardedConfirmWithdrawal()} />
     </div>
   );
 }
