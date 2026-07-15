@@ -64,8 +64,8 @@ const chatPage = read('src/features/chat/ChatPage.tsx');
 const profileRoute = read('src/pages/ProfileMobile.tsx');
 
 assert(
-  appShell.includes('<div\n        className="app-main app-shell-main"') &&
-    !appShell.includes('<main\n        className="app-main app-shell-main"') &&
+  /<div\s+className="app-main app-shell-main"/.test(appShell) &&
+    !/<main\s+className="app-main app-shell-main"/.test(appShell) &&
     homePage.includes('<main className={homeShellClassName}>') &&
     authRoute.includes('<PageContentShell as="main" className="ui-auth-required-wrap ui-app-page-main">') &&
     authRoute.includes('titleAs="h1"') &&
