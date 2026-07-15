@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   Heart,
   Megaphone,
@@ -15,6 +15,7 @@ import PageHeader from '@/ui/PageHeader';
 import PageContentShell from '@/ui/PageContentShell';
 import SEO from '@/platform/SEO';
 import { useAuth } from '@/context/AuthContext';
+import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import { usePushNotification } from '@/hooks/usePushNotification';
 import type { NotificationPreference } from '@/services/pushNotification';
 
@@ -67,7 +68,7 @@ export default function NotificationSettings() {
     setVisualEnabled((current) => (current === null || current === enabled ? null : current));
   }, [enabled]);
 
-  const handleMasterToggle = async () => {
+  const handleMasterToggle = useCallback(async () => {
     if (!canUse) return;
     const previousEnabled = displayedEnabled;
     const nextEnabled = !previousEnabled;
@@ -84,9 +85,9 @@ export default function NotificationSettings() {
       setVisualEnabled(previousEnabled);
       showToast(error?.message || '操作失败，请稍后重试', 'error');
     }
-  };
+  }, [canUse, disable, displayedEnabled, enable, showToast]);
 
-  const handlePreferenceToggle = async (key: PreferenceKey) => {
+  const handlePreferenceToggle = useCallback(async (key: PreferenceKey) => {
     if (!displayedPreference) return;
     const previousPreference = displayedPreference;
     const nextPreference = {
@@ -101,7 +102,21 @@ export default function NotificationSettings() {
       setVisualPreference(previousPreference);
       showToast(error?.message || '更新失败，请稍后重试', 'error');
     }
-  };
+  }, [displayedPreference, showToast, updatePreference]);
+
+  const { guarded: guardedMasterToggle, isPending: masterTogglePending } = useInteractionGuard(handleMasterToggle, {
+    policy: 'critical',
+    cooldownMs: 560,
+    minPendingMs: 160,
+    mode: 'drop',
+  });
+  const { guarded: guardedPreferenceToggle, isPending: preferenceTogglePending } = useInteractionGuard<[PreferenceKey]>(handlePreferenceToggle, {
+    policy: 'critical',
+    cooldownMs: 560,
+    minPendingMs: 160,
+    mode: 'drop',
+  });
+  const settingsBusy = isMutating || masterTogglePending || preferenceTogglePending;
 
   return (
     <AppPage mobileAddressBarScroll bottomSafe className="notification-settings-page surface-page">
@@ -119,9 +134,10 @@ export default function NotificationSettings() {
             role="switch"
             aria-checked={displayedEnabled}
             className="notification-settings-item notification-settings-item--master pressable"
-            aria-disabled={!canUse || isMutating}
-            data-pending={isMutating ? 'true' : 'false'}
-            onClick={handleMasterToggle}
+            aria-disabled={!canUse || settingsBusy}
+            disabled={!canUse || settingsBusy}
+            data-pending={settingsBusy ? 'true' : 'false'}
+            onClick={() => void guardedMasterToggle()}
           >
             <span className="notification-settings-item-copy">
               <span className="notification-settings-item-title">系统提醒</span>
@@ -143,8 +159,10 @@ export default function NotificationSettings() {
                   role="switch"
                   aria-checked={checked}
                   className="notification-settings-item pressable"
-                  aria-disabled={!displayedPreference}
-                  onClick={() => handlePreferenceToggle(item.key)}
+                  aria-disabled={!displayedPreference || settingsBusy}
+                  disabled={!displayedPreference || settingsBusy}
+                  data-pending={settingsBusy ? 'true' : 'false'}
+                  onClick={() => void guardedPreferenceToggle(item.key)}
                 >
                   <span className="notification-settings-item-icon" aria-hidden="true">
                     <Icon />

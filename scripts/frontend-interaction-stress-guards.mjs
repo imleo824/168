@@ -65,6 +65,7 @@ const messagesPage = read('src/pages/MessagesMobile.tsx');
 const messagesStyles = read('src/styles/features/messages.css');
 const tuiPlusLinkEditor = read('src/pages/TuiPlusLinkEditorMobile.tsx');
 const profileBioEditor = read('src/pages/ProfileBioEditorMobile.tsx');
+const notificationSettings = read('src/pages/NotificationSettings.tsx');
 
 assert(
   /<div\s+className="app-main app-shell-main"/.test(appShell) &&
@@ -275,6 +276,17 @@ assert(
     profileBioEditor.includes('disabled={saveBusy}') &&
     profileBioEditor.includes('onClick={() => void guardedSaveBio()}'),
   'Profile bio save must use a critical interaction guard and freeze editing while saving.',
+);
+
+assert(
+  notificationSettings.includes('useInteractionGuard(handleMasterToggle') &&
+    notificationSettings.includes('useInteractionGuard<[PreferenceKey]>(handlePreferenceToggle') &&
+    notificationSettings.includes('const settingsBusy = isMutating || masterTogglePending || preferenceTogglePending;') &&
+    notificationSettings.includes('disabled={!canUse || settingsBusy}') &&
+    notificationSettings.includes('disabled={!displayedPreference || settingsBusy}') &&
+    notificationSettings.includes('onClick={() => void guardedMasterToggle()}') &&
+    notificationSettings.includes('onClick={() => void guardedPreferenceToggle(item.key)}'),
+  'Notification settings toggles must use real disabled states and critical interaction guards during rapid tapping.',
 );
 
 if (failures.length > 0) {
