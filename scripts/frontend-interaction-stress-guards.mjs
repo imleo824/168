@@ -238,6 +238,18 @@ assert(
 );
 
 assert(
+  categoryFeed.includes('useInteractionGuard(refetchCategoryPosts') &&
+    categoryFeed.includes('useInteractionGuard(requestNextPage') &&
+    categoryFeed.includes('const retryBusy = postsQuery.isRefetching || refetchGuardPending;') &&
+    categoryFeed.includes('const loadMoreBusy = postsQuery.isFetchingNextPage || loadMoreGuardPending;') &&
+    categoryFeed.includes('onClick={() => void guardedRefetchCategoryPosts()}') &&
+    categoryFeed.includes('onRetry={() => void guardedRequestNextPage()}') &&
+    categoryFeed.includes('onLoadMore={() => void guardedRequestNextPage()}') &&
+    !categoryFeed.includes('onClick={() => void postsQuery.refetch()}'),
+  'Category feed retry and load-more actions must use guarded handlers instead of direct query calls.',
+);
+
+assert(
   sponsorPage.includes('SPONSOR_NAV_GUARD') &&
     sponsorPage.includes('guardedGoRecharge') &&
     sponsorPage.includes('guardedGoPromote') &&

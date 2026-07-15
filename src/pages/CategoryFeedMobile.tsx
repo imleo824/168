@@ -379,6 +379,23 @@ export default function CategoryFeedMobile() {
     itemCount: posts.length,
     fetchNextPage: postsQuery.fetchNextPage,
   });
+  const refetchCategoryPosts = useCallback(async () => {
+    await postsQuery.refetch();
+  }, [postsQuery]);
+  const { guarded: guardedRefetchCategoryPosts, isPending: refetchGuardPending } = useInteractionGuard(refetchCategoryPosts, {
+    policy: 'optimistic',
+    cooldownMs: 520,
+    minPendingMs: 160,
+    mode: 'drop',
+  });
+  const { guarded: guardedRequestNextPage, isPending: loadMoreGuardPending } = useInteractionGuard(requestNextPage, {
+    policy: 'optimistic',
+    cooldownMs: 520,
+    minPendingMs: 160,
+    mode: 'drop',
+  });
+  const retryBusy = postsQuery.isRefetching || refetchGuardPending;
+  const loadMoreBusy = postsQuery.isFetchingNextPage || loadMoreGuardPending;
 
   useEffect(() => {
     resetError();
@@ -477,7 +494,7 @@ export default function CategoryFeedMobile() {
             description="网络恢复后可重新拉取内容。"
             tone="error"
             className="category-feed-empty"
-            action={<ActionButton type="button" variant="muted" onClick={() => void postsQuery.refetch()}>重新加载</ActionButton>}
+            action={<ActionButton type="button" variant="muted" disabled={retryBusy} state={retryBusy ? 'loading' : 'idle'} onClick={() => void guardedRefetchCategoryPosts()}>{retryBusy ? '加载中' : '重新加载'}</ActionButton>}
           />
         ) : posts.length === 0 ? (
           <EmptyState categoryName={categoryName} />
@@ -488,10 +505,10 @@ export default function CategoryFeedMobile() {
             <div ref={sentinelRef}>
               <ListLoadMoreState
                 error={loadMoreError}
-                loading={postsQuery.isFetchingNextPage}
+                loading={loadMoreBusy}
                 hasMore={postsQuery.hasNextPage}
-                onRetry={requestNextPage}
-                onLoadMore={requestNextPage}
+                onRetry={() => void guardedRequestNextPage()}
+                onLoadMore={() => void guardedRequestNextPage()}
                 loadingText="正在加载更多"
                 loadMoreText="点击加载更多"
                 doneText="已经到底啦"
