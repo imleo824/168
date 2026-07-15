@@ -239,9 +239,15 @@ assert(
 );
 
 assert(
-  postCard.includes('setIsQuoteSheetOpen(false); setIsCommentSheetOpen(true);') &&
+  postCard.includes('useInteractionGuard(openCommentSheet') &&
+    postCard.includes('useInteractionGuard(openQuoteSheet') &&
+    postCard.includes('useInteractionGuard(openAuthorContact') &&
+    postCard.includes('void guardedOpenCommentSheet();') &&
+    postCard.includes('void guardedOpenQuoteSheet();') &&
+    postCard.includes('void guardedOpenAuthorContact();') &&
+    postCard.includes('setIsQuoteSheetOpen(false); setIsCommentSheetOpen(true);') &&
     postCard.includes('setIsCommentSheetOpen(false); setIsQuoteSheetOpen(true);'),
-  'Post card comment and quote actions must close the competing sheet before opening a new one under rapid tapping.',
+  'Post card comment, quote, and contact actions must be guarded while keeping sheets mutually exclusive under rapid tapping.',
 );
 
 assert(

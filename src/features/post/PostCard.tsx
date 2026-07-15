@@ -533,23 +533,33 @@ const PostCard = memo(function PostCard({ post: inputPost, isOwner = false, show
   const handleTagClick = useCallback((event: React.MouseEvent, id: string, name: string, type: 'category' | 'location') => { event.stopPropagation(); event.preventDefault(); const cleanId = cleanString(id); const cleanName = cleanString(name); const targetId = type === 'location' ? toLocationCategoryId(cleanName) : cleanId || cleanName; if (!targetId) return; rememberListReturnPosition(event.currentTarget as HTMLElement); navigate(type === 'location' ? `/category/${targetId}?view=location` : `/category/${encodeURIComponent(targetId)}`, { state: withCurrentBackground(location, { name: cleanName || targetId, resultType: type }) }); }, [location, navigate]);
   const handleStructuredMetaClick = useCallback((event: React.MouseEvent, item: PostStructuredMetaItem) => { event.stopPropagation(); event.preventDefault(); const filters = item.filterValues && Object.keys(item.filterValues).length > 0 ? item.filterValues : { [item.key]: item.rawValue ?? item.value }; if (Object.keys(filters).length === 0) return; const params = new URLSearchParams(); params.set('view', 'tag'); params.set('categoryMetaFilters', JSON.stringify(filters)); rememberListReturnPosition(event.currentTarget as HTMLElement); navigate(`/category/search?${params.toString()}`, { state: withCurrentBackground(location, { name: item.value, resultType: 'tag' }) }); }, [location, navigate]);
   const handleToggleLike = useCallback((event: React.MouseEvent) => { stopAndPrevent(event); requireAuth(() => { if (!hasLiked) triggerLikeFeedback(); void likeLock.run(); }); }, [hasLiked, likeLock, requireAuth, triggerLikeFeedback]);
-  const handleComment = useCallback((event: React.MouseEvent) => { stopAndPrevent(event); setIsQuoteSheetOpen(false); setIsCommentSheetOpen(true); }, []);
+  const openCommentSheet = useCallback(() => { setIsQuoteSheetOpen(false); setIsCommentSheetOpen(true); }, []);
   const handleCloseCommentSheet = useCallback(() => setIsCommentSheetOpen(false), []);
   const handleCommentCountChange = useCallback((count: number) => { setLocalCommentCount(Math.max(0, Math.floor(Number(count) || 0))); }, []);
   const handleShare = useCallback((event: React.MouseEvent) => { stopAndPrevent(event); void shareLock.run(); }, [shareLock]);
-  const handleQuote = useCallback((event: React.MouseEvent) => { stopAndPrevent(event); setIsCommentSheetOpen(false); setIsQuoteSheetOpen(true); }, []);
+  const openQuoteSheet = useCallback(() => { setIsCommentSheetOpen(false); setIsQuoteSheetOpen(true); }, []);
   const handleCloseQuoteSheet = useCallback(() => setIsQuoteSheetOpen(false), []);
   const requestTelegramSync = useCallback(() => { if (!canShowTelegramSync) return; if (telegramSyncStatus === 'SENT') { showToast('已成功同步1次', 'success'); return; } if (telegramSyncStatus === 'PENDING') { showToast('已提交同步', 'success'); return; } if (!canAffordTelegramSync) { showToast(`积分不足，需 ${telegramSyncPrice} 积分，当前剩余 ${currentPoints} 积分`, 'error'); return; } requireAuth(() => { setIsTelegramSyncConfirmOpen(true); }); }, [canAffordTelegramSync, canShowTelegramSync, currentPoints, requireAuth, showToast, telegramSyncPrice, telegramSyncStatus]);
   const handleTelegramSync = useCallback((event: React.MouseEvent) => { stopAndPrevent(event); requestTelegramSync(); }, [requestTelegramSync]);
   const handleCloseTelegramSyncConfirm = useCallback(() => { if (telegramSyncLock.isPending) return; setIsTelegramSyncConfirmOpen(false); }, [telegramSyncLock.isPending]);
   const handleConfirmTelegramSync = useCallback(() => { if (!canAffordTelegramSync) { showToast(`积分不足，需 ${telegramSyncPrice} 积分，当前剩余 ${currentPoints} 积分`, 'error'); return; } void telegramSyncLock.run(); }, [canAffordTelegramSync, currentPoints, showToast, telegramSyncLock, telegramSyncPrice]);
-  const handleContactClick = useCallback((event: React.MouseEvent) => { stopAndPrevent(event); if (!canShowContact || !post.contact) return; requireAuth(() => { openTelegramContact(post.contact || ''); }); }, [canShowContact, post.contact, requireAuth]);
+  const openAuthorContact = useCallback(() => { if (!canShowContact || !post.contact) return; requireAuth(() => { openTelegramContact(post.contact || ''); }); }, [canShowContact, post.contact, requireAuth]);
   const handlePromote = useCallback(() => { navigate('/promote', { state: { postId: post.id, from: typeof window !== 'undefined' ? `${window.location.pathname}${window.location.search}` : undefined } }); }, [navigate, post.id]);
   const handleStatusChange = useCallback(() => { onStatusChange?.(inputPost as Post, !isPublished); }, [inputPost, isPublished, onStatusChange]);
   const handleDelete = useCallback(() => { onDelete?.(inputPost as Post); }, [inputPost, onDelete]);
   const { guarded: guardedPromote } = useInteractionGuard(handlePromote, 320);
   const { guarded: guardedStatusChange } = useInteractionGuard(handleStatusChange, 420);
   const { guarded: guardedDelete } = useInteractionGuard(handleDelete, 420);
+  const { guarded: guardedOpenCommentSheet } = useInteractionGuard(openCommentSheet, 260);
+  const { guarded: guardedOpenQuoteSheet } = useInteractionGuard(openQuoteSheet, 260);
+  const { guarded: guardedOpenAuthorContact } = useInteractionGuard(openAuthorContact, {
+    policy: 'instant',
+    cooldownMs: 720,
+    mode: 'drop',
+  });
+  const handleComment = useCallback((event: React.MouseEvent) => { stopAndPrevent(event); void guardedOpenCommentSheet(); }, [guardedOpenCommentSheet]);
+  const handleQuote = useCallback((event: React.MouseEvent) => { stopAndPrevent(event); void guardedOpenQuoteSheet(); }, [guardedOpenQuoteSheet]);
+  const handleContactClick = useCallback((event: React.MouseEvent) => { stopAndPrevent(event); void guardedOpenAuthorContact(); }, [guardedOpenAuthorContact]);
   const handlePromoteClick = useCallback((event: React.MouseEvent) => { stopAndPrevent(event); guardedPromote(); }, [guardedPromote]);
   const ownerMenuOptions = useMemo(() => ({ enabled: showStatus && isOwner, isPublished, onTelegramSync: canShowTelegramSync ? requestTelegramSync : undefined, onPromote: canShowPromoteAction ? guardedPromote : undefined, onStatusChange: guardedStatusChange, onDelete: guardedDelete }), [canShowPromoteAction, canShowTelegramSync, guardedDelete, guardedPromote, guardedStatusChange, isOwner, isPublished, requestTelegramSync, showStatus]);
   const handleOpenLightbox = useCallback((index: number) => setLightboxIndex(clampMediaIndex(index, postImages.length)), [postImages.length]);
