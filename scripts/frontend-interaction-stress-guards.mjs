@@ -363,13 +363,17 @@ assert(
 assert(
   referralInvitePageContent.includes('useInteractionGuard(handleConfirmWithdrawal') &&
     referralInvitePageContent.includes('useInteractionGuard(handleConfirmConversion') &&
+    referralInvitePageContent.includes('useInteractionGuard(refetchReferralSummary') &&
     referralInvitePageContent.includes('const withdrawalBusy = baseWithdrawalBusy || withdrawalGuardPending;') &&
     referralInvitePageContent.includes('const conversionBusy = baseConversionBusy || conversionGuardPending;') &&
+    referralInvitePageContent.includes('const summaryRetryBusy = summaryQuery.isRefetching || summaryRefetchGuardPending;') &&
     referralInvitePageContent.includes('await withdrawalMutation.mutateAsync().catch(() => undefined);') &&
     referralInvitePageContent.includes('await convertMutation.mutateAsync().catch(() => undefined);') &&
     referralInvitePageContent.includes('onConfirm={() => void guardedConfirmWithdrawal()}') &&
-    referralInvitePageContent.includes('onConfirm={() => void guardedConfirmConversion()}'),
-  'Referral withdrawal and conversion confirmations must use critical interaction guards across payment mutations.',
+    referralInvitePageContent.includes('onConfirm={() => void guardedConfirmConversion()}') &&
+    referralInvitePageContent.includes('onClick={() => void guardedRefetchReferralSummary()}') &&
+    !referralInvitePageContent.includes('onClick={() => void summaryQuery.refetch()}'),
+  'Referral withdrawal, conversion, and summary retry actions must use interaction guards across payment mutations and reloads.',
 );
 
 assert(

@@ -161,14 +161,24 @@ export default function ReferralInvitePageContent({ isRulesOpen, onCloseRules }:
     minPendingMs: 180,
     mode: 'drop',
   });
+  const refetchReferralSummary = async () => {
+    await summaryQuery.refetch();
+  };
+  const { guarded: guardedRefetchReferralSummary, isPending: summaryRefetchGuardPending } = useInteractionGuard(refetchReferralSummary, {
+    policy: 'optimistic',
+    cooldownMs: 520,
+    minPendingMs: 160,
+    mode: 'drop',
+  });
   const withdrawalBusy = baseWithdrawalBusy || withdrawalGuardPending;
   const conversionBusy = baseConversionBusy || conversionGuardPending;
+  const summaryRetryBusy = summaryQuery.isRefetching || summaryRefetchGuardPending;
   const canSubmitWithdrawal = Boolean(summary) && parsedWithdrawAmount >= (summary?.settings.minWithdrawAmount || 0) && parsedWithdrawAmount <= (summary?.availableCommission || 0) && Boolean(withdrawAddress.trim()) && !withdrawalBusy && (needsPaymentPasswordSetup ? canSetPaymentPassword : normalizedPaymentPassword.length >= 6);
   const canSubmitConversion = Boolean(summary) && parsedConvertAmount > 0 && parsedConvertAmount <= (summary?.availableCommission || 0) && previewConvertPoints > 0 && !conversionBusy;
   const copyValue = async (value: string, label: string) => { if (!value) return; try { await navigator.clipboard.writeText(value); showToast(`${label}已复制`, 'success'); } catch { showToast('复制失败，请手动复制', 'error'); } };
 
   if (summaryQuery.isLoading) return <LoadingBlock compact text="正在加载邀请数据" className="referral-page-loading" />;
-  if (summaryQuery.isError || !summary) return <StateBlock title="邀请数据加载失败" description="网络恢复后可重新加载邀请页面。" tone="error" compact className="referral-page-state" action={<ActionButton type="button" variant="muted" size="sm" onClick={() => void summaryQuery.refetch()}>重新加载</ActionButton>} />;
+  if (summaryQuery.isError || !summary) return <StateBlock title="邀请数据加载失败" description="网络恢复后可重新加载邀请页面。" tone="error" compact className="referral-page-state" action={<ActionButton type="button" variant="muted" size="sm" disabled={summaryRetryBusy} state={summaryRetryBusy ? 'loading' : 'idle'} onClick={() => void guardedRefetchReferralSummary()}>{summaryRetryBusy ? '加载中' : '重新加载'}</ActionButton>} />;
 
   const rateText = formatRate(summary.settings.commissionRate);
   const recordContent = activeRecordTab === 'relations'
