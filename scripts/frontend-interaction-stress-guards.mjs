@@ -66,6 +66,7 @@ const homePageSource = read('src/pages/Home.tsx');
 const sponsorPage = read('src/features/sponsor/SponsorMobilePage.tsx');
 const profileRoute = read('src/pages/ProfileMobile.tsx');
 const profileMobilePage = read('src/features/profile/ProfileMobilePage.tsx');
+const profileSecuritySheet = read('src/features/profile/ProfileSecuritySheet.tsx');
 const messagesPage = read('src/pages/MessagesMobile.tsx');
 const messagesStyles = read('src/styles/features/messages.css');
 const tuiPlusLinkEditor = read('src/pages/TuiPlusLinkEditorMobile.tsx');
@@ -353,6 +354,24 @@ assert(
     profileRoute.includes('cooldownMs: 520') &&
     profileRoute.includes('mode: \'drop\''),
   'Profile settings topbar entry must be guarded so rapid taps do not repeatedly proxy-click the settings sheet trigger.',
+);
+
+assert(
+  profileSecuritySheet.includes('useInteractionGuard(handleAvatarClick') &&
+    profileSecuritySheet.includes('useInteractionGuard(openDisplayNameEditor') &&
+    profileSecuritySheet.includes('useInteractionGuard(openLoginAccountEditor') &&
+    profileSecuritySheet.includes('useInteractionGuard(openPasswordEditor') &&
+    profileSecuritySheet.includes('useInteractionGuard(openPaymentPasswordEditor') &&
+    profileSecuritySheet.includes('useInteractionGuard(handleLogout') &&
+    profileSecuritySheet.includes('onClick={() => void guardedAvatarClick()}') &&
+    profileSecuritySheet.includes('onClick={() => void guardedOpenDisplayNameEditor()}') &&
+    profileSecuritySheet.includes('onClick={() => void guardedOpenLoginAccountEditor()}') &&
+    profileSecuritySheet.includes('onClick={() => void guardedOpenPasswordEditor()}') &&
+    profileSecuritySheet.includes('onClick={() => void guardedOpenPaymentPasswordEditor()}') &&
+    profileSecuritySheet.includes('onClick={() => void guardedLogout()}') &&
+    !profileSecuritySheet.includes('onClick={handleLogout}') &&
+    !profileSecuritySheet.includes('onClick={() => avatarInputRef.current?.click()}'),
+  'Profile security sheet avatar, editor, and logout actions must be guarded against rapid duplicate opens.',
 );
 
 assert(

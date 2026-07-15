@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom';
 import { CheckCircle2, ShieldCheck, X } from 'lucide-react';
 import AvatarImage from '@/ui/AvatarImage';
 import SettingRow from '@/ui/SettingRow';
+import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import { subscribeProfileSettingsOpen } from './profileSettingsIntent';
 
 type ProfileSecuritySheetProps = {
@@ -71,6 +72,44 @@ export default function ProfileSecuritySheet({
     setIsIntentOpen(false);
     onLogout();
   }, [onLogout]);
+  const handleAvatarClick = useCallback(() => {
+    avatarInputRef.current?.click();
+  }, [avatarInputRef]);
+  const openDisplayNameEditor = useCallback(() => {
+    closeSheet();
+    onEditDisplayName(user?.displayName || '');
+    onOpenDisplayNameEditor();
+  }, [closeSheet, onEditDisplayName, onOpenDisplayNameEditor, user?.displayName]);
+  const openLoginAccountEditor = useCallback(() => {
+    closeSheet();
+    onEditLoginAccount(user?.loginAccount || '');
+    onOpenLoginAccountEditor();
+  }, [closeSheet, onEditLoginAccount, onOpenLoginAccountEditor, user?.loginAccount]);
+  const openPasswordEditor = useCallback(() => {
+    onResetPasswordFields();
+    closeSheet();
+    onOpenPasswordEditor();
+  }, [closeSheet, onOpenPasswordEditor, onResetPasswordFields]);
+  const openPaymentPasswordEditor = useCallback(() => {
+    onResetPaymentPasswordFields();
+    closeSheet();
+    onOpenPaymentPasswordEditor();
+  }, [closeSheet, onOpenPaymentPasswordEditor, onResetPaymentPasswordFields]);
+  const { guarded: guardedAvatarClick } = useInteractionGuard(handleAvatarClick, {
+    policy: 'instant',
+    cooldownMs: 520,
+    mode: 'drop',
+  });
+  const { guarded: guardedOpenDisplayNameEditor } = useInteractionGuard(openDisplayNameEditor, 520);
+  const { guarded: guardedOpenLoginAccountEditor } = useInteractionGuard(openLoginAccountEditor, 520);
+  const { guarded: guardedOpenPasswordEditor } = useInteractionGuard(openPasswordEditor, 520);
+  const { guarded: guardedOpenPaymentPasswordEditor } = useInteractionGuard(openPaymentPasswordEditor, 520);
+  const { guarded: guardedLogout } = useInteractionGuard(handleLogout, {
+    policy: 'critical',
+    cooldownMs: 720,
+    minPendingMs: 120,
+    mode: 'drop',
+  });
 
   if (!isOpen) return null;
 
@@ -103,7 +142,7 @@ export default function ProfileSecuritySheet({
             <div className="account-info-avatar-row">
               <button
                 type="button"
-                onClick={() => avatarInputRef.current?.click()}
+                onClick={() => void guardedAvatarClick()}
                 disabled={isAvatarUpdating}
                 className="account-info-avatar-action pressable ui-avatar-action"
                 aria-label="更换头像"
@@ -136,11 +175,7 @@ export default function ProfileSecuritySheet({
             trailing={
               <button
                 type="button"
-                onClick={() => {
-                  closeSheet();
-                  onEditDisplayName(user?.displayName || '');
-                  onOpenDisplayNameEditor();
-                }}
+                onClick={() => void guardedOpenDisplayNameEditor()}
                 className="pressable ui-action ui-action-sm ui-action-muted account-info-action"
               >
                 修改
@@ -157,11 +192,7 @@ export default function ProfileSecuritySheet({
             trailing={
               <button
                 type="button"
-                onClick={() => {
-                  closeSheet();
-                  onEditLoginAccount(user.loginAccount || '');
-                  onOpenLoginAccountEditor();
-                }}
+                onClick={() => void guardedOpenLoginAccountEditor()}
                 className="pressable ui-action ui-action-sm ui-action-muted account-info-action"
               >
                 修改
@@ -190,11 +221,7 @@ export default function ProfileSecuritySheet({
             trailing={
               <button
                 type="button"
-                onClick={() => {
-                  onResetPasswordFields();
-                  closeSheet();
-                  onOpenPasswordEditor();
-                }}
+                onClick={() => void guardedOpenPasswordEditor()}
                 className="pressable ui-action ui-action-sm ui-action-muted account-info-action"
               >
                 修改
@@ -223,11 +250,7 @@ export default function ProfileSecuritySheet({
             trailing={
               <button
                 type="button"
-                onClick={() => {
-                  onResetPaymentPasswordFields();
-                  closeSheet();
-                  onOpenPaymentPasswordEditor();
-                }}
+                onClick={() => void guardedOpenPaymentPasswordEditor()}
                 className="pressable ui-action ui-action-sm ui-action-muted account-info-action"
               >
                 修改
@@ -251,7 +274,7 @@ export default function ProfileSecuritySheet({
               <button
                 type="button"
                 className="pressable ui-action ui-action-sm ui-action-muted account-info-action"
-                onClick={handleLogout}
+                onClick={() => void guardedLogout()}
               >
                 <span>退出</span>
               </button>
