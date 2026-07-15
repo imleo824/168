@@ -32,6 +32,7 @@ import {
   useHomeNotificationSummary,
 } from '@/hooks/useData';
 import { useAuth } from '@/context/AuthContext';
+import { useIsDesktopViewport } from '@/hooks/useIsDesktopViewport';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useFeedExposureViews } from '@/hooks/useFeedExposureViews';
 import { useListReturnScroll } from '@/utils/listReturnScroll';
@@ -88,6 +89,7 @@ function getHomeFeedErrorMessage(error: unknown) {
 
 export default function Home() {
   const isMobile = useIsMobile();
+  const isDesktopViewport = useIsDesktopViewport();
   const location = useLocation();
   const queryClient = useQueryClient();
   const { user, requireAuth, loading: isAuthLoading } = useAuth();
@@ -276,6 +278,12 @@ export default function Home() {
   }, []);
 
   const handleHomeFeedScrollPositionChange = useCallback((scrollTop: number) => {
+    if (isDesktopViewport) {
+      pendingHomeFeedScrollTopRef.current = scrollTop;
+      setIsHomeChromeCollapsed(false);
+      return;
+    }
+
     pendingHomeFeedScrollTopRef.current = scrollTop;
     if (homeChromeRafRef.current !== null) return;
 
@@ -283,7 +291,7 @@ export default function Home() {
       homeChromeRafRef.current = null;
       updateHomeChromeCollapsed(pendingHomeFeedScrollTopRef.current);
     });
-  }, [updateHomeChromeCollapsed]);
+  }, [isDesktopViewport, updateHomeChromeCollapsed]);
 
   useEffect(() => {
     if (!isMobile || typeof window === 'undefined') return undefined;
@@ -301,26 +309,10 @@ export default function Home() {
   }, [isMobile]);
 
   useEffect(() => {
-    if (isMobile) return undefined;
-    if (typeof window === 'undefined') return undefined;
-
-    const handleWindowScroll = () => {
-      const scrollTop =
-        window.scrollY ||
-        document.scrollingElement?.scrollTop ||
-        document.documentElement.scrollTop ||
-        0;
-
-      updateHomeChromeCollapsed(scrollTop);
-    };
-
-    window.addEventListener('scroll', handleWindowScroll, { passive: true });
-    handleWindowScroll();
-
-    return () => {
-      window.removeEventListener('scroll', handleWindowScroll);
-    };
-  }, [isMobile, updateHomeChromeCollapsed]);
+    if (!isDesktopViewport) return undefined;
+    setIsHomeChromeCollapsed(false);
+    return undefined;
+  }, [isDesktopViewport]);
 
   const { runManualRefresh } = useHomeRefresh({
     activeMainTab,

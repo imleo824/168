@@ -223,6 +223,13 @@
       background: var(--ui-surface-page);
     }
 
+    .app-shell[data-route-surface='user'][data-desktop-surface='feed'] {
+      height: 100svh;
+      min-height: 100svh;
+      align-items: stretch;
+      overflow: hidden;
+    }
+
     .app-shell[data-route-surface='user'] > .ui-layer-header {
       display: none;
     }
@@ -293,6 +300,12 @@
       box-shadow: var(--ui-shadow-card);
       transform: none;
       transform-origin: initial;
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='feed'] .app-shell-main {
+      height: calc(100svh - (var(--app-desktop-shell-padding-y) * 2));
+      min-height: 0;
+      overflow: hidden;
     }
 
     .app-shell[data-route-surface='user']:not([data-desktop-surface='conversation']) .app-shell-main > :is(.ui-app-page, .ui-page, .surface-page) {
