@@ -5,13 +5,19 @@
   .notification-settings-page .notification-settings-main {
     display: flex;
     width: 100%;
-    max-width: var(--ui-page-narrow);
+    max-width: var(--ui-message-settings-content-max, var(--ui-page-narrow));
     flex-direction: column;
     gap: var(--ui-space-3);
     margin-inline: auto;
     padding-inline: var(--ui-page-padding-x);
     padding-top: var(--ui-space-3);
     padding-bottom: calc(var(--ui-page-bottom-safe) + var(--ui-bottom-nav-height, 0px));
+  }
+
+  @media (min-width: 1024px) {
+    .app-shell[data-route-surface='user'] :is(.messages-page, .notification-settings-page) {
+      --ui-message-settings-content-max: var(--app-desktop-page-content-width);
+    }
   }
 
   .messages-topbar-actions {

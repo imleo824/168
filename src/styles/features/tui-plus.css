@@ -87,7 +87,7 @@
 
   .tui-plus-main {
     width: 100%;
-    max-width: var(--ui-page-content-max-width);
+    max-width: var(--ui-tui-plus-content-max, var(--ui-page-content-max-width));
     margin-inline: auto;
     gap: var(--ui-space-4);
     padding: var(--ui-space-3) var(--ui-space-3) calc(var(--ui-page-bottom-safe) + var(--ui-control-lg) + var(--ui-space-8));
@@ -430,7 +430,7 @@
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
     gap: var(--ui-space-3);
-    max-width: var(--ui-page-content-max-width);
+    max-width: var(--ui-tui-plus-content-max, var(--ui-page-content-max-width));
     margin-inline: auto;
     border: var(--ui-border-width-hairline) solid var(--ui-line-glass-strong);
     border-radius: var(--ui-radius-2xl);
@@ -439,6 +439,12 @@
     box-shadow: var(--ui-shadow-sheet);
     backdrop-filter: var(--ui-floating-muted-filter);
     -webkit-backdrop-filter: var(--ui-floating-muted-filter);
+  }
+
+  @media (min-width: 1024px) {
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .tui-plus-page {
+      --ui-tui-plus-content-max: var(--app-desktop-page-content-width);
+    }
   }
 
   .tui-plus-sticky-cta div {
