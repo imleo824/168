@@ -40,6 +40,7 @@ const actionButton = read('src/ui/ActionButton.tsx');
 const commentSheet = read('src/features/post/PostCommentSheetPanel.tsx');
 const commentComposer = read('src/features/post/PostCommentComposerDialog.tsx');
 const quoteSheet = read('src/features/post/PostQuoteSheetPanel.tsx');
+const authModal = read('src/features/auth/AuthModal.tsx');
 const postSheetOpenIntent = read('src/features/post/postSheetOpenIntent.ts');
 const profileDialog = read('src/features/profile/ProfileDialog.tsx');
 const postCreatePage = read('src/features/post-create/PostCreatePage.tsx');
@@ -120,6 +121,20 @@ assert(
     actionButton.includes('instantPress = true') &&
     actionButton.includes('const shouldUseInstantPress = instantPress && type === \'button\' && Boolean(onClick);'),
   'ActionButton must support instantPress={false} so layered CTAs can avoid pointerup/click-through under rapid tapping.',
+);
+
+assert(
+  authModal.includes('useInteractionGuard(submitPasswordLogin') &&
+    authModal.includes('useInteractionGuard(submitPasswordRegister') &&
+    authModal.includes('const authBusy = isAuthenticating || loginSubmitPending || registerSubmitPending;') &&
+    authModal.includes('if (authBusy) return;') &&
+    authModal.includes('void guardedSubmitLogin();') &&
+    authModal.includes('void guardedSubmitRegister();') &&
+    authModal.includes("state={loginSubmitPending || isAuthenticating ? 'loading' : 'idle'}") &&
+    authModal.includes("state={registerSubmitPending || isAuthenticating ? 'loading' : 'idle'}") &&
+    !authModal.includes('const canSubmitLogin = !isAuthenticating') &&
+    !authModal.includes('const canSubmitRegister =\n    !isAuthenticating'),
+  'Auth modal login and register submits must use local interaction guards and shared busy state before auth context catches up.',
 );
 
 assert(

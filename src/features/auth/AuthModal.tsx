@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { X, Lock, User, ChevronDown, ChevronUp, Gift } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
@@ -10,6 +10,7 @@ import { SITE_NAME, SITE_SLOGAN } from '@/platform/brand';
 import SEO from '@/platform/SEO';
 import ActionButton from '@/ui/ActionButton';
 import IconButton from '@/ui/IconButton';
+import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import {
   LOGIN_ACCOUNT_MAX_LENGTH,
   LOGIN_ACCOUNT_MIN_LENGTH,
@@ -99,22 +100,9 @@ export default function AuthModal({ isOpen, onClose, isAuthenticating }: AuthMod
   const [formError, setFormError] = useState('');
   const [agreementAccepted, setAgreementAccepted] = useState(false);
   const [isAgreementOpen, setIsAgreementOpen] = useState(false);
-  const canSubmitLogin = !isAuthenticating && Boolean(username.trim()) && Boolean(password);
   const cleanRegisterUsername = normalizeLoginAccount(username);
   const cleanInviteCode = sanitizeReferralInviteCodeInput(inviteCode);
   const hasInvalidInviteCode = isReferralInviteCodeTooShort(inviteCode);
-  const canSubmitRegister =
-    !isAuthenticating &&
-    agreementAccepted &&
-    !hasInvalidInviteCode &&
-    cleanRegisterUsername.length >= LOGIN_ACCOUNT_MIN_LENGTH &&
-    password.length >= LOGIN_PASSWORD_MIN_LENGTH &&
-    Boolean(confirmPassword);
-
-  const handleRequestClose = () => {
-    if (isAuthenticating) return;
-    onClose();
-  };
 
   useScrollLock(isOpen, {
     fixed: true,
@@ -157,13 +145,12 @@ export default function AuthModal({ isOpen, onClose, isAuthenticating }: AuthMod
     if (formError) setFormError('');
   };
 
-  const goToDefaultHomeAfterAuth = () => {
+  const goToDefaultHomeAfterAuth = useCallback(() => {
     selectDefaultHomeTopicTab();
     navigate('/', { replace: true });
-  };
+  }, [navigate]);
 
-  const handlePasswordLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const submitPasswordLogin = useCallback(async () => {
     const cleanUsername = username.trim();
     if (!cleanUsername || !password) {
       setFormError('请输入登录账号和密码');
@@ -175,10 +162,9 @@ export default function AuthModal({ isOpen, onClose, isAuthenticating }: AuthMod
       return;
     }
     setFormError('error' in result ? result.error : '登录失败，请稍后重试');
-  };
+  }, [goToDefaultHomeAfterAuth, loginWithPassword, password, username]);
 
-  const handlePasswordRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const submitPasswordRegister = useCallback(async () => {
     const cleanUsername = normalizeLoginAccount(username);
     if (!cleanUsername || !password || !confirmPassword) {
       setFormError('请输入登录账号和两次密码');
@@ -218,6 +204,53 @@ export default function AuthModal({ isOpen, onClose, isAuthenticating }: AuthMod
       return;
     }
     setFormError('error' in result ? result.error : '注册失败，请稍后重试');
+  }, [
+    agreementAccepted,
+    cleanInviteCode,
+    confirmPassword,
+    goToDefaultHomeAfterAuth,
+    hasInvalidInviteCode,
+    inviteSource,
+    password,
+    registerWithPassword,
+    username,
+  ]);
+
+  const { guarded: guardedSubmitLogin, isPending: loginSubmitPending } = useInteractionGuard(submitPasswordLogin, {
+    policy: 'critical',
+    cooldownMs: 720,
+    minPendingMs: 220,
+    mode: 'drop',
+  });
+  const { guarded: guardedSubmitRegister, isPending: registerSubmitPending } = useInteractionGuard(submitPasswordRegister, {
+    policy: 'critical',
+    cooldownMs: 720,
+    minPendingMs: 220,
+    mode: 'drop',
+  });
+  const authBusy = isAuthenticating || loginSubmitPending || registerSubmitPending;
+  const canSubmitLogin = !authBusy && Boolean(username.trim()) && Boolean(password);
+  const canSubmitRegister =
+    !authBusy &&
+    agreementAccepted &&
+    !hasInvalidInviteCode &&
+    cleanRegisterUsername.length >= LOGIN_ACCOUNT_MIN_LENGTH &&
+    password.length >= LOGIN_PASSWORD_MIN_LENGTH &&
+    Boolean(confirmPassword);
+
+  const handlePasswordLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    void guardedSubmitLogin();
+  };
+
+  const handlePasswordRegister = (e: React.FormEvent) => {
+    e.preventDefault();
+    void guardedSubmitRegister();
+  };
+
+  const handleRequestClose = () => {
+    if (authBusy) return;
+    onClose();
   };
 
   if (!isOpen) return null;
@@ -233,7 +266,7 @@ export default function AuthModal({ isOpen, onClose, isAuthenticating }: AuthMod
         <div onClick={handleRequestClose} className="ui-auth-scrim" />
 
         <div role="dialog" aria-modal="true" aria-labelledby="auth-modal-title" className="ui-panel ui-auth-panel">
-          <IconButton onClick={handleRequestClose} disabled={isAuthenticating} className="ui-layer-close-action ui-auth-close-action" aria-label="关闭登录弹窗" title="关闭">
+          <IconButton onClick={handleRequestClose} disabled={authBusy} className="ui-layer-close-action ui-auth-close-action" aria-label="关闭登录弹窗" title="关闭">
             <X />
           </IconButton>
 
@@ -254,7 +287,7 @@ export default function AuthModal({ isOpen, onClose, isAuthenticating }: AuthMod
                 <div><div className="ui-control ui-auth-field"><div className="ui-auth-input-icon"><User /></div><input type="text" value={username} onChange={(e) => handleUsernameChange(e.target.value)} placeholder="登录账号" autoComplete="username" className="ui-auth-input" required aria-invalid={Boolean(formError)} /></div></div>
                 <div><div className="ui-control ui-auth-field"><div className="ui-auth-input-icon"><Lock /></div><input type="password" value={password} onChange={(e) => handlePasswordChange(e.target.value)} placeholder="密码" autoComplete="current-password" className="ui-auth-input" required aria-invalid={Boolean(formError)} /></div></div>
                 {formError ? <p className="ui-auth-error">{formError}</p> : null}
-                <ActionButton type="submit" disabled={!canSubmitLogin} variant={canSubmitLogin ? 'primary' : 'disabled'} className="ui-auth-submit">{isAuthenticating ? '登录中...' : '立即登录'}</ActionButton>
+                <ActionButton type="submit" disabled={!canSubmitLogin} state={loginSubmitPending || isAuthenticating ? 'loading' : 'idle'} variant={canSubmitLogin ? 'primary' : 'disabled'} className="ui-auth-submit">{loginSubmitPending || isAuthenticating ? '登录中...' : '立即登录'}</ActionButton>
               </form>
             </div>
           ) : (
@@ -282,7 +315,7 @@ export default function AuthModal({ isOpen, onClose, isAuthenticating }: AuthMod
                 </div>
 
                 {formError ? <p className="ui-auth-error">{formError}</p> : null}
-                <ActionButton type="submit" disabled={!canSubmitRegister} variant={canSubmitRegister ? 'primary' : 'disabled'} className="ui-auth-submit ui-auth-submit--register" title={!agreementAccepted ? `请先同意《${SITE_NAME}用户协议》` : undefined}>{isAuthenticating ? '注册中...' : '确认并免费注册'}</ActionButton>
+                <ActionButton type="submit" disabled={!canSubmitRegister} state={registerSubmitPending || isAuthenticating ? 'loading' : 'idle'} variant={canSubmitRegister ? 'primary' : 'disabled'} className="ui-auth-submit ui-auth-submit--register" title={!agreementAccepted ? `请先同意《${SITE_NAME}用户协议》` : undefined}>{registerSubmitPending || isAuthenticating ? '注册中...' : '确认并免费注册'}</ActionButton>
               </form>
             </div>
           )}
