@@ -4,6 +4,7 @@ import DetailCommentItem from '@/features/post-detail/DetailCommentItem';
 import { DetailQuoteItem } from '@/features/post-detail/PostDetailLegacySections';
 import { usePostQuotes } from '@/hooks/useData';
 import { usePostComments, type PostComment } from '@/features/post/usePostComments';
+import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import ListLoadMoreState from '@/ui/ListLoadMoreState';
 import { LoadingBlock, StateBlock } from '@/ui/LoadingState';
 import { formatEngagementCount } from '@/utils/engagement';
@@ -104,15 +105,33 @@ const PostDetailInteractionsSection = memo(function PostDetailInteractionsSectio
   const hasMoreInteractions = Boolean(hasMoreQuotes || hasMoreComments);
   const isFetchingMoreInteractions = Boolean(isQuotesFetchingMore || isCommentsFetchingMore);
 
-  const handleRefetch = useCallback(() => {
-    if (quotesError) void refetchQuotes();
-    if (commentsError) void refetchComments();
+  const refetchInteractions = useCallback(async () => {
+    const tasks: Array<Promise<unknown>> = [];
+    if (quotesError) tasks.push(refetchQuotes());
+    if (commentsError) tasks.push(refetchComments());
+    await Promise.all(tasks);
   }, [commentsError, quotesError, refetchComments, refetchQuotes]);
 
-  const handleLoadMore = useCallback(() => {
-    if (hasMoreComments) void fetchMoreComments();
-    if (hasMoreQuotes) void fetchMoreQuotes();
-  }, [fetchMoreComments, fetchMoreQuotes, hasMoreComments, hasMoreQuotes]);
+  const loadMoreInteractions = useCallback(async () => {
+    const tasks: Array<Promise<unknown>> = [];
+    if (hasMoreComments && !isCommentsFetchingMore) tasks.push(fetchMoreComments());
+    if (hasMoreQuotes && !isQuotesFetchingMore) tasks.push(fetchMoreQuotes());
+    await Promise.all(tasks);
+  }, [fetchMoreComments, fetchMoreQuotes, hasMoreComments, hasMoreQuotes, isCommentsFetchingMore, isQuotesFetchingMore]);
+  const { guarded: guardedRefetchInteractions, isPending: refetchInteractionsGuardPending } = useInteractionGuard(refetchInteractions, {
+    policy: 'optimistic',
+    cooldownMs: 520,
+    minPendingMs: 160,
+    mode: 'drop',
+  });
+  const { guarded: guardedLoadMoreInteractions, isPending: loadMoreInteractionsGuardPending } = useInteractionGuard(loadMoreInteractions, {
+    policy: 'optimistic',
+    cooldownMs: 520,
+    minPendingMs: 160,
+    mode: 'drop',
+  });
+  const retryBusy = isQuotesFetching || isCommentsFetching || refetchInteractionsGuardPending;
+  const loadMoreBusy = isFetchingMoreInteractions || loadMoreInteractionsGuardPending;
 
   if (interactionCount <= 0) return null;
 
@@ -135,8 +154,8 @@ const PostDetailInteractionsSection = memo(function PostDetailInteractionsSectio
           tone="error"
           compact
           className="detail-quotes-state-block detail-interactions-state-block"
-          actionLabel="重新加载"
-          onAction={handleRefetch}
+          actionLabel={retryBusy ? '加载中' : '重新加载'}
+          onAction={() => void guardedRefetchInteractions()}
         />
       ) : canShowEmpty ? (
         <StateBlock
@@ -153,9 +172,9 @@ const PostDetailInteractionsSection = memo(function PostDetailInteractionsSectio
             <DetailQuoteItem key={item.id} post={item.quote} />
           ))}
           <ListLoadMoreState
-            loading={isFetchingMoreInteractions}
+            loading={loadMoreBusy}
             hasMore={hasMoreInteractions}
-            onLoadMore={handleLoadMore}
+            onLoadMore={() => void guardedLoadMoreInteractions()}
             loadingText="正在加载更多互动"
             loadMoreText="查看更多互动"
             doneText=""

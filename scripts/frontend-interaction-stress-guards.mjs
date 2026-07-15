@@ -43,6 +43,7 @@ const quoteSheet = read('src/features/post/PostQuoteSheetPanel.tsx');
 const authModal = read('src/features/auth/AuthModal.tsx');
 const postSheetOpenIntent = read('src/features/post/postSheetOpenIntent.ts');
 const profileDialog = read('src/features/profile/ProfileDialog.tsx');
+const postDetailInteractions = read('src/features/post-detail/PostDetailInteractionsSection.tsx');
 const postCreatePage = read('src/features/post-create/PostCreatePage.tsx');
 const postCreatePageSections = read('src/features/post-create/postCreatePageSections.tsx');
 const postCreateFocusBridge = read('src/utils/postCreateFocusBridge.ts');
@@ -237,6 +238,18 @@ assert(
   postCard.includes('setIsQuoteSheetOpen(false); setIsCommentSheetOpen(true);') &&
     postCard.includes('setIsCommentSheetOpen(false); setIsQuoteSheetOpen(true);'),
   'Post card comment and quote actions must close the competing sheet before opening a new one under rapid tapping.',
+);
+
+assert(
+  postDetailInteractions.includes('useInteractionGuard(refetchInteractions') &&
+    postDetailInteractions.includes('useInteractionGuard(loadMoreInteractions') &&
+    postDetailInteractions.includes('const retryBusy = isQuotesFetching || isCommentsFetching || refetchInteractionsGuardPending;') &&
+    postDetailInteractions.includes('const loadMoreBusy = isFetchingMoreInteractions || loadMoreInteractionsGuardPending;') &&
+    postDetailInteractions.includes('onAction={() => void guardedRefetchInteractions()}') &&
+    postDetailInteractions.includes('onLoadMore={() => void guardedLoadMoreInteractions()}') &&
+    !postDetailInteractions.includes('onAction={handleRefetch}') &&
+    !postDetailInteractions.includes('onLoadMore={handleLoadMore}'),
+  'Post detail interaction retry and load-more actions must use guarded combined handlers instead of direct comment/quote requests.',
 );
 
 assert(
