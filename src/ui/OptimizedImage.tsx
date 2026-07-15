@@ -109,7 +109,11 @@ const OptimizedImage = memo(function OptimizedImage({
     () => resolveSrcSet(src, variant, effectiveResize, effectiveDisableOptimization),
     [effectiveDisableOptimization, effectiveResize, src, variant],
   );
-  const fallbackSrc = useMemo(() => toPublicStorageObjectUrl(src), [src]);
+  const fallbackSrc = useMemo(() => {
+    if (!src) return src;
+    if (/^https?:\/\//i.test(src) && finalSrc !== src) return src;
+    return toPublicStorageObjectUrl(src);
+  }, [finalSrc, src]);
   const effectiveLoading = priority ? 'eager' : loading;
   const [effectiveSrc, setEffectiveSrc] = useState(finalSrc);
   const [effectiveSrcKey, setEffectiveSrcKey] = useState(finalSrc);

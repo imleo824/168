@@ -154,6 +154,7 @@ const MediaTile = React.memo(function MediaTile({
       data-media-mode="feed"
       data-media-priority={isPriorityImage ? 'true' : undefined}
       data-media-state={imageState}
+      data-media-image-state={imageState}
       aria-current={active ? 'true' : undefined}
       aria-label={getMediaButtonLabel(index, total, hiddenCount)}
       className={getTileClass(total)}

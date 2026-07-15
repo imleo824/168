@@ -3,6 +3,8 @@ import fs from 'node:fs';
 
 const uploadRoute = fs.readFileSync('server/routes/upload.routes.ts', 'utf8');
 const avatarImage = fs.readFileSync('src/ui/AvatarImage.tsx', 'utf8');
+const optimizedImage = fs.readFileSync('src/ui/OptimizedImage.tsx', 'utf8');
+const postMediaGrid = fs.readFileSync('src/features/post/PostMediaGrid.tsx', 'utf8');
 
 assert.match(
   uploadRoute,
@@ -47,5 +49,15 @@ assert.match(
 const directIndex = avatarImage.indexOf('candidates.push(directSrc)');
 const proxyIndex = avatarImage.indexOf('candidates.push(`/media/avatar/');
 assert.ok(proxyIndex >= 0 && directIndex > proxyIndex, 'avatars must prefer the same-origin proxy for persistent avatars');
+
+assert.ok(
+  optimizedImage.includes('if (/^https?:\\/\\//i.test(src) && finalSrc !== src) return src;'),
+  'optimized feed images must fall back to the original URL before showing the transparent placeholder',
+);
+assert.match(
+  postMediaGrid,
+  /data-media-image-state=\{imageState\}/,
+  'feed media tiles must expose the loaded state used to hide carousel placeholders',
+);
 
 console.log('Image storage contract guards passed.');
