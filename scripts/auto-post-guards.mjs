@@ -127,7 +127,9 @@ assertNotIncludes('auto-post.routes.ts', routes, 'runAutoPostOnce', 'manual run 
 assertIncludes('auto-post.routes.ts', routes, "app.get('/api/admin/auto-post/runs'", 'run list route is required.');
 assertIncludes('auto-post.routes.ts', routes, "app.get('/api/admin/auto-post/contents'", 'content list route is required.');
 assertIncludes('auto-post.routes.ts', routes, "app.post('/api/admin/auto-post/contents/import'", 'content import route is required.');
-assertIncludes('auto-post.routes.ts', routes, "app.post('/api/admin/auto-post/contents/seed'", 'seed initialization route is required.');
+assertNotIncludes('auto-post.routes.ts', routes, "app.post('/api/admin/auto-post/contents/seed'", 'runtime admin seed initialization route must stay removed.');
+assertNotIncludes('auto-post.service.ts', service, 'initializeAutoPostContentsFromSeed', 'runtime admin seed initializer must stay removed.');
+assertNotIncludes('auto-post.service.ts', service, 'AUTO_POST_SEED_INPUT', 'runtime auto post service must not read local seed files.');
 assertIncludes('auto-post.routes.ts', routes, "app.patch('/api/admin/auto-post/contents/:id'", 'content update route is required.');
 assertIncludes('auto-post.routes.ts', routes, 'adminOnly', 'auto post routes must be admin only.');
 assertNotIncludes('auto-post.routes.ts', routes, 'registerAutoCrawlRoutes', 'auto post routes must not register auto crawl routes as a side effect.');

@@ -129,6 +129,7 @@ assert.match(
 
 const adminSystemConfigSectionsSource = fs.readFileSync(path.join(root, 'src/features/admin/AdminSystemConfigSections.tsx'), 'utf8');
 const adminSystemConfigEditorSource = fs.readFileSync(path.join(root, 'src/features/admin/useAdminSystemConfigEditor.ts'), 'utf8');
+const adminPageSource = fs.readFileSync(path.join(root, 'src/features/admin/AdminPage.tsx'), 'utf8');
 const configRoutesSource = fs.readFileSync(path.join(root, 'server/routes/config.routes.ts'), 'utf8');
 assert.match(
   adminSystemConfigSectionsSource,
@@ -174,6 +175,16 @@ assert.match(
   adminSystemConfigSectionsSource,
   /readOnly/,
   'Admin publish category display name must be read-only because backend names come from the database Category row.',
+);
+assert.doesNotMatch(
+  adminPageSource,
+  /useCategories|@\/hooks\/useData/,
+  'Admin page must not use public categories for backend editing/filtering surfaces.',
+);
+assert.match(
+  adminPageSource,
+  /categories=\{databaseCategoryOptions\}/,
+  'Admin system config and data panels must receive database category options.',
 );
 assert.match(
   adminSystemConfigEditorSource,

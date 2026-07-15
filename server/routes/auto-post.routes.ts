@@ -7,7 +7,6 @@ import { normalizeOptionalBooleanParam, normalizeStringParam } from '../http/par
 import {
   getAutoPostConfig,
   getAutoPostContentStats,
-  initializeAutoPostContentsFromSeed,
   importAutoPostContents,
   listAutoPostContents,
   listAutoPostRuns,
@@ -112,12 +111,6 @@ export function registerAutoPostRoutes(app: Express, options: {
     if (items.length === 0) return res.status(400).json({ error: 'items 必须是非空数组' });
     if (items.length > 6000) return res.status(400).json({ error: '单次最多导入 6000 条' });
     const result = await importAutoPostContents(items);
-    return res.status(201).json(result);
-  }));
-
-  app.post('/api/admin/auto-post/contents/seed', authMiddleware, adminOnly, catchAsync(async (_req, res) => {
-    setNoStore(res);
-    const result = await initializeAutoPostContentsFromSeed();
     return res.status(201).json(result);
   }));
 

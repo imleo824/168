@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { Save } from 'lucide-react';
-import { useCategories } from '@/hooks/useData';
 import SEO from '@/platform/SEO';
 import { apiFetch } from '@/services/api';
 import { Navigate } from 'react-router-dom';
@@ -51,7 +50,6 @@ export default function Admin() {
   const [activeTelegramConfigSection, setActiveTelegramConfigSection] = useState<TelegramConfigSection>('connection');
   const [activeOpsConfigSection, setActiveOpsConfigSection] = useState<OpsConfigSection>('reward');
   const [activeDepositAddressSection, setActiveDepositAddressSection] = useState<DepositAddressSection>('monitor');
-  const { data: categories } = useCategories();
   const [localConfig, setLocalConfig] = useState<any>({});
   const [isSaving, setIsSaving] = useState(false);
   const [statusFilter, setStatusFilter] = useState('');
@@ -906,7 +904,7 @@ export default function Admin() {
   const telegramSyncRequireImage = String(localConfig?.telegram_sync_require_image ?? 'false').trim().toLowerCase() === 'true';
   const databaseCategoryOptions = Array.isArray(localConfig?.category_options)
     ? localConfig.category_options
-    : categories;
+    : [];
   const activeConfigTab = isSystemConfigTab(activeTab) ? activeTab : null;
   const activeSectionConfigTab = hasConfigSections(activeConfigTab) ? activeConfigTab : null;
   const activeTabMeta = [...adminNavigationTabs, ...interactionSubTabs].find((tab) => tab.id === activeTab) || adminNavigationTabs[0];
@@ -1036,7 +1034,7 @@ export default function Admin() {
             activeTab={activeTab}
             activeDepositAddressSection={activeDepositAddressSection}
             setActiveDepositAddressSection={setActiveDepositAddressSection}
-            categories={categories}
+            categories={databaseCategoryOptions}
             searchKeyword={searchKeyword}
             setSearchKeyword={setSearchKeyword}
             categoryFilter={categoryFilter}

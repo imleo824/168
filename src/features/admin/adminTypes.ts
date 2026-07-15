@@ -30,9 +30,9 @@ export type OpsReport = {
   timezone: string;
 };
 
-export type AdminTab = 'report' | 'content' | 'promotions' | 'users' | 'orders' | 'transactions' | 'referral-withdrawals' | 'chat' | 'model-config' | 'interaction-config' | 'comment-publish' | 'quote-publish' | 'auto-post' | 'auto-crawl' | 'auto-like' | 'chat-config' | 'ad' | 'telegram' | 'ops' | 'deposit-addresses';
+export type AdminTab = 'report' | 'content' | 'promotions' | 'users' | 'orders' | 'transactions' | 'referral-withdrawals' | 'chat' | 'model-config' | 'interaction-config' | 'comment-publish' | 'quote-publish' | 'auto-post' | 'auto-crawl' | 'auto-like' | 'ad' | 'telegram' | 'ops' | 'deposit-addresses';
 export type ConfigScope = 'ad' | 'telegram' | 'ops' | 'deposit-addresses';
-export type AdConfigSection = 'pricing' | 'placement' | 'publish';
+export type AdConfigSection = 'pricing';
 export type TelegramConfigSection = 'connection' | 'filter' | 'template';
 export type OpsConfigSection = 'reward' | 'location-presets' | 'publish-category' | 'recharge';
 export type DepositAddressSection = 'monitor' | 'import' | 'list';

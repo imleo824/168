@@ -1,7 +1,5 @@
 import type { Request } from 'express';
 import crypto from 'node:crypto';
-import fs from 'node:fs/promises';
-import path from 'node:path';
 
 import prisma, { isDbConfigured } from '../db';
 import { PostService } from '../post.service';
@@ -41,7 +39,6 @@ export type AutoPostImportItem = {
 type RunOptions = { trigger?: AutoPostTrigger; req?: Request; afterPostCreated?: AutoPostAfterPostCreated; force?: boolean };
 type ListRunsOptions = { status?: AutoPostRunStatus; limit?: number; cursor?: string };
 type ListContentsOptions = { topic?: AutoPostTopic; used?: boolean; active?: boolean; limit?: number; cursor?: string };
-type InitializeSeedOptions = { inputPath?: string };
 
 const AUTO_POST_TASK_LOCK_NAME = 'auto_post';
 const AUTO_POST_TASK_LOCK_TTL_MS = 20 * 60 * 1000;
@@ -50,7 +47,6 @@ const AUTO_POST_RUN_RETENTION_DAYS = 3;
 const TELEGRAM_SYNC_STATUS_NONE = 'NONE';
 const PICK_CONTENT_LIMIT = 160;
 const PICK_RANDOM_POOL_LIMIT = 50;
-const AUTO_POST_SEED_INPUT = 'data/auto-post-content.seed.jsonl';
 
 export const AUTO_POST_TOPICS: AutoPostTopic[] = ['QUOTE', 'FACT', 'RIDDLE', 'JOKE'];
 const RUN_STATUSES = new Set<AutoPostRunStatus>(['PENDING', 'SUCCEEDED', 'SKIPPED', 'FAILED']);
@@ -217,9 +213,6 @@ async function createPostFromContent(params: { contentItem: any; author: any; ca
 }
 
 export async function importAutoPostContents(rawItems: AutoPostImportItem[]) { if (!isDbConfigured()) throw new Error('Database is not configured'); const failures: Array<{ index: number; reason: string }> = []; const seenHashes = new Set<string>(); const data: any[] = []; rawItems.forEach((raw, index) => { const normalized = normalizeImportItem(raw); if (!normalized.item) { failures.push({ index, reason: normalized.reason }); return; } if (seenHashes.has(normalized.item.contentHash)) { failures.push({ index, reason: 'duplicate_in_payload' }); return; } seenHashes.add(normalized.item.contentHash); data.push(normalized.item); }); if (data.length === 0) return { input: rawItems.length, valid: 0, created: 0, skipped: rawItems.length, failures }; const created = await getDb().autoPostContent.createMany({ data, skipDuplicates: true }); return { input: rawItems.length, valid: data.length, created: created.count, skipped: rawItems.length - created.count, failures }; }
-function parseAutoPostSeedLine(line: string) { const trimmed = line.trim(); if (!trimmed) return null; return JSON.parse(trimmed) as AutoPostImportItem; }
-async function loadAutoPostSeedItems(inputPath?: string) { const seedPath = path.resolve(process.cwd(), inputPath || process.env.AUTO_POST_SEED_INPUT || AUTO_POST_SEED_INPUT); const source = await fs.readFile(seedPath, 'utf8'); if (seedPath.endsWith('.jsonl')) return source.split(/\n+/).map(parseAutoPostSeedLine).filter(Boolean) as AutoPostImportItem[]; const parsed = JSON.parse(source); return Array.isArray(parsed) ? parsed : Array.isArray(parsed?.items) ? parsed.items : []; }
-export async function initializeAutoPostContentsFromSeed(options: InitializeSeedOptions = {}) { if (!isDbConfigured()) throw new Error('Database is not configured'); const before = await getAutoPostContentStats(); const items = await loadAutoPostSeedItems(options.inputPath); const importResult = await importAutoPostContents(items); const after = await getAutoPostContentStats(); return { source: options.inputPath || process.env.AUTO_POST_SEED_INPUT || AUTO_POST_SEED_INPUT, before, after, ...importResult }; }
 export async function listAutoPostContents(options: ListContentsOptions = {}) { if (!isDbConfigured()) return { items: [], nextCursor: null, hasMore: false }; const limit = Math.min(100, Math.max(1, Math.round(Number(options.limit) || 30))); const cursor = typeof options.cursor === 'string' && options.cursor.trim().length <= 128 ? options.cursor.trim() : ''; const items = await getDb().autoPostContent.findMany({ where: { ...(options.topic ? { topic: options.topic } : {}), ...(options.active !== undefined ? { isActive: options.active } : {}), ...(options.used === true ? { usedAt: { not: null } } : {}), ...(options.used === false ? { usedAt: null } : {}) }, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], take: limit + 1, ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}) }); const hasMore = items.length > limit; const pageItems = hasMore ? items.slice(0, limit) : items; return { items: pageItems.map(formatContentItem), nextCursor: hasMore ? pageItems[pageItems.length - 1]?.id || null : null, hasMore }; }
 export async function updateAutoPostContent(id: string, patch: Record<string, unknown>) { if (!isDbConfigured()) throw new Error('Database is not configured'); const current = await getDb().autoPostContent.findUnique({ where: { id } }); if (!current) return null; const nextRaw = { topic: patch.topic ?? current.topic, title: patch.title ?? current.title, content: patch.content ?? current.content, answer: patch.answer ?? current.answer, author: patch.author ?? current.author, sourceName: patch.sourceName ?? current.sourceName, sourceUrl: patch.sourceUrl ?? current.sourceUrl, license: patch.license ?? current.license, qualityScore: patch.qualityScore ?? current.qualityScore, isActive: patch.isActive ?? current.isActive }; const normalized = normalizeImportItem(nextRaw); if (!normalized.item) throw new Error(normalized.reason || 'invalid_content'); const updated = await getDb().autoPostContent.update({ where: { id }, data: { ...normalized.item, usedAt: patch.usedAt === null ? null : current.usedAt, postId: patch.postId === null ? null : current.postId } }); return formatContentItem(updated); }
 export async function listAutoPostRuns(options: ListRunsOptions = {}) { if (!isDbConfigured()) return { items: [], nextCursor: null, hasMore: false }; await cleanupExpiredAutoPostRuns(); const limit = Math.min(100, Math.max(1, Math.round(Number(options.limit) || 30))); const status = normalizeRunStatus(options.status); const cursor = typeof options.cursor === 'string' && options.cursor.trim().length <= 128 ? options.cursor.trim() : ''; const runs = await getDb().autoPostRun.findMany({ where: { ...(status ? { status } : {}) }, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], take: limit + 1, ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}) }); const hasMore = runs.length > limit; const items = hasMore ? runs.slice(0, limit) : runs; return { items: await enrichRuns(items), nextCursor: hasMore ? items[items.length - 1]?.id || null : null, hasMore }; }
