@@ -154,6 +154,20 @@ assert(
 );
 
 assert(
+  commentSheet.includes('useInteractionGuard(refetchComments') &&
+    commentSheet.includes('useInteractionGuard(fetchNextComments') &&
+    commentSheet.includes('const retryBusy = commentsQuery.isRefetching || refetchCommentsGuardPending;') &&
+    commentSheet.includes('const loadMoreBusy = commentsQuery.isFetchingNextPage || fetchNextCommentsGuardPending;') &&
+    commentSheet.includes('onClick={() => void guardedRefetchComments()}') &&
+    commentSheet.includes('onRetry={() => void guardedRefetchComments()}') &&
+    commentSheet.includes('onLoadMore={() => void guardedFetchNextComments()}') &&
+    !commentSheet.includes('onAction={() => void commentsQuery.refetch()}') &&
+    !commentSheet.includes('onRetry={() => void commentsQuery.refetch()}') &&
+    !commentSheet.includes('onLoadMore={() => void commentsQuery.fetchNextPage()}'),
+  'Comment sheet retry and load-more actions must use guarded handlers instead of direct query calls.',
+);
+
+assert(
   quoteSheet.includes('instantPress={false}') &&
     quoteSheet.includes('primePostCreateComposerFocus();') &&
     quoteSheet.includes('markPostCreateComposerFocusIntent();') &&

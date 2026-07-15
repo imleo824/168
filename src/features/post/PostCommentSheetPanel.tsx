@@ -9,6 +9,7 @@ import ListLoadMoreState from '@/ui/ListLoadMoreState';
 import AvatarImage from '@/ui/AvatarImage';
 import { apiFetch } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
+import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import { formatRelativeTime } from '@/utils/time';
 import { formatCompactChineseEngagementCount } from '@/utils/engagement';
 import PostCommentComposerDialog from '@/features/post/PostCommentComposerDialog';
@@ -232,6 +233,26 @@ export const PostCommentSheetPanel = memo(function PostCommentSheetPanel({
     setIsComposerOpen(false);
     setComposerError('');
   }, [createMutation.isPending]);
+  const refetchComments = useCallback(async () => {
+    await commentsQuery.refetch();
+  }, [commentsQuery]);
+  const fetchNextComments = useCallback(async () => {
+    await commentsQuery.fetchNextPage();
+  }, [commentsQuery]);
+  const { guarded: guardedRefetchComments, isPending: refetchCommentsGuardPending } = useInteractionGuard(refetchComments, {
+    policy: 'optimistic',
+    cooldownMs: 520,
+    minPendingMs: 160,
+    mode: 'drop',
+  });
+  const { guarded: guardedFetchNextComments, isPending: fetchNextCommentsGuardPending } = useInteractionGuard(fetchNextComments, {
+    policy: 'optimistic',
+    cooldownMs: 520,
+    minPendingMs: 160,
+    mode: 'drop',
+  });
+  const retryBusy = commentsQuery.isRefetching || refetchCommentsGuardPending;
+  const loadMoreBusy = commentsQuery.isFetchingNextPage || fetchNextCommentsGuardPending;
 
   return (
     <>
@@ -270,8 +291,18 @@ export const PostCommentSheetPanel = memo(function PostCommentSheetPanel({
             title="评论加载失败"
             tone="error"
             compact
-            actionLabel="重新加载"
-            onAction={() => void commentsQuery.refetch()}
+            action={(
+              <ActionButton
+                type="button"
+                variant="brand"
+                size="sm"
+                disabled={retryBusy}
+                state={retryBusy ? 'loading' : 'idle'}
+                onClick={() => void guardedRefetchComments()}
+              >
+                {retryBusy ? '加载中' : '重新加载'}
+              </ActionButton>
+            )}
           />
         ) : comments.length === 0 ? (
           <StateBlock
@@ -287,10 +318,10 @@ export const PostCommentSheetPanel = memo(function PostCommentSheetPanel({
             ))}
             <ListLoadMoreState
               error={Boolean(commentsQuery.error)}
-              loading={commentsQuery.isFetchingNextPage}
+              loading={loadMoreBusy}
               hasMore={Boolean(commentsQuery.hasNextPage)}
-              onRetry={() => void commentsQuery.refetch()}
-              onLoadMore={() => void commentsQuery.fetchNextPage()}
+              onRetry={() => void guardedRefetchComments()}
+              onLoadMore={() => void guardedFetchNextComments()}
               loadingText="正在加载更多评论"
               doneText=""
             />
