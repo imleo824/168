@@ -43,6 +43,7 @@ const quoteSheet = read('src/features/post/PostQuoteSheetPanel.tsx');
 const postSheetOpenIntent = read('src/features/post/postSheetOpenIntent.ts');
 const profileDialog = read('src/features/profile/ProfileDialog.tsx');
 const postCreatePage = read('src/features/post-create/PostCreatePage.tsx');
+const postCreatePageSections = read('src/features/post-create/postCreatePageSections.tsx');
 const postCreateFocusBridge = read('src/utils/postCreateFocusBridge.ts');
 const publishIconButton = read('src/ui/PublishIconButton.tsx');
 const bottomNavigation = read('src/app/AppBottomNavigation.tsx');
@@ -251,6 +252,15 @@ assert(
   publishIconButton.includes('POST_CREATE_FOCUS_TRIGGER_ATTR') &&
     publishIconButton.includes('POST_CREATE_FOCUS_TRIGGER_PROPS'),
   'Publish icon buttons must be marked as create-focus triggers for rapid navigation/focus handoff.',
+);
+
+assert(
+  postCreatePageSections.includes('useInteractionGuard(savePromotionLink') &&
+    postCreatePageSections.includes('const promotionLinkSaveDisabled = isPublishingLocked || savePromotionLinkPending || !draftLinkTitle.trim() || !draftLinkUrl.trim();') &&
+    postCreatePageSections.includes('onClick={() => void guardedSavePromotionLink()}') &&
+    postCreatePageSections.includes("state={savePromotionLinkPending ? 'loading' : 'idle'}") &&
+    !postCreatePageSections.includes('onClick={savePromotionLink}'),
+  'Post create promotion link editor save action must be guarded against rapid duplicate saves.',
 );
 
 assert(

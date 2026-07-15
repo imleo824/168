@@ -14,6 +14,7 @@ import AppPage from '@/ui/AppPage';
 import PageContentShell from '@/ui/PageContentShell';
 import PageHeader from '@/ui/PageHeader';
 import { useInstantPress } from '@/hooks/useInstantPress';
+import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import type { QuotePostPreview } from '@/types';
 import {
   POST_PROMOTION_LINK_TITLE_MAX_LENGTH,
@@ -146,12 +147,12 @@ export function PostCreateComposerSection({
   const locationPressHandlers = useInstantPress<HTMLButtonElement>(onOpenLocation, isPublishingLocked);
   const privacyPressHandlers = useInstantPress<HTMLButtonElement>(onOpenPrivacy, isPublishingLocked);
   const telegramPressHandlers = useInstantPress<HTMLButtonElement>(onOpenTelegram, isPublishingLocked);
-  const openPromotionLinkEditorCard = () => {
+  const openPromotionLinkEditorCard = useCallback(() => {
     setDraftLinkTitle(activePromotionTitle || '');
     setDraftLinkUrl(activePromotionUrl || '');
     setLinkError('');
     setIsLinkEditorOpen(true);
-  };
+  }, [activePromotionTitle, activePromotionUrl]);
   const openPromotionLinkPanel = useCallback(() => {
     if (onOpenPromotionLink) {
       onOpenPromotionLink();
@@ -162,10 +163,10 @@ export function PostCreateComposerSection({
       return;
     }
     openPromotionLinkEditorCard();
-  }, [onOpenPromotionLink, tuiPlusActive, activePromotionTitle, activePromotionUrl]);
+  }, [onOpenPromotionLink, openPromotionLinkEditorCard, tuiPlusActive]);
   const linkPressHandlers = useInstantPress<HTMLButtonElement>(openPromotionLinkPanel, isPublishingLocked);
   const normalizedDraftLinkUrl = useMemo(() => normalizePostPromotionLinkUrl(draftLinkUrl), [draftLinkUrl]);
-  const savePromotionLink = () => {
+  const savePromotionLink = useCallback(() => {
     const safeTitle = cleanPostPromotionLinkTitle(draftLinkTitle);
     if (!safeTitle) {
       setLinkError('请输入标题');
@@ -177,7 +178,14 @@ export function PostCreateComposerSection({
     }
     onPromotionLinkChange?.({ title: safeTitle, url: normalizedDraftLinkUrl });
     setIsLinkEditorOpen(false);
-  };
+  }, [draftLinkTitle, normalizedDraftLinkUrl, onPromotionLinkChange]);
+  const { guarded: guardedSavePromotionLink, isPending: savePromotionLinkPending } = useInteractionGuard(savePromotionLink, {
+    policy: 'optimistic',
+    cooldownMs: 420,
+    minPendingMs: 120,
+    mode: 'drop',
+  });
+  const promotionLinkSaveDisabled = isPublishingLocked || savePromotionLinkPending || !draftLinkTitle.trim() || !draftLinkUrl.trim();
 
   return (
     <>
@@ -246,7 +254,7 @@ export function PostCreateComposerSection({
 
       {isLinkEditorOpen ? (
         <AppPage className="post-create-page post-create-contact-editor-page post-create-link-editor-page" bottomSafe>
-          <PageHeader title="添加链接" showBack onBack={() => setIsLinkEditorOpen(false)} right={<ActionButton type="button" variant="brand" size="header" onClick={savePromotionLink} disabled={!draftLinkTitle.trim() || !draftLinkUrl.trim()}>保存</ActionButton>} />
+          <PageHeader title="添加链接" showBack onBack={() => setIsLinkEditorOpen(false)} right={<ActionButton type="button" variant="brand" size="header" disabled={promotionLinkSaveDisabled} state={savePromotionLinkPending ? 'loading' : 'idle'} onClick={() => void guardedSavePromotionLink()}>{savePromotionLinkPending ? '保存中' : '保存'}</ActionButton>} />
           <PageContentShell bottomSafe className="post-create-contact-editor-main ui-app-page-main">
             <section data-post-create-stable-focus="true" className="post-create-stable-focus post-create-contact-editor-card post-create-link-editor-card">
               <label className="post-create-contact-editor-field">
