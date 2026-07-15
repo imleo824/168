@@ -57,6 +57,7 @@ const notFound = read('src/pages/NotFound.tsx');
 const homeRefresh = read('src/hooks/useHomeRefresh.ts');
 const listLoadMoreState = read('src/ui/ListLoadMoreState.tsx');
 const postDetail = read('src/pages/PostDetailLegacy.tsx');
+const postCard = read('src/features/post/PostCard.tsx');
 const categoryFeed = read('src/pages/CategoryFeedMobile.tsx');
 const homePageSource = read('src/pages/Home.tsx');
 const sponsorPage = read('src/features/sponsor/SponsorMobilePage.tsx');
@@ -172,6 +173,12 @@ assert(
     postDetail.includes('setIsQuoteSheetOpen(true);') &&
     postDetail.includes('setIsCommentSheetOpen(true);'),
   'Post detail must make comment and quote sheets mutually exclusive before opening a new sheet.',
+);
+
+assert(
+  postCard.includes('setIsQuoteSheetOpen(false); setIsCommentSheetOpen(true);') &&
+    postCard.includes('setIsCommentSheetOpen(false); setIsQuoteSheetOpen(true);'),
+  'Post card comment and quote actions must close the competing sheet before opening a new one under rapid tapping.',
 );
 
 assert(
