@@ -70,6 +70,7 @@ const notificationSettings = read('src/pages/NotificationSettings.tsx');
 const rechargePage = read('src/pages/RechargeMobile.tsx');
 const referralInvitePageContent = read('src/features/sponsor/ReferralInvitePageContent.tsx');
 const transactionHistoryPage = read('src/pages/TransactionHistoryMobile.tsx');
+const referralInviteRecordsPage = read('src/pages/ReferralInviteRecordsMobile.tsx');
 
 assert(
   /<div\s+className="app-main app-shell-main"/.test(appShell) &&
@@ -328,6 +329,17 @@ assert(
     transactionHistoryPage.includes('onClick={() => void guardedRefetchCurrentPage()}') &&
     transactionHistoryPage.includes('onLoadMore={() => void guardedFetchNextPage()}'),
   'Transaction history retry and load-more actions must be guarded against rapid duplicate page requests.',
+);
+
+assert(
+  referralInviteRecordsPage.includes('useInteractionGuard(refetchActiveRecords') &&
+    referralInviteRecordsPage.includes('const retryBusy = activeQuery.isRefetching || refetchGuardPending;') &&
+    referralInviteRecordsPage.includes('disabled={retryBusy}') &&
+    referralInviteRecordsPage.includes('onClick={() => void guardedRefetchActiveRecords()}') &&
+    !referralInviteRecordsPage.includes('onClick={() => void commissionsQuery.refetch()}') &&
+    !referralInviteRecordsPage.includes('onClick={() => void withdrawalsQuery.refetch()}') &&
+    !referralInviteRecordsPage.includes('onClick={() => void relationsQuery.refetch()}'),
+  'Referral record retry actions must share a guarded active-tab refetch instead of direct query refetch handlers.',
 );
 
 if (failures.length > 0) {

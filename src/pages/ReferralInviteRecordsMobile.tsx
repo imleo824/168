@@ -9,6 +9,7 @@ import PageContentShell from '@/ui/PageContentShell';
 import EmptyStateCard from '@/ui/EmptyStateCard';
 import { LoadingBlock, StateBlock } from '@/ui/LoadingState';
 import ActionButton from '@/ui/ActionButton';
+import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import {
   getReferralCommissions,
   getReferralRelations,
@@ -61,25 +62,48 @@ export default function ReferralInviteRecordsMobile() {
     : activeTab === 'withdrawals'
       ? withdrawalsQuery
       : relationsQuery;
+  const refetchActiveRecords = async () => {
+    await activeQuery.refetch();
+  };
+  const { guarded: guardedRefetchActiveRecords, isPending: refetchGuardPending } = useInteractionGuard(refetchActiveRecords, {
+    policy: 'optimistic',
+    cooldownMs: 520,
+    minPendingMs: 160,
+    mode: 'drop',
+  });
+  const retryBusy = activeQuery.isRefetching || refetchGuardPending;
+
+  const retryAction = (
+    <ActionButton
+      type="button"
+      variant="muted"
+      size="sm"
+      disabled={retryBusy}
+      state={retryBusy ? 'loading' : 'idle'}
+      onClick={() => void guardedRefetchActiveRecords()}
+    >
+      {retryBusy ? '加载中' : '重新加载'}
+    </ActionButton>
+  );
 
   const content = useMemo(() => {
     if (activeTab === 'commissions') {
       if (commissionsQuery.isLoading) return <LoadingBlock compact text="正在加载返佣记录" />;
-      if (commissionsQuery.isError) return <StateBlock title="返佣记录加载失败" description="网络恢复后可重新加载。" tone="error" compact action={<ActionButton type="button" variant="muted" size="sm" onClick={() => void commissionsQuery.refetch()}>重新加载</ActionButton>} />;
+      if (commissionsQuery.isError) return <StateBlock title="返佣记录加载失败" description="网络恢复后可重新加载。" tone="error" compact action={retryAction} />;
       if (!commissionsQuery.data?.length) return <EmptyStateCard title="暂无记录" compact />;
       return <div className="record-list referral-record-list">{commissionsQuery.data.map((item) => <CommissionRow key={item.id} item={item} />)}</div>;
     }
     if (activeTab === 'withdrawals') {
       if (withdrawalsQuery.isLoading) return <LoadingBlock compact text="正在加载提现记录" />;
-      if (withdrawalsQuery.isError) return <StateBlock title="提现记录加载失败" description="网络恢复后可重新加载。" tone="error" compact action={<ActionButton type="button" variant="muted" size="sm" onClick={() => void withdrawalsQuery.refetch()}>重新加载</ActionButton>} />;
+      if (withdrawalsQuery.isError) return <StateBlock title="提现记录加载失败" description="网络恢复后可重新加载。" tone="error" compact action={retryAction} />;
       if (!withdrawalsQuery.data?.length) return <EmptyStateCard title="暂无记录" compact />;
       return <div className="record-list referral-record-list">{withdrawalsQuery.data.map((item) => <WithdrawalRow key={item.id} item={item} />)}</div>;
     }
     if (relationsQuery.isLoading) return <LoadingBlock compact text="正在加载邀请记录" />;
-    if (relationsQuery.isError) return <StateBlock title="邀请记录加载失败" description="网络恢复后可重新加载。" tone="error" compact action={<ActionButton type="button" variant="muted" size="sm" onClick={() => void relationsQuery.refetch()}>重新加载</ActionButton>} />;
+    if (relationsQuery.isError) return <StateBlock title="邀请记录加载失败" description="网络恢复后可重新加载。" tone="error" compact action={retryAction} />;
     if (!relationsQuery.data?.length) return <EmptyStateCard title="暂无记录" compact />;
     return <div className="record-list referral-record-list">{relationsQuery.data.map((item) => <RelationRow key={item.id} item={item} />)}</div>;
-  }, [activeTab, commissionsQuery.data, commissionsQuery.isError, commissionsQuery.isLoading, relationsQuery.data, relationsQuery.isError, relationsQuery.isLoading, withdrawalsQuery.data, withdrawalsQuery.isError, withdrawalsQuery.isLoading]);
+  }, [activeTab, commissionsQuery.data, commissionsQuery.isError, commissionsQuery.isLoading, relationsQuery.data, relationsQuery.isError, relationsQuery.isLoading, retryAction, withdrawalsQuery.data, withdrawalsQuery.isError, withdrawalsQuery.isLoading]);
 
   return (
     <AppPage mobileAddressBarScroll bottomSafe className="referral-page surface-page">
