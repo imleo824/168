@@ -21,6 +21,7 @@ const rankingSyncSql = read('prisma/sql/sync_post_engagement_aggregates.sql');
 const prismaSchema = read('prisma/schema.prisma');
 const apiClient = read('src/services/api.ts');
 const homeFeedQueries = read('src/hooks/useHomeFeedQueries.ts');
+const homeFeedCacheKey = read('src/features/home/homeFeedCacheKey.ts');
 const homePage = read('src/pages/Home.tsx');
 const homeTopicTabs = read('src/features/home/HomeTopicTabs.tsx');
 
@@ -106,6 +107,18 @@ assert.match(
   publicFeedCache,
   /feed[\s\S]*categorySlug[\s\S]*categoryMetaScope[\s\S]*categoryMetaFilters/,
   'public feed cache key should include home feed mode, category slug, and structured filters',
+);
+
+assert.match(
+  homeFeedCacheKey,
+  /export function stableHomeFeedParamsKey[\s\S]*JSON\.stringify\(stableHomeFeedParams\(params\)\)/,
+  'home feed client cache keys should use stable sorted params for structured filters',
+);
+
+assert.match(
+  homeFeedQueries,
+  /const homeFeedRequestParamsKey = useMemo\([\s\S]*stableHomeFeedParamsKey\([\s\S]*categoryMetaFilters[\s\S]*\['posts', 'home-feed', HOME_FEED_QUERY_VERSION, viewerId \|\| 'anonymous', homeFeedRequestParamsKey\]/,
+  'home feed React Query key must use the stable params string instead of the raw filters object',
 );
 
 assert.match(

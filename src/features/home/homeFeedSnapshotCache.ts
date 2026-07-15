@@ -1,6 +1,7 @@
 import { safeLocalStorage } from '@/utils/storage';
 import type { CategoryMetaFeedFilters, Post } from '@/types';
 import type { HomeFeedKind } from '@/features/home/homeTypes';
+import { stableHomeFeedParams, stableHomeFeedParamsKey } from '@/features/home/homeFeedCacheKey';
 
 const HOME_FEED_SNAPSHOT_PREFIX = 'tuitui:home-feed-snapshot:';
 const HOME_FEED_SNAPSHOT_TTL_MS = 1000 * 60 * 60 * 12;
@@ -27,20 +28,6 @@ export type HomeFeedSnapshotParams = {
   categoryMetaFilters?: CategoryMetaFeedFilters;
 };
 
-function stableNormalize(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(stableNormalize);
-  if (value && typeof value === 'object') {
-    return Object.keys(value as Record<string, unknown>)
-      .sort()
-      .reduce<Record<string, unknown>>((acc, key) => {
-        const next = (value as Record<string, unknown>)[key];
-        if (next !== undefined && next !== null && next !== '') acc[key] = stableNormalize(next);
-        return acc;
-      }, {});
-  }
-  return value;
-}
-
 function safeJsonParse<T>(value: string | null): T | null {
   if (!value) return null;
   try {
@@ -52,7 +39,7 @@ function safeJsonParse<T>(value: string | null): T | null {
 
 export function buildHomeFeedSnapshotKey(version: string, viewerId: string | null | undefined, params: HomeFeedSnapshotParams) {
   const viewer = viewerId ? `user:${viewerId}` : 'anonymous';
-  return `${HOME_FEED_SNAPSHOT_PREFIX}${version}:${viewer}:${JSON.stringify(stableNormalize(params))}`;
+  return `${HOME_FEED_SNAPSHOT_PREFIX}${version}:${viewer}:${stableHomeFeedParamsKey(params)}`;
 }
 
 function isValidSnapshot(snapshot: HomeFeedSnapshot | null, version: string, viewerId: string | null | undefined) {
@@ -82,7 +69,7 @@ export function writeHomeFeedSnapshot(
   const snapshot: HomeFeedSnapshot = {
     version,
     viewer,
-    params,
+    params: stableHomeFeedParams(params),
     updatedAt: Date.now(),
     page: {
       items: page.items.slice(0, HOME_FEED_SNAPSHOT_MAX_ITEMS),

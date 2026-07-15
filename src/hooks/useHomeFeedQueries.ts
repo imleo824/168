@@ -6,10 +6,11 @@ import type { CategoryMetaFeedFilters, Post } from '@/types';
 import type { FeedQueryResult } from '@/types/homeFeed';
 import type { HomeFeedKind } from '@/features/home/homeTypes';
 import { readHomeFeedSnapshot, writeHomeFeedSnapshot, type HomeFeedSnapshotParams } from '@/features/home/homeFeedSnapshotCache';
+import { stableHomeFeedParamsKey } from '@/features/home/homeFeedCacheKey';
 import { stabilizeHomeBootstrapReferenceData, writeHomeBootstrapSnapshot } from '@/features/home/homeBootstrapSnapshotCache';
 
 const HOME_FEED_PAGE_SIZE = 10;
-const HOME_FEED_QUERY_VERSION = 'v7';
+const HOME_FEED_QUERY_VERSION = 'v8';
 const HOME_FEED_STALE_TIME = 1000 * 60 * 2;
 const HOME_FEED_GC_TIME = 1000 * 60 * 30;
 const HOME_FEED_MAX_PAGES = 5;
@@ -81,19 +82,23 @@ export function useHomeFeedQueries({
   viewerId = null,
 }: UseHomeFeedQueriesOptions): UseHomeFeedQueriesResult {
   const queryClient = useQueryClient();
-  const homeFeedRequestParams = useMemo<HomeFeedSnapshotParams>(
-    () => ({
+  const homeFeedRequestParamsKey = useMemo(
+    () => stableHomeFeedParamsKey({
       feed: feedKind,
       categorySlug: feedKind === 'category' ? categorySlug : '',
       categoryMetaScope,
       categoryMetaFilters,
     }),
-    [categoryMetaFilters, categoryMetaScope, categorySlug, feedKind]
+    [categoryMetaFilters, categoryMetaScope, categorySlug, feedKind],
+  );
+  const homeFeedRequestParams = useMemo<HomeFeedSnapshotParams>(
+    () => JSON.parse(homeFeedRequestParamsKey) as HomeFeedSnapshotParams,
+    [homeFeedRequestParamsKey],
   );
 
   const homeFeedQueryKey = useMemo<QueryKey>(
-    () => ['posts', 'home-feed', HOME_FEED_QUERY_VERSION, viewerId || 'anonymous', homeFeedRequestParams],
-    [homeFeedRequestParams, viewerId],
+    () => ['posts', 'home-feed', HOME_FEED_QUERY_VERSION, viewerId || 'anonymous', homeFeedRequestParamsKey],
+    [homeFeedRequestParamsKey, viewerId],
   );
 
   const initialData = useMemo(() => getSnapshotData(viewerId, homeFeedRequestParams), [homeFeedRequestParams, viewerId]);
