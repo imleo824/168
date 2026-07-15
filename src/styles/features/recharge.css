@@ -25,6 +25,60 @@
     .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page {
       --ui-recharge-page-max: var(--app-desktop-page-content-width);
     }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-shell {
+      gap: var(--ui-space-5);
+      padding-top: var(--ui-space-4);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-step--amount {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(calc(var(--ui-space-8) * 4), 0.65fr);
+      align-items: start;
+      gap: var(--ui-space-4);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-step--amount .recharge-field {
+      grid-column: 1;
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-step--amount .recharge-preset-grid {
+      grid-column: 2;
+      grid-row: 1 / span 2;
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-step--amount .recharge-note {
+      grid-column: 1;
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-step--amount .recharge-submit {
+      grid-column: 1 / -1;
+      justify-self: end;
+      max-width: min(100%, calc(var(--ui-space-8) * 8));
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-payment-panel {
+      display: grid;
+      grid-template-columns: minmax(calc(var(--ui-space-8) * 5), 0.8fr) minmax(0, 1.2fr);
+      align-items: stretch;
+      gap: var(--ui-space-4);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-instruction-body {
+      display: grid;
+      grid-template-columns: minmax(calc(var(--ui-space-8) * 5), auto) minmax(0, 1fr);
+      align-items: center;
+      gap: var(--ui-space-4);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-footer-action {
+      justify-content: flex-end;
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-footer-action .recharge-submit {
+      max-width: min(100%, calc(var(--ui-space-8) * 8));
+    }
   }
 
   .recharge-page .recharge-form-card {

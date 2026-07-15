@@ -346,5 +346,35 @@
     .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .referral-page {
       --ui-referral-page-content-max: var(--app-desktop-page-content-width);
     }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .referral-page-content {
+      grid-template-columns: minmax(0, 1.08fr) minmax(calc(var(--ui-space-8) * 5), 0.92fr);
+      align-items: start;
+      gap: var(--ui-space-4);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .referral-hero-card {
+      grid-column: 1;
+      min-height: 100%;
+      align-content: space-between;
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .referral-share-card {
+      grid-column: 2;
+      min-height: 100%;
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .referral-record-section {
+      grid-column: 1 / -1;
+      max-width: var(--app-desktop-page-content-width);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .referral-record-list {
+      width: 100%;
+      max-width: var(--app-desktop-page-content-width);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--ui-space-3);
+      margin-inline: auto;
+    }
   }
 }
