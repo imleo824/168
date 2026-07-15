@@ -18,8 +18,7 @@
     background: var(--ui-surface-page);
   }
 
-  .detail-page[data-route-overlay],
-  .detail-page--mobile {
+  .detail-page[data-route-overlay] {
     height: var(--app-layout-vh);
     min-height: var(--app-layout-vh);
     max-height: var(--app-layout-vh);
@@ -37,7 +36,10 @@
 
   .detail-page--mobile {
     display: flex;
+    min-height: var(--app-layout-vh);
     flex-direction: column;
+    overflow-x: clip;
+    overflow-y: visible;
     transform: var(--ui-transform-none);
     backface-visibility: visible;
   }

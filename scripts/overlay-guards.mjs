@@ -160,6 +160,14 @@ assert(
 );
 
 assert(
+  !postDetailCss.includes('.detail-page[data-route-overlay],\n  .detail-page--mobile') &&
+    postDetailCss.includes('.detail-page[data-route-overlay] {\n    height: var(--app-layout-vh);') &&
+    postDetailCss.includes('.detail-page--mobile {\n    display: flex;\n    min-height: var(--app-layout-vh);') &&
+    postDetailCss.includes('overflow-y: visible;'),
+  'Plain mobile post detail pages must use document scrolling; only route overlays may own the fixed-height internal scroll lane.',
+);
+
+assert(
   !mobileAddressBarHook.includes("visualViewport?.addEventListener('scroll'") &&
     !mobileAddressBarHook.includes('visualViewport?.addEventListener("scroll"'),
   'useMobileAddressBar must not listen to visualViewport.scroll because keyboard/address-bar movement must not rewrite layout scroll metrics.',
