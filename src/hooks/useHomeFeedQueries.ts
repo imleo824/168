@@ -28,6 +28,11 @@ interface UseHomeFeedQueriesOptions {
 
 type HomeFeedPage = { items: Post[]; nextCursor: string | null; hasMore: boolean };
 
+type HomeFeedInitialSnapshotState = {
+  initialData?: InfiniteData<HomeFeedPage, string | undefined>;
+  initialDataUpdatedAt?: number;
+};
+
 type UseHomeFeedQueriesResult = FeedQueryResult & {
   activeQuery: any;
   activeQueryKey: QueryKey;
@@ -52,14 +57,13 @@ function getNextCursor(lastPage: any) {
   return lastPage?.hasMore && lastPage?.nextCursor ? lastPage.nextCursor : undefined;
 }
 
-function getSnapshotData(viewerId: string | null | undefined, params: HomeFeedSnapshotParams): InfiniteData<HomeFeedPage, string | undefined> | undefined {
+function getSnapshotInitialState(viewerId: string | null | undefined, params: HomeFeedSnapshotParams): HomeFeedInitialSnapshotState {
   const snapshot = readHomeFeedSnapshot(HOME_FEED_QUERY_VERSION, viewerId, params);
-  if (!snapshot?.page) return undefined;
-  return { pages: [snapshot.page], pageParams: [undefined] };
-}
-
-function getSnapshotUpdatedAt(viewerId: string | null | undefined, params: HomeFeedSnapshotParams) {
-  return readHomeFeedSnapshot(HOME_FEED_QUERY_VERSION, viewerId, params)?.updatedAt;
+  if (!snapshot?.page) return {};
+  return {
+    initialData: { pages: [snapshot.page], pageParams: [undefined] },
+    initialDataUpdatedAt: snapshot.updatedAt,
+  };
 }
 
 const commonHomeFeedQueryOptions = {
@@ -101,8 +105,10 @@ export function useHomeFeedQueries({
     [homeFeedRequestParamsKey, viewerId],
   );
 
-  const initialData = useMemo(() => getSnapshotData(viewerId, homeFeedRequestParams), [homeFeedRequestParams, viewerId]);
-  const initialDataUpdatedAt = useMemo(() => getSnapshotUpdatedAt(viewerId, homeFeedRequestParams), [homeFeedRequestParams, viewerId]);
+  const { initialData, initialDataUpdatedAt } = useMemo(
+    () => getSnapshotInitialState(viewerId, homeFeedRequestParams),
+    [homeFeedRequestParams, viewerId],
+  );
 
   const homeFeedQuery = useInfiniteQuery({
     queryKey: homeFeedQueryKey,

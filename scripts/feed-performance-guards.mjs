@@ -247,6 +247,18 @@ assert.match(
   'home feed should keep paginated dedicated feed fetching',
 );
 
+assert.equal(
+  (homeFeedQueries.match(/readHomeFeedSnapshot\(/g) || []).length,
+  1,
+  'home feed initial state should read the local snapshot once per query key',
+);
+
+assert.match(
+  homeFeedQueries,
+  /function getSnapshotInitialState[\s\S]*initialDataUpdatedAt: snapshot\.updatedAt/,
+  'home feed should derive initial data and timestamp from the same snapshot read',
+);
+
 assert.match(
   homePage,
   /DEFAULT_HOME_TOPIC_TAB_ID/,
