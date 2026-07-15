@@ -1,5 +1,6 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import BottomSheet from '@/ui/BottomSheet';
+import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import type {
   CategoryMetaFeedFilters,
   CategoryMetaFeedFilterValue,
@@ -131,6 +132,17 @@ export const HomeStructuredFilterSheetPanel = memo(function HomeStructuredFilter
     onApply({});
     onClose();
   }, [draft, fields, focusFieldKey, onApply, onClose]);
+  const { guarded: guardedApply, isPending: applyPending } = useInteractionGuard(handleApply, {
+    policy: 'optimistic',
+    cooldownMs: 520,
+    mode: 'drop',
+  });
+  const { guarded: guardedReset, isPending: resetPending } = useInteractionGuard(handleReset, {
+    policy: 'optimistic',
+    cooldownMs: 520,
+    mode: 'drop',
+  });
+  const actionPending = applyPending || resetPending;
 
   useEffect(() => {
     if (!open || !focusFieldKey) return;
@@ -364,10 +376,10 @@ export const HomeStructuredFilterSheetPanel = memo(function HomeStructuredFilter
         {error ? <div className="home-structured-filter-error">{error}</div> : null}
 
         <div className="home-structured-filter-actions">
-          <button type="button" className="home-structured-filter-reset pressable" onClick={handleReset}>
+          <button type="button" className="home-structured-filter-reset pressable" onClick={() => void guardedReset()} disabled={actionPending}>
             重置
           </button>
-          <button type="button" className="home-structured-filter-apply pressable" onClick={handleApply}>
+          <button type="button" className="home-structured-filter-apply pressable" onClick={() => void guardedApply()} disabled={actionPending}>
             完成
           </button>
         </div>

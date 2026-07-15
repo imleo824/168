@@ -55,6 +55,7 @@ const authRequiredState = read('src/ui/AuthRequiredState.tsx');
 const pageHeader = read('src/ui/PageHeader.tsx');
 const homeTopbar = read('src/features/home/HomeTopbar.tsx');
 const homePage = read('src/pages/Home.tsx');
+const homeStructuredFilterPanel = read('src/features/home/HomeStructuredFilterSheetPanel.tsx');
 const brandAbout = read('src/pages/BrandAbout.tsx');
 const notFound = read('src/pages/NotFound.tsx');
 const homeRefresh = read('src/hooks/useHomeRefresh.ts');
@@ -328,6 +329,18 @@ assert(
     categoryFeed.includes('onLoadMore={() => void guardedRequestNextPage()}') &&
     !categoryFeed.includes('onClick={() => void postsQuery.refetch()}'),
   'Category feed retry and load-more actions must use guarded handlers instead of direct query calls.',
+);
+
+assert(
+  homeStructuredFilterPanel.includes('useInteractionGuard(handleApply') &&
+    homeStructuredFilterPanel.includes('useInteractionGuard(handleReset') &&
+    homeStructuredFilterPanel.includes('const actionPending = applyPending || resetPending;') &&
+    homeStructuredFilterPanel.includes('onClick={() => void guardedApply()}') &&
+    homeStructuredFilterPanel.includes('onClick={() => void guardedReset()}') &&
+    homeStructuredFilterPanel.includes('disabled={actionPending}') &&
+    !homeStructuredFilterPanel.includes('onClick={handleApply}') &&
+    !homeStructuredFilterPanel.includes('onClick={handleReset}'),
+  'Home structured filter apply and reset actions must be guarded against rapid duplicate filter commits.',
 );
 
 assert(
