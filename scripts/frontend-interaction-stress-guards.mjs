@@ -184,6 +184,20 @@ assert(
 );
 
 assert(
+  quoteSheet.includes('useInteractionGuard(refetchQuotes') &&
+    quoteSheet.includes('useInteractionGuard(fetchNextQuotes') &&
+    quoteSheet.includes('const retryBusy = isRefetching || refetchQuotesGuardPending;') &&
+    quoteSheet.includes('const loadMoreBusy = isFetchingNextPage || fetchNextQuotesGuardPending;') &&
+    quoteSheet.includes('onClick={() => void guardedRefetchQuotes()}') &&
+    quoteSheet.includes('onRetry={() => void guardedRefetchQuotes()}') &&
+    quoteSheet.includes('onLoadMore={() => void guardedFetchNextQuotes()}') &&
+    !quoteSheet.includes('onAction={() => void refetch()}') &&
+    !quoteSheet.includes('onRetry={() => void refetch()}') &&
+    !quoteSheet.includes('onLoadMore={() => void fetchNextPage()}'),
+  'Quote sheet retry and load-more actions must use guarded handlers instead of direct query calls.',
+);
+
+assert(
   postDetail.includes('setIsCommentSheetOpen(false);') &&
     postDetail.includes('setIsQuoteSheetOpen(false);') &&
     postDetail.includes('setIsQuoteSheetOpen(true);') &&

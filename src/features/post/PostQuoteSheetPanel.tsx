@@ -9,6 +9,7 @@ import { StateBlock } from '@/ui/LoadingState';
 import ListLoadMoreState from '@/ui/ListLoadMoreState';
 import AvatarImage from '@/ui/AvatarImage';
 import { useAuth } from '@/context/AuthContext';
+import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import { usePostQuotes } from '@/hooks/useData';
 import { withCurrentBackground } from '@/utils/navigationState';
 import { rememberListReturnPosition } from '@/utils/listReturnScroll';
@@ -101,6 +102,7 @@ export const PostQuoteSheetPanel = memo(function PostQuoteSheetPanel({
     fetchNextPage,
     error,
     refetch,
+    isRefetching,
   } = usePostQuotes(resolvedPostId, open && Boolean(resolvedPostId));
 
   useEffect(() => {
@@ -137,6 +139,26 @@ export const PostQuoteSheetPanel = memo(function PostQuoteSheetPanel({
       });
     });
   }, [canCreateQuote, location.pathname, location.search, navigate, onClose, requireAuth, resolvedPostId, targetPost]);
+  const refetchQuotes = useCallback(async () => {
+    await refetch();
+  }, [refetch]);
+  const fetchNextQuotes = useCallback(async () => {
+    await fetchNextPage();
+  }, [fetchNextPage]);
+  const { guarded: guardedRefetchQuotes, isPending: refetchQuotesGuardPending } = useInteractionGuard(refetchQuotes, {
+    policy: 'optimistic',
+    cooldownMs: 520,
+    minPendingMs: 160,
+    mode: 'drop',
+  });
+  const { guarded: guardedFetchNextQuotes, isPending: fetchNextQuotesGuardPending } = useInteractionGuard(fetchNextQuotes, {
+    policy: 'optimistic',
+    cooldownMs: 520,
+    minPendingMs: 160,
+    mode: 'drop',
+  });
+  const retryBusy = isRefetching || refetchQuotesGuardPending;
+  const loadMoreBusy = isFetchingNextPage || fetchNextQuotesGuardPending;
 
   return (
     <BottomSheet
@@ -173,8 +195,18 @@ export const PostQuoteSheetPanel = memo(function PostQuoteSheetPanel({
           title="引用加载失败"
           tone="error"
           compact
-          actionLabel="重新加载"
-          onAction={() => void refetch()}
+          action={(
+            <ActionButton
+              type="button"
+              variant="brand"
+              size="sm"
+              disabled={retryBusy}
+              state={retryBusy ? 'loading' : 'idle'}
+              onClick={() => void guardedRefetchQuotes()}
+            >
+              {retryBusy ? '加载中' : '重新加载'}
+            </ActionButton>
+          )}
         />
       ) : quotes.length === 0 ? (
         <StateBlock
@@ -193,10 +225,10 @@ export const PostQuoteSheetPanel = memo(function PostQuoteSheetPanel({
           ))}
           <ListLoadMoreState
             error={Boolean(error)}
-            loading={isFetchingNextPage}
+            loading={loadMoreBusy}
             hasMore={Boolean(hasNextPage)}
-            onRetry={() => void refetch()}
-            onLoadMore={() => void fetchNextPage()}
+            onRetry={() => void guardedRefetchQuotes()}
+            onLoadMore={() => void guardedFetchNextQuotes()}
             loadingText="正在加载更多引用"
             doneText=""
           />
