@@ -299,18 +299,33 @@ export async function getAutoCrawlConfig(): Promise<AutoCrawlConfig> {
 
 export async function updateAutoCrawlConfig(patch: Partial<AutoCrawlConfig>) {
   await ensureAutoCrawlStorage();
+  const enabled = patch.enabled ?? null;
+  const checkIntervalMinutes = patch.checkIntervalMinutes === undefined ? null : clampInterval(patch.checkIntervalMinutes, DEFAULT_CHECK_INTERVAL_MINUTES);
+  const maxItemsPerSource = patch.maxItemsPerSource === undefined ? null : clampRun(patch.maxItemsPerSource, DEFAULT_MAX_ITEMS_PER_SOURCE, MAX_ITEMS_PER_SOURCE);
+  const maxSourcesPerRun = patch.maxSourcesPerRun === undefined ? null : clampRun(patch.maxSourcesPerRun, DEFAULT_MAX_SOURCES_PER_RUN, MAX_RUN_SOURCES);
   await exec(
-    `UPDATE "AutoCrawlConfig" SET
-      "enabled"=COALESCE($1::boolean,"enabled"),
-      "checkIntervalMinutes"=COALESCE($2::integer,"checkIntervalMinutes"),
-      "maxItemsPerSource"=COALESCE($3::integer,"maxItemsPerSource"),
-      "maxSourcesPerRun"=COALESCE($4::integer,"maxSourcesPerRun"),
-      "updatedAt"=CURRENT_TIMESTAMP
-    WHERE "id"='default'`,
-    patch.enabled ?? null,
-    patch.checkIntervalMinutes === undefined ? null : clampInterval(patch.checkIntervalMinutes, DEFAULT_CHECK_INTERVAL_MINUTES),
-    patch.maxItemsPerSource === undefined ? null : clampRun(patch.maxItemsPerSource, DEFAULT_MAX_ITEMS_PER_SOURCE, MAX_ITEMS_PER_SOURCE),
-    patch.maxSourcesPerRun === undefined ? null : clampRun(patch.maxSourcesPerRun, DEFAULT_MAX_SOURCES_PER_RUN, MAX_RUN_SOURCES),
+    `INSERT INTO "AutoCrawlConfig"("id","enabled","checkIntervalMinutes","maxItemsPerSource","maxSourcesPerRun","updatedAt")
+     VALUES(
+       'default',
+       COALESCE($1::boolean,false),
+       COALESCE($2::integer,$5::integer),
+       COALESCE($3::integer,$6::integer),
+       COALESCE($4::integer,$7::integer),
+       CURRENT_TIMESTAMP
+     )
+     ON CONFLICT("id") DO UPDATE SET
+       "enabled"=COALESCE($1::boolean,"AutoCrawlConfig"."enabled"),
+       "checkIntervalMinutes"=COALESCE($2::integer,"AutoCrawlConfig"."checkIntervalMinutes"),
+       "maxItemsPerSource"=COALESCE($3::integer,"AutoCrawlConfig"."maxItemsPerSource"),
+       "maxSourcesPerRun"=COALESCE($4::integer,"AutoCrawlConfig"."maxSourcesPerRun"),
+       "updatedAt"=CURRENT_TIMESTAMP`,
+    enabled,
+    checkIntervalMinutes,
+    maxItemsPerSource,
+    maxSourcesPerRun,
+    DEFAULT_CHECK_INTERVAL_MINUTES,
+    DEFAULT_MAX_ITEMS_PER_SOURCE,
+    DEFAULT_MAX_SOURCES_PER_RUN,
   );
   return getAutoCrawlConfig();
 }

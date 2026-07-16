@@ -59,6 +59,7 @@ mustNotHave('crawl database config', crawlDatabaseConfig, /ConfigService|getDefa
 mustHave('main flow', crawl, /loadAutoCrawlDatabaseConfig/);
 mustHave('config payload', crawl, /categoryOptions/);
 mustHave('config payload', crawl, /listAutoCrawlCategoryOptions/);
+mustHave('config save upsert', crawl, /INSERT INTO "AutoCrawlConfig"[\s\S]*ON CONFLICT\("id"\) DO UPDATE/);
 mustHave('main flow', crawl, /getAutoCrawlDatabaseCategory\(databaseConfig, source\.categoryId\)/);
 mustHave('main flow', crawl, /getAutoCrawlCategorySchema\(databaseConfig, category\)/);
 mustHave('main flow', crawl, /category: \{ connect: \{ id: category\.id \} \}/);
