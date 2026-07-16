@@ -7,6 +7,8 @@ const packageJson = read('package.json');
 const server = read('server/bootstrap.ts');
 const postRoutes = read('server/routes/post.routes.ts');
 const feedRoutes = read('server/routes/feed.routes.ts');
+const configRoutes = read('server/routes/config.routes.ts');
+const adminConfigRoutes = read('server/routes/admin-config.routes.ts');
 const postService = read('server/services/post/index.ts');
 const recommendationContext = read('server/services/post/recommendation-context.ts');
 const rankingUtils = read('server/services/post/ranking-utils.ts');
@@ -86,6 +88,30 @@ assert.match(
   publicFeedWarmup,
   /setTimeout\(run, options\.initialDelayMs\)/,
   'public feed warmup service should honor the configured initial warm delay',
+);
+
+assert.match(
+  configRoutes,
+  /const CONFIGS_CACHE_TTL_MS\s*=\s*10 \* 1000/,
+  'public config route should keep a short route-level config cache to reduce repeated clone work',
+);
+
+assert.match(
+  configRoutes,
+  /if \(configsCache && configsCache\.expiresAt > Date\.now\(\)\) \{[\s\S]*return structuredClone\(configsCache\.data\)/,
+  'public config route cache hits should still return cloned config objects',
+);
+
+assert.match(
+  configRoutes,
+  /ConfigService\.getConfigs\(\)[\s\S]*configsCache = \{[\s\S]*expiresAt: Date\.now\(\) \+ CONFIGS_CACHE_TTL_MS/,
+  'public config route should populate the short config cache from ConfigService',
+);
+
+assert.match(
+  adminConfigRoutes,
+  /ConfigService\.updateConfigs\(req\.body\)[\s\S]*clearCachedConfigs\(\)[\s\S]*clearCachedCategories\(\)/,
+  'admin config saves should invalidate both route-level config and category caches immediately',
 );
 
 assert.match(

@@ -13,13 +13,20 @@ import { registerPlatformAiRoutes } from './platform-ai.routes';
 import { normalizePublishCategorySlug } from '../../shared/publishCategorySchema';
 
 const CATEGORIES_CACHE_TTL_MS = 2 * 60 * 1000;
+const CONFIGS_CACHE_TTL_MS = 10 * 1000;
 let categoriesCache: { expiresAt: number; data: any[]; schema: PublishCategoryMetaConfig[] } | null = null;
 let categoriesCachePromise: Promise<{ categories: any[]; schema: PublishCategoryMetaConfig[] }> | null = null;
+let configsCache: { expiresAt: number; data: any } | null = null;
 let configsCachePromise: Promise<any> | null = null;
 
 export function clearCachedCategories() {
   categoriesCache = null;
   categoriesCachePromise = null;
+}
+
+export function clearCachedConfigs() {
+  configsCache = null;
+  configsCachePromise = null;
 }
 
 export async function listDatabaseCategoryOptions() {
@@ -43,10 +50,22 @@ export async function getConfigs(options: { bypassCache?: boolean } = {}) {
     return await ConfigService.getConfigs(options);
   }
 
+  if (configsCache && configsCache.expiresAt > Date.now()) {
+    return structuredClone(configsCache.data);
+  }
+
   if (!configsCachePromise) {
-    configsCachePromise = ConfigService.getConfigs().finally(() => {
-      configsCachePromise = null;
-    });
+    configsCachePromise = ConfigService.getConfigs()
+      .then((configs) => {
+        configsCache = {
+          data: configs,
+          expiresAt: Date.now() + CONFIGS_CACHE_TTL_MS,
+        };
+        return configs;
+      })
+      .finally(() => {
+        configsCachePromise = null;
+      });
   }
 
   const configs = await configsCachePromise;

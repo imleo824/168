@@ -9,6 +9,7 @@ import { catchAsync } from '../middlewares/error';
 import { normalizePublishCategorySlug } from '../../shared/publishCategorySchema';
 import {
   clearCachedCategories,
+  clearCachedConfigs,
   getCachedCategories,
   getConfigs,
   listDatabaseCategoryOptions,
@@ -36,6 +37,7 @@ export function registerAdminConfigRoutes(app: Express) {
   app.patch('/api/admin/config', authMiddleware, adminOnly, catchAsync(async (req, res) => {
     await assertPublishCategorySchemaUsesExistingCategories(req.body?.publish_category_schema);
     await ConfigService.updateConfigs(req.body);
+    clearCachedConfigs();
     clearCachedCategories();
     const [configs, categories, databaseCategories] = await Promise.all([
       getConfigs(),
