@@ -297,6 +297,14 @@ export async function getAutoCrawlConfig(): Promise<AutoCrawlConfig> {
   };
 }
 
+async function markEnabledAutoCrawlSourcesDueNow() {
+  await exec(
+    `UPDATE "AutoCrawlSource"
+     SET "nextRunAt"=CURRENT_TIMESTAMP,"updatedAt"=CURRENT_TIMESTAMP
+     WHERE "disabled"=FALSE`,
+  );
+}
+
 export async function updateAutoCrawlConfig(patch: Partial<AutoCrawlConfig>) {
   await ensureAutoCrawlStorage();
   const enabled = patch.enabled ?? null;
@@ -327,6 +335,7 @@ export async function updateAutoCrawlConfig(patch: Partial<AutoCrawlConfig>) {
     DEFAULT_MAX_ITEMS_PER_SOURCE,
     DEFAULT_MAX_SOURCES_PER_RUN,
   );
+  if (enabled === true) await markEnabledAutoCrawlSourcesDueNow();
   return getAutoCrawlConfig();
 }
 
