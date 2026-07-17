@@ -82,6 +82,7 @@ const stickyCss = read('src/styles/system/ui-sticky-layer-contract.css');
 const topbarCss = read('src/styles/components/topbar.css');
 const postCard = read('src/features/post/PostCard.tsx');
 const postDetail = read('src/pages/PostDetailLegacy.tsx');
+const postDetailTopbarCss = read('src/styles/features/post-detail-topbar.css');
 const feedCardCss = read('src/styles/components/feed-card-shell.css');
 const postCreatePage = read('src/features/post-create/PostCreatePage.tsx');
 const postCreateEditorCss = read('src/styles/features/create-promote-post-editor.css');
@@ -258,6 +259,9 @@ assertIncludes('src/hooks/useLikeFeedback.ts', 'navigator.vibrate', 'like feedba
 assertIncludes('src/features/post/PostCard.tsx', 'useLikeFeedback', 'feed cards must use shared like feedback.');
 assertIncludes('src/pages/PostDetailLegacy.tsx', 'useLikeFeedback', 'post detail must use shared like feedback.');
 assertIncludes('src/pages/PostDetailLegacy.tsx', 'detail-topbar-contact-button', 'detail topbar must expose the contact action beside follow when contact is visible.');
+assertIncludes('src/styles/features/post-detail-topbar.css', ".app-shell[data-route-surface='user'][data-desktop-surface='detail'] .detail-page--desktop .detail-page-topbar.ui-topbar", 'desktop detail topbar must have a page-owned shell-scoped rule.');
+assertIncludes('src/styles/features/post-detail-topbar.css', 'top: var(--app-desktop-shell-padding-y);', 'desktop detail topbar must stick inside the desktop app frame instead of the browser viewport edge.');
+assertIncludes('src/styles/features/post-detail-topbar.css', 'minmax(var(--ui-detail-topbar-action-slot-min-width), max-content)', 'desktop detail topbar actions must reserve a stable trailing column.');
 assertIncludes('src/features/post/PostCard.tsx', "const isTelegramSyncDisabled = isTelegramSyncSubmitting;", 'sent telegram sync cards must stay clickable so they can explain the synced state.');
 assertIncludes('src/features/post/PostCard.tsx', "showToast('已成功同步1次', 'success');", 'sent telegram sync cards must show a success reminder when tapped.');
 assertNotIncludes('src/features/post/PostCard.tsx', 'CircleCheck', 'sent telegram sync cards must keep the original channel icon instead of a check icon.');
@@ -389,6 +393,7 @@ for (const [name, source] of Object.entries({
   topbarCss,
   postCard,
   postDetail,
+  postDetailTopbarCss,
   feedCardCss,
   postCreatePage,
   postCreateEditorCss,
