@@ -128,7 +128,7 @@ assertNotIncludes('src/pages/Home.tsx', 'useHomeOnlineCount({', 'home topbar mus
 assertIncludes('src/styles/system/wide-screen-mobile-adaptation.css', '(var(--ui-app-shell-desktop-padding-x) * 2)', 'desktop detail frame width must include the shared outer frame padding.');
 assertNotIncludes('src/styles/system/wide-screen-mobile-adaptation.css', "[data-desktop-surface='detail'] .app-shell-main {\n      padding-inline: var(--ui-space-none);", 'desktop detail pages must not remove the shared outer frame padding.');
 assertIncludes('src/styles/features/post-detail-shell.css', 'var(--ui-bottom-nav-page-bottom-space)', 'desktop detail pages must size their internal height against the framed app shell content area.');
-assertIncludes('src/pages/PostDetailLegacy.tsx', 'const isOverlayDetail = !isDesktopViewport && Boolean(routeState?.backgroundLocation?.pathname);', 'desktop detail pages must stay inside the framed app shell instead of using the mobile route overlay.');
+assertIncludes('src/pages/PostDetailLegacy.tsx', 'const isOverlayDetail = isDetailMobile && Boolean(routeState?.backgroundLocation?.pathname);', 'desktop detail pages must stay inside the framed app shell instead of using the mobile route overlay.');
 assertIncludes('src/styles/system/wide-screen-mobile-adaptation.css', 'calc(var(--app-desktop-main-active-width) - (var(--ui-app-shell-desktop-padding-x) * 2))', 'desktop secondary pages must use the framed app shell inner content width.');
 assertIncludes('src/styles/system/wide-screen-mobile-adaptation.css', '--ui-topbar-content-max-width: var(--app-desktop-page-content-width);', 'desktop secondary page topbars must align to the framed content width.');
 assertIncludes('src/styles/features/recharge.css', '--ui-recharge-page-max: var(--app-desktop-page-content-width);', 'desktop recharge content must align to the framed content width.');
@@ -259,6 +259,9 @@ assertIncludes('src/hooks/useLikeFeedback.ts', 'navigator.vibrate', 'like feedba
 assertIncludes('src/features/post/PostCard.tsx', 'useLikeFeedback', 'feed cards must use shared like feedback.');
 assertIncludes('src/pages/PostDetailLegacy.tsx', 'useLikeFeedback', 'post detail must use shared like feedback.');
 assertIncludes('src/pages/PostDetailLegacy.tsx', 'detail-topbar-contact-button', 'detail topbar must expose the contact action beside follow when contact is visible.');
+assertNotIncludes('src/pages/PostDetailLegacy.tsx', "from '@/hooks/useIsMobile'", 'post detail layout must use the real viewport width instead of the user-surface mobile-first shell hook.');
+assertIncludes('src/pages/PostDetailLegacy.tsx', 'const isDetailMobile = !isDesktopViewport;', 'post detail must derive its mobile/desktop layout from the actual viewport.');
+assertIncludes('src/pages/PostDetailLegacy.tsx', 'const shouldUseDetailPageScroll = isDetailMobile && !isOverlayDetail;', 'post detail document scroll must only apply to non-overlay mobile detail pages.');
 assertIncludes('src/styles/features/post-detail-topbar.css', ".app-shell[data-route-surface='user'][data-desktop-surface='detail'] .detail-page--desktop .detail-page-topbar.ui-topbar", 'desktop detail topbar must have a page-owned shell-scoped rule.');
 assertIncludes('src/styles/features/post-detail-topbar.css', 'top: var(--app-desktop-shell-padding-y);', 'desktop detail topbar must stick inside the desktop app frame instead of the browser viewport edge.');
 assertIncludes('src/styles/features/post-detail-topbar.css', 'minmax(var(--ui-detail-topbar-action-slot-min-width), max-content)', 'desktop detail topbar actions must reserve a stable trailing column.');
@@ -295,7 +298,7 @@ assertIncludes('src/styles/features/home-feed-state.css', '.ui-feed-empty-plain-
 assertNotIncludes('src/pages/PostDetailLegacy.tsx', 'DetailQuotesLoadingRows', 'detail quote loading must not render skeleton rows.');
 assertNotIncludes('src/styles/features/post-detail.css', 'skeleton', 'detail CSS must not keep detail skeleton selectors.');
 assertIncludes('src/pages/PostDetailLegacy.tsx', '<LoadingBlock text="正在加载帖子详情"', 'detail initial entry must render a normal loading block.');
-assertIncludes('src/pages/PostDetailLegacy.tsx', 'const shouldUseDetailPageScroll = isMobile && !isOverlayDetail && !isDesktopViewport;', 'overlay detail must not register a nested mobile addressbar scroll target.');
+assertIncludes('src/pages/PostDetailLegacy.tsx', 'const shouldUseDetailPageScroll = isDetailMobile && !isOverlayDetail;', 'overlay detail must not register a nested mobile addressbar scroll target.');
 assertIncludes('src/utils/postPresentation.ts', 'const LOCATION_SPLIT_PATTERN = /\\s+-\\s+|[·>＞、，,;；|/\\n]+/;', 'location display splitting must support the standard middle-dot hierarchy.');
 assertIncludes('src/utils/postStructuredMeta.ts', "if (normalizeKey(key) === 'location') return selectFinestDisplayLocation(formatted) || formatted;", 'structured location meta must display the leaf node only.');
 

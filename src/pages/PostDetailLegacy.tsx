@@ -22,7 +22,6 @@ import {
   normalizeLocationName,
   toLocationCategoryId,
 } from '@/utils/postPresentation';
-import { useIsMobile } from '@/hooks/useIsMobile';
 import { useIsDesktopViewport } from '@/hooks/useIsDesktopViewport';
 import AvatarImage from '@/ui/AvatarImage';
 import TelegramContactIconButton from '@/ui/TelegramContactIconButton';
@@ -84,11 +83,11 @@ export default function PostDetail() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user: currentUser, requireAuth, showToast } = useAuth();
-  const isMobile = useIsMobile();
   const isDesktopViewport = useIsDesktopViewport();
+  const isDetailMobile = !isDesktopViewport;
   const routeState = getRouteState(location.state);
-  const isOverlayDetail = !isDesktopViewport && Boolean(routeState?.backgroundLocation?.pathname);
-  const shouldUseDetailPageScroll = isMobile && !isOverlayDetail && !isDesktopViewport;
+  const isOverlayDetail = isDetailMobile && Boolean(routeState?.backgroundLocation?.pathname);
+  const shouldUseDetailPageScroll = isDetailMobile && !isOverlayDetail;
 
   const { data: post, isLoading, isFetching, isError, error, refetch: refetchPost } = usePost(id);
 
@@ -276,7 +275,7 @@ export default function PostDetail() {
   if (isInitialDetailLoading) {
     return (
       <DetailLoadingPage
-        isMobile={isMobile}
+        isMobile={isDetailMobile}
         isOverlayDetail={isOverlayDetail}
         shouldUseDetailPageScroll={shouldUseDetailPageScroll}
         onBack={handleBack}
@@ -296,7 +295,7 @@ export default function PostDetail() {
             description="这条内容暂时无法加载，请稍后重试。"
           />
           <DetailStatePage
-            isMobile={isMobile}
+            isMobile={isDetailMobile}
             isOverlayDetail={isOverlayDetail}
             shouldUseDetailPageScroll={shouldUseDetailPageScroll}
             onBack={handleBack}
@@ -321,12 +320,12 @@ export default function PostDetail() {
           description="该帖子已被下架、删除，或暂时无法访问。"
         />
         <DetailStatePage
-          isMobile={isMobile}
+          isMobile={isDetailMobile}
           isOverlayDetail={isOverlayDetail}
           shouldUseDetailPageScroll={shouldUseDetailPageScroll}
           onBack={handleBack}
           stateBlock={{
-            title: isMobile ? '帖子不存在' : '该帖子已被下架或不存在',
+            title: isDetailMobile ? '帖子不存在' : '该帖子已被下架或不存在',
             tone: 'empty',
             actionLabel: '返回广场',
             onAction: handleBack,
@@ -393,7 +392,7 @@ export default function PostDetail() {
   );
 
   const { titleText, contentText } = detailContent;
-  const detailDescription = (contentText || titleText).substring(0, isMobile ? 100 : 120);
+  const detailDescription = (contentText || titleText).substring(0, isDetailMobile ? 100 : 120);
   const likeCountText = formatEngagementCount(likeCount);
   const shareCountText = formatEngagementCount(shareState.shareCount);
   const quoteCount = detailContent.quoteCount;
@@ -489,7 +488,7 @@ export default function PostDetail() {
     ];
   })();
   const hasMetaRow = Boolean(post.category || visibleLocationTags.length > 0 || structuredMetaItems.length > 0);
-  const showPublishedAt = !isMobile && Boolean(contentText || hasMetaRow || !postImages.length);
+  const showPublishedAt = !isDetailMobile && Boolean(contentText || hasMetaRow || !postImages.length);
   const hasArticleBody = Boolean(contentText || hasMetaRow || showPublishedAt);
 
   return (
@@ -497,7 +496,7 @@ export default function PostDetail() {
       data-route-overlay={isOverlayDetail ? '' : undefined}
       data-route-overlay-scroll={isOverlayDetail ? '' : undefined}
       mobileAddressBarScroll={shouldUseDetailPageScroll}
-      className={`detail-page detail-page--ready ${isMobile ? 'detail-page--mobile' : 'detail-page--desktop'}`}
+      className={`detail-page detail-page--ready ${isDetailMobile ? 'detail-page--mobile' : 'detail-page--desktop'}`}
     >
       <SEO
         title={postSeo.title}
@@ -523,10 +522,10 @@ export default function PostDetail() {
       <PageContentShell
         as="main"
         variant="fluid"
-        className={`detail-page-main ui-app-page-main ${isMobile ? 'detail-page-main--mobile' : 'detail-page-main--desktop'}`}
+        className={`detail-page-main ui-app-page-main ${isDetailMobile ? 'detail-page-main--mobile' : 'detail-page-main--desktop'}`}
       >
         <article
-          className={`detail-article ${isMobile ? 'detail-article--mobile' : 'detail-article--desktop'}`}
+          className={`detail-article ${isDetailMobile ? 'detail-article--mobile' : 'detail-article--desktop'}`}
           data-detail-content-kind={detailContentKind}
           data-has-media={postImages.length > 0 ? 'true' : undefined}
           data-has-quote-preview={(post as any).quotedPost ? 'true' : undefined}
@@ -635,7 +634,7 @@ export default function PostDetail() {
       </PageContentShell>
 
       <DetailBottomBar
-        isMobile={isMobile}
+        isMobile={isDetailMobile}
         heatCountText={heatCountText}
         hasLiked={hasLiked}
         likePending={likePending}
