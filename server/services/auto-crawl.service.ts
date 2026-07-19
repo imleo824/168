@@ -870,6 +870,13 @@ export async function runAutoCrawlOnce(options: { trigger?: RunTrigger; force?: 
   const owner = `${trigger}:${Date.now()}:${crypto.randomUUID()}`;
   const id = await createRun(trigger, owner);
   const logger = createAutoCrawlExecutionLogger(id, trigger);
+  logEvent(logger, {
+    scope: 'run',
+    phase: 'run_started',
+    message: '自动抓取运行开始',
+    status: 'RUNNING',
+    details: { force: Boolean(options.force) },
+  });
 
   try {
     const config = await getAutoCrawlConfig();

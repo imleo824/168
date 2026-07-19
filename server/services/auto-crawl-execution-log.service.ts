@@ -1,6 +1,8 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
+import prisma, { isDbConfigured } from '../db';
+
 export type AutoCrawlExecutionLogLevel = 'info' | 'warn' | 'error';
 export type AutoCrawlExecutionLogScope = 'run' | 'source' | 'item' | 'quality' | 'ai' | 'publish';
 export type AutoCrawlExecutionLogEvent = {
@@ -81,6 +83,11 @@ function safeValue(value: unknown, depth = 0, pathParts: string[] = []): unknown
 }
 function safeObject(value: unknown) {
   return safeValue(value || {}) as Record<string, unknown>;
+}
+function iso(value: unknown) {
+  if (!value) return null;
+  const date = value instanceof Date ? value : new Date(String(value));
+  return Number.isFinite(date.getTime()) ? date.toISOString() : null;
 }
 function filePath(runId: string) {
   return path.join(LOG_DIR, `${String(runId || 'unknown').replace(/[^A-Za-z0-9_-]/g, '_')}.jsonl`);
@@ -175,6 +182,98 @@ async function readEvents(fullPath: string) {
   return text.split('\n').map((line) => line.trim()).filter(Boolean).map(parseLine).filter(Boolean) as AutoCrawlExecutionLogEvent[];
 }
 
+function runSummary(row: any): AutoCrawlExecutionLogSummary {
+  const startedAt = iso(row.startedAt) || new Date().toISOString();
+  const finishedAt = iso(row.finishedAt);
+  const status = String(row.status || (finishedAt ? 'SKIPPED' : 'RUNNING'));
+  const reason = String(row.skipReason || row.errorMessage || '').trim();
+  const latestTitle = String(row.latestTitle || '').trim();
+  return {
+    runId: String(row.id),
+    trigger: String(row.trigger || ''),
+    startedAt,
+    finishedAt,
+    status,
+    sourceCount: Number(row.sourceCount || 0),
+    scanned: Number(row.scanned || 0),
+    delivered: Number(row.delivered || 0),
+    filtered: Number(row.filtered || 0),
+    duplicate: Number(row.duplicate || 0),
+    error: Number(row.error || 0),
+    eventCount: 0,
+    latestMessage: latestTitle || reason || (finishedAt ? '自动抓取运行结束' : '自动抓取正在运行'),
+  };
+}
+
+function runEventsFromSummary(summary: AutoCrawlExecutionLogSummary, row?: any): AutoCrawlExecutionLogEvent[] {
+  const reason = String(row?.skipReason || row?.errorMessage || '').trim();
+  const events: AutoCrawlExecutionLogEvent[] = [{
+    timestamp: summary.startedAt,
+    runId: summary.runId,
+    trigger: summary.trigger,
+    level: 'info',
+    scope: 'run',
+    phase: 'run_started',
+    message: '自动抓取运行开始',
+    status: 'RUNNING',
+    counts: {},
+    reason: null,
+    error: null,
+    details: {},
+  }];
+  if (summary.finishedAt) {
+    events.push({
+      timestamp: summary.finishedAt,
+      runId: summary.runId,
+      trigger: summary.trigger,
+      level: summary.status === 'FAILED' || summary.status === 'PARTIAL_FAILED' ? 'error' : 'info',
+      scope: 'run',
+      phase: 'run_finished',
+      message: '自动抓取运行结束',
+      status: summary.status,
+      counts: {
+        sourceCount: summary.sourceCount,
+        scanned: summary.scanned,
+        delivered: summary.delivered,
+        filtered: summary.filtered,
+        duplicate: summary.duplicate,
+        error: summary.error,
+      },
+      reason: reason || null,
+      error: row?.errorMessage || null,
+      details: {
+        latestTitle: row?.latestTitle || null,
+        databaseFallback: true,
+      },
+    });
+  }
+  return events;
+}
+
+async function listDatabaseRunSummaries(limit: number) {
+  if (!isDbConfigured()) return [];
+  const rows = await (prisma as any).$queryRawUnsafe(
+    `SELECT "id","status","trigger","startedAt","finishedAt","scanned","delivered","filtered","duplicate","error","sourceCount","skipReason","errorMessage","latestTitle"
+     FROM "AutoCrawlRun"
+     ORDER BY "startedAt" DESC,"id" DESC
+     LIMIT $1::integer`,
+    Math.max(1, Math.min(100, limit)),
+  ).catch(() => []);
+  return Array.isArray(rows) ? rows.map(runSummary) : [];
+}
+
+async function getDatabaseRun(runId: string) {
+  if (!isDbConfigured()) return null;
+  const rows = await (prisma as any).$queryRawUnsafe(
+    `SELECT "id","status","trigger","startedAt","finishedAt","scanned","delivered","filtered","duplicate","error","sourceCount","skipReason","errorMessage","latestTitle"
+     FROM "AutoCrawlRun"
+     WHERE "id"=$1
+     LIMIT 1`,
+    runId,
+  ).catch(() => []);
+  return Array.isArray(rows) ? rows[0] || null : null;
+}
+
 export async function listAutoCrawlExecutionLogs(limit = 20): Promise<AutoCrawlExecutionLogSummary[]> {
   await cleanupAutoCrawlExecutionLogs();
   await ensureLogDir();
@@ -191,14 +290,27 @@ export async function listAutoCrawlExecutionLogs(limit = 20): Promise<AutoCrawlE
     const summary = summarize(await readEvents(file.fullPath).catch(() => []));
     if (summary) summaries.push(summary);
   }
-  return summaries;
+  const byRunId = new Map(summaries.map((summary) => [summary.runId, summary]));
+  for (const summary of await listDatabaseRunSummaries(limit)) {
+    if (!byRunId.has(summary.runId)) byRunId.set(summary.runId, summary);
+  }
+  return [...byRunId.values()]
+    .sort((left, right) => new Date(right.startedAt).getTime() - new Date(left.startedAt).getTime())
+    .slice(0, Math.max(1, Math.min(100, limit)));
 }
 
 export async function getAutoCrawlExecutionLog(runId: string, options: { sourceId?: string } = {}) {
   await cleanupAutoCrawlExecutionLogs();
   const events = await readEvents(filePath(runId)).catch(() => []);
-  const filtered = options.sourceId
+  let filtered = options.sourceId
     ? events.filter((event) => event.sourceId === options.sourceId || event.scope === 'run')
     : events;
+  if (!filtered.length) {
+    const row = await getDatabaseRun(runId);
+    if (row) {
+      const summary = runSummary(row);
+      filtered = runEventsFromSummary(summary, row);
+    }
+  }
   return { runId, summary: summarize(filtered), events: filtered };
 }

@@ -125,6 +125,8 @@ mustNotHave('crawl routes', crawlRoutes, /sources\/seed|category-routing-rules|r
 
 mustHave('crawl log', crawlLog, /MAX_STRING_LENGTH/);
 mustHave('crawl log', crawlLog, /\[redacted\]/);
+mustHave('crawl log', crawlLog, /FROM "AutoCrawlRun"[\s\S]*ORDER BY "startedAt" DESC/);
+mustHave('crawl log', crawlLog, /runEventsFromSummary/);
 mustHave('crawl admin panel', crawlPanel, /executionLogs/);
 mustHave('crawl admin panel', crawlPanel, /categoryId/);
 mustNotHave('crawl admin panel', crawlPanel, /restoreSeeds|localOnlyMode|aiEnabled|syncToTelegram/);
