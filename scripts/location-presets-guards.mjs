@@ -53,8 +53,33 @@ assert.doesNotMatch(
 );
 assert.match(
   configSource,
-  /if \(!Array\.isArray\(source\)\) return \[\]/,
+  /if \(!Array\.isArray\(source\)\) return invalidLocationPresets\('location_presets 必须是数组', strict\)/,
   'ConfigService must only accept the database location preset array',
+);
+assert.match(
+  configSource,
+  /export function parseLocationPresetsForSave\(raw: unknown\)[\s\S]*parseLocationPresetsDocument\(raw, true\)/,
+  'ConfigService must expose strict location preset validation for admin saves.',
+);
+assert.match(
+  configSource,
+  /if \(strict\) throw new HttpError\(message, 400\)/,
+  'Invalid location preset saves must return a 400 instead of silently clearing presets.',
+);
+assert.match(
+  configSource,
+  /output\[key\] = JSON\.stringify\(parseLocationPresetsForSave\(obj\[key\]\)\)/,
+  'Admin config saves must use strict location preset validation.',
+);
+assert.match(
+  configSource,
+  /export function parseFeedRankProfileForSave\(raw: unknown\)[\s\S]*feed_rank_profile 必须是对象/,
+  'ConfigService must validate feed_rank_profile before admin saves.',
+);
+assert.match(
+  configSource,
+  /output\[key\] = JSON\.stringify\(parseFeedRankProfileForSave\(obj\[key\]\)\)/,
+  'Admin config saves must not persist invalid feed_rank_profile values that runtime will ignore.',
 );
 assert.match(
   crawlDatabaseConfigSource,

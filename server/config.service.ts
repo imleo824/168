@@ -274,29 +274,69 @@ function normalizeLocationPresetText(raw: unknown, maxLength: number) {
 }
 
 function parseLocationPresets(raw: unknown): LocationPresetConfig[] {
+  return parseLocationPresetsDocument(raw, false);
+}
+
+function invalidLocationPresets(message: string, strict: boolean) {
+  if (strict) throw new HttpError(message, 400);
+  return [] as LocationPresetConfig[];
+}
+
+function parseLocationPresetsDocument(raw: unknown, strict: boolean): LocationPresetConfig[] {
   let source = raw;
   if (typeof raw === 'string') {
     try {
       source = JSON.parse(raw);
     } catch {
-      return [];
+      return invalidLocationPresets('location_presets 不是合法 JSON', strict);
     }
   }
-  if (!Array.isArray(source)) return [];
+  if (!Array.isArray(source)) return invalidLocationPresets('location_presets 必须是数组', strict);
 
   const presets: LocationPresetConfig[] = [];
   const countries = new Set<string>();
   for (const item of source) {
-    if (!item || typeof item !== 'object' || Array.isArray(item)) return [];
+    if (!item || typeof item !== 'object' || Array.isArray(item)) return invalidLocationPresets('location_presets 包含无效地点组', strict);
     const entry = item as Record<string, unknown>;
     const country = normalizeLocationPresetText(entry.country, 32);
-    if (!country || countries.has(country) || !Array.isArray(entry.cities)) return [];
-    const cities = entry.cities.map((city) => normalizeLocationPresetText(city, 32)).filter(Boolean);
-    if (!cities.length || new Set(cities).size !== cities.length) return [];
+    const countryKey = country.toLowerCase();
+    if (!country) return invalidLocationPresets('location_presets 国家不能为空', strict);
+    if (countries.has(countryKey)) return invalidLocationPresets(`location_presets 国家重复：${country}`, strict);
+    if (!Array.isArray(entry.cities)) return invalidLocationPresets(`location_presets 城市必须是数组：${country}`, strict);
+    const cities: string[] = [];
+    const cityKeys = new Set<string>();
+    for (const rawCity of entry.cities) {
+      const city = normalizeLocationPresetText(rawCity, 32);
+      if (!city) continue;
+      const cityKey = city.toLowerCase();
+      if (cityKeys.has(cityKey)) return invalidLocationPresets(`location_presets 城市重复：${country}`, strict);
+      cities.push(city);
+      cityKeys.add(cityKey);
+    }
+    if (!cities.length) return invalidLocationPresets(`location_presets 城市不能为空：${country}`, strict);
     presets.push({ country, cities: cities.slice(0, 50) });
-    countries.add(country);
+    countries.add(countryKey);
   }
   return presets.slice(0, 80);
+}
+
+export function parseLocationPresetsForSave(raw: unknown): LocationPresetConfig[] {
+  return parseLocationPresetsDocument(raw, true);
+}
+
+export function parseFeedRankProfileForSave(raw: unknown) {
+  let source = raw;
+  if (typeof raw === 'string') {
+    try {
+      source = JSON.parse(raw);
+    } catch {
+      throw new HttpError('feed_rank_profile 不是合法 JSON', 400);
+    }
+  }
+  if (!source || typeof source !== 'object' || Array.isArray(source)) {
+    throw new HttpError('feed_rank_profile 必须是对象', 400);
+  }
+  return source as Record<string, unknown>;
 }
 
 function normalizeTelegramShareTemplate(raw: unknown) {
@@ -520,16 +560,18 @@ export class ConfigService {
             continue;
           }
           if (key === 'location_presets') {
-            output[key] = JSON.stringify(parseLocationPresets(obj[key]));
+            output[key] = JSON.stringify(parseLocationPresetsForSave(obj[key]));
+            continue;
+          }
+          if (key === 'feed_rank_profile') {
+            output[key] = JSON.stringify(parseFeedRankProfileForSave(obj[key]));
             continue;
           }
           if (NUMERIC_TOP_LEVEL_CONFIG_KEYS.has(key)) {
             const defaultValue = Number((this.defaults as any)[key] ?? 0);
             output[key] = normalizeConfigNumber(key, obj[key], defaultValue);
           } else {
-            output[key] = key === 'feed_rank_profile'
-              ? (typeof obj[key] === 'string' ? obj[key] : JSON.stringify(obj[key] ?? {}))
-              : BOOLEAN_STRING_TOP_LEVEL_CONFIG_KEYS.has(key)
+            output[key] = BOOLEAN_STRING_TOP_LEVEL_CONFIG_KEYS.has(key)
                 ? normalizeBooleanStringConfig(obj[key], String((this.defaults as any)[key] ?? 'false').trim().toLowerCase() === 'true')
               : key === 'telegram_share_template'
                 ? normalizeTelegramShareTemplate(obj[key])

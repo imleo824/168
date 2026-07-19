@@ -65,7 +65,7 @@
     "test:automation-engine-contract": "node scripts/automation-engine-contract-guards.mjs",
     "test:tui-plus": "node scripts/tui-plus-contract-guards.mjs && node scripts/tui-plus-avatar-ring-guards.mjs && node scripts/tui-plus-membership-integrity-guards.mjs && node scripts/tui-plus-channel-claim-guards.mjs && node scripts/tui-plus-channel-auto-post-toggle-guards.mjs && node scripts/tui-plus-post-contact-guards.mjs && node scripts/tui-plus-notification-guards.mjs && node scripts/tui-plus-link-editor-guards.mjs && node scripts/tui-plus-final-closure-guards.mjs",
     "test:robot-comment-generation": "node scripts/robot-comment-generation-guards.mjs",
-    "test:location-presets": "node scripts/location-presets-guards.mjs",
+    "test:location-presets": "node scripts/location-presets-guards.mjs && node --import tsx scripts/admin-config-save-guards.ts",
     "test:goal-168-ui": "node scripts/goal-168-ui-guards.mjs && npm run test:image-storage",
     "test:chat-realtime": "node scripts/chat-realtime-smoke.mjs",
     "test:smoke:production": "node scripts/smoke-production.mjs",
