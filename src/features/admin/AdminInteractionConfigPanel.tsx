@@ -115,6 +115,23 @@ function numericText(value: unknown) {
 }
 
 function processRows(run: any, module: ManualRunModule) {
+  if (Array.isArray(run?.processEvents) && run.processEvents.length) {
+    return run.processEvents.map((event: any) => {
+      const details = event?.details && typeof event.details === 'object'
+        ? Object.entries(event.details)
+          .filter(([, value]) => value !== null && value !== undefined && value !== '')
+          .slice(0, 6)
+          .map(([key, value]) => `${key}: ${typeof value === 'object' ? JSON.stringify(value) : String(value)}`)
+          .join(' · ')
+        : '';
+      const status = event?.status ? `（${runStatusLabel(String(event.status))}）` : '';
+      const reason = event?.reason ? `，原因：${reasonLabel(event.reason)}` : '';
+      return {
+        label: `${formatDateTime(event?.timestamp)} ${event?.message || event?.phase || '执行过程'}${status}`,
+        value: [event?.error ? `错误：${event.error}` : '', reason.replace(/^，/, ''), details].filter(Boolean).join('；'),
+      };
+    });
+  }
   const rows = [
     { label: '开始时间', value: formatDateTime(run.startedAt || run.createdAt) },
     { label: '完成时间', value: run.finishedAt ? formatDateTime(run.finishedAt) : '' },

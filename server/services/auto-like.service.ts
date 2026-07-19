@@ -4,6 +4,10 @@ import { Prisma } from '@prisma/client';
 import prisma from '../db';
 import { getPlatformDayRange } from '../platform-time';
 import { withAutomationTaskLock, type AutomationTaskLockDetails } from './automation-task-lock.service';
+import {
+  attachInteractionAutomationExecutionEvents,
+  logInteractionAutomationEvent,
+} from './interaction-automation-execution-log.service';
 
 export type AutoLikeTrigger = 'MANUAL' | 'SCHEDULED' | 'STARTUP_HEALTH_CHECK';
 export type AutoLikeRunStatus = 'SUCCEEDED' | 'SKIPPED' | 'FAILED';
@@ -164,7 +168,22 @@ async function createInternalLike(input: { postId: string; postAuthorId: string;
 
 async function recordAndReturn(result: AutoLikeRunResult, status: AutoLikeRunStatus, reason?: string | null) {
   rememberLatestRun({ ...result, reason: reason ?? result.reason ?? null });
-  await createRunRow({ trigger: result.trigger, status, postId: result.lastPostId || null, robotUserId: result.lastRobotUserId || null, reason: reason ?? result.reason ?? null }).catch((error) => console.warn('[auto-like] run history write failed:', error?.message || error));
+  const runId = await createRunRow({ trigger: result.trigger, status, postId: result.lastPostId || null, robotUserId: result.lastRobotUserId || null, reason: reason ?? result.reason ?? null }).catch((error) => {
+    console.warn('[auto-like] run history write failed:', error?.message || error);
+    return null;
+  });
+  if (runId) await logInteractionAutomationEvent({
+    module: 'auto_like',
+    runId,
+    level: status === 'FAILED' ? 'error' : 'info',
+    phase: 'run_finished',
+    message: status === 'SUCCEEDED' ? '自动点赞成功' : status === 'SKIPPED' ? '自动点赞跳过' : '自动点赞失败',
+    status,
+    reason: reason ?? result.reason ?? null,
+    postId: result.lastPostId || null,
+    robotUserId: result.lastRobotUserId || null,
+    details: result,
+  });
   return result;
 }
 function rememberLatestRun(result: AutoLikeRunResult) { latestRun = { ...result, finishedAt: new Date().toISOString() }; }
@@ -213,7 +232,44 @@ async function runAutoLikeLocked(config: AutoLikeConfig, enabled: boolean, trigg
     if (attempt.status === 'SUCCEEDED') { liked += 1; robotDailyCounts.set(pair.robot.id, (robotDailyCounts.get(pair.robot.id) || 0) + 1); }
     else if (attempt.status === 'FAILED') failed += 1;
     else skipped += 1;
-    await createRunRow({ trigger, status: attempt.status, postId: pair.post.id, robotUserId: pair.robot.id, reason: attempt.reason }).catch((error) => console.warn('[auto-like] attempt history write failed:', error?.message || error));
+    const attemptRunId = await createRunRow({ trigger, status: attempt.status, postId: pair.post.id, robotUserId: pair.robot.id, reason: attempt.reason }).catch((error) => {
+      console.warn('[auto-like] attempt history write failed:', error?.message || error);
+      return null;
+    });
+    if (attemptRunId) {
+      await logInteractionAutomationEvent({
+        module: 'auto_like',
+        runId: attemptRunId,
+        phase: 'candidate_selected',
+        message: '已选择点赞对象和机器人账号',
+        status: 'READY',
+        postId: pair.post.id,
+        robotUserId: pair.robot.id,
+        details: { trigger, maxLikesPerPost: config.maxLikesPerPost, maxLikesPerRobotPerDay: config.maxLikesPerRobotPerDay },
+      });
+      await logInteractionAutomationEvent({
+        module: 'auto_like',
+        runId: attemptRunId,
+        level: attempt.status === 'FAILED' ? 'error' : 'info',
+        phase: attempt.status === 'SUCCEEDED' ? 'like_written' : 'like_skipped',
+        message: attempt.status === 'SUCCEEDED' ? '点赞记录已写入' : '点赞未写入',
+        status: attempt.status,
+        reason: attempt.reason,
+        postId: pair.post.id,
+        robotUserId: pair.robot.id,
+      });
+      await logInteractionAutomationEvent({
+        module: 'auto_like',
+        runId: attemptRunId,
+        level: attempt.status === 'FAILED' ? 'error' : 'info',
+        phase: 'run_finished',
+        message: attempt.status === 'SUCCEEDED' ? '自动点赞成功' : attempt.status === 'SKIPPED' ? '自动点赞跳过' : '自动点赞失败',
+        status: attempt.status,
+        reason: attempt.reason,
+        postId: pair.post.id,
+        robotUserId: pair.robot.id,
+      });
+    }
   }
   const reason = liked > 0 ? 'liked' : lastReason || 'no_available_pair';
   const result = { enabled, trigger, liked, boosted: liked, skipped, failed, reason, lastPostId, lastRobotUserId };
@@ -245,7 +301,7 @@ export async function listAutoLikeRuns(options: ListAutoLikeRunsOptions = {}) {
   const rows = await prisma.$queryRaw<any[]>(Prisma.sql`SELECT r.*, p."title" AS "postTitle", p."content" AS "postContent", u."displayName" AS "robotName" FROM "AutoLikeRun" r LEFT JOIN "Post" p ON p."id" = r."postId" LEFT JOIN "User" u ON u."id" = r."robotUserId" WHERE (${status || null}::text IS NULL OR r."status" = ${status || null}) AND (${cursor || null}::text IS NULL OR r."id" < ${cursor || null}) ORDER BY r."createdAt" DESC, r."id" DESC LIMIT ${limit + 1}`);
   const hasMore = rows.length > limit;
   const items = hasMore ? rows.slice(0, limit) : rows;
-  return { items, hasMore, nextCursor: hasMore ? items[items.length - 1]?.id || null : null };
+  return { items: await attachInteractionAutomationExecutionEvents('auto_like', items), hasMore, nextCursor: hasMore ? items[items.length - 1]?.id || null : null };
 }
 export async function getAutoLikeStats(): Promise<AutoLikeStats> {
   const config = await getAutoLikeConfig();

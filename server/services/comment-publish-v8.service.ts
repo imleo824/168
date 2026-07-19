@@ -20,6 +20,10 @@ import {
   withAutomationTaskLock,
   type AutomationTaskLockDetails,
 } from './automation-task-lock.service';
+import {
+  attachInteractionAutomationExecutionEvents,
+  logInteractionAutomationEvent,
+} from './interaction-automation-execution-log.service';
 
 export type CommentPublishRunStatus = 'PENDING' | 'SUCCEEDED' | 'SKIPPED' | 'FAILED';
 
@@ -137,6 +141,23 @@ export const saveCommentPublishConfig = updateCommentPublishConfig;
 async function createRun(input: { postId?: string | null; robotUserId?: string | null; status: CommentPublishRunStatus; reason?: string | null; content?: string | null; commentId?: string | null; contentSignature?: string | null; qualityScore?: number | null }) {
   const id = `comment_run_${randomUUID()}`;
   await prisma.$executeRaw(Prisma.sql`INSERT INTO "CommentPublishRun" ("id", "postId", "robotUserId", "status", "reason", "content", "commentId", "contentSignature", "qualityScore", "createdAt", "updatedAt") VALUES (${id}, ${input.postId || null}, ${input.robotUserId || null}, ${input.status}, ${input.reason || null}, ${input.content || null}, ${input.commentId || null}, ${input.contentSignature || null}, ${input.qualityScore ?? null}, NOW(), NOW())`);
+  await logInteractionAutomationEvent({
+    module: 'comment_publish',
+    runId: id,
+    level: input.status === 'FAILED' ? 'error' : 'info',
+    phase: 'run_finished',
+    message: input.status === 'SUCCEEDED' ? '自动评论发布成功' : input.status === 'SKIPPED' ? '自动评论跳过' : '自动评论失败',
+    status: input.status,
+    reason: input.reason || null,
+    postId: input.postId || null,
+    robotUserId: input.robotUserId || null,
+    details: {
+      commentId: input.commentId || null,
+      content: input.content || null,
+      contentSignature: input.contentSignature || null,
+      qualityScore: input.qualityScore ?? null,
+    },
+  });
   return id;
 }
 async function todayCount() { const r = getPlatformDayRange(); const rows = await prisma.$queryRaw<Array<{ count: bigint }>>(Prisma.sql`SELECT COUNT(*)::bigint AS "count" FROM "CommentPublishRun" WHERE "createdAt" >= ${r.start} AND "createdAt" < ${r.end} AND "status" = 'SUCCEEDED'`); return Number(rows[0]?.count || 0); }
@@ -284,7 +305,7 @@ export async function listCommentPublishRuns(options: number | ListCommentRunsOp
   const rows = await prisma.$queryRaw<any[]>(Prisma.sql`SELECT r.*, p."title" AS "postTitle", p."content" AS "postContent", p."categoryId" AS "postCategoryId", c."name" AS "postCategoryName", u."displayName" AS "robotName" FROM "CommentPublishRun" r LEFT JOIN "Post" p ON p."id" = r."postId" LEFT JOIN "Category" c ON c."id" = p."categoryId" LEFT JOIN "User" u ON u."id" = r."robotUserId" WHERE (${safeStatus || null}::text IS NULL OR r."status" = ${safeStatus || null}) AND (${cursorCreatedAt || null}::timestamp IS NULL OR r."createdAt" < ${cursorCreatedAt || null} OR (r."createdAt" = ${cursorCreatedAt || null} AND r."id" < ${cursorId || null})) ORDER BY r."createdAt" DESC, r."id" DESC LIMIT ${limit + 1}`);
   const hasMore = rows.length > limit;
   const items = hasMore ? rows.slice(0, limit) : rows;
-  return { items, hasMore, nextCursor: hasMore ? runCursor(items[items.length - 1]) : null };
+  return { items: await attachInteractionAutomationExecutionEvents('comment_publish', items), hasMore, nextCursor: hasMore ? runCursor(items[items.length - 1]) : null };
 }
 
 export async function getCommentPublishRunStats() {

@@ -27,6 +27,10 @@ import {
   withAutomationTaskLock,
   type AutomationTaskLockDetails,
 } from './automation-task-lock.service';
+import {
+  attachInteractionAutomationExecutionEvents,
+  logInteractionAutomationEvent,
+} from './interaction-automation-execution-log.service';
 
 export { getQuotePublishConfig, updateQuotePublishConfig };
 export type { QuotePublishConfig };
@@ -303,6 +307,22 @@ async function createRun(trigger: QuotePublishTrigger, model: string) {
 }
 async function finishRun(id: string, data: any) {
   const run = await db().quotePublishRun.update({ where: { id }, data: { ...data, finishedAt: new Date() } });
+  await logInteractionAutomationEvent({
+    module: 'quote_publish',
+    runId: id,
+    level: data.status === 'FAILED' ? 'error' : 'info',
+    phase: 'run_finished',
+    message: data.status === 'SUCCEEDED' ? '自动引用发布成功' : data.status === 'SKIPPED' ? '自动引用跳过' : '自动引用失败',
+    status: data.status,
+    reason: data.skipReason || data.error || null,
+    postId: data.sourcePostId || null,
+    robotUserId: data.robotUserId || null,
+    details: {
+      quotePostId: data.quotePostId || null,
+      generatedContent: data.generatedContent || null,
+      candidateScore: data.candidateScore ?? null,
+    },
+  });
   const [item] = await enrichRuns([run]);
   return item;
 }
@@ -385,7 +405,7 @@ export async function listQuotePublishRuns(options: ListRunsOptions = {}) {
   });
   const hasMore = runs.length > limit;
   const items = hasMore ? runs.slice(0, limit) : runs;
-  return { items: await enrichRuns(items), nextCursor: hasMore ? runCursor(items[items.length - 1]) : null, hasMore };
+  return { items: await attachInteractionAutomationExecutionEvents('quote_publish', await enrichRuns(items)), nextCursor: hasMore ? runCursor(items[items.length - 1]) : null, hasMore };
 }
 export async function getQuotePublishRunStats() {
   const empty = { total: 0, statuses: { PENDING: 0, SUCCEEDED: 0, SKIPPED: 0, FAILED: 0 } as Record<QuotePublishRunStatus, number>, latestRun: null as any };
@@ -407,6 +427,14 @@ export async function runQuotePublishOnce(options: RunOptions = {}) {
   const config = await getQuotePublishConfig({ force: true });
   const aiRuntime = await getAutomationAiRuntime('quote', { force: true }).catch(() => null);
   const run = await createRun(trigger, aiRuntime?.model || 'platform-ai');
+  await logInteractionAutomationEvent({
+    module: 'quote_publish',
+    runId: run.id,
+    phase: 'run_started',
+    message: '自动引用执行开始',
+    status: 'PENDING',
+    details: { trigger, force: Boolean(options.force), aiReady: Boolean(aiRuntime?.ready), aiModel: aiRuntime?.model || null },
+  });
   let sourcePost: CandidatePost | null = null;
   let robot: RobotUser | null = null;
   let content: string | null = null;
@@ -418,24 +446,65 @@ export async function runQuotePublishOnce(options: RunOptions = {}) {
       QUOTE_TASK_LOCK_NAME,
       { ttlMs: QUOTE_TASK_LOCK_TTL_MS, metadata: { trigger, runId: run.id }, force: options.force },
       async () => {
+        await logInteractionAutomationEvent({ module: 'quote_publish', runId: run.id, phase: 'lock_acquired', message: '任务锁已获取', status: 'RUNNING' });
         if (config.dailyLimit <= 0) return finishRun(run.id, { status: 'SKIPPED', skipReason: 'daily_limit_zero' });
         if (await todaySucceeded() >= config.dailyLimit) return finishRun(run.id, { status: 'SKIPPED', skipReason: 'daily_limit_reached' });
         const [availableRobots, availablePosts] = await Promise.all([robots(), candidates(config)]);
+        await logInteractionAutomationEvent({
+          module: 'quote_publish',
+          runId: run.id,
+          phase: 'candidates_loaded',
+          message: '候选机器人和帖子已加载',
+          status: 'RUNNING',
+          details: { robotCount: availableRobots.length, postCount: availablePosts.length },
+        });
         if (!availableRobots.length) return finishRun(run.id, { status: 'SKIPPED', skipReason: 'no_available_robot' });
         if (!availablePosts.length) return finishRun(run.id, { status: 'SKIPPED', skipReason: 'no_quality_candidate_post' });
         const selected = await pickSourceAndRobot(availablePosts, availableRobots);
         if (!selected) return finishRun(run.id, { status: 'SKIPPED', skipReason: 'no_robot_without_prior_engagement' });
         sourcePost = selected.post;
         robot = selected.robot;
+        await logInteractionAutomationEvent({
+          module: 'quote_publish',
+          runId: run.id,
+          phase: 'candidate_selected',
+          message: '已选择引用原帖和机器人账号',
+          status: 'RUNNING',
+          postId: sourcePost.id,
+          robotUserId: robot.id,
+          details: { sourceTitle: sourcePost.title || null, sourceContent: sourcePost.content || null },
+        });
         const reaction = await generateBestRobotReaction({ post: sourcePost as RobotReactionPost, robot, mode: 'quote', recentContents: await recentContents(), allowRuleFallback: false });
         if (!reaction) return finishRun(run.id, { status: 'SKIPPED', sourcePostId: sourcePost.id, robotUserId: robot.id, skipReason: 'no_quality_reaction' });
         const quality = scoreRobotReaction(sourcePost as RobotReactionPost, reaction, 'quote');
         content = reaction.content;
         score = quality.score;
         const signature = robotReactionSignature(content);
+        await logInteractionAutomationEvent({
+          module: 'quote_publish',
+          runId: run.id,
+          level: quality.ok ? 'info' : 'warn',
+          phase: 'quality_checked',
+          message: quality.ok ? '生成内容质量通过' : '生成内容质量未通过',
+          status: quality.ok ? 'PASSED' : 'REJECTED',
+          reason: quality.reason || reaction.reason || null,
+          postId: sourcePost.id,
+          robotUserId: robot.id,
+          details: { content, signature, score: quality.score },
+        });
         if (!quality.ok) return finishRun(run.id, { status: 'SKIPPED', sourcePostId: sourcePost.id, robotUserId: robot.id, candidateScore: quality.score, generatedContent: content, skipReason: quality.reason || reaction.reason || 'quality_gate_rejected' });
         if (await recentSignature(signature)) return finishRun(run.id, { status: 'SKIPPED', sourcePostId: sourcePost.id, robotUserId: robot.id, candidateScore: quality.score, generatedContent: content, skipReason: 'content_signature_recently_used' });
         const quotePost = await createQuotePost(sourcePost, robot, content, signature, config);
+        await logInteractionAutomationEvent({
+          module: 'quote_publish',
+          runId: run.id,
+          phase: 'post_written',
+          message: '引用帖已写入',
+          status: 'PUBLISHED',
+          postId: sourcePost.id,
+          robotUserId: robot.id,
+          details: { quotePostId: quotePost.id },
+        });
         let result = await finishRun(run.id, { status: 'SUCCEEDED', sourcePostId: sourcePost.id, quotePostId: quotePost.id, robotUserId: robot.id, generatedContent: content, candidateScore: quality.score });
         try {
           await options.afterPostCreated?.({ post: quotePost, user: robot, req: options.req });

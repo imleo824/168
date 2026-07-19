@@ -13,6 +13,10 @@ import {
   type AutoPostConfig,
 } from './auto-post.config';
 import { withAutomationTaskLock, type AutomationTaskLockDetails } from './automation-task-lock.service';
+import {
+  attachInteractionAutomationExecutionEvents,
+  logInteractionAutomationEvent,
+} from './interaction-automation-execution-log.service';
 
 export { getAutoPostConfig, normalizeAutoPostConfig, updateAutoPostConfig };
 export type { AutoPostConfig };
@@ -139,7 +143,28 @@ async function enrichRuns(runs: any[]) {
 }
 
 async function createRun(trigger: AutoPostTrigger) { return getDb().autoPostRun.create({ data: { trigger, status: 'PENDING', startedAt: new Date() } }); }
-async function finishRun(runId: string, data: { status: AutoPostRunStatus; contentId?: string | null; topic?: string | null; postId?: string | null; authorUserId?: string | null; categoryId?: string | null; publishedContent?: string | null; skipReason?: string | null; error?: string | null }) { const run = await getDb().autoPostRun.update({ where: { id: runId }, data: { ...data, finishedAt: new Date() } }); const [payload] = await enrichRuns([run]); return payload; }
+async function finishRun(runId: string, data: { status: AutoPostRunStatus; contentId?: string | null; topic?: string | null; postId?: string | null; authorUserId?: string | null; categoryId?: string | null; publishedContent?: string | null; skipReason?: string | null; error?: string | null }) {
+  const run = await getDb().autoPostRun.update({ where: { id: runId }, data: { ...data, finishedAt: new Date() } });
+  await logInteractionAutomationEvent({
+    module: 'auto_post',
+    runId,
+    level: data.status === 'FAILED' ? 'error' : 'info',
+    phase: 'run_finished',
+    message: data.status === 'SUCCEEDED' ? '自动发帖发布成功' : data.status === 'SKIPPED' ? '自动发帖跳过' : '自动发帖失败',
+    status: data.status,
+    reason: data.skipReason || data.error || null,
+    postId: data.postId || null,
+    robotUserId: data.authorUserId || null,
+    details: {
+      contentId: data.contentId || null,
+      topic: data.topic || null,
+      categoryId: data.categoryId || null,
+      publishedContent: data.publishedContent || null,
+    },
+  });
+  const [payload] = await enrichRuns([run]);
+  return payload;
+}
 async function markRunSideEffectError(runId: string, message: string) { const run = await getDb().autoPostRun.update({ where: { id: runId }, data: { error: cleanString(message, 500), finishedAt: new Date() } }); const [payload] = await enrichRuns([run]); return payload; }
 export async function cleanupExpiredAutoPostRuns() { if (!isDbConfigured()) return 0; const cutoff = new Date(Date.now() - AUTO_POST_RUN_RETENTION_DAYS * 24 * 60 * 60 * 1000); const result = await getDb().autoPostRun.deleteMany({ where: { createdAt: { lt: cutoff } } }); return Number(result?.count || 0); }
 async function countTodaySucceededRuns(topic?: AutoPostTopic) { const todayRange = getPlatformDayRange(); return getDb().autoPostRun.count({ where: { status: 'SUCCEEDED', ...(topic ? { topic } : {}), createdAt: { gte: todayRange.start, lt: todayRange.end } } }); }
@@ -215,7 +240,7 @@ async function createPostFromContent(params: { contentItem: any; author: any; ca
 export async function importAutoPostContents(rawItems: AutoPostImportItem[]) { if (!isDbConfigured()) throw new Error('Database is not configured'); const failures: Array<{ index: number; reason: string }> = []; const seenHashes = new Set<string>(); const data: any[] = []; rawItems.forEach((raw, index) => { const normalized = normalizeImportItem(raw); if (!normalized.item) { failures.push({ index, reason: normalized.reason }); return; } if (seenHashes.has(normalized.item.contentHash)) { failures.push({ index, reason: 'duplicate_in_payload' }); return; } seenHashes.add(normalized.item.contentHash); data.push(normalized.item); }); if (data.length === 0) return { input: rawItems.length, valid: 0, created: 0, skipped: rawItems.length, failures }; const created = await getDb().autoPostContent.createMany({ data, skipDuplicates: true }); return { input: rawItems.length, valid: data.length, created: created.count, skipped: rawItems.length - created.count, failures }; }
 export async function listAutoPostContents(options: ListContentsOptions = {}) { if (!isDbConfigured()) return { items: [], nextCursor: null, hasMore: false }; const limit = Math.min(100, Math.max(1, Math.round(Number(options.limit) || 30))); const cursor = typeof options.cursor === 'string' && options.cursor.trim().length <= 128 ? options.cursor.trim() : ''; const items = await getDb().autoPostContent.findMany({ where: { ...(options.topic ? { topic: options.topic } : {}), ...(options.active !== undefined ? { isActive: options.active } : {}), ...(options.used === true ? { usedAt: { not: null } } : {}), ...(options.used === false ? { usedAt: null } : {}) }, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], take: limit + 1, ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}) }); const hasMore = items.length > limit; const pageItems = hasMore ? items.slice(0, limit) : items; return { items: pageItems.map(formatContentItem), nextCursor: hasMore ? pageItems[pageItems.length - 1]?.id || null : null, hasMore }; }
 export async function updateAutoPostContent(id: string, patch: Record<string, unknown>) { if (!isDbConfigured()) throw new Error('Database is not configured'); const current = await getDb().autoPostContent.findUnique({ where: { id } }); if (!current) return null; const nextRaw = { topic: patch.topic ?? current.topic, title: patch.title ?? current.title, content: patch.content ?? current.content, answer: patch.answer ?? current.answer, author: patch.author ?? current.author, sourceName: patch.sourceName ?? current.sourceName, sourceUrl: patch.sourceUrl ?? current.sourceUrl, license: patch.license ?? current.license, qualityScore: patch.qualityScore ?? current.qualityScore, isActive: patch.isActive ?? current.isActive }; const normalized = normalizeImportItem(nextRaw); if (!normalized.item) throw new Error(normalized.reason || 'invalid_content'); const updated = await getDb().autoPostContent.update({ where: { id }, data: { ...normalized.item, usedAt: patch.usedAt === null ? null : current.usedAt, postId: patch.postId === null ? null : current.postId } }); return formatContentItem(updated); }
-export async function listAutoPostRuns(options: ListRunsOptions = {}) { if (!isDbConfigured()) return { items: [], nextCursor: null, hasMore: false }; await cleanupExpiredAutoPostRuns(); const limit = Math.min(100, Math.max(1, Math.round(Number(options.limit) || 30))); const status = normalizeRunStatus(options.status); const cursor = typeof options.cursor === 'string' && options.cursor.trim().length <= 128 ? options.cursor.trim() : ''; const runs = await getDb().autoPostRun.findMany({ where: { ...(status ? { status } : {}) }, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], take: limit + 1, ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}) }); const hasMore = runs.length > limit; const items = hasMore ? runs.slice(0, limit) : runs; return { items: await enrichRuns(items), nextCursor: hasMore ? items[items.length - 1]?.id || null : null, hasMore }; }
+export async function listAutoPostRuns(options: ListRunsOptions = {}) { if (!isDbConfigured()) return { items: [], nextCursor: null, hasMore: false }; await cleanupExpiredAutoPostRuns(); const limit = Math.min(100, Math.max(1, Math.round(Number(options.limit) || 30))); const status = normalizeRunStatus(options.status); const cursor = typeof options.cursor === 'string' && options.cursor.trim().length <= 128 ? options.cursor.trim() : ''; const runs = await getDb().autoPostRun.findMany({ where: { ...(status ? { status } : {}) }, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], take: limit + 1, ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}) }); const hasMore = runs.length > limit; const items = hasMore ? runs.slice(0, limit) : runs; return { items: await attachInteractionAutomationExecutionEvents('auto_post', await enrichRuns(items)), nextCursor: hasMore ? items[items.length - 1]?.id || null : null, hasMore }; }
 export async function getAutoPostContentStats() { if (!isDbConfigured()) return { topics: [], total: 0, unused: 0 }; const [total, unused, grouped] = await Promise.all([getDb().autoPostContent.count(), getDb().autoPostContent.count({ where: { isActive: true, usedAt: null } }), getDb().autoPostContent.groupBy({ by: ['topic'], _count: { _all: true }, where: { isActive: true } })]); return { total, unused, topics: grouped.map((row: any) => ({ topic: row.topic, topicLabel: TOPIC_LABELS[row.topic as AutoPostTopic] || row.topic, active: row._count?._all || 0 })) }; }
 
 export async function runAutoPostOnce(options: RunOptions = {}) {
@@ -223,6 +248,14 @@ export async function runAutoPostOnce(options: RunOptions = {}) {
   await cleanupExpiredAutoPostRuns();
   const trigger = options.trigger || 'MANUAL';
   const run = await createRun(trigger);
+  await logInteractionAutomationEvent({
+    module: 'auto_post',
+    runId: run.id,
+    phase: 'run_started',
+    message: '自动发帖执行开始',
+    status: 'PENDING',
+    details: { trigger, force: Boolean(options.force) },
+  });
   let activeContentId: string | null = null;
   let activeTopic: AutoPostTopic | null = null;
   let activePublishedContent: string | null = null;
@@ -230,20 +263,68 @@ export async function runAutoPostOnce(options: RunOptions = {}) {
   let activeCategoryId: string | null = null;
   try {
     const taskLock = await withAutomationTaskLock(AUTO_POST_TASK_LOCK_NAME, { ttlMs: AUTO_POST_TASK_LOCK_TTL_MS, metadata: { trigger, runId: run.id }, force: options.force }, async () => {
+      await logInteractionAutomationEvent({ module: 'auto_post', runId: run.id, phase: 'lock_acquired', message: '任务锁已获取', status: 'RUNNING' });
       const config = await getAutoPostConfig({ force: true });
+      await logInteractionAutomationEvent({
+        module: 'auto_post',
+        runId: run.id,
+        phase: 'config_loaded',
+        message: '自动发帖配置已读取',
+        status: config.enabled ? 'ENABLED' : 'DISABLED',
+        details: { enabled: config.enabled, checkIntervalMinutes: config.checkIntervalMinutes },
+      });
       if (!config.enabled) return finishRun(run.id, { status: 'SKIPPED', skipReason: 'disabled' });
       const picked = await pickRunnableTopic(config);
+      await logInteractionAutomationEvent({
+        module: 'auto_post',
+        runId: run.id,
+        phase: 'topic_selected',
+        message: picked.topic ? '已选择可执行主题和内容' : '没有可执行主题内容',
+        status: picked.topic ? 'READY' : 'SKIPPED',
+        reason: picked.reason || null,
+        details: { topic: picked.topic || null, contentId: picked.content?.id || null },
+      });
       if (!picked.topic || !picked.content) return finishRun(run.id, { status: 'SKIPPED', skipReason: picked.reason || 'no_available_topic_content' });
       activeTopic = picked.topic;
       const validation = picked.validation || await validateTopicRuntimeConfig(config, activeTopic);
+      await logInteractionAutomationEvent({
+        module: 'auto_post',
+        runId: run.id,
+        level: validation.ok ? 'info' : 'warn',
+        phase: 'runtime_config_checked',
+        message: validation.ok ? '主题运行配置有效' : '主题运行配置无效',
+        status: validation.ok ? 'PASSED' : 'REJECTED',
+        reason: validation.reason || null,
+        robotUserId: validation.user?.id || null,
+        details: { topic: activeTopic, authorUserId: validation.user?.id || null, categoryId: validation.category?.id || null },
+      });
       if (!validation.ok) return finishRun(run.id, { status: 'SKIPPED', topic: activeTopic, skipReason: validation.reason });
       activeAuthorUserId = validation.user.id;
       activeCategoryId = validation.category?.id || null;
       const contentItem = picked.content;
       activeContentId = contentItem.id;
+      await logInteractionAutomationEvent({
+        module: 'auto_post',
+        runId: run.id,
+        phase: 'content_selected',
+        message: '已选择待发布内容',
+        status: 'READY',
+        robotUserId: activeAuthorUserId,
+        details: { contentId: activeContentId, topic: activeTopic, title: contentItem.title || null, content: contentItem.content || null },
+      });
       const created = await createPostFromContent({ contentItem, author: validation.user, category: validation.category, config });
       activePublishedContent = created.publishedContent;
       if (!created.post) return finishRun(run.id, { status: 'SKIPPED', contentId: activeContentId, topic: activeTopic, authorUserId: activeAuthorUserId, categoryId: activeCategoryId, publishedContent: activePublishedContent, skipReason: created.skippedReason || 'content_skipped' });
+      await logInteractionAutomationEvent({
+        module: 'auto_post',
+        runId: run.id,
+        phase: 'post_written',
+        message: '帖子已写入',
+        status: 'PUBLISHED',
+        postId: created.post.id,
+        robotUserId: activeAuthorUserId,
+        details: { contentId: activeContentId, topic: activeTopic, categoryId: activeCategoryId },
+      });
       let result = await finishRun(run.id, { status: 'SUCCEEDED', contentId: activeContentId, topic: activeTopic, postId: created.post.id, authorUserId: activeAuthorUserId, categoryId: activeCategoryId, publishedContent: activePublishedContent });
       try { await options.afterPostCreated?.({ post: created.post, user: validation.user, req: options.req }); } catch (error: any) { result = await markRunSideEffectError(run.id, `after_post_created_failed: ${cleanString(error?.message || error, 430)}`); }
       return result;
