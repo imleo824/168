@@ -18,7 +18,6 @@ type PaginationParams = {
 type AccountRoutesContext = {
   JWT_SECRET: string;
   MAX_BIO_LENGTH: number;
-  WEBHOOK_MAX_CONTACT_LEN: number;
   POST_ID_PATTERN: RegExp;
   USER_PROFILE_CACHE_TTL_MS: number;
   USER_PROFILE_CACHE_MAX_ENTRIES: number;
@@ -59,7 +58,6 @@ export function registerAccountRoutes(app: Express, context: AccountRoutesContex
 
   registerAccountSettingsRoutes(app, {
     MAX_BIO_LENGTH: context.MAX_BIO_LENGTH,
-    WEBHOOK_MAX_CONTACT_LEN: context.WEBHOOK_MAX_CONTACT_LEN,
     validateLoginPassword: context.validateLoginPassword,
     canonicalizePersistentUploadedImageUrl: context.canonicalizePersistentUploadedImageUrl,
     normalizeTelegramContactHandle: context.normalizeTelegramContactHandle,

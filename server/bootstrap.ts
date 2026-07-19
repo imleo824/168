@@ -130,14 +130,6 @@ import {
   normalizeExternalLocation,
   normalizeShowContactInput,
 } from './services/post/post-create-input';
-import {
-  WEBHOOK_MAX_CONTACT_LEN,
-  WEBHOOK_MAX_CONTENT_LEN,
-  WEBHOOK_MAX_IMAGE_URL_LEN,
-  WEBHOOK_MAX_IMAGES,
-  WEBHOOK_MAX_LOCATION_LEN,
-  WEBHOOK_MAX_TITLE_LEN,
-} from './webhooks/webhook-constants';
 
 const PORT = parseInt(process.env.PORT as string, 10) || 3000;
 const app = express();
@@ -853,7 +845,6 @@ registerApiHealthRoute(app);
 registerAccountRoutes(app, {
   JWT_SECRET,
   MAX_BIO_LENGTH,
-  WEBHOOK_MAX_CONTACT_LEN,
   POST_ID_PATTERN,
   USER_PROFILE_CACHE_TTL_MS,
   USER_PROFILE_CACHE_MAX_ENTRIES,
@@ -1020,12 +1011,6 @@ registerSeoFallbackRoutes(app, {
 registerPostCreateRoutes(app, {
   POST_ID_PATTERN,
   POST_CREATED_CHAT_QUOTE_SELECT,
-  WEBHOOK_MAX_TITLE_LEN,
-  WEBHOOK_MAX_CONTENT_LEN,
-  WEBHOOK_MAX_CONTACT_LEN,
-  WEBHOOK_MAX_LOCATION_LEN,
-  WEBHOOK_MAX_IMAGES,
-  WEBHOOK_MAX_IMAGE_URL_LEN,
   normalizeExternalLocation,
   derivePostLocation,
   normalizeTelegramContactHandle,

@@ -7,14 +7,8 @@ import { lookup as dnsLookup } from 'node:dns/promises';
 import { getPublicOrigin, normalizeOrigin } from '../http-origin';
 import { setPublicCache } from '../http-cache';
 import {
-  UPLOAD_BUCKET,
-  buildUploadStoragePath,
-  ensureUploadBucket,
-  hasValidImageSignature,
   isProduction,
   isLocalUploadUrlAllowed,
-  isSupabaseBucketMissingError,
-  supabase,
   supabaseUrl,
 } from '../routes/upload.routes';
 
@@ -23,7 +17,6 @@ export type SocialPreviewImage = {
   contentType: string;
 };
 
-const DEFAULT_WEBHOOK_MAX_IMAGES = 9;
 const SOCIAL_PREVIEW_FETCH_TIMEOUT_MS = 8000;
 const SOCIAL_PREVIEW_MAX_BYTES = 10 * 1024 * 1024;
 const SOCIAL_PREVIEW_MAX_REDIRECTS = 2;
@@ -34,16 +27,6 @@ const SHARE_PREVIEW_ALLOWED_HOSTS = new Set(
     .map((value) => value.trim().toLowerCase())
     .filter(Boolean),
 );
-
-const WEBHOOK_UNSUPPORTED_IMAGE_MEDIA_EXTENSIONS = new Set([
-  '.mp4',
-  '.mov',
-  '.m4v',
-  '.webm',
-  '.avi',
-  '.mkv',
-  '.3gp',
-]);
 
 export function resolvePublicOriginFromContext(context?: Request | string) {
   if (!context) return getPublicOrigin(undefined);
@@ -127,12 +110,6 @@ export function buildPostSharePreviewCandidates(sourceImage: string | undefined,
   return [...candidates];
 }
 
-function getImageExtensionFromContentType(contentType: string) {
-  if (contentType.includes('png')) return 'png';
-  if (contentType.includes('webp')) return 'webp';
-  return 'jpg';
-}
-
 export function canonicalizePersistentUploadedImageUrl(url: string) {
   const raw = String(url || '').trim();
   if (!raw) return '';
@@ -207,120 +184,6 @@ function isImageHostedBySupabase(hostname: string) {
   return host.endsWith('.supabase.co')
     || host.endsWith('.supabase.in')
     || host.includes('supabase');
-}
-
-function getUrlPathExtension(value: string) {
-  try {
-    const pathname = new URL(value).pathname.toLowerCase();
-    const match = pathname.match(/\.[a-z0-9]+$/i);
-    return match?.[0] || '';
-  } catch {
-    return '';
-  }
-}
-
-function isKnownUnsupportedWebhookImageMediaUrl(value: string) {
-  const ext = getUrlPathExtension(value);
-  return ext ? WEBHOOK_UNSUPPORTED_IMAGE_MEDIA_EXTENSIONS.has(ext) : false;
-}
-
-function isUnsupportedPreviewMediaError(error: unknown) {
-  const message = error instanceof Error ? error.message : String(error || '');
-  return /^Unsupported preview image type:\s*video\//i.test(message);
-}
-
-async function mirrorExternalImageToStorage(params: {
-  url: string;
-  userId: string;
-  requestId?: string;
-  index: number;
-}) {
-  if (isKnownUnsupportedWebhookImageMediaUrl(params.url)) return '';
-
-  const existingPersistentUrl = canonicalizePersistentUploadedImageUrl(params.url);
-  if (existingPersistentUrl) return existingPersistentUrl;
-  if (!supabase) {
-    return isProduction ? '' : params.url;
-  }
-
-  try {
-    const image = await fetchSocialPreviewImage(params.url);
-    if (!hasValidImageSignature(image.buffer, image.contentType)) {
-      throw new Error('Mirrored image signature is invalid');
-    }
-
-    const ext = getImageExtensionFromContentType(image.contentType);
-    const filePath = buildUploadStoragePath('webhook', params.userId, ext, `${params.index + 1}`);
-    const uploadPayload = {
-      contentType: image.contentType,
-      cacheControl: '31536000',
-      upsert: false,
-    };
-    let { error } = await supabase.storage
-      .from(UPLOAD_BUCKET)
-      .upload(filePath, image.buffer, {
-        ...uploadPayload,
-      });
-
-    if (error && isSupabaseBucketMissingError(error) && await ensureUploadBucket()) {
-      const retry = await supabase.storage
-        .from(UPLOAD_BUCKET)
-        .upload(filePath, image.buffer, uploadPayload);
-      error = retry.error;
-    }
-
-    if (error) throw error;
-
-    const { data: { publicUrl } } = supabase.storage
-      .from(UPLOAD_BUCKET)
-      .getPublicUrl(filePath);
-
-    return canonicalizePersistentUploadedImageUrl(publicUrl || '') || publicUrl || params.url;
-  } catch (error: any) {
-    if (isUnsupportedPreviewMediaError(error)) return '';
-
-    console.warn('[webhook-image-mirror] failed:', {
-      requestId: params.requestId,
-      index: params.index,
-      url: params.url,
-      error: error?.message || error,
-    });
-    return '';
-  }
-}
-
-export async function mirrorWebhookImagesToStorage(params: {
-  images: string[];
-  userId: string;
-  requestId?: string;
-  maxImages?: number;
-}) {
-  const maxImages = Math.max(1, Math.floor(params.maxImages || DEFAULT_WEBHOOK_MAX_IMAGES));
-  const uniqueImages = Array.from(new Set(
-    params.images
-      .map((item) => item.trim())
-      .filter(Boolean)
-      .filter((url) => !isKnownUnsupportedWebhookImageMediaUrl(url))
-  )).slice(0, maxImages);
-  const mirrored: string[] = [];
-  const concurrency = 3;
-
-  for (let cursor = 0; cursor < uniqueImages.length; cursor += concurrency) {
-    const batch = uniqueImages.slice(cursor, cursor + concurrency);
-    const results = await Promise.all(
-      batch.map((url, batchIndex) =>
-        mirrorExternalImageToStorage({
-          url,
-          userId: params.userId,
-          requestId: params.requestId,
-          index: cursor + batchIndex,
-        })
-      )
-    );
-    mirrored.push(...results);
-  }
-
-  return Array.from(new Set(mirrored.filter(Boolean))).slice(0, maxImages);
 }
 
 function getStaticShareFallbackPath() {

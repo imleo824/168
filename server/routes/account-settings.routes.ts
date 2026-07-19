@@ -12,10 +12,10 @@ import {
   normalizeLoginAccount,
   validateLoginAccountForWrite,
 } from '../../shared/accountCredentials';
+import { POST_CONTACT_MAX_LENGTH } from '../../shared/postPublishing';
 
 type AccountSettingsRoutesContext = {
   MAX_BIO_LENGTH: number;
-  WEBHOOK_MAX_CONTACT_LEN: number;
   validateLoginPassword: (password: string, username?: string) => string | null | undefined;
   canonicalizePersistentUploadedImageUrl: (url: string) => string;
   normalizeTelegramContactHandle: (input: unknown) => string;
@@ -27,7 +27,6 @@ type AccountSettingsRoutesContext = {
 export function registerAccountSettingsRoutes(app: Express, context: AccountSettingsRoutesContext) {
   const {
     MAX_BIO_LENGTH,
-    WEBHOOK_MAX_CONTACT_LEN,
     validateLoginPassword,
     canonicalizePersistentUploadedImageUrl,
     normalizeTelegramContactHandle,
@@ -173,8 +172,8 @@ export function registerAccountSettingsRoutes(app: Express, context: AccountSett
       if (typeof contact === 'string' && contact.trim() && !normalized) {
         return res.status(400).json({ error: '仅支持 Telegram 联系方式，请输入 @用户名 或 t.me 链接' });
       }
-      if (normalized.length > WEBHOOK_MAX_CONTACT_LEN) {
-        return res.status(400).json({ error: `联系方式最长 ${WEBHOOK_MAX_CONTACT_LEN} 字` });
+      if (normalized.length > POST_CONTACT_MAX_LENGTH) {
+        return res.status(400).json({ error: `联系方式最长 ${POST_CONTACT_MAX_LENGTH} 字` });
       }
       data.contact = normalized || null;
     }

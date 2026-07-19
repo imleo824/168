@@ -141,7 +141,6 @@ const UPLOAD_STORAGE_FOLDERS: Record<string, string> = {
   cover: 'covers',
   'ad-desktop': 'ads/desktop',
   'ad-mobile': 'ads/mobile',
-  webhook: 'webhook-images',
 };
 const CLIENT_UPLOAD_PURPOSES = new Set(['post', 'avatar', 'cover', 'ad-desktop', 'ad-mobile']);
 

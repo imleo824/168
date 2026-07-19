@@ -28,11 +28,16 @@ assertMissing('server/services/quote-publish.service.ts', 'quote publish must im
 assertMissing('server/services/comment-publish.service.ts', 'comment publish must import the real v8 implementation directly, without a compatibility facade');
 assertMissing('server/routes/webhook.routes.ts', 'removed external automation webhook APIs must not keep an empty route registrar');
 assertMissing('server/webhooks/webhook-handlers.ts', 'removed external automation webhook APIs must not keep 410 handler shims');
+assertMissing('server/webhooks/webhook-constants.ts', 'post publishing limits must use shared/postPublishing, not removed webhook naming');
 
 assertNotIncludes('server/routes/config.routes.ts', 'registerAdminAutomationLockRoutes', 'obsolete raw lock routes must not be registered from config routes');
 assertNotIncludes('server/bootstrap.ts', 'registerWebhookRoutes', 'removed external automation webhook routes must not be registered at startup');
 assertNotIncludes('server/bootstrap.ts', 'createWebhookHandlers', 'removed external automation webhook handlers must not be constructed at startup');
+assertNotIncludes('server/bootstrap.ts', 'webhook-constants', 'startup must not import constants from removed webhook module');
 assertNotIncludes('server/middlewares/rateLimit.ts', 'webhookLimiter', 'removed external automation webhook APIs must not keep a dedicated limiter alias');
+assertNotIncludes('server/routes/upload.routes.ts', 'webhook-images', 'removed external webhook image mirroring must not keep a storage folder');
+assertNotIncludes('server/services/social-image.service.ts', 'mirrorWebhookImagesToStorage', 'removed external webhook image mirroring must not remain as a dead export');
+assertNotIncludes('server/services/social-image.service.ts', 'webhook-image-mirror', 'removed external webhook image mirroring must not leave runtime logs');
 assertNotIncludes('server/routes/quote-publish.routes.ts', 'registerAutomationDebugRoutes', 'obsolete internal automation side route must not be registered');
 assertNotIncludes('server/startup/server-runtime.ts', 'startQuotePublishScheduler', 'server runtime must not use quote scheduler directly');
 assertNotIncludes('server/startup/server-runtime.ts', 'startAutoCrawlScheduler', 'server runtime must not use standalone crawl scheduler');
