@@ -220,12 +220,14 @@ function semanticConfiguredOption(raw: unknown, field: PublishCategoryMetaFieldC
     const optionParts = /[\/|、,，&+]/.test(optionText)
       ? optionText.split(/[\/|、,，&+]+/g).map((part) => part.trim()).filter(Boolean)
       : [];
+    const optionKey = compactComparable(optionText);
     const candidates = [
+      optionText,
       ...(OPTION_ALIASES[option] || []),
       ...optionParts,
       ...optionParts.flatMap((part) => OPTION_ALIASES[part] || []),
     ].map(compactComparable).filter(Boolean);
-    if (candidates.some((candidate) => rawKey === candidate || rawKey.includes(candidate))) {
+    if (rawKey === optionKey || rawKey.includes(optionKey) || candidates.some((candidate) => rawKey === candidate || rawKey.includes(candidate))) {
       matches.add(option);
     }
   }
@@ -272,19 +274,21 @@ function moneyField(field: PublishCategoryMetaFieldConfig) {
 
 function normalizeMoneyNumber(raw: unknown) {
   if (typeof raw === 'number') {
-    return Number.isFinite(raw) ? { value: raw, reason: 'strict_money_number_usd' } : { value: null, reason: 'money_number_not_matched' };
+    return Number.isFinite(raw) ? { value: raw, reason: 'money_number_without_currency' } : { value: null, reason: 'money_number_not_matched' };
   }
   if (typeof raw !== 'string') return { value: null, reason: 'money_number_not_matched' };
   const text = raw.normalize('NFKC').replace(/\s+/g, ' ').trim();
   if (!text) return { value: null, reason: 'money_number_not_matched' };
 
   const rate = currencyRate(text);
-  if (!rate) return { value: null, reason: 'money_currency_not_matched' };
   const amounts = parseNumericAmounts(text);
   if (amounts.length !== 1) return { value: null, reason: 'money_number_not_matched' };
-  const usd = amounts[0] * rate;
+  const usd = amounts[0] * (rate || 1);
   if (!Number.isFinite(usd)) return { value: null, reason: 'money_number_not_matched' };
-  return { value: Math.round(usd * 100) / 100, reason: rate === 1 ? 'money_usd_amount' : 'money_currency_converted_usd' };
+  return {
+    value: Math.round(usd * 100) / 100,
+    reason: !rate ? 'money_number_without_currency' : rate === 1 ? 'money_usd_amount' : 'money_currency_converted_usd',
+  };
 }
 
 function normalizeNumber(raw: unknown, field: PublishCategoryMetaFieldConfig) {

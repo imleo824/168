@@ -272,8 +272,8 @@ const nonSalarySelect = await normalizeCrawlCategoryMeta({
   locationPresets: [],
 });
 
-assert.equal(nonSalarySelect.meta.jobType, undefined, 'non-salary select fields must not receive loose semantic matching.');
-assert.equal(nonSalarySelect.audit.rejected.jobType?.reason, 'database_option_not_matched');
+assert.equal(nonSalarySelect.meta.jobType, '全职', 'select fields must accept clear backend option text embedded in model output.');
+assert.equal(nonSalarySelect.audit.rejected.jobType, undefined);
 
 const adminArchivePosition = await normalizeCrawlCategoryMeta({
   category: { id: 'category_jobs', name: '招聘', slug: 'jobs' },
@@ -356,12 +356,13 @@ assert.deepEqual(allMeta.meta, {
   documentType: '签证',
   nightlifeType: '按摩',
   supplyDemandType: '支付',
+  price: 12000,
   area: 100,
   bedrooms: 2,
   depositMonths: 2,
   paymentMonths: 1,
 });
-assert.equal(allMeta.audit.rejected.price?.reason, 'money_currency_not_matched', 'money fields without currency units must be rejected.');
+assert.equal(allMeta.audit.rejected.price, undefined, 'money fields without currency units must keep the original number.');
 
 const rentMoneyMeta = await normalizeCrawlCategoryMeta({
   category: { id: 'category_housing', name: '租房', slug: 'housing' },
@@ -419,8 +420,8 @@ const unitlessRentMeta = await normalizeCrawlCategoryMeta({
   locationPresets: [],
 });
 
-assert.equal(unitlessRentMeta.meta.price, undefined, 'money fields must not accept unitless amounts.');
-assert.equal(unitlessRentMeta.audit.rejected.price?.reason, 'money_currency_not_matched');
+assert.equal(unitlessRentMeta.meta.price, 800, 'unitless money fields must keep their numeric amount instead of being dropped.');
+assert.equal(unitlessRentMeta.audit.rejected.price, undefined);
 
 const secondhandNumericPriceMeta = await normalizeCrawlCategoryMeta({
   category: { id: 'category_secondhand', name: '二手', slug: 'secondhand' },
@@ -462,7 +463,7 @@ const numericPriceCannotStoreNegotiable = await normalizeCrawlCategoryMeta({
 });
 
 assert.equal(numericPriceCannotStoreNegotiable.meta.price, undefined, 'numeric price fields cannot store negotiable text.');
-assert.equal(numericPriceCannotStoreNegotiable.audit.rejected.price?.reason, 'money_currency_not_matched');
+assert.equal(numericPriceCannotStoreNegotiable.audit.rejected.price?.reason, 'money_number_not_matched');
 
 const compositeSelect = await normalizeCrawlCategoryMeta({
   category: { id: 'category_secondhand', name: '二手', slug: 'secondhand' },

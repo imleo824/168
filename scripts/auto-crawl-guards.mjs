@@ -85,6 +85,8 @@ mustHave('main flow post write log', crawl, /phase: 'post_db_write_started'/);
 mustHave('main flow post write log', crawl, /phase: 'post_db_write_failed'/);
 mustHave('main flow post write log', crawl, /phase: 'post_db_written'/);
 mustHave('main flow post payload log', crawl, /phase: 'post_payload_ready'/);
+mustHave('main flow meta rejection details', crawl, /rejectedMetaKeys/);
+mustHave('main flow meta rejection details', crawl, /rejectedMeta/);
 mustHave('main flow item terminal log', crawl, /phase: 'item_finished'/);
 mustHave('main flow item terminal log', crawl, /单条内容执行结束/);
 mustHave('main flow source config failure', crawl, /phase: 'source_config_invalid'/);
@@ -153,9 +155,11 @@ mustNotHave('AI extraction', crawlAi, /import prisma|loadAutoCrawlDatabaseConfig
 
 mustHave('Meta normalization', crawlMeta, /database_option_exact/);
 mustHave('Meta normalization', crawlMeta, /database_option_semantic/);
+mustHave('Meta normalization', crawlMeta, /rawKey\.includes\(optionKey\)/);
 mustHave('Meta normalization', crawlMeta, /OPTION_ALIASES/);
 mustHave('Meta normalization', crawlMeta, /chinese_number_extracted/);
 mustHave('Meta normalization', crawlMeta, /numeric_unit_extracted/);
+mustHave('Meta normalization', crawlMeta, /money_number_without_currency/);
 mustHave('Meta normalization', crawlMeta, /salaryPeriodMonthlyFactor/);
 mustHave('Meta normalization', crawlMeta, /strict_number/);
 mustHave('Meta normalization', crawlMeta, /strict_boolean/);

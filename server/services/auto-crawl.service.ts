@@ -115,12 +115,14 @@ function sourceFailureBackoffMinutes(failCount: unknown) {
     }
 
     function extractionAudit(extracted: Awaited<ReturnType<typeof buildCrawlExtract>>) {
+      const rejectedMeta = extracted.audit.metaStandardization.rejected;
       return {
         schemaVersion: extracted.audit.schemaVersion,
         configuredMetaKeys: extracted.audit.configuredMetaKeys,
         normalizedMetaKeys: extracted.audit.metaStandardization.normalizedKeys,
         unexpectedMetaKeys: extracted.audit.metaStandardization.unexpectedKeys,
-        rejectedMetaKeys: Object.keys(extracted.audit.metaStandardization.rejected),
+        rejectedMetaKeys: Object.keys(rejectedMeta),
+        rejectedMeta,
         provider: extracted.audit.provider,
         model: extracted.audit.model,
         enrichmentStatus: extracted.audit.enrichmentStatus,
