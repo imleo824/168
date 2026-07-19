@@ -80,6 +80,7 @@ function phaseLabel(phase?: string | null) {
     post_payload_ready: '生成发布入参',
     publish_succeeded: '发布成功',
     publish_failed: '发布失败',
+    item_finished: '单条内容执行结束',
     reprocess_item_seen: '历史内容重跑开始',
     reprocess_item_failed: '历史内容重跑失败',
   };
@@ -295,6 +296,8 @@ function contentTitle(events: LogEvent[]) {
 function finalStatus(events: LogEvent[]) {
   if (events.some((event) => event.phase === 'publish_succeeded')) return '已发布';
   if (events.some((event) => event.phase === 'publish_failed')) return '发布失败';
+  const finished = [...events].reverse().find((event) => event.phase === 'item_finished' && event.status);
+  if (finished) return statusLabel(finished.status);
   const duplicate = [...events].reverse().find((event) => event.status === 'DUPLICATE');
   if (duplicate) return statusLabel(duplicate.status);
   const rejected = [...events].reverse().find((event) => event.status === 'REJECTED');
@@ -446,7 +449,7 @@ export function AdminAutoCrawlExecutionLogsCompactPanel() {
       {isLoading ? <AdminAutomationEmptyLogs loading /> : sourceGroups.length ? sourceGroups.map((source) => (
         <section key={source.key} className="admin-config-card">
           <div className="admin-text-strong-xs">数据源：{source.name}</div>
-          <div className="admin-form-note mt-1">最近执行：{fmt(source.latestAt)} · 内容 {source.items.length} 条</div>
+          <div className="admin-form-note mt-1">最近执行：{fmt(source.latestAt)} · 按抓取内容展示执行过程，共 {source.items.length} 条</div>
           <div className="mt-3 space-y-3">{source.items.map((item) => (
             <details key={item.key} className="admin-config-card">
               <summary className="cursor-pointer"><div className="flex flex-wrap items-start justify-between gap-2"><div className="min-w-0"><div className="admin-text-strong-xs">内容：{item.title}</div><div className="admin-form-note mt-1">状态：{item.status}{item.reason ? ` · 原因：${item.reason}` : ''} · 过程 {item.events.length} 步</div></div><div className="admin-form-note">{fmt(item.latestAt)}</div></div></summary>

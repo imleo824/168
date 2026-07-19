@@ -746,11 +746,52 @@ async function processSource(
             source, item, fingerprint: fp, status: 'DUPLICATE', reason: duplicate.duplicateBy,
             details: { existingPostId: duplicate.postId },
           });
+          logEvent(logger, {
+            scope: 'item',
+            phase: 'item_finished',
+            message: '单条内容执行结束：重复内容未发布',
+            source,
+            item,
+            fingerprint: fp,
+            status: 'DUPLICATE',
+            reason: duplicate.duplicateBy,
+            details: { existingPostId: duplicate.postId },
+          });
           commitCursor(stats, item);
           continue;
         }
 
-        await writeItem(source, runId, item, fp, itemHash);
+        try {
+          await writeItem(source, runId, item, fp, itemHash);
+        } catch (error) {
+          const message = errorText(error);
+          stats.error += 1;
+          logEvent(logger, {
+            level: 'error',
+            scope: 'item',
+            phase: 'raw_store_failed',
+            message: '原始抓取记录写入失败，单条内容终止',
+            source,
+            item,
+            fingerprint: fp,
+            status: 'FAILED',
+            error: message,
+            details: { contentHash: itemHash },
+          });
+          logEvent(logger, {
+            level: 'error',
+            scope: 'item',
+            phase: 'item_finished',
+            message: '单条内容执行结束：原始记录写入失败',
+            source,
+            item,
+            fingerprint: fp,
+            status: 'FAILED',
+            error: message,
+          });
+          commitCursor(stats, item);
+          continue;
+        }
         logEvent(logger, {
           scope: 'item',
           phase: 'raw_stored',
@@ -779,6 +820,17 @@ async function processSource(
             contentHash: publishHash,
             metadata: { quality: qualityAudit(quality), publishContentHash: publishHash, parse: fetched.parseMeta, imageCount: item.images?.length || 0 },
           });
+          logEvent(logger, {
+            scope: 'item',
+            phase: 'item_finished',
+            message: '单条内容执行结束：质量过滤未通过',
+            source,
+            item,
+            fingerprint: fp,
+            status: 'REJECTED',
+            reason: quality.reason,
+            details: { publishContentHash: publishHash },
+          });
           commitCursor(stats, item);
           continue;
         }
@@ -806,6 +858,17 @@ async function processSource(
             source, item, fingerprint: fp, status: 'DUPLICATE', reason: cleanedDuplicate.duplicateBy,
             details: { existingPostId: cleanedDuplicate.postId, publishContentHash: publishHash },
           });
+          logEvent(logger, {
+            scope: 'item',
+            phase: 'item_finished',
+            message: '单条内容执行结束：清洗后重复未发布',
+            source,
+            item,
+            fingerprint: fp,
+            status: 'DUPLICATE',
+            reason: cleanedDuplicate.duplicateBy,
+            details: { existingPostId: cleanedDuplicate.postId, publishContentHash: publishHash },
+          });
           commitCursor(stats, item);
           continue;
         }
@@ -830,6 +893,16 @@ async function processSource(
             source, item, fingerprint: fp, status: 'PUBLISHED',
             details: { postId: post.id, categoryId: category.id, categoryName: category.name },
           });
+          logEvent(logger, {
+            scope: 'item',
+            phase: 'item_finished',
+            message: '单条内容执行结束：发布成功',
+            source,
+            item,
+            fingerprint: fp,
+            status: 'PUBLISHED',
+            details: { postId: post.id, categoryId: category.id, categoryName: category.name },
+          });
           schedulePostSideEffects(post.id);
           stats.delivered += 1;
           stats.latestTitle ||= extracted.title;
@@ -845,6 +918,17 @@ async function processSource(
             level: 'error', scope: 'publish', phase: 'publish_failed',
             message: '帖子发布失败，已进入失败队列', source, item, fingerprint: fp,
             status: 'FAILED', error: message,
+          });
+          logEvent(logger, {
+            level: 'error',
+            scope: 'item',
+            phase: 'item_finished',
+            message: '单条内容执行结束：发布失败',
+            source,
+            item,
+            fingerprint: fp,
+            status: 'FAILED',
+            error: message,
           });
         }
         commitCursor(stats, item);
@@ -1155,6 +1239,17 @@ export async function reprocessAutoCrawlItems(options: {
               reason: duplicate.duplicateBy,
               details: { existingPostId: duplicate.postId },
             });
+            logEvent(logger, {
+              scope: 'item',
+              phase: 'item_finished',
+              message: '历史内容执行结束：重复内容未发布',
+              source,
+              item,
+              fingerprint: fp,
+              status: 'DUPLICATE',
+              reason: duplicate.duplicateBy,
+              details: { existingPostId: duplicate.postId },
+            });
             items.push({ id: item.id, status: 'DUPLICATE', postId: duplicate.postId });
             continue;
           }
@@ -1192,6 +1287,17 @@ export async function reprocessAutoCrawlItems(options: {
               reason: quality.reason,
               details: { publishContentHash: publishHash },
             });
+            logEvent(logger, {
+              scope: 'item',
+              phase: 'item_finished',
+              message: '历史内容执行结束：质量过滤未通过',
+              source,
+              item,
+              fingerprint: fp,
+              status: 'REJECTED',
+              reason: quality.reason,
+              details: { publishContentHash: publishHash },
+            });
             items.push({ id: item.id, status: 'REJECTED' });
             continue;
           }
@@ -1217,6 +1323,17 @@ export async function reprocessAutoCrawlItems(options: {
               scope: 'item',
               phase: 'duplicate_after_clean',
               message: '历史内容清洗后重复，已跳过',
+              source,
+              item,
+              fingerprint: fp,
+              status: 'DUPLICATE',
+              reason: cleanedDuplicate.duplicateBy,
+              details: { existingPostId: cleanedDuplicate.postId, publishContentHash: publishHash },
+            });
+            logEvent(logger, {
+              scope: 'item',
+              phase: 'item_finished',
+              message: '历史内容执行结束：清洗后重复未发布',
               source,
               item,
               fingerprint: fp,
@@ -1257,6 +1374,16 @@ export async function reprocessAutoCrawlItems(options: {
               status: 'PUBLISHED',
               details: { postId: post.id, categoryId: category.id, categoryName: category.name },
             });
+            logEvent(logger, {
+              scope: 'item',
+              phase: 'item_finished',
+              message: '历史内容执行结束：发布成功',
+              source,
+              item,
+              fingerprint: fp,
+              status: 'PUBLISHED',
+              details: { postId: post.id, categoryId: category.id, categoryName: category.name },
+            });
             items.push({ id: item.id, status: 'PUBLISHED', postId: post.id });
           } catch (error) {
             const message = errorText(error);
@@ -1271,6 +1398,17 @@ export async function reprocessAutoCrawlItems(options: {
               scope: 'publish',
               phase: 'publish_failed',
               message: '历史内容重跑发布失败',
+              source,
+              item,
+              fingerprint: fp,
+              status: 'FAILED',
+              error: message,
+            });
+            logEvent(logger, {
+              level: 'error',
+              scope: 'item',
+              phase: 'item_finished',
+              message: '历史内容执行结束：发布失败',
               source,
               item,
               fingerprint: fp,

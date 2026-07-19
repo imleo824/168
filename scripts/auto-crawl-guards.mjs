@@ -76,6 +76,8 @@ mustHave('main flow log start', crawl, /phase: 'run_started'/);
 mustHave('main flow item seen log', crawl, /phase: 'item_seen'/);
 mustHave('main flow raw stored log', crawl, /phase: 'raw_stored'/);
 mustHave('main flow post payload log', crawl, /phase: 'post_payload_ready'/);
+mustHave('main flow item terminal log', crawl, /phase: 'item_finished'/);
+mustHave('main flow item terminal log', crawl, /单条内容执行结束/);
 mustHave('main flow source config failure', crawl, /phase: 'source_config_invalid'/);
 mustHave('main flow source config failure', crawl, /stats\.error \+= 1/);
 mustHave('main flow', crawl, /帖子发布失败，已进入失败队列/);
@@ -87,6 +89,8 @@ mustNotHave('auto crawl logs panel', crawlLogsPanel, /同步 Telegram|syncToTele
 mustHave('auto crawl logs panel fallback', crawlLogsPanel, /buildRunGroups/);
 mustHave('auto crawl logs panel fallback', crawlLogsPanel, /const hasLogs = sourceGroups\.length > 0 \|\| runGroups\.length > 0/);
 mustHave('auto crawl logs panel process fallback', crawlLogsPanel, /title: '运行过程'/);
+mustHave('auto crawl logs panel item process', crawlLogsPanel, /按抓取内容展示执行过程/);
+mustHave('auto crawl logs panel item process', crawlLogsPanel, /item_finished: '单条内容执行结束'/);
 mustNotHave('auto crawl logs panel process fallback', crawlLogsPanel, /运行批次/);
 mustHave('auto crawl execution logs fallback', read('server/services/auto-crawl-execution-log.service.ts'), /FROM "AutoCrawlRun"[\s\S]*ORDER BY "startedAt" DESC/);
 mustHave('auto crawl execution logs fallback', read('server/services/auto-crawl-execution-log.service.ts'), /listDatabaseRunSummaries/);
