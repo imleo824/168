@@ -228,6 +228,7 @@ const salaryRangeSchema = {
 
 for (const [rawSalary, expectedRange] of [
   ['1000U/月', '$800 - $1,200'],
+  ['1500/月', '$1,200 - $1,500'],
   ['5000人民币', '$800 以下'],
   ['1.5w RMB/月', '$2,000 - $3,000'],
   ['6000 AED', '$1,500 - $2,000'],
@@ -503,7 +504,33 @@ const ambiguousSelect = await normalizeCrawlCategoryMeta({
 
 assert.equal(ambiguousSelect.meta.position, undefined, 'ambiguous select values must not be guessed.');
 assert.equal(ambiguousSelect.audit.rejected.position?.reason, 'database_option_not_matched');
-assert.equal(ambiguousSelect.meta.depositMonths, undefined, 'ambiguous numeric values with multiple Chinese numbers must not be guessed.');
-assert.equal(ambiguousSelect.audit.rejected.depositMonths?.reason, 'number_not_matched');
+assert.equal(ambiguousSelect.meta.depositMonths, 2, 'deposit fields must extract the deposit number from composite rent phrases.');
+assert.equal(ambiguousSelect.audit.rejected.depositMonths, undefined);
+
+const rentPaymentMeta = await normalizeCrawlCategoryMeta({
+  category: { id: 'category_housing', name: '租房', slug: 'housing' },
+  categoryMetaSchema: {
+    categorySlug: 'housing',
+    schemaVersion: 1,
+    name: '租房',
+    fields: [
+      { key: 'depositMonths', label: '押几', type: 'number', required: false },
+      { key: 'paymentMonths', label: '付几', type: 'number', required: false },
+      { key: 'bedrooms', label: '卧室', type: 'number', required: false },
+    ],
+  },
+  rawMeta: {
+    depositMonths: '押二付一',
+    paymentMonths: '押二付一',
+    bedrooms: '两室一厅',
+  },
+  locationPresets: [],
+});
+
+assert.deepEqual(rentPaymentMeta.meta, {
+  depositMonths: 2,
+  paymentMonths: 1,
+  bedrooms: 2,
+}, 'rent composite phrases must extract field-specific numeric meta.');
 
 console.log('[auto-crawl-quality-meta-guards] passed');

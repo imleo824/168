@@ -143,6 +143,24 @@ function normalizePlainNumber(raw: unknown) {
     : { value: null, reason: 'number_not_matched' };
 }
 
+function contextualNumberPattern(field: PublishCategoryMetaFieldConfig) {
+  const key = normalizedComparable(field.key);
+  const label = normalizedComparable(field.label);
+  if (/deposit/.test(key) || /押/.test(label)) return /押\s*([+-]?\d+(?:\.\d+)?|[一二两三四五六七八九十百千万]{1,12})/;
+  if (/payment/.test(key) || /付/.test(label)) return /付\s*([+-]?\d+(?:\.\d+)?|[一二两三四五六七八九十百千万]{1,12})/;
+  if (/bed(room)?s?/.test(key) || /卧室|房间|几房|房型/.test(label)) return /([+-]?\d+(?:\.\d+)?|[一二两三四五六七八九十百千万]{1,12})\s*(?:房|室|bedrooms?|br)(?:\b|$)?/i;
+  return null;
+}
+
+function normalizeContextualNumber(raw: unknown, field: PublishCategoryMetaFieldConfig) {
+  if (typeof raw !== 'string') return { value: null, reason: 'contextual_number_not_matched' };
+  const pattern = contextualNumberPattern(field);
+  if (!pattern) return { value: null, reason: 'contextual_number_not_matched' };
+  const match = raw.normalize('NFKC').match(pattern);
+  if (!match?.[1]) return { value: null, reason: 'contextual_number_not_matched' };
+  return normalizePlainNumber(match[1]);
+}
+
 function exactConfiguredOption(raw: unknown, field: PublishCategoryMetaFieldConfig) {
   if (typeof raw !== 'string') return null;
   const rawKey = normalizedComparable(raw);
@@ -292,7 +310,11 @@ function normalizeMoneyNumber(raw: unknown) {
 }
 
 function normalizeNumber(raw: unknown, field: PublishCategoryMetaFieldConfig) {
-  return moneyField(field) ? normalizeMoneyNumber(raw) : normalizePlainNumber(raw);
+  if (moneyField(field)) return normalizeMoneyNumber(raw);
+  const contextual = normalizeContextualNumber(raw, field);
+  return contextual.value !== null && contextual.value !== undefined
+    ? { ...contextual, reason: 'contextual_number_extracted' }
+    : normalizePlainNumber(raw);
 }
 
 function salaryOptionRange(option: string) {
@@ -341,9 +363,9 @@ function semanticSalaryOption(raw: unknown, field: PublishCategoryMetaFieldConfi
     ? [raw]
     : parseNumericAmounts(text);
   if (!amounts.length) return isNegotiableSalaryText(text) ? option : null;
-  if (!rate) return option;
+  if (!rate && !amounts.length) return option;
   const averageAmount = amounts.reduce((sum, amount) => sum + amount, 0) / amounts.length;
-  const salaryOption = chooseSalaryRangeOption(averageAmount * rate * periodFactor, field);
+  const salaryOption = chooseSalaryRangeOption(averageAmount * (rate || 1) * periodFactor, field);
   return salaryOption || option;
 }
 

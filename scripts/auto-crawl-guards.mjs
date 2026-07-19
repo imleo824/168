@@ -160,6 +160,8 @@ mustHave('Meta normalization', crawlMeta, /OPTION_ALIASES/);
 mustHave('Meta normalization', crawlMeta, /chinese_number_extracted/);
 mustHave('Meta normalization', crawlMeta, /numeric_unit_extracted/);
 mustHave('Meta normalization', crawlMeta, /money_number_without_currency/);
+mustHave('Meta normalization', crawlMeta, /contextualNumberPattern/);
+mustHave('Meta normalization', crawlMeta, /contextual_number_extracted/);
 mustHave('Meta normalization', crawlMeta, /salaryPeriodMonthlyFactor/);
 mustHave('Meta normalization', crawlMeta, /strict_number/);
 mustHave('Meta normalization', crawlMeta, /strict_boolean/);
