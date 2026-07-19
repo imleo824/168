@@ -33,7 +33,7 @@ export function registerAdminBillingRoutes(app: Express, options: RegisterAdminB
     normalizeAdminUserTypeFilter,
   } = options;
 
-  app.get('/api/admin/transactions', authMiddleware, adminOnly, async (req, res) => {
+  app.get('/api/admin/transactions', authMiddleware, adminOnly, catchAsync(async (req, res) => {
     try {
       if (isDbConfigured()) {
         const { action, search, startDate, endDate, userType } = req.query;
@@ -138,9 +138,9 @@ export function registerAdminBillingRoutes(app: Express, options: RegisterAdminB
       }
       res.status(500).json({ error: 'Failed to fetch transactions' });
     }
-  });
+  }));
 
-  app.get('/api/admin/orders', authMiddleware, adminOnly, async (req, res) => {
+  app.get('/api/admin/orders', authMiddleware, adminOnly, catchAsync(async (req, res) => {
     try {
       if (isDbConfigured()) {
         const { status, search, startDate, endDate, userType } = req.query;
@@ -222,7 +222,7 @@ export function registerAdminBillingRoutes(app: Express, options: RegisterAdminB
       }
       res.status(500).json({ error: 'Failed to fetch orders' });
     }
-  });
+  }));
 
   app.post('/api/admin/orders/:id/credit', authMiddleware, adminOnly, catchAsync(async (req, res) => {
     if (!isDbConfigured()) return res.status(503).json({ error: 'Database is not configured' });

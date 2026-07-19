@@ -123,7 +123,7 @@ export function registerAdminPromotionRoutes(app: Express, options: RegisterAdmi
     normalizePromotionErrorMessage,
   } = options;
 
-  app.get('/api/admin/promotions', authMiddleware, adminOnly, async (req, res) => {
+  app.get('/api/admin/promotions', authMiddleware, adminOnly, catchAsync(async (req, res) => {
     try {
       if (isDbConfigured()) {
         const { type, status, search, categoryId, startDate, endDate, userType } = req.query;
@@ -240,7 +240,7 @@ export function registerAdminPromotionRoutes(app: Express, options: RegisterAdmi
       }
       res.status(500).json({ error: 'Failed to fetch promotions' });
     }
-  });
+  }));
 
   app.patch('/api/admin/promotions/:id', authMiddleware, adminOnly, catchAsync(async (req, res) => {
     if (!isDbConfigured()) return res.status(503).json({ error: 'Database is not configured' });

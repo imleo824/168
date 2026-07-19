@@ -34,7 +34,7 @@ export function registerAdminPostRoutes(app: Express, options: RegisterAdminPost
     adjustPostQuoteCount,
   } = options;
 
-  app.get('/api/admin/posts', authMiddleware, adminOnly, async (req, res) => {
+  app.get('/api/admin/posts', authMiddleware, adminOnly, catchAsync(async (req, res) => {
     try {
       if (isDbConfigured()) {
         const { categoryId, search, published, userType } = req.query;
@@ -91,7 +91,7 @@ export function registerAdminPostRoutes(app: Express, options: RegisterAdminPost
       }
       res.status(500).json({ error: 'Failed to fetch posts' });
     }
-  });
+  }));
 
   app.patch('/api/admin/posts/:id/publish', authMiddleware, adminOnly, catchAsync(async (req, res) => {
     if (!isDbConfigured()) return res.status(503).json({ error: 'Database is not configured' });

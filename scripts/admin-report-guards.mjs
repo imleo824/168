@@ -11,11 +11,38 @@ function read(relativePath) {
   return fs.readFileSync(path.join(root, relativePath), 'utf8');
 }
 
+function listFiles(dir, suffix = '.ts') {
+  const absoluteDir = path.join(root, dir);
+  return fs.readdirSync(absoluteDir, { withFileTypes: true }).flatMap((entry) => {
+    const relativePath = path.join(dir, entry.name);
+    if (entry.isDirectory()) return listFiles(relativePath, suffix);
+    return entry.isFile() && entry.name.endsWith(suffix) ? [relativePath] : [];
+  });
+}
+
 function extractRoute(source, route) {
   const start = source.indexOf(route);
   assert.notEqual(start, -1, `${route} must exist`);
   const nextRoute = source.indexOf("\napp.", start + route.length);
   return source.slice(start, nextRoute === -1 ? source.length : nextRoute);
+}
+
+function assertNoBareAdminAsyncRoutes() {
+  const routeFiles = [
+    ...listFiles('server/routes'),
+    ...listFiles('server/chat'),
+  ];
+  const offenders = [];
+  const bareAdminAsyncRouteLine = /app\.(?:get|post|patch|put|delete)\('\/api\/admin[^'\n]*'[^;\n]*,\s*async\s*\(/;
+  for (const file of routeFiles) {
+    const source = read(file);
+    source.split('\n').forEach((lineText, index) => {
+      if (bareAdminAsyncRouteLine.test(lineText)) {
+        offenders.push(`${file}:${index + 1}: ${lineText.trim()}`);
+      }
+    });
+  }
+  assert.deepEqual(offenders, [], `admin routes must use catchAsync instead of bare async handlers:\n${offenders.join('\n')}`);
 }
 
 const bootstrap = read('server/bootstrap.ts');
@@ -57,6 +84,7 @@ assert.match(platformTime, /export function getPlatformSqlDateKeyExpression\(/, 
 assert.match(adminReportRoutes, /from '\.\.\/platform-time'/, 'admin reports must import the shared platform time helper');
 assert.match(adminReportRoutes, /async function runAdminReportQuery/, 'admin reports must tolerate individual metric query failures.');
 assert.match(adminReportRoutes, /\[admin-report:\$\{label\}\]/, 'admin report query fallback must log failed metric labels.');
+assertNoBareAdminAsyncRoutes();
 
 const usersRoute = extractRoute(adminUserRoutes, "app.get('/api/admin/users'");
 const postsRoute = extractRoute(adminPostRoutes, "app.get('/api/admin/posts'");

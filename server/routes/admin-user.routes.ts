@@ -61,7 +61,7 @@ export function registerAdminUserRoutes(app: Express, options: RegisterAdminUser
     markUserDataChanged,
   } = options;
 
-  app.get('/api/admin/users', authMiddleware, adminOnly, async (req, res) => {
+  app.get('/api/admin/users', authMiddleware, adminOnly, catchAsync(async (req, res) => {
     try {
       if (isDbConfigured()) {
         const { search, userType, startDate, endDate, member, tuiPlus, isTuiPlus } = req.query;
@@ -136,7 +136,7 @@ export function registerAdminUserRoutes(app: Express, options: RegisterAdminUser
       console.warn('[admin-users] Failed to fetch users', err);
       res.status(500).json({ error: 'Failed to fetch users' });
     }
-  });
+  }));
 
   app.patch('/api/admin/users/:id/disabled', authMiddleware, adminOnly, catchAsync(async (req: AuthRequest, res) => {
     if (!isDbConfigured()) return res.status(503).json({ error: 'Database is not configured' });
