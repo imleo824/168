@@ -123,7 +123,7 @@ export async function cleanupAutoCrawlExecutionLogs() {
 
 export function createAutoCrawlExecutionLogger(runId: string, trigger: string) {
   let chain = Promise.resolve();
-  const log = (event: Omit<AutoCrawlExecutionLogEvent, 'timestamp' | 'runId' | 'trigger'>) => {
+  const log = (event: Omit<AutoCrawlExecutionLogEvent, 'timestamp' | 'runId' | 'trigger' | 'level'> & { level?: AutoCrawlExecutionLogLevel }) => {
     const payload: AutoCrawlExecutionLogEvent = {
       timestamp: new Date().toISOString(),
       runId,

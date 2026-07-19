@@ -532,6 +532,21 @@ function extractionContext(
     ): Promise<AutoCrawlPublishResult> {
       if (!source.authorUserId) throw new Error('auto_crawl_author_required');
       const category = context.category;
+      logEvent(logger, {
+        scope: 'ai',
+        phase: 'ai_started',
+        message: '开始生成发布标题和可选结构化字段',
+        source,
+        item,
+        fingerprint: fp,
+        status: 'RUNNING',
+        details: {
+          categoryId: category.id,
+          categoryName: category.name,
+          cleanedContentLength: preview(quality.cleanedContent, 12).length,
+          imageCount: item.images?.length || 0,
+        },
+      });
       const extracted = await buildCrawlExtract({
         context,
         rawTitle: quality.cleanedTitle || item.title,
@@ -575,28 +590,77 @@ function extractionContext(
         },
       });
 
-      const post = await prisma.$transaction(async (tx) => {
-        await (tx as any).$queryRawUnsafe(`SELECT set_config('app.auto_crawl_write','1',true)`);
-        const created = await tx.post.create({
-          data: {
-            title: extracted.title,
-            content: extracted.content,
-            location: extracted.location || null,
-            contact: extracted.contact,
-            showContact: source.showContact && Boolean(extracted.contact),
-            images: item.images || [],
-            source: (source.sourceName || source.source).slice(0, 80),
-            isAnonymous: false,
-            isPublished: true,
-            bumpedAt: new Date(),
-            category: { connect: { id: category.id } },
-            user: { connect: { id: source.authorUserId } },
-            categoryMeta: extracted.meta,
-            categoryMetaSchemaVersion: extracted.audit.schemaVersion || null,
-          },
-          select: { id: true },
+      logEvent(logger, {
+        scope: 'publish',
+        phase: 'post_db_write_started',
+        message: '开始写入帖子',
+        source,
+        item,
+        fingerprint: fp,
+        status: 'RUNNING',
+        details: {
+          categoryId: category.id,
+          authorUserId: source.authorUserId,
+          metaKeys: Object.keys(extracted.meta || {}),
+          schemaVersion: extracted.audit.schemaVersion,
+        },
+      });
+
+      let post: { id: string };
+      try {
+        post = await prisma.$transaction(async (tx) => {
+          await (tx as any).$queryRawUnsafe(`SELECT set_config('app.auto_crawl_write','1',true)`);
+          const created = await tx.post.create({
+            data: {
+              title: extracted.title,
+              content: extracted.content,
+              location: extracted.location || null,
+              contact: extracted.contact,
+              showContact: source.showContact && Boolean(extracted.contact),
+              images: item.images || [],
+              source: (source.sourceName || source.source).slice(0, 80),
+              isAnonymous: false,
+              isPublished: true,
+              bumpedAt: new Date(),
+              category: { connect: { id: category.id } },
+              user: { connect: { id: source.authorUserId } },
+              categoryMeta: extracted.meta,
+              categoryMetaSchemaVersion: extracted.audit.schemaVersion || null,
+            },
+            select: { id: true },
+          });
+          return created;
         });
-        return created;
+      } catch (error) {
+        logEvent(logger, {
+          level: 'error',
+          scope: 'publish',
+          phase: 'post_db_write_failed',
+          message: '帖子写入数据库失败',
+          source,
+          item,
+          fingerprint: fp,
+          status: 'FAILED',
+          error: errorText(error),
+          details: {
+            categoryId: category.id,
+            authorUserId: source.authorUserId,
+            metaKeys: Object.keys(extracted.meta || {}),
+            schemaVersion: extracted.audit.schemaVersion,
+          },
+        });
+        throw error;
+      }
+
+      logEvent(logger, {
+        scope: 'publish',
+        phase: 'post_db_written',
+        message: '帖子已写入数据库',
+        source,
+        item,
+        fingerprint: fp,
+        status: 'PUBLISHED',
+        details: { postId: post.id },
       });
 
       return { post, extracted, category };
@@ -716,6 +780,24 @@ async function processSource(
       stats.parsed = fetched.items.length;
       stats.visibleMinCursor = fetched.visibleMinCursor;
       stats.visibleMaxCursor = fetched.visibleMaxCursor;
+      logEvent(logger, {
+        scope: 'source',
+        phase: 'source_fetched',
+        message: fetched.items.length ? '数据源抓取解析完成，发现候选内容' : '数据源抓取解析完成，但没有新候选内容',
+        source,
+        status: fetched.items.length ? 'READY' : 'SKIPPED',
+        reason: fetched.items.length ? undefined : 'no_new_candidate_after_cursor',
+        counts: {
+          fetched: stats.fetched,
+          parsed: stats.parsed,
+        },
+        details: {
+          ...fetched.parseMeta,
+          currentCursor: source.cursor || '',
+          cursorKind: source.cursorKind,
+          maxItemsPerSource: config.maxItemsPerSource,
+        },
+      });
       if (fetched.parseMeta.gapUnresolved) {
         stats.warning = `telegram_gap_partially_recovered:${fetched.parseMeta.gapFrom}:${fetched.parseMeta.gapTo}:${fetched.parseMeta.gapStoppedReason}`;
         logEvent(logger, {
@@ -723,6 +805,33 @@ async function processSource(
           message: 'Telegram 历史缺口无法完全回补，已发布全部可恢复内容并保留缺口审计',
           source, status: 'PARTIAL', reason: stats.warning, details: fetched.parseMeta,
         });
+      }
+
+      if (!fetched.items.length) {
+        await updateSourceStats(source, stats);
+        logEvent(logger, {
+          scope: 'source',
+          phase: 'source_finished',
+          message: '数据源执行结束：没有新内容发布',
+          source,
+          status: 'SKIPPED',
+          reason: stats.fetched ? 'cursor_filtered_all_items' : 'parser_returned_zero_items',
+          counts: {
+            fetched: stats.fetched,
+            parsed: stats.parsed,
+            scanned: stats.scanned,
+            delivered: stats.delivered,
+            filtered: stats.filtered,
+            duplicate: stats.duplicate,
+            error: stats.error,
+          },
+          details: {
+            currentCursor: source.cursor || '',
+            visibleMinCursor: stats.visibleMinCursor || null,
+            visibleMaxCursor: stats.visibleMaxCursor || null,
+          },
+        });
+        return stats;
       }
 
       for (const item of fetched.items.slice(0, clampRun(config.maxItemsPerSource, DEFAULT_MAX_ITEMS_PER_SOURCE, MAX_ITEMS_PER_SOURCE))) {
@@ -935,6 +1044,28 @@ async function processSource(
       }
 
       await updateSourceStats(source, stats);
+      logEvent(logger, {
+        scope: 'source',
+        phase: 'source_finished',
+        message: '数据源执行结束',
+        source,
+        status: stats.error ? 'PARTIAL_FAILED' : 'SUCCEEDED',
+        reason: stats.failedReason || stats.warning || undefined,
+        counts: {
+          fetched: stats.fetched,
+          parsed: stats.parsed,
+          scanned: stats.scanned,
+          delivered: stats.delivered,
+          filtered: stats.filtered,
+          duplicate: stats.duplicate,
+          error: stats.error,
+        },
+        details: {
+          nextCursor: stats.cursor || source.cursor || '',
+          visibleMinCursor: stats.visibleMinCursor || null,
+          visibleMaxCursor: stats.visibleMaxCursor || null,
+        },
+      });
       return stats;
     }
 
@@ -1027,12 +1158,49 @@ export async function runAutoCrawlOnce(options: { trigger?: RunTrigger; force?: 
 
   try {
     const config = await getAutoCrawlConfig();
+    logEvent(logger, {
+      scope: 'run',
+      phase: 'config_loaded',
+      message: '自动抓取配置已读取',
+      status: config.enabled ? 'ENABLED' : 'DISABLED',
+      details: {
+        enabled: config.enabled,
+        checkIntervalMinutes: config.checkIntervalMinutes,
+        maxItemsPerSource: config.maxItemsPerSource,
+        maxSourcesPerRun: config.maxSourcesPerRun,
+        configuredSourceCount: config.sources.length,
+      },
+    });
     if (!config.enabled && !options.force) {
       return await finishLoggedRun(logger, id, { status: 'SKIPPED', skipReason: '自动抓取未启用' });
     }
     const databaseConfig = await loadAutoCrawlDatabaseConfig();
-      const sources = await runnableSources(config, Boolean(options.force));
-      if (!sources.length) {
+    logEvent(logger, {
+      scope: 'run',
+      phase: 'database_config_loaded',
+      message: '数据库分类和后台字段配置已读取',
+      status: 'READY',
+      details: {
+        categoryCount: databaseConfig.categoriesById.size,
+        schemaCount: databaseConfig.schemasBySlug.size,
+        locationPresetCount: databaseConfig.locationPresets.length,
+      },
+    });
+    const sources = await runnableSources(config, Boolean(options.force));
+    logEvent(logger, {
+      scope: 'run',
+      phase: 'sources_loaded',
+      message: sources.length ? '已加载到期数据源' : '没有到期可执行数据源',
+      status: sources.length ? 'READY' : 'SKIPPED',
+      reason: sources.length ? undefined : 'no_due_source',
+      counts: { sourceCount: sources.length },
+      details: {
+        force: Boolean(options.force),
+        maxSourcesPerRun: config.maxSourcesPerRun,
+        sourceIds: sources.map((source) => source.id),
+      },
+    });
+    if (!sources.length) {
       return await finishLoggedRun(logger, id, { status: 'SKIPPED', skipReason: '暂无到期数据源' });
     }
 
@@ -1048,6 +1216,17 @@ export async function runAutoCrawlOnce(options: { trigger?: RunTrigger; force?: 
     const sourceConcurrency = 4;
     for (let index = 0; index < sources.length; index += sourceConcurrency) {
       const batch = sources.slice(index, index + sourceConcurrency);
+      logEvent(logger, {
+        scope: 'run',
+        phase: 'source_group_started',
+        message: '开始处理一组数据源',
+        status: 'RUNNING',
+        counts: { sourceCount: batch.length },
+        details: {
+          groupStartIndex: index,
+          sourceIds: batch.map((source) => source.id),
+        },
+      });
       const results = await Promise.all(batch.map(async (source) => {
         try {
           return await processSource(id, source, config, databaseConfig, logger);
@@ -1089,6 +1268,23 @@ export async function runAutoCrawlOnce(options: { trigger?: RunTrigger; force?: 
         totals.error += stats.error;
         totals.latestTitle ||= stats.latestTitle;
       }
+      logEvent(logger, {
+        scope: 'run',
+        phase: 'source_group_finished',
+        message: '一组数据源处理结束',
+        status: totals.error ? 'PARTIAL' : 'RUNNING',
+        counts: {
+          scanned: totals.scanned,
+          delivered: totals.delivered,
+          filtered: totals.filtered,
+          duplicate: totals.duplicate,
+          error: totals.error,
+        },
+        details: {
+          groupStartIndex: index,
+          sourceIds: batch.map((source) => source.id),
+        },
+      });
     }
 
     return await finishLoggedRun(logger, id, {

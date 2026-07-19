@@ -9,6 +9,7 @@ import {
   reconcileInterruptedAutoCrawlState,
   runAutoCrawlRecoveryQueue,
 } from './auto-crawl-recovery.service';
+import { createAutoCrawlExecutionLogger } from './auto-crawl-execution-log.service';
 import { recordAutomationHeartbeat } from './automation-health.service';
 import { withAutomationTaskLock, type AutomationTaskLockDetails } from './automation-task-lock.service';
 
@@ -32,11 +33,44 @@ function autoCrawlHeartbeatReason(run: any, error?: unknown) {
 async function createLockedRun(trigger: AutoCrawlObservedTrigger, lock: AutomationTaskLockDetails | null) {
   const owner = `LOCKED:${Date.now()}:${lock?.owner || 'unknown'}`;
   const id = await createAutoCrawlRun(trigger, owner);
+  const logger = createAutoCrawlExecutionLogger(id, trigger);
+  logger.log({
+    scope: 'run',
+    phase: 'run_started',
+    message: '自动抓取运行开始',
+    status: 'RUNNING',
+    details: { lockedBy: lock?.owner || null },
+  });
+  logger.log({
+    scope: 'run',
+    phase: 'lock_not_acquired',
+    message: '任务锁占用，本次未进入抓取',
+    status: 'SKIPPED',
+    reason: 'another_instance_running',
+    details: { lock },
+  });
   const run = await finishAutoCrawlRun(id, {
     status: 'SKIPPED',
     skipReason: 'another_instance_running',
     errorMessage: 'auto_crawl_already_running',
   });
+  logger.log({
+    scope: 'run',
+    phase: 'run_finished',
+    message: '自动抓取运行结束',
+    status: 'SKIPPED',
+    reason: 'another_instance_running',
+    error: 'auto_crawl_already_running',
+    counts: {
+      sourceCount: 0,
+      scanned: 0,
+      delivered: 0,
+      filtered: 0,
+      duplicate: 0,
+      error: 0,
+    },
+  });
+  await logger.flush();
   return { ...run, lock, configEnabled: null };
 }
 
