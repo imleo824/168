@@ -8,6 +8,7 @@ type LogSummary = { runId: string; trigger: string; startedAt: string; finishedA
 type LogEvent = { timestamp: string; runId: string; level: string; phase: string; message: string; sourceId?: string | null; sourceName?: string | null; itemId?: string | null; sourcePostId?: string | null; fingerprint?: string | null; status?: string | null; reason?: string | null; error?: string | null; details?: Record<string, unknown> | null };
 type ContentLogGroup = { key: string; title: string; status: string; reason: string; latestAt: string; events: LogEvent[] };
 type SourceLogGroup = { key: string; name: string; latestAt: string; items: ContentLogGroup[] };
+type RunLogGroup = { key: string; title: string; status: string; reason: string; latestAt: string; events: LogEvent[] };
 type DetailRow = { label: string; value: string };
 
 function fmt(value?: string | null) {
@@ -324,6 +325,27 @@ function buildSourceContentGroups(events: LogEvent[]) {
   }).filter((group) => group.items.length).sort((a, b) => new Date(b.latestAt).getTime() - new Date(a.latestAt).getTime());
 }
 
+function buildRunGroups(events: LogEvent[]) {
+  const runMap = new Map<string, LogEvent[]>();
+  for (const event of events) {
+    if (itemKey(event)) continue;
+    runMap.set(event.runId, [...(runMap.get(event.runId) || []), event]);
+  }
+  return [...runMap.entries()].map(([runId, runEvents]) => {
+    const sorted = [...runEvents].sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+    const latest = sorted[sorted.length - 1];
+    const started = sorted[0];
+    return {
+      key: runId,
+      title: `运行批次 ${runId.length > 12 ? `${runId.slice(0, 8)}…${runId.slice(-4)}` : runId}`,
+      status: statusLabel(latest?.status),
+      reason: finalReason(sorted),
+      latestAt: latest?.timestamp || started?.timestamp || '',
+      events: sorted,
+    } as RunLogGroup;
+  }).sort((a, b) => new Date(b.latestAt).getTime() - new Date(a.latestAt).getTime());
+}
+
 function InfoRows({ rows }: { rows: DetailRow[] }) {
   if (!rows.length) return <div className="admin-form-note">细节：本步骤没有关键字段</div>;
   return <div className="mt-2 grid gap-1">{rows.map((row) => <div key={`${row.label}:${row.value}`} className="admin-form-note"><span className="admin-text-strong-xs">{row.label}：</span>{row.value}</div>)}</div>;
@@ -374,6 +396,8 @@ export function AdminAutoCrawlExecutionLogsCompactPanel() {
 
   useEffect(() => { void loadLogs(); }, [loadLogs]);
   const sourceGroups = useMemo(() => buildSourceContentGroups(events), [events]);
+  const runGroups = useMemo(() => buildRunGroups(events), [events]);
+  const hasLogs = sourceGroups.length > 0 || runGroups.length > 0;
 
   return (
     <AdminAutomationLogsShell isLoading={isLoading} onRefresh={loadLogs} actions={<button type="button" onClick={runNow} disabled={isRunning || isLoading} className="pressable admin-quote-action"><Play size={15} aria-hidden="true" />{isRunning ? '执行中' : '手动执行一次'}</button>}>
@@ -391,7 +415,23 @@ export function AdminAutoCrawlExecutionLogsCompactPanel() {
             </details>
           ))}</div>
         </section>
-      )) : <AdminAutomationEmptyLogs />}
+      )) : null}
+      {!isLoading && runGroups.length ? runGroups.map((run) => (
+        <section key={run.key} className="admin-config-card">
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <div className="min-w-0">
+              <div className="admin-text-strong-xs">{run.title}</div>
+              <div className="admin-form-note mt-1">状态：{run.status}{run.reason ? ` · 原因：${run.reason}` : ''} · 节点 {run.events.length} 个</div>
+            </div>
+            <div className="admin-form-note">{fmt(run.latestAt)}</div>
+          </div>
+          <div className="mt-3 space-y-2">{run.events.map((event, index) => {
+            const reason = reasonLabel(event.reason, event.error);
+            return <details key={`${event.runId}-${event.timestamp}-${event.phase}-${index}`} className="admin-config-card"><summary className="cursor-pointer"><div className="flex flex-wrap items-center justify-between gap-2"><div className="admin-text-strong-xs">{index + 1}. {phaseLabel(event.phase)} · {levelLabel(event.level)}</div><div className="admin-form-note">{fmt(event.timestamp)}</div></div>{event.status || reason ? <div className="admin-form-note mt-1">状态：{statusLabel(event.status)}{reason ? ` · 原因：${reason}` : ''}</div> : null}</summary><InfoRows rows={keyRowsForEvent(event)} /></details>;
+          })}</div>
+        </section>
+      )) : null}
+      {!isLoading && !hasLogs ? <AdminAutomationEmptyLogs /> : null}
     </AdminAutomationLogsShell>
   );
 }
