@@ -19,6 +19,7 @@ const coreService = read('server/services/tui-plus.service.ts');
 mustHave('source claim helper', sourceClaim, 'claimedFromAuthorUserId');
 mustHave('source claim helper', sourceClaim, 'claimedFromSourceName');
 mustHave('source claim helper', sourceClaim, 'claimedFromCategoryName');
+mustNotHave('source claim helper', sourceClaim, '"categoryName"');
 mustHave('source claim helper', sourceClaim, 'releaseOrDeleteTuiPlusSource');
 mustHave('source claim helper', sourceClaim, 'pauseOrReleaseTuiPlusSource');
 mustHave('source claim helper', sourceClaim, 'releaseClaimedPlatformSource');
@@ -36,6 +37,10 @@ mustHave('channel claim source snapshot', channelService, 'await pauseOrReleaseT
 mustHave('channel claim source snapshot', channelService, 'The original platform fields are snapshotted');
 mustHave('channel claim source snapshot', channelService, 'claimedFromAuthorUserId');
 mustHave('channel claim source snapshot', channelService, 'Existing posts are intentionally not updated');
+mustHave('channel claim source database category', channelService, 'async function resolveCategory');
+mustHave('channel claim source database category', channelService, '"categoryId"');
+mustNotHave('channel claim source removed columns', channelService, '"trustLevel"');
+mustNotHave('channel claim source removed columns', channelService, '"categoryName"');
 mustNotHave('channel claim source snapshot', channelService, 'DELETE FROM "AutoCrawlSource" WHERE "id" = ${current.sourceId}');
 mustNotHave('channel claim source snapshot', channelService, 'DELETE FROM "AutoCrawlSource" WHERE "id" = ${row.sourceId}');
 mustNotHave('channel pause must not release ownership', channelService, 'pause can release the source back to PLATFORM');

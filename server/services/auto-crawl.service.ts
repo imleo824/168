@@ -554,6 +554,26 @@ function extractionContext(
         reason: extracted.audit.enrichmentError || undefined,
         details: extractionAudit(extracted),
       });
+      logEvent(logger, {
+        scope: 'publish',
+        phase: 'post_payload_ready',
+        message: '发布入参已生成',
+        source,
+        item,
+        fingerprint: fp,
+        status: 'READY',
+        details: {
+          title: extracted.title,
+          categoryId: category.id,
+          categoryName: category.name,
+          location: extracted.location || null,
+          contact: extracted.contact || null,
+          imagesCount: item.images?.length || 0,
+          authorUserId: source.authorUserId,
+          isPublished: true,
+          categoryMeta: extracted.meta,
+        },
+      });
 
       const post = await prisma.$transaction(async (tx) => {
         await (tx as any).$queryRawUnsafe(`SELECT set_config('app.auto_crawl_write','1',true)`);
@@ -709,6 +729,15 @@ async function processSource(
         stats.scanned += 1;
         const itemHash = contentHash(item);
         const fp = fingerprint(source, item);
+        logEvent(logger, {
+          scope: 'item',
+          phase: 'item_seen',
+          message: '解析到单条内容',
+          source,
+          item,
+          fingerprint: fp,
+          status: 'RAW',
+        });
         const duplicate = await findPublishedDuplicate(source, item, fp, itemHash);
         if (duplicate) {
           stats.duplicate += 1;
@@ -722,6 +751,16 @@ async function processSource(
         }
 
         await writeItem(source, runId, item, fp, itemHash);
+        logEvent(logger, {
+          scope: 'item',
+          phase: 'raw_stored',
+          message: '原始抓取记录已写入',
+          source,
+          item,
+          fingerprint: fp,
+          status: 'RAW',
+          details: { contentHash: itemHash },
+        });
         const quality = filterCrawlContentBeforePublish({ title: item.title, content: item.content, images: item.images });
         logEvent(logger, {
           scope: 'quality', phase: 'quality_checked',
@@ -1073,6 +1112,17 @@ export async function reprocessAutoCrawlItems(options: {
       const owner = `REPROCESS:${Date.now()}:${crypto.randomUUID()}`;
       const id = await createAutoCrawlRun('REPROCESS', owner);
       const logger = createAutoCrawlExecutionLogger(id, 'REPROCESS');
+      logEvent(logger, {
+        scope: 'run',
+        phase: 'run_started',
+        message: '历史内容重跑开始',
+        status: 'RUNNING',
+        details: {
+          status: options.status || null,
+          sourceId: options.sourceId || null,
+          itemCount: storedItems.length,
+        },
+      });
       const totals = { scanned: 0, delivered: 0, filtered: 0, duplicate: 0, error: 0, latestTitle: '', sourceCount: new Set(storedItems.map((stored) => stored.source.id)).size };
       const items: Array<{ id: string; status: AutoCrawlItemStatus; postId?: string | null; error?: string | null }> = [];
 
@@ -1080,15 +1130,47 @@ export async function reprocessAutoCrawlItems(options: {
         for (const stored of storedItems) {
           const { source, item, fingerprint: fp, contentHash: itemHash } = stored;
           totals.scanned += 1;
+          logEvent(logger, {
+            scope: 'item',
+            phase: 'reprocess_item_seen',
+            message: '历史内容重跑开始',
+            source,
+            item,
+            fingerprint: fp,
+            status: stored.previousStatus,
+            details: { previousStatus: stored.previousStatus, postId: stored.postId || null },
+          });
           const duplicate = await findPublishedDuplicate(source, item, fp, itemHash);
           if (duplicate && duplicate.postId !== stored.postId) {
             totals.duplicate += 1;
             await markItem(fp, 'DUPLICATE', { reason: duplicate.duplicateBy, metadata: { existingPostId: duplicate.postId, reprocessedAt: new Date().toISOString() } });
+            logEvent(logger, {
+              scope: 'item',
+              phase: 'duplicate_detected',
+              message: '历史内容重跑发现重复发布，已跳过',
+              source,
+              item,
+              fingerprint: fp,
+              status: 'DUPLICATE',
+              reason: duplicate.duplicateBy,
+              details: { existingPostId: duplicate.postId },
+            });
             items.push({ id: item.id, status: 'DUPLICATE', postId: duplicate.postId });
             continue;
           }
 
           const quality = filterCrawlContentBeforePublish({ title: item.title, content: item.content, images: item.images });
+          logEvent(logger, {
+            scope: 'quality',
+            phase: 'quality_checked',
+            message: quality.shouldPublish ? '历史内容质量过滤通过' : '历史内容质量过滤未通过',
+            source,
+            item,
+            fingerprint: fp,
+            status: quality.shouldPublish ? 'PASSED' : 'REJECTED',
+            reason: quality.reason,
+            details: qualityAudit(quality),
+          });
           const publishHash = publishContentHash(item, quality);
           if (!quality.shouldPublish) {
             totals.filtered += 1;
@@ -1098,6 +1180,17 @@ export async function reprocessAutoCrawlItems(options: {
               reason: quality.reason,
               contentHash: publishHash,
               metadata: { quality: qualityAudit(quality), publishContentHash: publishHash, reprocessedAt: new Date().toISOString() },
+            });
+            logEvent(logger, {
+              scope: 'item',
+              phase: 'reprocess_item_failed',
+              message: '历史内容质量未通过，重跑未发布',
+              source,
+              item,
+              fingerprint: fp,
+              status: 'REJECTED',
+              reason: quality.reason,
+              details: { publishContentHash: publishHash },
             });
             items.push({ id: item.id, status: 'REJECTED' });
             continue;
@@ -1119,6 +1212,17 @@ export async function reprocessAutoCrawlItems(options: {
                 duplicate: { postId: cleanedDuplicate.postId, by: cleanedDuplicate.duplicateBy },
                 reprocessedAt: new Date().toISOString(),
               },
+            });
+            logEvent(logger, {
+              scope: 'item',
+              phase: 'duplicate_after_clean',
+              message: '历史内容清洗后重复，已跳过',
+              source,
+              item,
+              fingerprint: fp,
+              status: 'DUPLICATE',
+              reason: cleanedDuplicate.duplicateBy,
+              details: { existingPostId: cleanedDuplicate.postId, publishContentHash: publishHash },
             });
             items.push({ id: item.id, status: 'DUPLICATE', postId: cleanedDuplicate.postId });
             continue;
@@ -1143,6 +1247,16 @@ export async function reprocessAutoCrawlItems(options: {
             schedulePostSideEffects(post.id);
             totals.delivered += 1;
             totals.latestTitle ||= extracted.title;
+            logEvent(logger, {
+              scope: 'publish',
+              phase: 'publish_succeeded',
+              message: '历史内容重跑发布成功',
+              source,
+              item,
+              fingerprint: fp,
+              status: 'PUBLISHED',
+              details: { postId: post.id, categoryId: category.id, categoryName: category.name },
+            });
             items.push({ id: item.id, status: 'PUBLISHED', postId: post.id });
           } catch (error) {
             const message = errorText(error);
@@ -1151,6 +1265,17 @@ export async function reprocessAutoCrawlItems(options: {
               error: message,
               contentHash: publishHash,
               metadata: { quality: qualityAudit(quality), publishContentHash: publishHash, reprocessedAt: new Date().toISOString() },
+            });
+            logEvent(logger, {
+              level: 'error',
+              scope: 'publish',
+              phase: 'publish_failed',
+              message: '历史内容重跑发布失败',
+              source,
+              item,
+              fingerprint: fp,
+              status: 'FAILED',
+              error: message,
             });
             items.push({ id: item.id, status: 'FAILED', error: message });
           }

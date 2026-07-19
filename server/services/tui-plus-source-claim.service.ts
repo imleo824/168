@@ -12,7 +12,6 @@ async function releaseClaimedPlatformSource(tx: any, params: { sourceId: string;
     SET "disabled" = false,
         "authorUserId" = COALESCE(NULLIF("claimedFromAuthorUserId", ''), ''),
         "sourceName" = COALESCE(NULLIF("claimedFromSourceName", ''), "sourceName"),
-        "categoryName" = COALESCE(NULLIF("claimedFromCategoryName", ''), "categoryName"),
         "ownerUserId" = NULL,
         "sourceScope" = ${PLATFORM_SOURCE_SCOPE},
         "claimedFromAuthorUserId" = NULL,

@@ -1,6 +1,5 @@
 import crypto from 'crypto';
 
-import { ConfigService } from '../config.service';
 import prisma, { isDbConfigured } from '../db';
 import {
   TuiPlusError,
@@ -26,15 +25,34 @@ function stableId(input: string) {
   return crypto.createHash('sha1').update(input).digest('hex').slice(0, 24);
 }
 
-async function resolveDefaultCategoryName() {
-  const configs = await ConfigService.getConfigs().catch(() => ConfigService.getDefaultConfigs());
-  const schemas = Array.isArray(configs?.publish_category_schema) ? configs.publish_category_schema : [];
-  const firstSchema = schemas.find((schema: any) => schema && typeof schema === 'object');
-  return cleanString(firstSchema?.name || firstSchema?.slug || firstSchema?.categorySlug, 32) || 'default';
+type TuiPlusCrawlCategory = { id: string; name: string };
+
+async function resolveDefaultCategory() {
+  const category = await prisma.category.findFirst({
+    select: { id: true, name: true },
+    orderBy: [{ order: 'asc' }, { name: 'asc' }, { id: 'asc' }],
+  });
+  if (!category) throw new TuiPlusError(400, '请先在后台创建数据库分类');
+  return category;
 }
 
-async function resolveCategoryName(raw: unknown, fallback?: unknown) {
-  return cleanString(raw, 32) || cleanString(fallback, 32) || await resolveDefaultCategoryName();
+async function resolveCategory(raw: unknown): Promise<TuiPlusCrawlCategory> {
+  const value = cleanString(raw, 128);
+  if (value) {
+    const category = await prisma.category.findFirst({
+      where: {
+        OR: [
+          { id: value },
+          { slug: value },
+          { name: value },
+        ],
+      },
+      select: { id: true, name: true },
+      orderBy: [{ order: 'asc' }, { name: 'asc' }, { id: 'asc' }],
+    });
+    if (category) return category;
+  }
+  return resolveDefaultCategory();
 }
 
 function normalizeTelegramHandle(input: unknown) {
@@ -144,7 +162,7 @@ async function countActiveChannels(tx: any, userId: string) {
   return Number(rows[0]?.count || 0);
 }
 
-async function claimAutoCrawlSource(tx: any, params: { userId: string; crawlUrl: string; handle: string; categoryName: string; title: string }) {
+async function claimAutoCrawlSource(tx: any, params: { userId: string; crawlUrl: string; handle: string; category: TuiPlusCrawlCategory; title: string }) {
   // Existing posts are intentionally not updated; channel claims only affect future crawl sync.
   const now = new Date();
   const existingRows = await tx.$queryRaw<any[]>`SELECT * FROM "AutoCrawlSource" WHERE "source" = ${params.crawlUrl} LIMIT 1`;
@@ -153,20 +171,18 @@ async function claimAutoCrawlSource(tx: any, params: { userId: string; crawlUrl:
   if (existing?.id) {
     if (isMemberOwnedSource(existing, params.userId)) throw new TuiPlusError(409, MEMBER_OWNED_SOURCE_MESSAGE);
     await assertNoOtherMemberChannelClaim(tx, { userId: params.userId, handle: params.handle, sourceId: existing.id });
-    const categoryName = await resolveCategoryName(params.categoryName, existing.categoryName);
 
     // The original platform fields are snapshotted before member ownership takes over.
     await tx.$executeRaw`
       UPDATE "AutoCrawlSource"
       SET "disabled" = false,
           "sourceName" = ${cleanString(`Tui Plus ${params.title}`, 80)},
-          "categoryName" = ${categoryName},
+          "categoryId" = COALESCE(NULLIF("categoryId", ''), ${params.category.id}),
           "authorUserId" = ${params.userId},
           "ownerUserId" = ${params.userId},
           "sourceScope" = ${TUI_PLUS_SOURCE_SCOPE},
           "claimedFromAuthorUserId" = COALESCE(NULLIF("claimedFromAuthorUserId", ''), ${String(existing.authorUserId || '')}),
           "claimedFromSourceName" = COALESCE(NULLIF("claimedFromSourceName", ''), ${String(existing.sourceName || '')}),
-          "claimedFromCategoryName" = COALESCE(NULLIF("claimedFromCategoryName", ''), ${String(existing.categoryName || '')}),
           "updatedAt" = ${now}
       WHERE "id" = ${existing.id}
     `;
@@ -174,12 +190,11 @@ async function claimAutoCrawlSource(tx: any, params: { userId: string; crawlUrl:
   }
 
   await assertNoOtherMemberChannelClaim(tx, { userId: params.userId, handle: params.handle });
-  const categoryName = await resolveCategoryName(params.categoryName);
 
   const sourceId = `plus_${stableId(`${params.userId}:${params.handle}`)}`;
   await tx.$executeRaw`
-    INSERT INTO "AutoCrawlSource" ("id", "source", "type", "sourceName", "trustLevel", "categoryId", "categoryName", "authorUserId", "showContact", "disabled", "cursor", "cursorKind", "pollIntervalMinutes", "nextRunAt", "ownerUserId", "sourceScope", "createdAt", "updatedAt")
-    VALUES (${sourceId}, ${params.crawlUrl}, 'telegram', ${cleanString(`Tui Plus ${params.title}`, 80)}, 'NORMAL', NULL, ${categoryName}, ${params.userId}, true, false, '', 'baseline_pending', 30, ${now}, ${params.userId}, ${TUI_PLUS_SOURCE_SCOPE}, ${now}, ${now})
+    INSERT INTO "AutoCrawlSource" ("id", "source", "type", "sourceName", "categoryId", "authorUserId", "showContact", "disabled", "cursor", "cursorKind", "pollIntervalMinutes", "nextRunAt", "ownerUserId", "sourceScope", "createdAt", "updatedAt")
+    VALUES (${sourceId}, ${params.crawlUrl}, 'telegram', ${cleanString(`Tui Plus ${params.title}`, 80)}, ${params.category.id}, ${params.userId}, true, false, '', 'baseline_pending', 30, ${now}, ${params.userId}, ${TUI_PLUS_SOURCE_SCOPE}, ${now}, ${now})
   `;
   return sourceId;
 }
@@ -196,7 +211,7 @@ export async function addTuiPlusTelegramChannel(userId: string, input: { channel
   const crawlUrl = canonicalTelegramChannelUrl(handle);
   await assertNewTelegramSourceReachable(crawlUrl);
   const title = normalizeChannelTitle(input.title || input.label, handle);
-  const categoryName = await resolveCategoryName(input.categoryName);
+  const category = await resolveCategory(input.categoryName);
   const autoPostEnabled = normalizeAutoPostEnabled(input.autoPostEnabled);
   const now = new Date();
 
@@ -207,7 +222,7 @@ export async function addTuiPlusTelegramChannel(userId: string, input: { channel
     if (!existingRows[0] && currentCount >= limit) throw new TuiPlusError(400, `会员主页最多添加 ${limit} 个 Telegram 频道`);
 
     const sourceId = autoPostEnabled
-      ? await claimAutoCrawlSource(tx, { userId, crawlUrl, handle, categoryName, title })
+      ? await claimAutoCrawlSource(tx, { userId, crawlUrl, handle, category, title })
       : null;
     if (!autoPostEnabled && existingRows[0]?.sourceId) {
       await pauseOrReleaseTuiPlusSource(tx, { sourceId: existingRows[0].sourceId, userId });
@@ -251,8 +266,8 @@ export async function updateTuiPlusTelegramChannel(userId: string, channelId: st
         if (!handle) throw new TuiPlusError(400, '频道数据异常，请重新添加频道');
         const crawlUrl = canonicalTelegramChannelUrl(handle);
         const title = normalizeChannelTitle(channel.title, handle);
-        const categoryName = await resolveCategoryName(null);
-        const sourceId = await claimAutoCrawlSource(tx, { userId, crawlUrl, handle, categoryName, title });
+        const category = await resolveCategory(null);
+        const sourceId = await claimAutoCrawlSource(tx, { userId, crawlUrl, handle, category, title });
         await tx.$executeRaw`UPDATE "TuiPlusTelegramChannel" SET "status" = ${normalized}, "sourceId" = ${sourceId}, "lastError" = NULL, "updatedAt" = ${new Date()} WHERE "id" = ${channelId} AND "userId" = ${userId}`;
       } else {
         // Expiry and pause only stop sync; the member-owned source is not released back to the platform pool.
@@ -278,7 +293,7 @@ export async function updateTuiPlusTelegramChannel(userId: string, channelId: st
   const crawlUrl = canonicalTelegramChannelUrl(handle);
   if (handle !== current.channelHandle) await assertNewTelegramSourceReachable(crawlUrl);
   const title = normalizeChannelTitle(input.title || input.label || current.title, handle);
-  const categoryName = await resolveCategoryName(input.categoryName);
+  const category = await resolveCategory(input.categoryName);
   const autoPostEnabled = resolveAutoPostEnabled(input, current.autoPostEnabled);
   const now = new Date();
 
@@ -287,7 +302,7 @@ export async function updateTuiPlusTelegramChannel(userId: string, channelId: st
     if (duplicateRows[0]) throw new TuiPlusError(409, '该频道已经添加过');
 
     const sourceId = autoPostEnabled
-      ? await claimAutoCrawlSource(tx, { userId, crawlUrl, handle, categoryName, title })
+      ? await claimAutoCrawlSource(tx, { userId, crawlUrl, handle, category, title })
       : null;
     if (current.sourceId && current.sourceId !== sourceId) {
       if (autoPostEnabled) {

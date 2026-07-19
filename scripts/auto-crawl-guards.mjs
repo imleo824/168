@@ -36,6 +36,7 @@ const strictMetaMigration = read('prisma/migrations/20260915000000_auto_crawl_me
 const packageJson = read('package.json');
 const crawlLogsPanel = read('src/features/admin/AdminAutoCrawlExecutionLogsCompactPanel.tsx');
 const crawlPanel = read('src/features/admin/AdminAutoCrawlPanel.tsx');
+const tuiPlusChannelService = read('server/services/tui-plus-channel.service.ts');
 
 mustNotHave('domain types', types, /syncToTelegram|localOnlyMode|aiEnabled|QUARANTINED|FILTERED/);
 mustHave('domain types', types, /RETRYABLE/);
@@ -72,6 +73,9 @@ mustHave('main flow', crawl, /publishContentHash/);
 mustHave('main flow', crawl, /duplicate_after_clean/);
 mustHave('main flow', crawl, /"contentHash"=COALESCE\(\$8,"contentHash"\)/);
 mustHave('main flow log start', crawl, /phase: 'run_started'/);
+mustHave('main flow item seen log', crawl, /phase: 'item_seen'/);
+mustHave('main flow raw stored log', crawl, /phase: 'raw_stored'/);
+mustHave('main flow post payload log', crawl, /phase: 'post_payload_ready'/);
 mustHave('main flow source config failure', crawl, /phase: 'source_config_invalid'/);
 mustHave('main flow source config failure', crawl, /stats\.error \+= 1/);
 mustHave('main flow', crawl, /帖子发布失败，已进入失败队列/);
@@ -100,11 +104,16 @@ mustHave('source identity', crawl, /duplicateBy: 'sourcePostId' \| 'fingerprint'
 mustHave('source identity', crawl, /\(\"sourceId\"=\$1 AND \"sourcePostId\"=\$2\)/);
 mustHave('source identity', crawl, /ON CONFLICT\(\"sourceId\",\"sourcePostId\"\)/);
 mustNotHave('source identity', crawl, /fingerprint\(source, item, itemHash\)/);
+mustNotHave('tui plus auto crawl source claim', tuiPlusChannelService, /"trustLevel"|"categoryName"|NULL,\s*\$\{categoryName\}|ConfigService/);
+mustHave('tui plus auto crawl source claim', tuiPlusChannelService, /async function resolveCategory/);
+mustHave('tui plus auto crawl source claim', tuiPlusChannelService, /"categoryId"/);
 
 mustHave('recovery', crawlRecovery, /reconcileInterruptedAutoCrawlState/);
 mustHave('recovery', crawlRecovery, /runAutoCrawlRecoveryQueue/);
 mustHave('recovery exact claim', crawlRecovery, /ids:\s*claimedIds/);
 mustHave('reprocess exact ids', crawl, /conditions\.push\(`i\."id"=ANY\(\$\$\{params\.length\}::text\[\]\)`\)/);
+mustHave('reprocess logs start', crawl, /phase: 'reprocess_item_seen'/);
+mustHave('reprocess logs failures', crawl, /phase: 'reprocess_item_failed'/);
 mustHave('observed runner', observedRunner, /runRecoverySafely/);
 
 mustHave('AI extraction', crawlAi, /context: AutoCrawlExtractionContext/);
