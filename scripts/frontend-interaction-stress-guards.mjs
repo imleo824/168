@@ -82,6 +82,7 @@ const promotionEffectsHistoryPage = read('src/pages/PromotionEffectsHistory.tsx'
 const userSpacePage = read('src/pages/UserSpace.tsx');
 const userSpaceTuiPlusLinks = read('src/features/profile/UserSpaceTuiPlusLinks.tsx');
 const promoteHistoryPage = read('src/pages/PromoteHistory.tsx');
+const skeleton = read('src/ui/Skeleton.tsx');
 
 assert(
   /<div\s+className="app-main app-shell-main"/.test(appShell) &&
@@ -566,6 +567,12 @@ assert(
     userSpaceTuiPlusLinks.includes('onClick={() => void guardedOpenEditor()}') &&
     !userSpaceTuiPlusLinks.includes('onClick={openEditor}'),
   'User space contact and own profile link editor entries must be guarded against rapid duplicate external opens and route changes.',
+);
+
+assert(
+  skeleton.includes('<div className="profile-bio-button profile-bio-inline user-space-bio-mobile user-space-bio-desktop">') &&
+    !skeleton.includes('<p className="profile-bio-button profile-bio-inline user-space-bio-mobile user-space-bio-desktop">'),
+  'User space skeleton bio placeholder must not render a block Skeleton inside a paragraph.',
 );
 
 assert(

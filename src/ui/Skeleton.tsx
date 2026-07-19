@@ -292,9 +292,9 @@ export const UserSpaceSkeleton = memo(function UserSpaceSkeleton(_props: UserSpa
               <Skeleton className="profile-name-mobile profile-name-desktop user-space-name-mobile user-space-name-desktop user-space-name-skeleton" />
             </div>
 
-            <p className="profile-bio-button profile-bio-inline user-space-bio-mobile user-space-bio-desktop">
+            <div className="profile-bio-button profile-bio-inline user-space-bio-mobile user-space-bio-desktop">
               <Skeleton className="profile-bio-text user-space-bio-line-skeleton" />
-            </p>
+            </div>
 
             <div className="user-space-plus-links" aria-hidden="true">
               <div className="user-space-plus-link-list">
