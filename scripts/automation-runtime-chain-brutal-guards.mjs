@@ -23,8 +23,8 @@ const FILES = {
   quoteRoutes: 'server/routes/quote-publish.routes.ts',
   commentRoutes: 'server/routes/admin-comment-publish.routes.ts',
   autoLikeRoutes: 'server/routes/admin-auto-like.routes.ts',
-  quoteService: 'server/services/quote-publish.service.ts',
-  commentService: 'server/services/comment-publish.service.ts',
+  quoteService: 'server/services/quote-publish-v5.service.ts',
+  commentService: 'server/services/comment-publish-v8.service.ts',
   autoLikeService: 'server/services/auto-like.service.ts',
   adminAutomationRoutes: 'server/routes/admin-automation.routes.ts',
   automationHealth: 'server/services/automation-health.service.ts',
@@ -36,6 +36,8 @@ const deletedPaths = [
   'server/services/chat-automation-observer.service.ts',
   'server/services/observed-auto-crawl-scheduler.service.ts',
   'server/services/auto-crawl-ai-review.service.ts',
+  'server/services/quote-publish.service.ts',
+  'server/services/comment-publish.service.ts',
 ];
 
 function fileExists(relativePath) {
@@ -155,8 +157,8 @@ includes(FILES.adminPanel, 'AdminAutoCrawlExecutionLogsCompactPanel', 'admin exe
 
 assertOnlyFilesContain('runAutoCrawlOnce', new Set([path.normalize(FILES.autoCrawlService), path.normalize(FILES.autoCrawlRunner)]), 'runAutoCrawlOnce must stay behind observed runner');
 assertOnlyFilesContain('runAutoPostOnce', new Set([path.normalize(FILES.autoPostService), path.normalize(FILES.autoPostRunner)]), 'runAutoPostOnce must stay behind observed runner');
-assertOnlyFilesContain('runQuotePublishOnce', new Set([path.normalize(FILES.quoteService), path.normalize('server/services/quote-publish-v5.service.ts'), path.normalize(FILES.interactionRunner)]), 'runQuotePublishOnce must stay behind observed runner');
-assertOnlyFilesContain('runCommentPublishOnce', new Set([path.normalize(FILES.commentService), path.normalize('server/services/comment-publish-v8.service.ts'), path.normalize(FILES.interactionRunner)]), 'runCommentPublishOnce must stay behind observed runner');
+assertOnlyFilesContain('runQuotePublishOnce', new Set([path.normalize(FILES.quoteService), path.normalize(FILES.interactionRunner)]), 'runQuotePublishOnce must stay behind observed runner');
+assertOnlyFilesContain('runCommentPublishOnce', new Set([path.normalize(FILES.commentService), path.normalize(FILES.interactionRunner)]), 'runCommentPublishOnce must stay behind observed runner');
 assertOnlyFilesContain('runAutoLikeOnce', new Set([path.normalize(FILES.autoLikeService), path.normalize(FILES.interactionRunner)]), 'runAutoLikeOnce must stay behind observed runner');
 
 console.log('[automation-runtime-chain-brutal-guards] passed');

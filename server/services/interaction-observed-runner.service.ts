@@ -1,8 +1,8 @@
 import type { Request } from 'express';
 
 import { runAutoLikeOnce } from './auto-like.service';
-import { runCommentPublishOnce } from './comment-publish.service';
-import { runQuotePublishOnce, type QuotePublishAfterPostCreated } from './quote-publish.service';
+import { runCommentPublishOnce } from './comment-publish-v8.service';
+import { runQuotePublishOnce, type QuotePublishAfterPostCreated } from './quote-publish-v5.service';
 import { recordAutomationHeartbeat, type AutomationHeartbeatStatus } from './automation-health.service';
 
 type InteractionTrigger = 'MANUAL' | 'SCHEDULED';

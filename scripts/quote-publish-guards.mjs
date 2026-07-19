@@ -21,7 +21,6 @@ function assertNotIncludes(file, source, pattern, message) {
 const schema = read('prisma/schema.prisma');
 const migration = read('prisma/migrations/20260828000000_add_quote_publish_runs/migration.sql');
 const service = read('server/services/quote-publish-v5.service.ts');
-const facade = read('server/services/quote-publish.service.ts');
 const config = read('server/services/quote-publish.config.ts');
 const routes = read('server/routes/quote-publish.routes.ts');
 const automationRuntimeSource = [
@@ -69,10 +68,9 @@ assertIncludes('automation-task-lock.service.ts', lockService, 'heartbeatAutomat
 assertIncludes('automation-task-lock.service.ts', lockService, 'forceReleaseAutomationTaskLock', 'admin force release is required.');
 assertIncludes('automation-task-lock.service.ts', lockService, 'cleanupExpiredAutomationTaskLocks', 'expired lock cleanup is required.');
 
-assertIncludes('quote-publish.service.ts', facade, "export * from './quote-publish-v5.service'", 'facade must expose v5 implementation.');
-assertNotIncludes('quote-publish.service.ts', facade, 'startAutoLikeScheduler', 'quote facade must not start other schedulers.');
-assertNotIncludes('quote-publish.service.ts', facade, 'setTimeout', 'quote facade must not own scheduling.');
-assertNotIncludes('quote-publish.service.ts', facade, 'startQuotePublishScheduler', 'quote facade must not expose legacy scheduler.');
+if (fs.existsSync(path.join(root, 'server/services/quote-publish.service.ts'))) {
+  throw new Error('quote-publish.service.ts: compatibility facade must stay removed; import quote-publish-v5.service.ts directly.');
+}
 
 assertIncludes('automation runtime sources', automationRuntimeSource, "module: 'quote_publish'", 'automation runtime must register quote scheduling.');
 assertIncludes('automation runtime sources', automationRuntimeSource, 'runObservedQuotePublish', 'automation runtime must use the observed quote runner.');

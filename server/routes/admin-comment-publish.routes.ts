@@ -11,7 +11,7 @@ import {
   listCommentPublishRuns,
   updateCommentPublishConfig,
   type CommentPublishRunStatus,
-} from '../services/comment-publish.service';
+} from '../services/comment-publish-v8.service';
 import { runObservedCommentPublish } from '../services/interaction-observed-runner.service';
 
 const RUN_STATUSES = new Set(['PENDING', 'SUCCEEDED', 'SKIPPED', 'FAILED']);

@@ -4,7 +4,7 @@ import { createServer as createHttpServer } from 'node:http';
 import { createDefaultAutomationModules } from '../services/automation/default-automation-modules';
 import { startAutomationRuntime } from '../services/automation/automation-runtime';
 import type { AutoPostAfterPostCreated } from '../services/auto-post.service';
-import type { QuotePublishAfterPostCreated } from '../services/quote-publish.service';
+import type { QuotePublishAfterPostCreated } from '../services/quote-publish-v5.service';
 import { startTronDepositScanner, stopTronDepositScanner } from '../services/deposit-scanner.service';
 import { ensurePostPublishStorageReady } from '../services/post-category-schema-version.service';
 import { registerFrontendAssets } from './frontend-assets';

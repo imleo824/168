@@ -21,7 +21,6 @@ const bootstrap = read('server/bootstrap.ts');
 const postReadRoutes = read('server/routes/post-read.routes.ts');
 const postCreateRoutes = read('server/routes/post-create.routes.ts');
 const quotePublishService = [
-  read('server/services/quote-publish.service.ts'),
   read('server/services/quote-publish-v5.service.ts'),
   read('server/services/robot-content-generation.service.ts'),
   read('server/services/robot-reaction-quality.service.ts'),

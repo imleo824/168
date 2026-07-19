@@ -15,7 +15,7 @@ import {
   updateQuotePublishConfig,
   type QuotePublishAfterPostCreated,
   type QuotePublishRunStatus,
-} from '../services/quote-publish.service';
+} from '../services/quote-publish-v5.service';
 import { runObservedQuotePublish } from '../services/interaction-observed-runner.service';
 
 const RUN_STATUSES = new Set(['PENDING', 'SUCCEEDED', 'SKIPPED', 'FAILED']);

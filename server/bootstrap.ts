@@ -12,7 +12,6 @@ import { Prisma } from '@prisma/client';
 import {
   globalLimiter,
   publicReadLimiter,
-  webhookLimiter,
 } from './middlewares/rateLimit';
 import { errorHandler, catchAsync } from './middlewares/error';
 import { startServerRuntime } from './startup/server-runtime';
@@ -34,7 +33,6 @@ import { registerPostActionsRoutes } from './routes/post-actions.routes';
 import { registerPostTelegramSyncRoutes } from './routes/post-telegram-sync.routes';
 import { registerPostCreateRoutes } from './routes/post-create.routes';
 import { sendPublicFeedCachedResult, sendPublicFeedResult } from './routes/public-feed-response';
-import { registerWebhookRoutes } from './routes/webhook.routes';
 import { registerUserSocialRoutes } from './routes/user-social.routes';
 import { registerPromotionRoutes } from './routes/promotion.routes';
 import { registerJoinedTopicRoutes } from './routes/joined-topic.routes';
@@ -66,7 +64,7 @@ import { UserService } from './user.service';
 import { PostService, type PostCategoryMetaFilter } from './post.service';
 import { HomeFeedService } from './services/home-feed.service';
 import type { AutoPostAfterPostCreated } from './services/auto-post.service';
-import type { QuotePublishAfterPostCreated } from './services/quote-publish.service';
+import type { QuotePublishAfterPostCreated } from './services/quote-publish-v5.service';
 import {
   buildLocationPresetValueSet,
   normalizeCategoryMetaFeedFilters,
@@ -132,7 +130,6 @@ import {
   normalizeExternalLocation,
   normalizeShowContactInput,
 } from './services/post/post-create-input';
-import { createWebhookHandlers } from './webhooks/webhook-handlers';
 import {
   WEBHOOK_MAX_CONTACT_LEN,
   WEBHOOK_MAX_CONTENT_LEN,
@@ -1044,20 +1041,6 @@ registerPostCreateRoutes(app, {
   sendDatabaseUnavailable,
   sendDatabaseSchemaDrift,
 });
-
-const { createWebhookPostHandler, createWebhookLikeHandler } = createWebhookHandlers({
-  markContentDataChanged,
-  markInteractionDataChanged,
-  resolveAccessiblePostMeta,
-  getViewFingerprint,
-});
-
-registerWebhookRoutes(app, {
-  webhookLimiter,
-  createWebhookPostHandler,
-  createWebhookLikeHandler,
-});
-
 
 registerPostTelegramSyncRoutes(app, {
   POST_ID_PATTERN,

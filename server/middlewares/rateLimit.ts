@@ -91,8 +91,6 @@ export const viewLimiter = rateLimit({
   validate: { trustProxy: true },
 });
 
-export const webhookLimiter = postLimiter;
-
 export const orderLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
   max: 12,

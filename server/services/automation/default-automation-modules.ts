@@ -4,8 +4,8 @@ import { DEFAULT_AUTO_POST_CONFIG, getAutoPostConfig } from '../auto-post.config
 import { runObservedAutoPost } from '../auto-post-observed-runner.service';
 import type { AutoPostAfterPostCreated } from '../auto-post.service';
 import { getAutoLikeConfig } from '../auto-like.service';
-import { getCommentPublishConfig } from '../comment-publish.service';
-import { getQuotePublishConfig, type QuotePublishAfterPostCreated } from '../quote-publish.service';
+import { getCommentPublishConfig } from '../comment-publish-v8.service';
+import { getQuotePublishConfig, type QuotePublishAfterPostCreated } from '../quote-publish-v5.service';
 import {
   runObservedAutoLike,
   runObservedCommentPublish,

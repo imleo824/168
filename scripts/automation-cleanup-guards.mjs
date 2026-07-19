@@ -24,16 +24,23 @@ assertMissing('server/services/auto-crawl-scheduler.service.ts', 'auto-crawl sch
 assertMissing('server/services/auto-post-scheduler.service.ts', 'auto-post scheduling must go through unified AutomationRuntime');
 assertMissing('server/services/automation-supervisor.service.ts', 'interaction scheduling must go through unified AutomationRuntime');
 assertMissing('server/routes/admin-automation-lock.routes.ts', 'admin automation locks must go through the normalized /api/admin/automation status and module-release routes');
+assertMissing('server/services/quote-publish.service.ts', 'quote publish must import the real v5 implementation directly, without a compatibility facade');
+assertMissing('server/services/comment-publish.service.ts', 'comment publish must import the real v8 implementation directly, without a compatibility facade');
+assertMissing('server/routes/webhook.routes.ts', 'removed external automation webhook APIs must not keep an empty route registrar');
+assertMissing('server/webhooks/webhook-handlers.ts', 'removed external automation webhook APIs must not keep 410 handler shims');
 
 assertNotIncludes('server/routes/config.routes.ts', 'registerAdminAutomationLockRoutes', 'obsolete raw lock routes must not be registered from config routes');
+assertNotIncludes('server/bootstrap.ts', 'registerWebhookRoutes', 'removed external automation webhook routes must not be registered at startup');
+assertNotIncludes('server/bootstrap.ts', 'createWebhookHandlers', 'removed external automation webhook handlers must not be constructed at startup');
+assertNotIncludes('server/middlewares/rateLimit.ts', 'webhookLimiter', 'removed external automation webhook APIs must not keep a dedicated limiter alias');
 assertNotIncludes('server/routes/quote-publish.routes.ts', 'registerAutomationDebugRoutes', 'obsolete internal automation side route must not be registered');
 assertNotIncludes('server/startup/server-runtime.ts', 'startQuotePublishScheduler', 'server runtime must not use quote scheduler directly');
 assertNotIncludes('server/startup/server-runtime.ts', 'startAutoCrawlScheduler', 'server runtime must not use standalone crawl scheduler');
 assertNotIncludes('server/startup/server-runtime.ts', 'startAutoPostScheduler', 'server runtime must not use standalone post scheduler');
 assertNotIncludes('server/startup/server-runtime.ts', 'startAutomationSupervisor', 'server runtime must not use standalone interaction supervisor');
-assertNotIncludes('server/services/quote-publish.service.ts', 'startQuotePublishScheduler', 'quote-publish facade must not expose legacy scheduler compatibility');
-assertNotIncludes('server/services/quote-publish.service.ts', 'Legacy bootstrap', 'legacy scheduler comments must not remain');
-assertNotIncludes('server/services/quote-publish.service.ts', 'automation-supervisor.service', 'quote facade must not lazy-import supervisor');
+assertNotIncludes('server/services/quote-publish-v5.service.ts', 'startQuotePublishScheduler', 'quote-publish service must not expose legacy scheduler compatibility');
+assertNotIncludes('server/services/quote-publish-v5.service.ts', 'Legacy bootstrap', 'legacy scheduler comments must not remain');
+assertNotIncludes('server/services/quote-publish-v5.service.ts', 'automation-supervisor.service', 'quote service must not lazy-import supervisor');
 
 assertNotIncludes('server/services/auto-post.service.ts', 'recordAutoPostSchedulerHeartbeat', 'auto-post scheduler heartbeat belongs in observed runner, not business service');
 assertNotIncludes('server/services/auto-post.service.ts', 'recordAutomationHeartbeat', 'auto-post business service must not write scheduler heartbeat directly');
