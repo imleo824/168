@@ -1,4 +1,10 @@
-import { getAutoCrawlConfig, runAutoCrawlOnce, type AutoCrawlRunRecord } from './auto-crawl.service';
+import {
+  createAutoCrawlRun,
+  finishAutoCrawlRun,
+  getAutoCrawlConfig,
+  runAutoCrawlOnce,
+  type AutoCrawlRunRecord,
+} from './auto-crawl.service';
 import {
   reconcileInterruptedAutoCrawlState,
   runAutoCrawlRecoveryQueue,
@@ -23,26 +29,15 @@ function autoCrawlHeartbeatReason(run: any, error?: unknown) {
   return run?.skipReason || run?.errorMessage || run?.status || null;
 }
 
-function buildLockedRun(trigger: AutoCrawlObservedTrigger, lock: AutomationTaskLockDetails | null) {
-  const now = new Date().toISOString();
-  return {
-    id: lock?.owner || 'auto_crawl_locked',
+async function createLockedRun(trigger: AutoCrawlObservedTrigger, lock: AutomationTaskLockDetails | null) {
+  const owner = `LOCKED:${Date.now()}:${lock?.owner || 'unknown'}`;
+  const id = await createAutoCrawlRun(trigger, owner);
+  const run = await finishAutoCrawlRun(id, {
     status: 'SKIPPED',
-    trigger,
-    startedAt: now,
-    finishedAt: now,
-    scanned: 0,
-    delivered: 0,
-    filtered: 0,
-    duplicate: 0,
-    error: 0,
-    sourceCount: 0,
     skipReason: 'another_instance_running',
     errorMessage: 'auto_crawl_already_running',
-    latestTitle: null,
-    lock,
-    configEnabled: null,
-  };
+  });
+  return { ...run, lock, configEnabled: null };
 }
 
 async function runRecoverySafely() {
@@ -82,7 +77,7 @@ export async function runObservedAutoCrawl(input: {
         return { ...result, recovery, configEnabled: config.enabled };
       },
     );
-    run = taskLock.acquired ? taskLock.result : buildLockedRun(input.trigger, taskLock.lock as AutomationTaskLockDetails | null);
+    run = taskLock.acquired ? taskLock.result : await createLockedRun(input.trigger, taskLock.lock as AutomationTaskLockDetails | null);
     return run;
   } catch (caught) {
     error = caught;

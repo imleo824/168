@@ -6,6 +6,7 @@ import { AdminAutomationEmptyLogs, AdminAutomationLogsShell } from './AdminAutom
 
 type LogSummary = { runId: string; trigger: string; startedAt: string; finishedAt?: string | null; status: string; eventCount: number };
 type LogEvent = { timestamp: string; runId: string; level: string; phase: string; message: string; sourceId?: string | null; sourceName?: string | null; itemId?: string | null; sourcePostId?: string | null; fingerprint?: string | null; status?: string | null; reason?: string | null; error?: string | null; details?: Record<string, unknown> | null };
+type LogDetail = { runId: string; summary?: LogSummary | null; events?: LogEvent[] };
 type ContentLogGroup = { key: string; title: string; status: string; reason: string; latestAt: string; events: LogEvent[] };
 type SourceLogGroup = { key: string; name: string; latestAt: string; items: ContentLogGroup[] };
 type RunLogGroup = { key: string; title: string; status: string; reason: string; latestAt: string; events: LogEvent[] };
@@ -346,6 +347,34 @@ function buildRunGroups(events: LogEvent[]) {
   }).sort((a, b) => new Date(b.latestAt).getTime() - new Date(a.latestAt).getTime());
 }
 
+function eventsFromSummary(summary: LogSummary): LogEvent[] {
+  const events: LogEvent[] = [{
+    timestamp: summary.startedAt,
+    runId: summary.runId,
+    trigger: summary.trigger,
+    level: 'info',
+    scope: 'run',
+    phase: 'run_started',
+    message: '自动抓取运行开始',
+    status: 'RUNNING',
+    details: {},
+  } as LogEvent];
+  if (summary.finishedAt) {
+    events.push({
+      timestamp: summary.finishedAt,
+      runId: summary.runId,
+      trigger: summary.trigger,
+      level: summary.status === 'FAILED' || summary.status === 'PARTIAL_FAILED' ? 'error' : 'info',
+      scope: 'run',
+      phase: 'run_finished',
+      message: '自动抓取运行结束',
+      status: summary.status,
+      details: { databaseFallback: true },
+    } as LogEvent);
+  }
+  return events;
+}
+
 function InfoRows({ rows }: { rows: DetailRow[] }) {
   if (!rows.length) return <div className="admin-form-note">细节：本步骤没有关键字段</div>;
   return <div className="mt-2 grid gap-1">{rows.map((row) => <div key={`${row.label}:${row.value}`} className="admin-form-note"><span className="admin-text-strong-xs">{row.label}：</span>{row.value}</div>)}</div>;
@@ -360,17 +389,21 @@ export function AdminAutoCrawlExecutionLogsCompactPanel() {
   const loadLogs = useCallback(async () => {
     setIsLoading(true);
     try {
-      const res = await apiFetch('/api/admin/auto-crawl/execution-logs?limit=20');
-      const summaries = await res.json().catch(() => [] as LogSummary[]);
-      if (!res.ok) throw new Error((summaries as any)?.error || '执行日志加载失败');
-      const rows = Array.isArray(summaries) ? summaries : [];
-      const detailPayloads = await Promise.all(rows.map(async (row) => {
-        const detailRes = await apiFetch(`/api/admin/auto-crawl/execution-logs/${encodeURIComponent(row.runId)}`);
-        const payload = await detailRes.json().catch(() => ({}));
-        if (!detailRes.ok) return [];
-        return Array.isArray(payload?.events) ? payload.events as LogEvent[] : [];
-      }));
-      setEvents(detailPayloads.flat());
+      const res = await apiFetch('/api/admin/auto-crawl/execution-logs/details?limit=20');
+      const payload = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(payload?.error || '执行日志加载失败');
+      const summaries = Array.isArray(payload?.summaries) ? payload.summaries as LogSummary[] : [];
+      const details = Array.isArray(payload?.details) ? payload.details as LogDetail[] : [];
+      const summaryByRunId = new Map(summaries.map((summary) => [summary.runId, summary]));
+      const detailEvents = details.flatMap((detail) => {
+        const eventsForRun = Array.isArray(detail.events) ? detail.events : [];
+        if (eventsForRun.length) return eventsForRun;
+        const summary = detail.summary || summaryByRunId.get(detail.runId);
+        return summary ? eventsFromSummary(summary) : [];
+      });
+      const covered = new Set(detailEvents.map((event) => event.runId));
+      const fallbackEvents = summaries.flatMap((summary) => (covered.has(summary.runId) ? [] : eventsFromSummary(summary)));
+      setEvents([...detailEvents, ...fallbackEvents]);
     } catch (error: any) {
       showToast(error?.message || '执行日志加载失败', 'error');
     } finally {

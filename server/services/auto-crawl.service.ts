@@ -68,6 +68,7 @@ type SourceStats = {
   visibleMinCursor: string;
   visibleMaxCursor: string;
   warning: string;
+  failedReason: string;
 };
 type PublishedDuplicate = { postId: string | null; duplicateBy: 'sourcePostId' | 'fingerprint' | 'contentHash' } | null;
 type StoredAutoCrawlReprocessItem = {
@@ -643,6 +644,7 @@ async function processSource(
         visibleMinCursor: '',
         visibleMaxCursor: '',
         warning: '',
+        failedReason: '',
       };
       const source = inputSource;
 
@@ -655,7 +657,18 @@ async function processSource(
       });
 
       if (!source.authorUserId) {
-        await skipSource(source, '未绑定发布账号');
+        stats.error += 1;
+        stats.failedReason = '未绑定发布账号';
+        await skipSource(source, stats.failedReason);
+        logEvent(logger, {
+          level: 'error',
+          scope: 'source',
+          phase: 'source_config_invalid',
+          message: '数据源配置无效，已停用',
+          source,
+          status: 'FAILED',
+          reason: stats.failedReason,
+        });
         return stats;
       }
 
@@ -663,7 +676,18 @@ async function processSource(
       try {
         category = getAutoCrawlDatabaseCategory(databaseConfig, source.categoryId);
       } catch {
-        await skipSource(source, '未绑定有效数据库分类');
+        stats.error += 1;
+        stats.failedReason = '未绑定有效数据库分类';
+        await skipSource(source, stats.failedReason);
+        logEvent(logger, {
+          level: 'error',
+          scope: 'source',
+          phase: 'source_config_invalid',
+          message: '数据源配置无效，已停用',
+          source,
+          status: 'FAILED',
+          reason: stats.failedReason,
+        });
         return stats;
       }
       const context = extractionContext(category, databaseConfig);
@@ -794,7 +818,7 @@ async function processSource(
     function newRunId(trigger: RunTrigger) {
   return stableId(`${trigger}:${Date.now()}:${crypto.randomUUID()}`);
 }
-async function createRun(trigger: RunTrigger, owner: string) {
+export async function createAutoCrawlRun(trigger: RunTrigger, owner: string) {
   const id = newRunId(trigger);
   await exec(
     `INSERT INTO "AutoCrawlRun"("id","status","trigger","lockOwner","startedAt") VALUES($1,'RUNNING',$2,$3,CURRENT_TIMESTAMP)`,
@@ -804,7 +828,7 @@ async function createRun(trigger: RunTrigger, owner: string) {
   );
   return id;
 }
-async function finishRun(id: string, patch: Partial<AutoCrawlRunRecord>) {
+export async function finishAutoCrawlRun(id: string, patch: Partial<AutoCrawlRunRecord>) {
   await exec(
     `UPDATE "AutoCrawlRun" SET
       "status"=$2,"finishedAt"=CURRENT_TIMESTAMP,"scanned"=$3,"delivered"=$4,"filtered"=$5,
@@ -842,7 +866,7 @@ async function finishLoggedRun(
   id: string,
   patch: Partial<AutoCrawlRunRecord>,
 ) {
-  const run = await finishRun(id, patch);
+  const run = await finishAutoCrawlRun(id, patch);
   logEvent(logger, {
     scope: 'run',
     phase: 'run_finished',
@@ -868,7 +892,7 @@ export async function runAutoCrawlOnce(options: { trigger?: RunTrigger; force?: 
 
   const trigger = options.trigger || 'MANUAL';
   const owner = `${trigger}:${Date.now()}:${crypto.randomUUID()}`;
-  const id = await createRun(trigger, owner);
+  const id = await createAutoCrawlRun(trigger, owner);
   const logger = createAutoCrawlExecutionLogger(id, trigger);
   logEvent(logger, {
     scope: 'run',
@@ -1047,7 +1071,7 @@ export async function reprocessAutoCrawlItems(options: {
       }
 
       const owner = `REPROCESS:${Date.now()}:${crypto.randomUUID()}`;
-      const id = await createRun('REPROCESS', owner);
+      const id = await createAutoCrawlRun('REPROCESS', owner);
       const logger = createAutoCrawlExecutionLogger(id, 'REPROCESS');
       const totals = { scanned: 0, delivered: 0, filtered: 0, duplicate: 0, error: 0, latestTitle: '', sourceCount: new Set(storedItems.map((stored) => stored.source.id)).size };
       const items: Array<{ id: string; status: AutoCrawlItemStatus; postId?: string | null; error?: string | null }> = [];

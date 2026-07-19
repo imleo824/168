@@ -314,3 +314,10 @@ export async function getAutoCrawlExecutionLog(runId: string, options: { sourceI
   }
   return { runId, summary: summarize(filtered), events: filtered };
 }
+
+export async function listAutoCrawlExecutionLogDetails(limit = 20) {
+  const summaries = await listAutoCrawlExecutionLogs(limit);
+  const details = await Promise.all(summaries.map((summary) => getAutoCrawlExecutionLog(summary.runId)
+    .catch(() => ({ runId: summary.runId, summary, events: [] as AutoCrawlExecutionLogEvent[] }))));
+  return { summaries, details };
+}

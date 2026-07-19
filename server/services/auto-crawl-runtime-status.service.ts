@@ -31,6 +31,8 @@ export type AutoCrawlRuntimeStatus = {
     latestTitle: string | null;
   };
   latestRun: AutoCrawlRuntimeStatus['activeRun'];
+  staleRunningRun: AutoCrawlRuntimeStatus['activeRun'];
+  needsRecovery: boolean;
   totals: {
     sourceCount: number;
     enabledSourceCount: number;
@@ -79,6 +81,8 @@ function emptyStatus(now: string): AutoCrawlRuntimeStatus {
     activeLock: null,
     activeRun: null,
     latestRun: null,
+    staleRunningRun: null,
+    needsRecovery: false,
     totals: {
       sourceCount: 0,
       enabledSourceCount: 0,
@@ -98,10 +102,11 @@ export async function getAutoCrawlRuntimeStatus(): Promise<AutoCrawlRuntimeStatu
 
   const query = (sql: string, ...params: unknown[]) => (prisma as any).$queryRawUnsafe(sql, ...params) as Promise<any[]>;
   const now = toIso(first<any>(await query(`SELECT now() AS now`))?.now) || new Date().toISOString();
-  const [lockRow, activeRunRow, latestRunRow, totalsRow] = await Promise.all([
+  const [lockRow, activeRunRow, latestRunRow, staleRunningRunRow, totalsRow] = await Promise.all([
     getAutomationTaskLock('auto_crawl').catch(() => null),
     query(`SELECT "id","status","trigger","startedAt","finishedAt","scanned","delivered","filtered","duplicate","error","sourceCount","skipReason","errorMessage","latestTitle" FROM "AutoCrawlRun" WHERE "status"='RUNNING' AND "startedAt">=CURRENT_TIMESTAMP-INTERVAL '30 minutes' ORDER BY "startedAt" DESC,"id" DESC LIMIT 1`).then(first<any>).catch(() => null),
     query(`SELECT "id","status","trigger","startedAt","finishedAt","scanned","delivered","filtered","duplicate","error","sourceCount","skipReason","errorMessage","latestTitle" FROM "AutoCrawlRun" ORDER BY "startedAt" DESC,"id" DESC LIMIT 1`).then(first<any>).catch(() => null),
+    query(`SELECT "id","status","trigger","startedAt","finishedAt","scanned","delivered","filtered","duplicate","error","sourceCount","skipReason","errorMessage","latestTitle" FROM "AutoCrawlRun" WHERE "status"='RUNNING' AND "startedAt"<CURRENT_TIMESTAMP-INTERVAL '30 minutes' ORDER BY "startedAt" ASC,"id" ASC LIMIT 1`).then(first<any>).catch(() => null),
     query(`SELECT
       (SELECT COUNT(*)::int FROM "AutoCrawlSource") AS "sourceCount",
       (SELECT COUNT(*)::int FROM "AutoCrawlSource" WHERE "disabled"=FALSE) AS "enabledSourceCount",
@@ -121,6 +126,7 @@ export async function getAutoCrawlRuntimeStatus(): Promise<AutoCrawlRuntimeStatu
   } : null;
   const activeRun = mapRun(activeRunRow);
   const latestRun = mapRun(latestRunRow);
+  const staleRunningRun = mapRun(staleRunningRunRow);
   const totals = {
     sourceCount: Number(totalsRow?.sourceCount || 0),
     enabledSourceCount: Number(totalsRow?.enabledSourceCount || 0),
@@ -139,6 +145,8 @@ export async function getAutoCrawlRuntimeStatus(): Promise<AutoCrawlRuntimeStatu
     activeLock,
     activeRun,
     latestRun,
+    staleRunningRun,
+    needsRecovery: Boolean(staleRunningRun),
     totals,
   };
 }

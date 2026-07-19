@@ -16,7 +16,7 @@ import {
 } from '../services/auto-crawl.service';
 import { toBool } from '../services/auto-crawl-normalize';
 import { getAutoCrawlRuntimeStatus } from '../services/auto-crawl-runtime-status.service';
-import { getAutoCrawlExecutionLog, listAutoCrawlExecutionLogs } from '../services/auto-crawl-execution-log.service';
+import { getAutoCrawlExecutionLog, listAutoCrawlExecutionLogDetails, listAutoCrawlExecutionLogs } from '../services/auto-crawl-execution-log.service';
 import { runObservedAutoCrawl } from '../services/auto-crawl-observed-runner.service';
 
 let registered = false;
@@ -206,6 +206,11 @@ export function registerAutoCrawlRoutes(app: Express) {
   app.get('/api/admin/auto-crawl/execution-logs', authMiddleware, adminOnly, catchAsync(async (req, res) => {
     setNoStore(res);
     return guarded(res, () => listAutoCrawlExecutionLogs(intValue(req.query.limit, 20, 1, 100)));
+  }));
+
+  app.get('/api/admin/auto-crawl/execution-logs/details', authMiddleware, adminOnly, catchAsync(async (req, res) => {
+    setNoStore(res);
+    return guarded(res, () => listAutoCrawlExecutionLogDetails(intValue(req.query.limit, 20, 1, 100)));
   }));
 
   app.get('/api/admin/auto-crawl/execution-logs/:runId', authMiddleware, adminOnly, catchAsync(async (req, res) => {
