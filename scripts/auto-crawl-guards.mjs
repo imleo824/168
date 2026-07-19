@@ -72,6 +72,7 @@ mustHave('main flow', crawl, /publishContentHash/);
 mustHave('main flow', crawl, /duplicate_after_clean/);
 mustHave('main flow', crawl, /"contentHash"=COALESCE\(\$8,"contentHash"\)/);
 mustHave('main flow', crawl, /帖子发布失败，已进入失败队列/);
+mustHave('source failure backoff', crawl, /function sourceFailureBackoffMinutes[\s\S]*"nextRunAt"=CURRENT_TIMESTAMP\+\(\$3::text\|\|' minutes'\)::interval/);
 mustHave('main flow', crawl, /auto_crawl_database_migration_required/);
 mustNotHave('main flow', crawl, /resolveCategoryById|findPublishCategoryMetaSchema|ConfigService|AutoCrawlLock|AutoCrawlCategoryAuthor|heartbeatAutoCrawlLock|resolveAutoCrawlFinalCategoryByRules|initializeAutoCrawlSourcesFromSeed|AUTO_CRAWL_SEED|CREATE TABLE IF NOT EXISTS|CREATE INDEX IF NOT EXISTS|syncToTelegram|telegramSyncStatus/);
 mustNotHave('main flow metadata', crawl, /metadata:\s*\{[\s\S]{0,160}\bcategory\s*[,}]|metadata:\s*\{[\s\S]{0,180}\bmeta\s*:/);
@@ -85,6 +86,8 @@ mustNotHave('source identity', crawl, /fingerprint\(source, item, itemHash\)/);
 
 mustHave('recovery', crawlRecovery, /reconcileInterruptedAutoCrawlState/);
 mustHave('recovery', crawlRecovery, /runAutoCrawlRecoveryQueue/);
+mustHave('recovery exact claim', crawlRecovery, /ids:\s*claimedIds/);
+mustHave('reprocess exact ids', crawl, /conditions\.push\(`i\."id"=ANY\(\$\$\{params\.length\}::text\[\]\)`\)/);
 mustHave('observed runner', observedRunner, /runRecoverySafely/);
 
 mustHave('AI extraction', crawlAi, /context: AutoCrawlExtractionContext/);

@@ -91,6 +91,7 @@ export async function runAutoCrawlRecoveryQueue() {
 
   const result = await reprocessAutoCrawlItems({
     status: 'RAW',
+    ids: claimedIds,
     limit: claimedIds.length,
   });
   return {

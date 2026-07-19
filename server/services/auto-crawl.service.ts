@@ -98,6 +98,11 @@ function preview(raw: unknown, max = 180) {
       return text.length > max ? `${text.slice(0, max)}...` : text;
     }
 
+function sourceFailureBackoffMinutes(failCount: unknown) {
+  const failures = Math.max(1, Math.min(12, Number(failCount || 0) + 1));
+  return Math.min(240, Math.max(5, 5 * (2 ** Math.min(5, failures - 1))));
+}
+
     function qualityAudit(quality: CrawlQualityDecision) {
       return {
         reason: quality.reason,
@@ -894,9 +899,16 @@ export async function runAutoCrawlOnce(options: { trigger?: RunTrigger; force?: 
           return await processSource(id, source, config, databaseConfig, logger);
         } catch (error) {
           await exec(
-            `UPDATE "AutoCrawlSource" SET "failCount"="failCount"+1,"lastError"=$2,"sourceHealth"='ERROR',"updatedAt"=CURRENT_TIMESTAMP WHERE "id"=$1`,
+            `UPDATE "AutoCrawlSource" SET
+              "failCount"="failCount"+1,
+              "nextRunAt"=CURRENT_TIMESTAMP+($3::text||' minutes')::interval,
+              "lastError"=$2,
+              "sourceHealth"='ERROR',
+              "updatedAt"=CURRENT_TIMESTAMP
+             WHERE "id"=$1`,
             source.id,
             errorText(error).slice(0, 1000),
+            sourceFailureBackoffMinutes(source.failCount),
           );
           logEvent(logger, {
             level: 'error',
@@ -951,10 +963,18 @@ export async function runAutoCrawlOnce(options: { trigger?: RunTrigger; force?: 
 async function fetchStoredItemsForReprocess(options: {
   status?: string;
   sourceId?: string;
+  ids?: string[];
   limit: number;
 }): Promise<StoredAutoCrawlReprocessItem[]> {
   const conditions: string[] = [];
   const params: unknown[] = [];
+  const ids = Array.isArray(options.ids)
+    ? Array.from(new Set(options.ids.map((id) => cleanString(id, 80)).filter(Boolean)))
+    : [];
+  if (ids.length > 0) {
+    params.push(ids);
+    conditions.push(`i."id"=ANY($${params.length}::text[])`);
+  }
   if (options.status) {
     params.push(options.status);
     conditions.push(`i."status"=$${params.length}`);
@@ -1002,6 +1022,7 @@ async function fetchStoredItemsForReprocess(options: {
 export async function reprocessAutoCrawlItems(options: {
       status?: string;
       sourceId?: string;
+      ids?: string[];
       limit?: number;
     } = {}) {
       await ensureAutoCrawlStorage();
@@ -1009,6 +1030,7 @@ export async function reprocessAutoCrawlItems(options: {
         fetchStoredItemsForReprocess({
           status: options.status,
           sourceId: options.sourceId,
+          ids: options.ids,
           limit: clampRun(options.limit, 50, 100),
         }),
         loadAutoCrawlDatabaseConfig(),
