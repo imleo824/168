@@ -64,6 +64,103 @@ function safeObject(value: unknown) {
   return safeValue(value || {}) as Record<string, unknown>;
 }
 
+function iso(value: unknown, fallback?: string) {
+  if (!value) return fallback || new Date().toISOString();
+  const date = value instanceof Date ? value : new Date(String(value));
+  return Number.isFinite(date.getTime()) ? date.toISOString() : fallback || new Date().toISOString();
+}
+
+function runStatus(run: any) {
+  return String(run?.status || (run?.finishedAt || run?.updatedAt ? 'SKIPPED' : 'PENDING')).toUpperCase();
+}
+
+function runReason(run: any) {
+  return String(run?.error || run?.skipReason || run?.reason || '').trim() || null;
+}
+
+function runPostId(run: any) {
+  return String(run?.postId || run?.sourcePostId || run?.createdPostId || '').trim() || null;
+}
+
+function runRobotUserId(run: any) {
+  return String(run?.robotUserId || run?.authorUserId || '').trim() || null;
+}
+
+function startMessage(module: InteractionAutomationModule) {
+  if (module === 'auto_like') return '自动点赞执行开始';
+  if (module === 'comment_publish') return '自动评论执行开始';
+  if (module === 'quote_publish') return '自动引用执行开始';
+  return '自动发帖执行开始';
+}
+
+function finishMessage(module: InteractionAutomationModule, status: string) {
+  const action = module === 'auto_like' ? '自动点赞'
+    : module === 'comment_publish' ? '自动评论'
+      : module === 'quote_publish' ? '自动引用'
+        : '自动发帖';
+  if (status === 'SUCCEEDED') return `${action}成功`;
+  if (status === 'FAILED') return `${action}失败`;
+  if (status === 'PENDING') return `${action}仍在执行`;
+  return `${action}跳过`;
+}
+
+function fallbackDetails(module: InteractionAutomationModule, run: any) {
+  return safeObject({
+    databaseFallback: true,
+    trigger: run?.trigger || null,
+    postId: runPostId(run),
+    quotePostId: run?.quotePostId || null,
+    commentId: run?.commentId || null,
+    contentId: run?.contentId || null,
+    topic: run?.topic || null,
+    categoryId: run?.categoryId || run?.postCategoryId || null,
+    qualityScore: run?.qualityScore ?? run?.candidateScore ?? null,
+    generatedContent: run?.generatedContent || run?.content || run?.publishedContent || null,
+    source: module,
+  });
+}
+
+export function buildInteractionAutomationFallbackEvents(module: InteractionAutomationModule, run: any): InteractionAutomationExecutionEvent[] {
+  if (!run?.id) return [];
+  const runId = String(run.id);
+  const startedAt = iso(run.startedAt || run.createdAt);
+  const finishedAt = iso(run.finishedAt || run.updatedAt || run.createdAt, startedAt);
+  const status = runStatus(run);
+  const reason = runReason(run);
+  const postId = runPostId(run);
+  const robotUserId = runRobotUserId(run);
+  return [
+    {
+      timestamp: startedAt,
+      module,
+      runId,
+      level: 'info',
+      phase: 'run_started',
+      message: startMessage(module),
+      status: status === 'PENDING' ? 'PENDING' : 'RUNNING',
+      reason: null,
+      error: null,
+      postId,
+      robotUserId,
+      details: safeObject({ databaseFallback: true, trigger: run?.trigger || null }),
+    },
+    {
+      timestamp: finishedAt,
+      module,
+      runId,
+      level: status === 'FAILED' ? 'error' : 'info',
+      phase: 'run_finished',
+      message: finishMessage(module, status),
+      status,
+      reason,
+      error: status === 'FAILED' ? reason : null,
+      postId,
+      robotUserId,
+      details: fallbackDetails(module, run),
+    },
+  ];
+}
+
 function filePath(module: InteractionAutomationModule, runId: string) {
   return path.join(LOG_DIR, module, `${String(runId || 'unknown').replace(/[^A-Za-z0-9_-]/g, '_')}.jsonl`);
 }
@@ -130,8 +227,11 @@ export async function getInteractionAutomationExecutionEvents(module: Interactio
 }
 
 export async function attachInteractionAutomationExecutionEvents<T extends { id?: string | null }>(module: InteractionAutomationModule, runs: T[]) {
-  return Promise.all(runs.map(async (run) => ({
-    ...run,
-    processEvents: run.id ? await getInteractionAutomationExecutionEvents(module, String(run.id)) : [],
-  })));
+  return Promise.all(runs.map(async (run) => {
+    const fileEvents = run.id ? await getInteractionAutomationExecutionEvents(module, String(run.id)) : [];
+    return {
+      ...run,
+      processEvents: fileEvents.length ? fileEvents : buildInteractionAutomationFallbackEvents(module, run),
+    };
+  }));
 }

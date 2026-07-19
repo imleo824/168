@@ -152,7 +152,11 @@ mustHave('interaction panel process events', interactionPanel, /event\?\.message
 mustHave('interaction execution log', interactionExecutionLog, /logs', 'interaction-automation'/);
 mustHave('interaction execution log', interactionExecutionLog, /logInteractionAutomationEvent/);
 mustHave('interaction execution log', interactionExecutionLog, /attachInteractionAutomationExecutionEvents/);
+mustHave('interaction execution log fallback', interactionExecutionLog, /buildInteractionAutomationFallbackEvents/);
+mustHave('interaction execution log fallback', interactionExecutionLog, /databaseFallback/);
+mustHave('interaction execution log fallback', interactionExecutionLog, /fileEvents\.length \? fileEvents : buildInteractionAutomationFallbackEvents/);
 mustHave('interaction execution log', interactionExecutionLog, /\[redacted\]/);
+mustHave('package scripts', packageScripts, /interaction-automation-log-fallback-guards/);
 
 mustHave('auto post runner', autoPostRunner, /runAutoPostOnce/);
 mustHave('auto post runner', autoPostRunner, /module: 'auto_post'/);
