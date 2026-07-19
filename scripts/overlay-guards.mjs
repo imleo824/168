@@ -150,21 +150,27 @@ assert(
 
 assert(
   postDetailCss.includes('.detail-page--mobile .detail-page-topbar.ui-topbar') &&
-    postDetailCss.includes('position: fixed;') &&
-    postDetailCss.includes('inset-block-start: var(--ui-space-none);') &&
+    postDetailCss.includes('position: relative;') &&
+    postDetailCss.includes('inset: auto;') &&
     postDetailCss.includes('z-index: var(--ui-z-page-header);') &&
-    postDetailCss.includes('padding-top: calc(var(--ui-topbar-height) + env(safe-area-inset-top));') &&
+    postDetailCss.includes('padding-top: var(--ui-space-none);') &&
     postDetailCss.includes('.detail-page--mobile .detail-state-shell') &&
-    postDetailCss.includes('padding-top: calc(var(--ui-topbar-height) + env(safe-area-inset-top) + var(--ui-app-page-main-padding-y));'),
-  'Mobile post detail must keep its topbar fixed above long content and reserve the top safe-area height in every detail state.',
+    postDetailCss.includes('padding-top: var(--ui-app-page-main-padding-y);'),
+  'Mobile post detail must keep its topbar in page flow and reserve spacing inside the dedicated content scroll root.',
 );
 
 assert(
-  !postDetailCss.includes('.detail-page[data-route-overlay],\n  .detail-page--mobile') &&
+  scrollTargets.includes("'[data-detail-scroll-root]'") &&
+    postDetailPage.includes('data-detail-scroll-root=""') &&
+    postDetailSections.includes('data-detail-scroll-root=""') &&
     postDetailCss.includes('.detail-page[data-route-overlay] {\n    height: var(--app-layout-vh);') &&
-    postDetailCss.includes('.detail-page--mobile {\n    display: flex;\n    min-height: var(--app-layout-vh);') &&
-    postDetailCss.includes('overflow-y: visible;'),
-  'Plain mobile post detail pages must use document scrolling; only route overlays may own the fixed-height internal scroll lane.',
+    postDetailCss.includes('.detail-page--mobile {\n    display: flex;\n    height: var(--app-layout-vh);') &&
+    postDetailCss.includes('.detail-page-main--mobile') &&
+    postDetailCss.includes('overflow-y: auto;') &&
+    postDetailCss.includes('touch-action: pan-y;') &&
+    postDetailCss.includes('.detail-page-main--mobile > *') &&
+    postDetailCss.includes('flex: 0 0 auto;'),
+  'Mobile post detail pages must use the dedicated content scroll root and keep long content at natural height; route overlays only add the canonical lock-scroll allowance.',
 );
 
 assert(

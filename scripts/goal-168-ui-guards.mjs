@@ -261,7 +261,16 @@ assertIncludes('src/pages/PostDetailLegacy.tsx', 'useLikeFeedback', 'post detail
 assertIncludes('src/pages/PostDetailLegacy.tsx', 'detail-topbar-contact-button', 'detail topbar must expose the contact action beside follow when contact is visible.');
 assertNotIncludes('src/pages/PostDetailLegacy.tsx', "from '@/hooks/useIsMobile'", 'post detail layout must use the real viewport width instead of the user-surface mobile-first shell hook.');
 assertIncludes('src/pages/PostDetailLegacy.tsx', 'const isDetailMobile = !isDesktopViewport;', 'post detail must derive its mobile/desktop layout from the actual viewport.');
-assertIncludes('src/pages/PostDetailLegacy.tsx', 'const shouldUseDetailPageScroll = isDetailMobile && !isOverlayDetail;', 'post detail document scroll must only apply to non-overlay mobile detail pages.');
+assertIncludes('src/pages/PostDetailLegacy.tsx', 'const shouldUseDetailPageScroll = false;', 'post detail must not register the old mobile document scroll target.');
+assertIncludes('src/pages/PostDetailLegacy.tsx', 'data-detail-scroll-root=""', 'post detail content shell must expose the dedicated detail scroll root.');
+assertIncludes('src/features/post-detail/PostDetailLegacySections.tsx', 'data-detail-scroll-root=""', 'post detail loading and state pages must expose the dedicated detail scroll root.');
+assertIncludes('src/utils/scrollTargets.ts', "'[data-detail-scroll-root]'", 'shared scroll target discovery must include the detail content scroll root.');
+assertIncludes('src/styles/features/post-detail-shell.css', 'overflow-y: auto;', 'mobile detail content must own vertical scrolling inside the detail page.');
+assertIncludes('src/styles/features/post-detail-shell.css', 'touch-action: pan-y;', 'mobile detail content scroll root must keep touch panning enabled.');
+assertIncludes('src/styles/features/post-detail-shell.css', '.detail-page-main--mobile > *', 'mobile detail content children must not be flex-shrunk into a clipped non-scrollable page.');
+assertIncludes('src/styles/features/post-detail-shell.css', 'flex: 0 0 auto;', 'mobile detail content children must keep their natural height so long details can scroll.');
+assertIncludes('src/styles/features/post-detail-topbar.css', 'position: relative;', 'mobile detail topbar must stay in page flow instead of fixed-covering content.');
+assertNotIncludes('src/styles/features/post-detail-topbar.css', 'inset-block-start: var(--ui-space-none);', 'mobile detail topbar must not restore fixed viewport anchoring.');
 assertIncludes('src/styles/features/post-detail-topbar.css', ".app-shell[data-route-surface='user'][data-desktop-surface='detail'] .detail-page--desktop .detail-page-topbar.ui-topbar", 'desktop detail topbar must have a page-owned shell-scoped rule.');
 assertIncludes('src/styles/features/post-detail-topbar.css', 'top: var(--app-desktop-shell-padding-y);', 'desktop detail topbar must stick inside the desktop app frame instead of the browser viewport edge.');
 assertIncludes('src/styles/features/post-detail-topbar.css', 'minmax(var(--ui-detail-topbar-action-slot-min-width), max-content)', 'desktop detail topbar actions must reserve a stable trailing column.');
@@ -298,7 +307,7 @@ assertIncludes('src/styles/features/home-feed-state.css', '.ui-feed-empty-plain-
 assertNotIncludes('src/pages/PostDetailLegacy.tsx', 'DetailQuotesLoadingRows', 'detail quote loading must not render skeleton rows.');
 assertNotIncludes('src/styles/features/post-detail.css', 'skeleton', 'detail CSS must not keep detail skeleton selectors.');
 assertIncludes('src/pages/PostDetailLegacy.tsx', '<LoadingBlock text="正在加载帖子详情"', 'detail initial entry must render a normal loading block.');
-assertIncludes('src/pages/PostDetailLegacy.tsx', 'const shouldUseDetailPageScroll = isDetailMobile && !isOverlayDetail;', 'overlay detail must not register a nested mobile addressbar scroll target.');
+assertIncludes('src/pages/PostDetailLegacy.tsx', 'const shouldUseDetailPageScroll = false;', 'overlay detail must not register a nested mobile addressbar scroll target.');
 assertIncludes('src/utils/postPresentation.ts', 'const LOCATION_SPLIT_PATTERN = /\\s+-\\s+|[·>＞、，,;；|/\\n]+/;', 'location display splitting must support the standard middle-dot hierarchy.');
 assertIncludes('src/utils/postStructuredMeta.ts', "if (normalizeKey(key) === 'location') return selectFinestDisplayLocation(formatted) || formatted;", 'structured location meta must display the leaf node only.');
 

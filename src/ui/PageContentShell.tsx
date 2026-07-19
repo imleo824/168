@@ -1,7 +1,7 @@
-import type { ElementType, ReactNode } from 'react';
+import type { ComponentPropsWithoutRef, ElementType, ReactNode } from 'react';
 import { cn } from '@/utils/cn';
 
-type PageContentShellProps = {
+type PageContentShellProps = Omit<ComponentPropsWithoutRef<'div'>, 'as' | 'className' | 'children'> & {
   as?: ElementType;
   children: ReactNode;
   bottomSafe?: boolean;
@@ -15,10 +15,12 @@ export default function PageContentShell({
   children,
   className = '',
   variant = 'narrow',
+  ...restProps
 }: PageContentShellProps) {
   const Component: ElementType = as || 'div';
   return (
     <Component
+      {...restProps}
       className={cn(
         'ui-page-content-shell',
         variant === 'fluid' ? 'ui-shell-fluid' : 'ui-shell-narrow',

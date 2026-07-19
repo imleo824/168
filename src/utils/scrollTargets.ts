@@ -4,6 +4,7 @@ export const ROUTE_OVERLAY_SCROLL_SELECTOR = '[data-route-overlay-scroll]';
 export const PAGE_SCROLL_TARGET_SELECTORS = [
   ROUTE_OVERLAY_SELECTOR,
   ROUTE_OVERLAY_SCROLL_SELECTOR,
+  '[data-detail-scroll-root]',
   '[data-feed-scroll-root]',
   '[data-mobile-fill]',
   '[data-mobile-addressbar-scroll]',
@@ -13,6 +14,7 @@ export const PAGE_SCROLL_TARGET_SELECTORS = [
 export const LIST_SCROLL_ROOT_SELECTOR = [
   ROUTE_OVERLAY_SELECTOR,
   ROUTE_OVERLAY_SCROLL_SELECTOR,
+  '[data-detail-scroll-root]',
   '[data-feed-scroll-root]',
   '[data-list-scroll-root]',
   '[data-mobile-addressbar-scroll]',

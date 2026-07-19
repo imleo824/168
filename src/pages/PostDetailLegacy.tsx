@@ -87,7 +87,7 @@ export default function PostDetail() {
   const isDetailMobile = !isDesktopViewport;
   const routeState = getRouteState(location.state);
   const isOverlayDetail = isDetailMobile && Boolean(routeState?.backgroundLocation?.pathname);
-  const shouldUseDetailPageScroll = isDetailMobile && !isOverlayDetail;
+  const shouldUseDetailPageScroll = false;
 
   const { data: post, isLoading, isFetching, isError, error, refetch: refetchPost } = usePost(id);
 
@@ -522,6 +522,8 @@ export default function PostDetail() {
       <PageContentShell
         as="main"
         variant="fluid"
+        data-detail-scroll-root=""
+        data-route-overlay-scroll={isOverlayDetail ? '' : undefined}
         className={`detail-page-main ui-app-page-main ${isDetailMobile ? 'detail-page-main--mobile' : 'detail-page-main--desktop'}`}
       >
         <article

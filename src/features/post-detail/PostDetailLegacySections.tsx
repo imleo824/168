@@ -222,7 +222,13 @@ export function DetailStatePage({
         leftClassName="detail-topbar-left"
         rightClassName="detail-topbar-right"
       />
-      <PageContentShell className="detail-state-shell ui-app-page-main">
+      <PageContentShell
+        as="main"
+        variant="fluid"
+        data-detail-scroll-root=""
+        data-route-overlay-scroll={isOverlayDetail ? '' : undefined}
+        className={`detail-page-main detail-state-shell ui-app-page-main ${isMobile ? 'detail-page-main--mobile' : 'detail-page-main--desktop'}`}
+      >
         <StateBlock
           title={stateBlock.title}
           description={stateBlock.description}
@@ -268,6 +274,8 @@ export function DetailLoadingPage({
       <PageContentShell
         as="main"
         variant="fluid"
+        data-detail-scroll-root=""
+        data-route-overlay-scroll={isOverlayDetail ? '' : undefined}
         className={`detail-page-main ui-app-page-main ${isMobile ? 'detail-page-main--mobile' : 'detail-page-main--desktop'}`}
       >
         <LoadingBlock text="正在加载帖子详情" className="detail-page-loading-block" />

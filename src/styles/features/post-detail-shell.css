@@ -36,12 +36,20 @@
 
   .detail-page--mobile {
     display: flex;
+    height: var(--app-layout-vh);
     min-height: var(--app-layout-vh);
+    max-height: var(--app-layout-vh);
     flex-direction: column;
     overflow-x: clip;
-    overflow-y: visible;
+    overflow-y: hidden;
+    overscroll-behavior-y: contain;
+    touch-action: none;
     transform: var(--ui-transform-none);
     backface-visibility: visible;
+  }
+
+  .detail-page[data-route-overlay].detail-page--mobile {
+    overflow-y: hidden;
   }
 
   .detail-page--desktop {
@@ -69,15 +77,25 @@
   }
 
   .detail-page-main--mobile {
-    flex: 1 0 auto;
+    flex: 1 1 auto;
     min-height: 0;
+    max-height: 100%;
+    overflow-x: clip;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+    -webkit-overflow-scrolling: touch;
     padding-inline: var(--ui-space-none);
-    padding-top: calc(var(--ui-topbar-height) + env(safe-area-inset-top));
+    padding-top: var(--ui-space-none);
     padding-bottom: calc(var(--ui-detail-page-bottom-space) + env(safe-area-inset-bottom));
   }
 
+  .detail-page-main--mobile > * {
+    flex: 0 0 auto;
+  }
+
   .detail-page--mobile .detail-state-shell {
-    padding-top: calc(var(--ui-topbar-height) + env(safe-area-inset-top) + var(--ui-app-page-main-padding-y));
+    padding-top: var(--ui-app-page-main-padding-y);
   }
 
   .detail-page-main--desktop {

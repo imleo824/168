@@ -13,14 +13,13 @@
   }
 
   .detail-page--mobile .detail-page-topbar.ui-topbar {
-    position: fixed;
-    inset-block-start: var(--ui-space-none);
-    inset-inline: var(--ui-space-none);
+    position: relative;
+    inset: auto;
     z-index: var(--ui-z-page-header);
     width: 100%;
     min-width: 0;
     flex: 0 0 auto;
-    transform: translateZ(0);
+    transform: var(--ui-transform-none);
   }
 
   .detail-page[data-route-overlay] .detail-page-topbar.ui-topbar {
