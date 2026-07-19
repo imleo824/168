@@ -20,6 +20,7 @@ const quality = filterCrawlContentBeforePublish({
 assert.equal(quality.shouldPublish, true, 'valid content must survive contact and tail cleanup.');
 assert.doesNotMatch(quality.cleanedTitle, /\$1|helper1234|t\.me/i, 'cleaned title must not leak contact replacement artifacts.');
 assert.doesNotMatch(quality.cleanedContent, /\$1|helper1234|t\.me|频道赞助商|@channelname/i, 'cleaned content must remove contacts and source tails.');
+assert.equal(quality.contact, '@helper1234', 'post author contact must be extracted before contact lines are removed from cleaned content.');
 assert.ok(quality.removed.contactLines >= 2, 'contact removal must be audited.');
 assert.ok(quality.removed.tailLines >= 2, 'tail removal must be audited.');
 
@@ -65,6 +66,32 @@ assert.deepEqual(meta.meta, {
   note: '42',
 });
 assert.deepEqual(meta.audit.unexpectedKeys, ['extra'], 'only non-schema inputs should be audited as unexpected.');
+
+const booleanMeta = await normalizeCrawlCategoryMeta({
+  category: { id: 'category_housing', name: '租房', slug: 'housing' },
+  categoryMetaSchema: {
+    categorySlug: 'housing',
+    schemaVersion: 2,
+    name: '租房',
+    fields: [
+      { key: 'furnished', label: '带家具', type: 'boolean', required: false },
+      { key: 'hasParking', label: '停车位', type: 'boolean', required: false },
+      { key: 'petFriendly', label: '可养宠', type: 'boolean', required: false },
+    ],
+  },
+  rawMeta: {
+    furnished: '是',
+    hasParking: '无',
+    petFriendly: 1,
+  },
+  locationPresets: [],
+});
+
+assert.deepEqual(booleanMeta.meta, {
+  furnished: true,
+  hasParking: false,
+  petFriendly: true,
+}, 'boolean meta must tolerate common AI/string outputs instead of silently dropping them.');
 
 const sriLankaPresets = [{ country: '斯里兰卡', cities: ['科伦坡', '康提', '加勒'] }];
 assert.equal(normalizeToLocationPreset('SLK', sriLankaPresets), '斯里兰卡', 'SLK must semantically normalize to Sri Lanka.');
@@ -235,6 +262,7 @@ for (const [rawSalary, expectedRange] of [
   ['6000 AED', '$1,500 - $2,000'],
   ['300000日元/月', '$1,500 - $2,000'],
   ['年薪120000人民币', '$1,200 - $1,500'],
+  ['一万二人民币/月', '$1,500 - $2,000'],
   ['待遇从优，薪资详聊', '面议'],
 ] as const) {
   const normalizedSalary = await normalizeCrawlCategoryMeta({
@@ -425,6 +453,29 @@ const unitlessRentMeta = await normalizeCrawlCategoryMeta({
 assert.equal(unitlessRentMeta.meta.price, 800, 'unitless money fields must keep their numeric amount instead of being dropped.');
 assert.equal(unitlessRentMeta.audit.rejected.price, undefined);
 
+const abbreviatedChineseNumberMeta = await normalizeCrawlCategoryMeta({
+  category: { id: 'category_housing', name: '租房', slug: 'housing' },
+  categoryMetaSchema: {
+    categorySlug: 'housing',
+    schemaVersion: 1,
+    name: '租房',
+    fields: [
+      { key: 'price', label: '租金', type: 'number', required: false },
+      { key: 'area', label: '面积', type: 'number', required: false },
+    ],
+  },
+  rawMeta: {
+    price: '一万二人民币',
+    area: '三千五平',
+  },
+  locationPresets: [],
+});
+
+assert.deepEqual(abbreviatedChineseNumberMeta.meta, {
+  price: 1680,
+  area: 3500,
+}, 'abbreviated Chinese numeric meta such as 一万二 and 三千五 must be parsed as 12000 and 3500.');
+
 const secondhandNumericPriceMeta = await normalizeCrawlCategoryMeta({
   category: { id: 'category_secondhand', name: '二手', slug: 'secondhand' },
   categoryMetaSchema: {
@@ -466,6 +517,25 @@ const numericPriceCannotStoreNegotiable = await normalizeCrawlCategoryMeta({
 
 assert.equal(numericPriceCannotStoreNegotiable.meta.price, undefined, 'numeric price fields cannot store negotiable text.');
 assert.equal(numericPriceCannotStoreNegotiable.audit.rejected.price?.reason, 'money_number_not_matched');
+
+const priceMustNotReadChineseNumberFromCommonWords = await normalizeCrawlCategoryMeta({
+  category: { id: 'category_secondhand', name: '二手', slug: 'secondhand' },
+  categoryMetaSchema: {
+    categorySlug: 'secondhand',
+    schemaVersion: 2,
+    name: '二手',
+    fields: [
+      { key: 'price', label: '价格', type: 'number', required: false },
+    ],
+  },
+  rawMeta: {
+    price: '二手车出售',
+  },
+  locationPresets: [],
+});
+
+assert.equal(priceMustNotReadChineseNumberFromCommonWords.meta.price, undefined, 'Chinese numerals inside ordinary words such as 二手车 must not become numeric meta.');
+assert.equal(priceMustNotReadChineseNumberFromCommonWords.audit.rejected.price?.reason, 'money_number_not_matched');
 
 const compositeSelect = await normalizeCrawlCategoryMeta({
   category: { id: 'category_secondhand', name: '二手', slug: 'secondhand' },
@@ -570,5 +640,37 @@ assert.deepEqual(ruleBasedNormalized.meta, {
   paymentMonths: 1,
 }, 'rule-based crawl meta fallback must recover configured fields from cleaned body when AI returns no usable meta.');
 assert.deepEqual(ruleBasedNormalized.audit.unexpectedKeys, [], 'rule-based fallback must only emit configured schema keys.');
+
+const lineScopedRuleSchema = {
+  categorySlug: 'jobs',
+  schemaVersion: 6,
+  name: '招聘',
+  fields: [
+    { key: 'note', label: '备注', type: 'text' as const, required: false, maxLength: 80 },
+    { key: 'position', label: '岗位', type: 'select' as const, required: false, options: ['前端开发', '后端开发'] },
+    { key: 'salaryRange', label: '薪资', type: 'select' as const, required: false, options: ['面议', '$800 - $1,200', '$1,200 - $1,500'] },
+  ],
+};
+const lineScopedRuleCandidates = buildRuleBasedCrawlMetaCandidates({
+  category: { id: 'category_jobs', name: '招聘', slug: 'jobs' },
+  schema: lineScopedRuleSchema,
+  locationPresets: [],
+}, [
+  '备注：可带电脑设备',
+  '岗位：React 前端工程师',
+  '薪资：1000U/月',
+].join('\n'));
+const lineScopedRuleMeta = await normalizeCrawlCategoryMeta({
+  category: { id: 'category_jobs', name: '招聘', slug: 'jobs' },
+  categoryMetaSchema: lineScopedRuleSchema,
+  rawMeta: lineScopedRuleCandidates,
+  locationPresets: [],
+});
+
+assert.deepEqual(lineScopedRuleMeta.meta, {
+  note: '可带电脑设备',
+  position: '前端开发',
+  salaryRange: '$800 - $1,200',
+}, 'rule-based meta fallback must preserve line boundaries so one text field cannot swallow following fields.');
 
 console.log('[auto-crawl-quality-meta-guards] passed');

@@ -125,6 +125,7 @@ function sourceFailureBackoffMinutes(failCount: unknown) {
         rejectedMeta,
         ruleBasedMetaKeys: extracted.audit.ruleBasedMetaKeys,
         ruleBasedFallbackKeys: extracted.audit.ruleBasedFallbackKeys,
+        contactSource: extracted.audit.contactSource,
         provider: extracted.audit.provider,
         model: extracted.audit.model,
         enrichmentStatus: extracted.audit.enrichmentStatus,
@@ -564,6 +565,7 @@ function extractionContext(
           categoryName: category.name,
           cleanedContentLength: preview(quality.cleanedContent, 12).length,
           imageCount: item.images?.length || 0,
+          detectedContact: Boolean(quality.contact),
         },
       });
       const extracted = await buildCrawlExtract({
@@ -572,6 +574,7 @@ function extractionContext(
         rawContent: item.content,
         cleanedContent: quality.cleanedContent,
         sourceName: source.sourceName,
+        detectedContact: quality.contact,
       });
 
       logEvent(logger, {

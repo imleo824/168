@@ -36,6 +36,7 @@ type BodyCleanResult = {
   boilerplateLines: number;
   tailLines: number;
   duplicateLines: number;
+  contact: string;
   rawLineCount: number;
   keptLineCount: number;
 };
@@ -112,6 +113,36 @@ function removeInlineContacts(line: string) {
     .trim();
 }
 
+function contactValue(raw: unknown) {
+  return compact(String(raw || '')).slice(0, 120);
+}
+
+function detectContactFromLine(line: string) {
+  const value = compact(line);
+  if (!value) return '';
+  if (/(?:广告合作|商务合作|投稿|频道导航|频道矩阵|官方频道|防失联|备用频道|交流群|资源群)/i.test(value)) return '';
+
+  const labeledTelegram = value.match(/(?:TG|Telegram|飞机|电报)[:：\s@]*([A-Za-z0-9_]{4,64})/i);
+  if (labeledTelegram?.[1]) return contactValue(`@${labeledTelegram[1].replace(/^@/, '')}`);
+
+  const telegramUrl = value.match(/(?:https?:\/\/)?(?:t\.me|telegram\.me)\/([A-Za-z0-9_]{4,64})/i);
+  if (telegramUrl?.[1]) return contactValue(`@${telegramUrl[1]}`);
+
+  const whatsappUrl = value.match(/(?:https?:\/\/)?wa\.me\/(\+?\d{7,15})/i);
+  if (whatsappUrl?.[1]) return contactValue(`WhatsApp:${whatsappUrl[1]}`);
+
+  const wechat = value.match(/(?:微信|VX|WeChat)[:：\s]*([A-Za-z0-9_-]{4,64})/i);
+  if (wechat?.[1]) return contactValue(`微信:${wechat[1]}`);
+
+  const phone = value.match(/(?:电话|手机|联系)[:：\s]*(\+?\d[\d\s-]{7,}\d)/i);
+  if (phone?.[1]) return contactValue(phone[1].replace(/\s+/g, ' '));
+
+  const labeledAt = value.match(/(?:联系|咨询|私聊|客服|找|加)[:：\s]*@([A-Za-z0-9_]{4,64})/i);
+  if (labeledAt?.[1]) return contactValue(`@${labeledAt[1]}`);
+
+  return '';
+}
+
 function isSeparatorLine(line: string) {
   return /^[\-—_=*·•｜|\s]{4,}$/.test(line);
 }
@@ -177,6 +208,7 @@ function cleanBody(rawContent: string): BodyCleanResult {
   let tailLines = 0;
   let duplicateLines = 0;
   let emojiCount = 0;
+  let contact = '';
   let tailStarted = false;
 
   for (let index = 0; index < rawLines.length; index += 1) {
@@ -194,6 +226,7 @@ function cleanBody(rawContent: string): BodyCleanResult {
       promoLines += 1;
       continue;
     }
+    if (!contact && !isBoilerplateLine(rawLine, kept.length > 0)) contact = detectContactFromLine(rawLine);
 
     const withoutContacts = compact(removeInlineContacts(rawLine));
     if (withoutContacts !== compact(rawLine)) contactLines += 1;
@@ -225,6 +258,7 @@ function cleanBody(rawContent: string): BodyCleanResult {
     boilerplateLines,
     tailLines,
     duplicateLines,
+    contact,
     rawLineCount: rawLines.length,
     keptLineCount: kept.length,
   };
@@ -322,7 +356,7 @@ export function filterCrawlContentBeforePublish<T extends {
     score,
     cleanedTitle: cleanedTitle || rawTitle,
     cleanedContent: effectiveContent,
-    contact: '',
+    contact: body.contact,
     flags: unique(flags),
     removed: {
       emojiCount: body.emojiCount,

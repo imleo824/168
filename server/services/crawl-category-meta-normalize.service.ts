@@ -86,6 +86,7 @@ function parseChineseNumber(raw: string) {
   let total = 0;
   let section = 0;
   let number = 0;
+  let lastUnit = 1;
   for (const char of token) {
     if (char in values) {
       number = values[char];
@@ -95,14 +96,34 @@ function parseChineseNumber(raw: string) {
       total += Math.max(section + number, 1) * 10000;
       section = 0;
       number = 0;
+      lastUnit = 10000;
       continue;
     }
     const unit = unitValues[char];
     if (!unit) return null;
+    lastUnit = unit;
     section += Math.max(number, 1) * unit;
     number = 0;
   }
+  if (number > 0 && lastUnit > 10 && /[十百千万][一二三四五六七八九]$/.test(token)) {
+    return total + section + number * (lastUnit / 10);
+  }
   return total + section + number;
+}
+
+function parseChineseAmounts(raw: string) {
+  return [...raw.matchAll(/[一二两三四五六七八九十百千万]{1,12}/g)]
+    .filter((match) => {
+      const token = match[0] || '';
+      if (!token) return false;
+      if (token.length > 1 || /[十百千万]/.test(token)) return true;
+      const text = raw.trim();
+      const start = match.index ?? 0;
+      const nextChar = text[start + token.length] || '';
+      return text === token || /[年月日天房室平个台张辆人件份次]/.test(nextChar);
+    })
+    .map((match) => parseChineseNumber(match[0]))
+    .filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
 }
 
 function parseNumericAmounts(raw: string) {
@@ -135,9 +156,9 @@ function normalizePlainNumber(raw: unknown) {
   if (matches.length === 1) return { value: matches[0], reason: /(?:k|K|千|w|W|万)/.test(value) ? 'numeric_unit_extracted' : 'numeric_amount_extracted' };
   if (matches.length > 1) return { value: null, reason: 'number_not_matched' };
 
-  const chineseMatches = value.match(/[一二两三四五六七八九十百千万]{1,12}/g) || [];
+  const chineseMatches = parseChineseAmounts(value);
   if (chineseMatches.length !== 1) return { value: null, reason: 'number_not_matched' };
-  const parsed = parseChineseNumber(chineseMatches[0]);
+  const parsed = chineseMatches[0];
   return parsed !== null
     ? { value: parsed, reason: 'chinese_number_extracted' }
     : { value: null, reason: 'number_not_matched' };
@@ -299,7 +320,8 @@ function normalizeMoneyNumber(raw: unknown) {
   if (!text) return { value: null, reason: 'money_number_not_matched' };
 
   const rate = currencyRate(text);
-  const amounts = parseNumericAmounts(text);
+  const numericAmounts = parseNumericAmounts(text);
+  const amounts = numericAmounts.length ? numericAmounts : parseChineseAmounts(text);
   if (amounts.length !== 1) return { value: null, reason: 'money_number_not_matched' };
   const usd = amounts[0] * (rate || 1);
   if (!Number.isFinite(usd)) return { value: null, reason: 'money_number_not_matched' };
@@ -315,6 +337,24 @@ function normalizeNumber(raw: unknown, field: PublishCategoryMetaFieldConfig) {
   return contextual.value !== null && contextual.value !== undefined
     ? { ...contextual, reason: 'contextual_number_extracted' }
     : normalizePlainNumber(raw);
+}
+
+function normalizeBoolean(raw: unknown) {
+  if (typeof raw === 'boolean') return { value: raw, reason: 'strict_boolean' };
+  if (typeof raw === 'number') {
+    if (raw === 1) return { value: true, reason: 'numeric_boolean' };
+    if (raw === 0) return { value: false, reason: 'numeric_boolean' };
+    return { value: null, reason: 'strict_boolean_not_matched' };
+  }
+  if (typeof raw !== 'string') return { value: null, reason: 'strict_boolean_not_matched' };
+  const value = normalizedComparable(raw);
+  if (/^(?:true|yes|y|1|是|有|可|支持|需要|提供|包含|包)$/.test(value)) {
+    return { value: true, reason: 'semantic_boolean' };
+  }
+  if (/^(?:false|no|n|0|否|无|不|不可|不支持|无需|没有|未提供|不包含|不包)$/.test(value)) {
+    return { value: false, reason: 'semantic_boolean' };
+  }
+  return { value: null, reason: 'strict_boolean_not_matched' };
 }
 
 function salaryOptionRange(option: string) {
@@ -361,9 +401,11 @@ function semanticSalaryOption(raw: unknown, field: PublishCategoryMetaFieldConfi
 
   const amounts = typeof raw === 'number'
     ? [raw]
-    : parseNumericAmounts(text);
+    : (() => {
+      const numericAmounts = parseNumericAmounts(text);
+      return numericAmounts.length ? numericAmounts : parseChineseAmounts(text);
+    })();
   if (!amounts.length) return isNegotiableSalaryText(text) ? option : null;
-  if (!rate && !amounts.length) return option;
   const averageAmount = amounts.reduce((sum, amount) => sum + amount, 0) / amounts.length;
   const salaryOption = chooseSalaryRangeOption(averageAmount * (rate || 1) * periodFactor, field);
   return salaryOption || option;
@@ -399,9 +441,7 @@ function normalizeFieldValue(
   }
 
   if (field.type === 'boolean') {
-    return typeof raw === 'boolean'
-      ? { value: raw, reason: 'strict_boolean' }
-      : { value: null, reason: 'strict_boolean_not_matched' };
+    return normalizeBoolean(raw);
   }
 
   const value = textValue(raw, Number(field.maxLength) || 300);
