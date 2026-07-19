@@ -313,6 +313,17 @@ async function markEnabledAutoCrawlSourcesDueNow() {
   );
 }
 
+export async function markAutoCrawlSourceDueNow(id: string) {
+  const sourceId = cleanString(id, 80);
+  if (!sourceId) return;
+  await exec(
+    `UPDATE "AutoCrawlSource"
+     SET "nextRunAt"=CURRENT_TIMESTAMP,"updatedAt"=CURRENT_TIMESTAMP
+     WHERE "id"=$1 AND "disabled"=FALSE`,
+    sourceId,
+  );
+}
+
 export async function updateAutoCrawlConfig(patch: Partial<AutoCrawlConfig>) {
   await ensureAutoCrawlStorage();
   const enabled = patch.enabled ?? null;
@@ -379,7 +390,11 @@ export async function upsertAutoCrawlSource(raw: Partial<AutoCrawlSourceConfig>)
     source.cursorKind,
     source.pollIntervalMinutes,
   );
-  return getAutoCrawlConfig();
+  const savedRows = await rows<{ id: string }>(
+    `SELECT "id" FROM "AutoCrawlSource" WHERE "source"=$1 LIMIT 1`,
+    source.source,
+  );
+  return { config: await getAutoCrawlConfig(), sourceId: savedRows[0]?.id || source.id };
 }
 
 export async function updateAutoCrawlSource(raw: Partial<AutoCrawlSourceConfig>) {
@@ -404,7 +419,7 @@ export async function updateAutoCrawlSource(raw: Partial<AutoCrawlSourceConfig>)
     source.pollIntervalMinutes,
   );
   if (Number(changed || 0) === 0) throw new Error('auto_crawl_source_not_found');
-  return getAutoCrawlConfig();
+  return { config: await getAutoCrawlConfig(), sourceId: source.id };
 }
 
 export async function deleteAutoCrawlSource(id: string) {

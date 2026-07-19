@@ -7,6 +7,7 @@ import {
   deleteAutoCrawlSource,
   ensureAutoCrawlStorage,
   getAutoCrawlConfig,
+  markAutoCrawlSourceDueNow,
   reprocessAutoCrawlItems,
   updateAutoCrawlConfig,
   updateAutoCrawlSource,
@@ -105,8 +106,8 @@ function scheduleRun(reason: string) {
   kickTimer.unref?.();
 }
 
-async function sourceSaveResult(payload: Partial<AutoCrawlSourceConfig>) {
-  const config = await getAutoCrawlConfig();
+async function sourceSaveResult(saved: { config: AutoCrawlConfig; sourceId: string }, payload: Partial<AutoCrawlSourceConfig>) {
+  const config = saved.config;
   if (!config.enabled || payload.disabled === true) {
     return {
       ...config,
@@ -119,11 +120,8 @@ async function sourceSaveResult(payload: Partial<AutoCrawlSourceConfig>) {
     };
   }
 
-  const run = await runObservedAutoCrawl({
-    trigger: 'MANUAL',
-    force: true,
-    reason: 'source_saved_run_now',
-  });
+  await markAutoCrawlSourceDueNow(saved.sourceId);
+  scheduleRun('source_saved_due');
   const [nextConfig, runtimeStatus] = await Promise.all([
     getAutoCrawlConfig(),
     getAutoCrawlRuntimeStatus(),
@@ -131,10 +129,10 @@ async function sourceSaveResult(payload: Partial<AutoCrawlSourceConfig>) {
   return {
     ...nextConfig,
     runtimeStatus,
-    run,
     sourceEffectDiagnosis: {
-      runTriggered: true,
-      message: `已运行：发布 ${run.delivered || 0} 条，过滤 ${run.filtered || 0} 条，失败 ${run.error || 0} 条。`,
+      runTriggered: false,
+      wakeScheduled: true,
+      message: '数据源已保存，并已加入下一次自动抓取执行。',
     },
   };
 }
@@ -164,19 +162,19 @@ export function registerAutoCrawlRoutes(app: Express) {
 
   app.post('/api/admin/auto-crawl/sources', authMiddleware, adminOnly, catchAsync(async (req, res) => {
     setNoStore(res);
-    const payload = await normalizeSourcePayload(req.body);
     return guarded(res, async () => {
-      await upsertAutoCrawlSource(payload);
-      return sourceSaveResult(payload);
+      const payload = await normalizeSourcePayload(req.body);
+      const saved = await upsertAutoCrawlSource(payload);
+      return sourceSaveResult(saved, payload);
     }, 201);
   }));
 
   app.patch('/api/admin/auto-crawl/sources/:id', authMiddleware, adminOnly, catchAsync(async (req, res) => {
     setNoStore(res);
-    const payload = await normalizeSourcePayload({ ...bodyObject(req.body), id: req.params.id });
     return guarded(res, async () => {
-      await updateAutoCrawlSource(payload);
-      return sourceSaveResult(payload);
+      const payload = await normalizeSourcePayload({ ...bodyObject(req.body), id: req.params.id });
+      const saved = await updateAutoCrawlSource(payload);
+      return sourceSaveResult(saved, payload);
     });
   }));
 

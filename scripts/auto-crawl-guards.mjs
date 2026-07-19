@@ -45,6 +45,10 @@ mustHave('source normalization', normalize, /sanitizeDatabaseText/);
 
 mustHave('source routes', routes, /categoryId/);
 mustHave('source routes', routes, /prisma\.category\.findUnique/);
+mustHave('source routes validation boundary', routes, /app\.post\('\/api\/admin\/auto-crawl\/sources'[\s\S]{0,260}return guarded\(res, async \(\) => \{[\s\S]{0,120}const payload = await normalizeSourcePayload\(req\.body\)/);
+mustHave('source routes validation boundary', routes, /app\.patch\('\/api\/admin\/auto-crawl\/sources\/:id'[\s\S]{0,280}return guarded\(res, async \(\) => \{[\s\S]{0,140}const payload = await normalizeSourcePayload\(\{ \.\.\.bodyObject\(req\.body\), id: req\.params\.id \}\)/);
+mustHave('source routes async wake', routes, /markAutoCrawlSourceDueNow\(saved\.sourceId\)[\s\S]{0,80}scheduleRun\('source_saved_due'\)/);
+mustNotHave('source routes sync save run', routes, /source_saved_run_now/);
 mustNotHave('source routes', routes, /sources\/seed|category-routing-rules|resolveDefaultAutoCrawlAuthorUserId|repairEnabledAutoCrawlSourcesWithoutAuthor|localOnlyMode|aiEnabled|syncToTelegram/);
 mustNotHave('package scripts', packageJson, /seed:auto-crawl-sources/);
 
@@ -62,6 +66,7 @@ mustHave('config payload', crawl, /categoryOptions/);
 mustHave('config payload', crawl, /listAutoCrawlCategoryOptions/);
 mustHave('config save upsert', crawl, /INSERT INTO "AutoCrawlConfig"[\s\S]*ON CONFLICT\("id"\) DO UPDATE/);
 mustHave('config enable wakes sources', crawl, /function markEnabledAutoCrawlSourcesDueNow\(\)[\s\S]*"nextRunAt"=CURRENT_TIMESTAMP[\s\S]*WHERE "disabled"=FALSE/);
+mustHave('source save wakes only saved source', crawl, /export async function markAutoCrawlSourceDueNow\(id: string\)[\s\S]*WHERE "id"=\$1 AND "disabled"=FALSE/);
 mustHave('config enable wakes sources', crawl, /if \(enabled === true\) await markEnabledAutoCrawlSourcesDueNow\(\)/);
 mustHave('main flow', crawl, /getAutoCrawlDatabaseCategory\(databaseConfig, source\.categoryId\)/);
 mustHave('main flow', crawl, /getAutoCrawlCategorySchema\(databaseConfig, category\)/);
