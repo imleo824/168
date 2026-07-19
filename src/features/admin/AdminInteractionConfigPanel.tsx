@@ -36,34 +36,6 @@ const MODULE_LABELS: Record<ManualRunModule, string> = {
   'auto-post': '自动发帖',
 };
 
-const PRE_AI_REASON_KEYS = new Set([
-  'disabled',
-  'another_instance_running',
-  'module_backoff_active',
-  'daily_limit_zero',
-  'daily_limit_reached',
-  'no_available_robot',
-  'no_robot_user',
-  'no_candidate_post',
-  'no_quality_candidate_post',
-  'no_robot_without_prior_engagement',
-  'author_required',
-  'category_required',
-  'no_topic_enabled',
-  'no_available_topic_content',
-  'bot_rate_limited_local',
-  'bot_rate_limited_global',
-  'platform_ai_key_missing',
-  'platform_ai_not_ready',
-]);
-
-const DETAIL_LABELS: Record<string, string> = {
-  id: '运行 ID', status: '状态', reason: '原因', skipReason: '跳过原因', error: '错误', createdAt: '创建时间', startedAt: '开始时间', finishedAt: '完成时间', updatedAt: '更新时间',
-  robotUserId: '机器人账号 ID', robotName: '机器人名称', postId: '帖子 ID', sourcePostId: '原帖 ID', createdPostId: '新帖子 ID', commentId: '评论 ID', sourcePost: '原帖', createdPost: '新帖子', inputMessage: '触发消息', outputMessage: '输出消息', contextMessages: '聊天上下文',
-  title: '标题', content: '内容', postTitle: '帖子标题', generatedContent: '生成内容', qualityScore: '质量分', candidateScore: '候选分', liked: '点赞数', boosted: '助推数', created: '创建数', delivered: '发布数', skipped: '跳过数', failed: '失败数',
-  dailyLimit: '每日上限', batchSize: '批量数量', lock: '执行锁', name: '名称', heartbeatAt: '心跳时间', displayName: '展示名', userId: '用户 ID', topic: '主题', topicType: '主题', trigger: '触发方式', model: '模型', aiModel: '模型', body: '正文', authorName: '发言人',
-};
-
 function formatDateTime(value?: string | null) {
   if (!value) return '-';
   return new Date(value).toLocaleString('zh-CN', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' });
@@ -137,16 +109,40 @@ function runSummary(payload: any, label: string) {
   return `${label}执行完成：成功 ${success}，跳过 ${skipped}，失败 ${failed}`;
 }
 
-function lockMessage(lock?: any) {
-  if (!lock) return '';
-  const name = String(lock.name || lock.module || '').trim();
-  const heartbeatAt = lock.heartbeatAt ? formatDateTime(lock.heartbeatAt) : '';
-  const expiresAt = lock.expiresAt ? formatDateTime(lock.expiresAt) : '';
-  return [
-    name ? `锁 ${name}` : '执行锁占用',
-    heartbeatAt ? `心跳 ${heartbeatAt}` : '',
-    expiresAt ? `过期 ${expiresAt}` : '',
-  ].filter(Boolean).join('，');
+function numericText(value: unknown) {
+  const number = Number(value);
+  return Number.isFinite(number) ? String(number) : '';
+}
+
+function processRows(run: any, module: ManualRunModule) {
+  const rows = [
+    { label: '开始时间', value: formatDateTime(run.startedAt || run.createdAt) },
+    { label: '完成时间', value: run.finishedAt ? formatDateTime(run.finishedAt) : '' },
+    { label: '执行结果', value: runStatusLabel(run.status) },
+    { label: '处理原因', value: runReason(run) === '-' ? '' : runReason(run) },
+    { label: module === 'auto-post' ? '发布账号' : '机器人账号', value: robotLabel(run) === '-' ? '' : robotLabel(run) },
+    { label: module === 'auto-post' ? '发布内容' : '互动对象', value: postLabel(run) === '-' ? '' : postLabel(run) },
+    { label: module === 'auto-like' ? '点赞数' : module === 'auto-post' ? '发布数' : '生成数', value: numericText(run.liked ?? run.boosted ?? run.created ?? run.delivered) },
+    { label: '跳过数', value: numericText(run.skipped) },
+    { label: '失败数', value: numericText(run.failed ?? run.error) },
+    { label: '质量分', value: numericText(run.qualityScore ?? run.candidateScore) },
+    { label: '生成内容', value: module === 'auto-like' ? '' : generatedText(run) },
+    { label: '触发消息', value: String(run.inputMessage?.body || '').trim() },
+    { label: '输出消息', value: String(run.outputMessage?.body || '').trim() },
+  ];
+  const seen = new Set<string>();
+  return rows.filter((row) => {
+    if (!row.value || row.value === '-') return false;
+    const key = `${row.label}:${row.value}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function ProcessRows({ rows }: { rows: Array<{ label: string; value: string }> }) {
+  if (!rows.length) return <div className="admin-form-note">本次执行没有返回更多过程信息</div>;
+  return <div className="mt-3 grid gap-2">{rows.map((row) => <div key={`${row.label}:${row.value}`} className="admin-form-note"><span className="admin-text-strong-xs">{row.label}：</span>{row.value}</div>)}</div>;
 }
 
 function ModuleRunLogsPanel({ module }: { module: ManualRunModule }) {
@@ -177,8 +173,7 @@ function ModuleRunLogsPanel({ module }: { module: ManualRunModule }) {
       const payload = await res.json().catch(() => ({}));
       if (!res.ok) throw new Error(payload?.error || `${label}手动执行失败`);
       const status = payload?.status || payload?.run?.status;
-      const lockText = lockMessage(payload?.lock || payload?.run?.lock);
-      showToast(`${runSummary(payload, label)}${lockText ? `；${lockText}` : ''}`, status === 'FAILED' || status === 'PARTIAL_FAILED' || payload?.failed || payload?.error ? 'error' : 'success');
+      showToast(runSummary(payload, label), status === 'FAILED' || status === 'PARTIAL_FAILED' || payload?.failed || payload?.error ? 'error' : 'success');
       await loadRuns();
     } catch (error: any) {
       showToast(error?.message || `${label}手动执行失败`, 'error');
@@ -212,7 +207,7 @@ function ModuleRunLogsPanel({ module }: { module: ManualRunModule }) {
         {runs.length ? (
           <>
             <div className="admin-config-card">
-              <div className="admin-text-strong-xs">{label}运行日志</div>
+              <div className="admin-text-strong-xs">{label}执行过程</div>
               <div className="admin-form-note mt-1">最近 {summary.total} 次 · 成功 {summary.success} · 跳过 {summary.skipped} · 失败 {summary.failed} · 有生成内容 {summary.generated}</div>
             </div>
             {runs.map((run, index) => (
@@ -225,15 +220,7 @@ function ModuleRunLogsPanel({ module }: { module: ManualRunModule }) {
                   <div className="admin-form-note mt-1">{postLabel(run)}</div>
                   {runReason(run) !== '-' ? <div className="admin-form-note mt-1">原因：{runReason(run)}</div> : null}
                 </summary>
-                <div className="mt-3 grid gap-2">
-                  <div className="admin-form-note"><span className="admin-text-strong-xs">生成内容：</span>{generatedText(run) || '未生成或后端未返回生成内容'}</div>
-                  {run.inputMessage?.body ? <div className="admin-form-note"><span className="admin-text-strong-xs">触发消息：</span>{run.inputMessage.body}</div> : null}
-                  {run.outputMessage?.body ? <div className="admin-form-note"><span className="admin-text-strong-xs">输出消息：</span>{run.outputMessage.body}</div> : null}
-                  <details className="rounded-xl border border-white/10 bg-white/5 p-3">
-                    <summary className="cursor-pointer admin-text-strong-xs">原始明细</summary>
-                    <pre className="admin-form-note mt-2 max-h-80 overflow-auto whitespace-pre-wrap">{JSON.stringify(run, null, 2)}</pre>
-                  </details>
-                </div>
+                <ProcessRows rows={processRows(run, module)} />
               </details>
             ))}
           </>

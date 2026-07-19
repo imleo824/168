@@ -202,7 +202,9 @@ mustHave('task lock', lock, 'heartbeatStaleMsForTtl');
 mustHave('task lock', lock, 'withAutomationTaskLock');
 mustHave('task lock', lock, 'forceReleaseAutomationTaskLock');
 mustHave('admin automation logs', adminInteractionPanel, 'AdminAutoCrawlExecutionLogsCompactPanel');
-mustHave('admin automation logs', adminInteractionPanel, '运行日志');
+mustHave('admin automation logs', adminInteractionPanel, '执行过程');
+mustNotHave('admin automation logs', adminInteractionPanel, '原始明细');
+mustNotHave('admin automation logs', adminInteractionPanel, '批量数量');
 
 // AI and deposit scanner contracts stay explicit because automation quality depends on them.
 mustHave('platform AI', platformAi, 'PLATFORM_AI_API_KEY');

@@ -91,7 +91,9 @@ assertIncludes('AdminQuotePublishPanel.tsx', adminPanel, '/api/admin/quote-publi
 assertIncludes('AdminInteractionConfigPanel.tsx', interactionPanel, /\/api\/admin\/\$\{module\}\/run-now/, 'execution log tab must call manual run API.');
 assertNotIncludes('AdminQuotePublishPanel.tsx', adminPanel, '/api/admin/quote-publish/runs', 'config panel must not load execution records.');
 assertIncludes('AdminInteractionConfigPanel.tsx', interactionPanel, /\/api\/admin\/\$\{module\}\/runs\?limit=20/, 'execution log tab must load quote run records.');
-assertIncludes('AdminInteractionConfigPanel.tsx', interactionPanel, 'lockMessage(payload?.lock || payload?.run?.lock)', 'manual run feedback must include lock details.');
+assertIncludes('AdminInteractionConfigPanel.tsx', interactionPanel, '执行过程', 'execution log tab must show real process logs.');
+assertNotIncludes('AdminInteractionConfigPanel.tsx', interactionPanel, 'lockMessage', 'execution log tab must not surface internal lock details.');
+assertNotIncludes('AdminInteractionConfigPanel.tsx', interactionPanel, '原始明细', 'execution log tab must not dump raw backend details.');
 
 assertIncludes('package.json', JSON.stringify(packageJson.scripts || {}), 'test:quote-publish', 'package.json must expose test:quote-publish.');
 
