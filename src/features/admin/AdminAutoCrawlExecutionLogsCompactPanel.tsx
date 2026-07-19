@@ -68,6 +68,9 @@ function statusLabel(status?: string | null) {
 
 function phaseLabel(phase?: string | null) {
   const map: Record<string, string> = {
+    run_started: '开始执行',
+    run_finished: '执行结束',
+    source_config_invalid: '数据源配置异常',
     item_seen: '解析到单条内容',
     duplicate_detected: '重复内容判断',
     raw_stored: '写入原始抓取记录',
@@ -250,10 +253,16 @@ function publishRows(event: LogEvent): DetailRow[] {
 
 function defaultRows(event: LogEvent): DetailRow[] {
   const details = asRecord(event.details);
+  const counts = asRecord((event as any).counts);
   return compactRows([
     { label: '状态', value: statusLabel(event.status) },
     { label: '原因', value: reasonLabel(event.reason, event.error) },
     { label: '来源', value: event.sourceName || formatValue(details.sourceName) },
+    { label: '扫描内容', value: formatValue(counts.scanned) },
+    { label: '成功发布', value: formatValue(counts.delivered) },
+    { label: '过滤内容', value: formatValue(counts.filtered) },
+    { label: '重复内容', value: formatValue(counts.duplicate) },
+    { label: '错误数量', value: formatValue(counts.error) },
     { label: '原文链接', value: formatValue(details.sourceUrl) },
     { label: '标题', value: formatValue(details.titlePreview) || formatValue(details.title) || formatValue(details.rawTitle) },
     { label: '正文预览', value: formatValue(details.contentPreview) || formatValue(details.cleanedContentPreview) },
@@ -338,7 +347,7 @@ function buildRunGroups(events: LogEvent[]) {
     const started = sorted[0];
     return {
       key: runId,
-      title: `运行批次 ${runId.length > 12 ? `${runId.slice(0, 8)}…${runId.slice(-4)}` : runId}`,
+      title: '运行过程',
       status: statusLabel(latest?.status),
       reason: finalReason(sorted),
       latestAt: latest?.timestamp || started?.timestamp || '',
@@ -440,7 +449,7 @@ export function AdminAutoCrawlExecutionLogsCompactPanel() {
           <div className="admin-form-note mt-1">最近执行：{fmt(source.latestAt)} · 内容 {source.items.length} 条</div>
           <div className="mt-3 space-y-3">{source.items.map((item) => (
             <details key={item.key} className="admin-config-card">
-              <summary className="cursor-pointer"><div className="flex flex-wrap items-start justify-between gap-2"><div className="min-w-0"><div className="admin-text-strong-xs">内容：{item.title}</div><div className="admin-form-note mt-1">状态：{item.status}{item.reason ? ` · 原因：${item.reason}` : ''} · 关键节点 {item.events.length} 个</div></div><div className="admin-form-note">{fmt(item.latestAt)}</div></div></summary>
+              <summary className="cursor-pointer"><div className="flex flex-wrap items-start justify-between gap-2"><div className="min-w-0"><div className="admin-text-strong-xs">内容：{item.title}</div><div className="admin-form-note mt-1">状态：{item.status}{item.reason ? ` · 原因：${item.reason}` : ''} · 过程 {item.events.length} 步</div></div><div className="admin-form-note">{fmt(item.latestAt)}</div></div></summary>
               <div className="mt-3 space-y-2">{item.events.map((event, index) => {
                 const reason = reasonLabel(event.reason, event.error);
                 return <details key={`${event.runId}-${event.timestamp}-${event.phase}-${index}`} className="admin-config-card"><summary className="cursor-pointer"><div className="flex flex-wrap items-center justify-between gap-2"><div className="admin-text-strong-xs">{index + 1}. {phaseLabel(event.phase)} · {levelLabel(event.level)}</div><div className="admin-form-note">{fmt(event.timestamp)}</div></div>{event.status || reason ? <div className="admin-form-note mt-1">状态：{statusLabel(event.status)}{reason ? ` · 原因：${reason}` : ''}</div> : null}</summary><InfoRows rows={keyRowsForEvent(event)} /></details>;
@@ -454,7 +463,7 @@ export function AdminAutoCrawlExecutionLogsCompactPanel() {
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div className="min-w-0">
               <div className="admin-text-strong-xs">{run.title}</div>
-              <div className="admin-form-note mt-1">状态：{run.status}{run.reason ? ` · 原因：${run.reason}` : ''} · 节点 {run.events.length} 个</div>
+              <div className="admin-form-note mt-1">状态：{run.status}{run.reason ? ` · 原因：${run.reason}` : ''} · 过程 {run.events.length} 步</div>
             </div>
             <div className="admin-form-note">{fmt(run.latestAt)}</div>
           </div>

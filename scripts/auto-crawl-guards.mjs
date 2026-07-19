@@ -82,7 +82,8 @@ mustNotHave('main flow metadata', crawl, /metadata:\s*\{[\s\S]{0,160}\bcategory\
 mustNotHave('auto crawl logs panel', crawlLogsPanel, /同步 Telegram|syncToTelegram/);
 mustHave('auto crawl logs panel fallback', crawlLogsPanel, /buildRunGroups/);
 mustHave('auto crawl logs panel fallback', crawlLogsPanel, /const hasLogs = sourceGroups\.length > 0 \|\| runGroups\.length > 0/);
-mustHave('auto crawl logs panel fallback', crawlLogsPanel, /运行批次/);
+mustHave('auto crawl logs panel process fallback', crawlLogsPanel, /title: '运行过程'/);
+mustNotHave('auto crawl logs panel process fallback', crawlLogsPanel, /运行批次/);
 mustHave('auto crawl execution logs fallback', read('server/services/auto-crawl-execution-log.service.ts'), /FROM "AutoCrawlRun"[\s\S]*ORDER BY "startedAt" DESC/);
 mustHave('auto crawl execution logs fallback', read('server/services/auto-crawl-execution-log.service.ts'), /listDatabaseRunSummaries/);
 mustHave('auto crawl execution logs fallback', read('server/services/auto-crawl-execution-log.service.ts'), /getDatabaseRun/);
