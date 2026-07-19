@@ -23,7 +23,9 @@ assertMissing('server/services/chat-automation-observer.service.ts', 'chat bot o
 assertMissing('server/services/auto-crawl-scheduler.service.ts', 'auto-crawl scheduling must go through unified AutomationRuntime');
 assertMissing('server/services/auto-post-scheduler.service.ts', 'auto-post scheduling must go through unified AutomationRuntime');
 assertMissing('server/services/automation-supervisor.service.ts', 'interaction scheduling must go through unified AutomationRuntime');
+assertMissing('server/routes/admin-automation-lock.routes.ts', 'admin automation locks must go through the normalized /api/admin/automation status and module-release routes');
 
+assertNotIncludes('server/routes/config.routes.ts', 'registerAdminAutomationLockRoutes', 'obsolete raw lock routes must not be registered from config routes');
 assertNotIncludes('server/routes/quote-publish.routes.ts', 'registerAutomationDebugRoutes', 'obsolete internal automation side route must not be registered');
 assertNotIncludes('server/startup/server-runtime.ts', 'startQuotePublishScheduler', 'server runtime must not use quote scheduler directly');
 assertNotIncludes('server/startup/server-runtime.ts', 'startAutoCrawlScheduler', 'server runtime must not use standalone crawl scheduler');

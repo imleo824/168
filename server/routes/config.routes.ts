@@ -8,7 +8,6 @@ import { setNoStore, setPublicCache } from '../http-cache';
 import { PromotionService } from '../promotion.service';
 import { toPublicPromotionAdPayloads } from '../services/promotion-public-ad-payload.service';
 import { registerAdminAutoLikeRoutes } from './admin-auto-like.routes';
-import { registerAdminAutomationLockRoutes } from './admin-automation-lock.routes';
 import { registerPlatformAiRoutes } from './platform-ai.routes';
 import { normalizePublishCategorySlug } from '../../shared/publishCategorySchema';
 
@@ -228,7 +227,6 @@ export async function getCachedCategories() {
 
 export function registerConfigRoutes(app: Express) {
   registerAdminAutoLikeRoutes(app);
-  registerAdminAutomationLockRoutes(app);
   registerPlatformAiRoutes(app);
 
   app.get('/api/config', publicReadLimiter, catchAsync(async (_req, res) => {
