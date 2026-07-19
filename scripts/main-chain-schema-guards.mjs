@@ -90,7 +90,9 @@ async function assertAutoCrawlAiParserContract() {
   assertIncludes(file, content, 'jsonMode: true', 'Auto-crawl AI extraction must request strict JSON mode from the model.');
   assertIncludes(file, content, 'temperature: 0', 'Auto-crawl AI extraction must use deterministic temperature.');
   assertIncludes(file, content, "enrichmentStatus: 'success' | 'failed' | 'invalid_json'", 'Auto-crawl AI extraction must audit successful, failed, and invalid JSON enrichment states.');
-  assertIncludes(file, content, "rawMeta: objectValue(parsed?.meta)", 'Invalid or failed optional AI extraction must normalize to empty Meta instead of trusting unparsed output.');
+  assertIncludes(file, content, 'const aiRawMeta = objectValue(parsed?.meta)', 'Invalid or failed optional AI extraction must be isolated before standardization.');
+  assertIncludes(file, content, 'buildRuleBasedCrawlMetaCandidates', 'Invalid or empty optional AI extraction must have a schema-bound rule fallback.');
+  assertIncludes(file, content, 'ruleBasedFallbackRawMeta', 'Rule fallback must only fill fields that AI standardization did not already produce.');
   assertIncludes(file, content, 'title: cleanString(parsed?.title, 80) || fallbackTitle', 'Optional AI extraction must retain a deterministic title fallback.');
   assertIncludes(file, content, "extractor: 'ai_optional'", 'Auto-crawl AI must remain optional so content publication does not depend on AI availability.');
 }

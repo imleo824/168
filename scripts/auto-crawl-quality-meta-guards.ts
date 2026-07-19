@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 
+import { buildRuleBasedCrawlMetaCandidates } from '../server/services/crawl-content-ai.service';
 import { normalizeCrawlCategoryMeta } from '../server/services/crawl-category-meta-normalize.service';
 import { filterCrawlContentBeforePublish } from '../server/services/crawl-content-quality.service';
 import { normalizeToLocationPreset } from '../server/services/location-preset-normalize.service';
@@ -532,5 +533,42 @@ assert.deepEqual(rentPaymentMeta.meta, {
   paymentMonths: 1,
   bedrooms: 2,
 }, 'rent composite phrases must extract field-specific numeric meta.');
+
+const ruleBasedFallbackSchema = {
+  categorySlug: 'jobs',
+  schemaVersion: 5,
+  name: '招聘',
+  fields: [
+    { key: 'position', label: '岗位', type: 'select' as const, required: false, options: ['行政', '客服', '前端开发', '后端开发'] },
+    { key: 'salaryRange', label: '薪资', type: 'select' as const, required: false, options: ['面议', '$800 以下', '$800 - $1,200', '$1,200 - $1,500', '$1,500 - $2,000'] },
+    { key: 'location', label: '地点', type: 'location' as const, required: false },
+    { key: 'depositMonths', label: '押几', type: 'number' as const, required: false },
+    { key: 'paymentMonths', label: '付几', type: 'number' as const, required: false },
+  ],
+};
+
+const ruleBasedCandidates = buildRuleBasedCrawlMetaCandidates({
+  category: { id: 'category_jobs', name: '招聘', slug: 'jobs' },
+  schema: ruleBasedFallbackSchema,
+  locationPresets: [{ country: '阿联酋', cities: ['迪拜'] }],
+}, [
+  '迪拜急招 React 前端工程师，接受远程面试。',
+  '薪资 1000U/月，押二付一，包住，试用期后可转全职。',
+].join('\n'));
+const ruleBasedNormalized = await normalizeCrawlCategoryMeta({
+  category: { id: 'category_jobs', name: '招聘', slug: 'jobs' },
+  categoryMetaSchema: ruleBasedFallbackSchema,
+  rawMeta: ruleBasedCandidates,
+  locationPresets: [{ country: '阿联酋', cities: ['迪拜'] }],
+});
+
+assert.deepEqual(ruleBasedNormalized.meta, {
+  position: '前端开发',
+  salaryRange: '$800 - $1,200',
+  location: '阿联酋 · 迪拜',
+  depositMonths: 2,
+  paymentMonths: 1,
+}, 'rule-based crawl meta fallback must recover configured fields from cleaned body when AI returns no usable meta.');
+assert.deepEqual(ruleBasedNormalized.audit.unexpectedKeys, [], 'rule-based fallback must only emit configured schema keys.');
 
 console.log('[auto-crawl-quality-meta-guards] passed');

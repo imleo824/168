@@ -11,6 +11,7 @@ import {
   normalizeCrawlCategoryMeta,
   type CrawlCategoryRef,
 } from './crawl-category-meta-normalize.service';
+import { normalizeToLocationPreset } from './location-preset-normalize.service';
 
 export type AutoCrawlExtractionContext = {
   category: CrawlCategoryRef;
@@ -27,6 +28,8 @@ export type CrawlAiExtractResult = CrawlExtractResult & {
     schemaVersion: number | null;
     configuredMetaKeys: string[];
     metaStandardization: Awaited<ReturnType<typeof normalizeCrawlCategoryMeta>>['audit'];
+    ruleBasedMetaKeys: string[];
+    ruleBasedFallbackKeys: string[];
     provider: string;
     model: string;
     enrichmentStatus: 'success' | 'failed' | 'invalid_json';
@@ -41,6 +44,10 @@ type MetaFieldSpec = {
   options?: string[];
   maxLength?: number;
 };
+
+const CANDIDATE_TEXT_LIMIT = 12_000;
+const FIELD_SEGMENT_LIMIT = 140;
+const CHINESE_NUMBER_CHARS = '零一二两三四五六七八九十百千万';
 
 function objectValue(value: unknown) {
   return value && typeof value === 'object' && !Array.isArray(value)
@@ -76,6 +83,171 @@ function locationValues(presets: LocationPresetConfig[]) {
     group.country,
     ...group.cities.map((city) => `${group.country} · ${city}`),
   ]);
+}
+
+function normalizeSearchText(raw: unknown) {
+  return String(raw ?? '')
+    .normalize('NFKC')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function escapeRegex(raw: unknown) {
+  return String(raw ?? '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
+function textLines(raw: unknown) {
+  return normalizeSearchText(raw)
+    .split(/[\n\r]+/g)
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .slice(0, 240);
+}
+
+function lineLooksRelevant(line: string, terms: string[]) {
+  return terms.some((term) => term && line.toLowerCase().includes(term.toLowerCase()));
+}
+
+function fieldTerms(field: PublishCategoryMetaFieldConfig) {
+  return [field.label, field.key].map(normalizeSearchText).filter(Boolean);
+}
+
+function fieldSegments(field: PublishCategoryMetaFieldConfig, content: string, extraTerms: string[] = []) {
+  const terms = Array.from(new Set([...fieldTerms(field), ...extraTerms.map(normalizeSearchText)].filter(Boolean)));
+  const lines = textLines(content);
+  const segments: string[] = [];
+
+  for (const line of lines) {
+    if (lineLooksRelevant(line, terms)) segments.push(line.slice(0, FIELD_SEGMENT_LIMIT));
+  }
+
+  for (const term of terms) {
+    const pattern = new RegExp(`${escapeRegex(term)}\\s*[:：]?\\s*([^\\n。；;|]{1,${FIELD_SEGMENT_LIMIT}})`, 'i');
+    const match = content.match(pattern);
+    if (match?.[0]) segments.unshift(match[0].slice(0, FIELD_SEGMENT_LIMIT));
+  }
+
+  return Array.from(new Set(segments)).slice(0, 8);
+}
+
+function moneyFieldTerms(field: PublishCategoryMetaFieldConfig) {
+  const key = normalizeSearchText(field.key).toLowerCase();
+  const label = normalizeSearchText(field.label).toLowerCase();
+  const terms = new Set<string>();
+  if (/salary|wage|pay/.test(key) || /薪资|工资|待遇|月薪|薪酬/.test(label)) {
+    ['薪资', '工资', '待遇', '月薪', '薪酬', '底薪', 'salary', 'pay'].forEach((term) => terms.add(term));
+  }
+  if (/price|rent|cost|fee|amount/.test(key) || /价格|租金|房租|费用|金额|月租/.test(label)) {
+    ['价格', '租金', '房租', '费用', '金额', '月租', 'price', 'rent', 'cost', 'fee'].forEach((term) => terms.add(term));
+  }
+  return Array.from(terms);
+}
+
+function isSalarySelectField(field: PublishCategoryMetaFieldConfig) {
+  return field.type === 'select'
+    && /薪资|工资|待遇/i.test(field.label)
+    && (field.options || []).some((option) => /\$|面议/.test(option));
+}
+
+function isNumberField(field: PublishCategoryMetaFieldConfig) {
+  return field.type === 'number';
+}
+
+function isMoneyNumberField(field: PublishCategoryMetaFieldConfig) {
+  const key = normalizeSearchText(field.key).toLowerCase();
+  const label = normalizeSearchText(field.label).toLowerCase();
+  return /price|rent|salary|cost|fee|amount/.test(key)
+    || /价格|租金|房租|薪资|工资|待遇|费用|金额|月租/.test(label);
+}
+
+function numericUnitPattern(units: string) {
+  return new RegExp(`([+-]?\\d[\\d,]*(?:\\.\\d+)?\\s*(?:k|K|千|w|W|万)?|[${CHINESE_NUMBER_CHARS}]{1,12})\\s*(?:${units})`, 'i');
+}
+
+function contextualNumericCandidate(field: PublishCategoryMetaFieldConfig, content: string) {
+  const key = normalizeSearchText(field.key).toLowerCase();
+  const label = normalizeSearchText(field.label);
+  const text = normalizeSearchText(content);
+  if (/deposit/.test(key) || /押/.test(label)) return text.match(/押\s*([+-]?\d+(?:\.\d+)?|[零一二两三四五六七八九十百千万]{1,12})/)?.[0] || '';
+  if (/payment/.test(key) || /付/.test(label)) return text.match(/付\s*([+-]?\d+(?:\.\d+)?|[零一二两三四五六七八九十百千万]{1,12})/)?.[0] || '';
+  if (/bed(room)?s?/.test(key) || /卧室|房间|几房|房型/.test(label)) return text.match(/([+-]?\d+(?:\.\d+)?|[零一二两三四五六七八九十百千万]{1,12})\s*(?:房|室|bedrooms?|br)(?:\b|$)?/i)?.[0] || '';
+  if (/area|size/.test(key) || /面积|平方|平米/.test(label)) return text.match(numericUnitPattern('平|平方|平米|㎡|m2|sqm|sq\\.m'))?.[0] || '';
+  return '';
+}
+
+function firstNumberLikeSegment(segments: string[]) {
+  return segments.find((segment) => /(?:\d|[零一二两三四五六七八九十百千万])/.test(segment)) || '';
+}
+
+function selectCandidate(field: PublishCategoryMetaFieldConfig, content: string) {
+  if (isSalarySelectField(field)) {
+    return firstNumberLikeSegment(fieldSegments(field, content, moneyFieldTerms(field)))
+      || (/(?:面议|面谈|详聊|从优|看能力|negotiable|tbd)/i.test(content) ? content : '');
+  }
+  return content;
+}
+
+function numberCandidate(field: PublishCategoryMetaFieldConfig, content: string) {
+  const contextual = contextualNumericCandidate(field, content);
+  if (contextual) return contextual;
+  if (isMoneyNumberField(field)) return firstNumberLikeSegment(fieldSegments(field, content, moneyFieldTerms(field)));
+  return firstNumberLikeSegment(fieldSegments(field, content));
+}
+
+function booleanCandidate(field: PublishCategoryMetaFieldConfig, content: string) {
+  const label = normalizeSearchText(field.label);
+  if (!label) return undefined;
+  const negative = new RegExp(`(?:不|无|未|无需|没有|否)\\s*${escapeRegex(label)}|${escapeRegex(label)}\\s*(?:否|无|不需要|没有)`, 'i');
+  const positive = new RegExp(`(?:可|有|支持|提供|需要|要求|包|含)?\\s*${escapeRegex(label)}|${escapeRegex(label)}\\s*(?:是|有|支持|提供|需要)`, 'i');
+  if (negative.test(content)) return false;
+  if (positive.test(content)) return true;
+  return undefined;
+}
+
+function textCandidate(field: PublishCategoryMetaFieldConfig, content: string) {
+  const segment = fieldSegments(field, content)[0] || '';
+  if (!segment) return '';
+  const terms = fieldTerms(field);
+  const pattern = new RegExp(`^(?:${terms.map(escapeRegex).join('|')})\\s*[:：]?\\s*`, 'i');
+  return segment.replace(pattern, '').trim();
+}
+
+export function buildRuleBasedCrawlMetaCandidates(context: AutoCrawlExtractionContext, rawContent: unknown) {
+  const fields = context.schema?.fields || [];
+  const content = normalizeSearchText(rawContent).slice(0, CANDIDATE_TEXT_LIMIT);
+  const candidates: Record<string, unknown> = {};
+  if (!fields.length || !content) return candidates;
+
+  for (const field of fields) {
+    const key = normalizeSearchText(field.key);
+    if (!key) continue;
+
+    if (field.type === 'location') {
+      if (normalizeToLocationPreset(content, context.locationPresets)) candidates[key] = content;
+      continue;
+    }
+    if (field.type === 'select') {
+      const candidate = selectCandidate(field, content);
+      if (candidate) candidates[key] = candidate;
+      continue;
+    }
+    if (isNumberField(field)) {
+      const candidate = numberCandidate(field, content);
+      if (candidate) candidates[key] = candidate;
+      continue;
+    }
+    if (field.type === 'boolean') {
+      const candidate = booleanCandidate(field, content);
+      if (candidate !== undefined) candidates[key] = candidate;
+      continue;
+    }
+    if (field.type === 'text') {
+      const candidate = textCandidate(field, content);
+      if (candidate) candidates[key] = candidate;
+    }
+  }
+
+  return candidates;
 }
 
 function schemaInstruction(context: AutoCrawlExtractionContext) {
@@ -115,7 +287,7 @@ export async function buildCrawlExtract(input: {
   }
 
   const publishContent = cleanCrawlContent(input.cleanedContent);
-  const sourceContent = publishContent.slice(0, 12_000);
+  const sourceContent = publishContent.slice(0, CANDIDATE_TEXT_LIMIT);
   const fallbackTitle = cleanString(input.rawTitle, 80)
     || cleanString(publishContent.split('\n').find(Boolean), 80)
     || '自动抓取内容';
@@ -148,12 +320,27 @@ export async function buildCrawlExtract(input: {
     ? null
     : String(result.reason || (enrichmentStatus === 'invalid_json' ? 'invalid_json' : 'ai_failed')).slice(0, 300);
 
-  const normalized = await normalizeCrawlCategoryMeta({
+  const aiRawMeta = objectValue(parsed?.meta);
+  const aiNormalized = await normalizeCrawlCategoryMeta({
     category: context.category,
-    rawMeta: objectValue(parsed?.meta),
+    rawMeta: aiRawMeta,
     categoryMetaSchema: context.schema,
     locationPresets: context.locationPresets,
   });
+  const ruleBasedRawMeta = buildRuleBasedCrawlMetaCandidates(context, sourceContent);
+  const ruleBasedFallbackRawMeta = Object.fromEntries(Object.entries(ruleBasedRawMeta)
+    .filter(([key]) => !Object.prototype.hasOwnProperty.call(aiNormalized.meta, key)));
+  const normalized = Object.keys(ruleBasedFallbackRawMeta).length
+    ? await normalizeCrawlCategoryMeta({
+      category: context.category,
+      rawMeta: { ...aiRawMeta, ...ruleBasedFallbackRawMeta },
+      categoryMetaSchema: context.schema,
+      locationPresets: context.locationPresets,
+    })
+    : aiNormalized;
+  const ruleBasedFallbackKeys = Object.keys(ruleBasedFallbackRawMeta)
+    .filter((key) => Object.prototype.hasOwnProperty.call(normalized.meta, key)
+      && !Object.prototype.hasOwnProperty.call(aiNormalized.meta, key));
 
   const meta = normalized.meta as Prisma.InputJsonObject;
   return {
@@ -171,6 +358,8 @@ export async function buildCrawlExtract(input: {
       schemaVersion: typeof context.schema?.schemaVersion === 'number' ? context.schema.schemaVersion : null,
       configuredMetaKeys: (context.schema?.fields || []).map((field) => field.key),
       metaStandardization: normalized.audit,
+      ruleBasedMetaKeys: Object.keys(ruleBasedRawMeta),
+      ruleBasedFallbackKeys,
       provider: String(result.provider || ''),
       model: String(result.model || ''),
       enrichmentStatus,

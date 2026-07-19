@@ -123,6 +123,8 @@ function sourceFailureBackoffMinutes(failCount: unknown) {
         unexpectedMetaKeys: extracted.audit.metaStandardization.unexpectedKeys,
         rejectedMetaKeys: Object.keys(rejectedMeta),
         rejectedMeta,
+        ruleBasedMetaKeys: extracted.audit.ruleBasedMetaKeys,
+        ruleBasedFallbackKeys: extracted.audit.ruleBasedFallbackKeys,
         provider: extracted.audit.provider,
         model: extracted.audit.model,
         enrichmentStatus: extracted.audit.enrichmentStatus,
