@@ -256,8 +256,10 @@ const salaryRangeSchema = {
 
 for (const [rawSalary, expectedRange] of [
   ['1000U/月', '$800 - $1,200'],
+  ['1000-1500U/月', '$1,200 - $1,500'],
   ['1500/月', '$1,200 - $1,500'],
   ['5000人民币', '$800 以下'],
+  ['12-15k RMB/月', '$1,500 - $2,000'],
   ['1.5w RMB/月', '$2,000 - $3,000'],
   ['6000 AED', '$1,500 - $2,000'],
   ['300000日元/月', '$1,500 - $2,000'],
@@ -420,6 +422,86 @@ assert.deepEqual(rentMoneyMeta.meta, {
   bedrooms: 1,
 }, 'rent prices must convert currency units to USD while non-money numeric fields stay as quantities.');
 
+const sentenceScopedNumericMeta = await normalizeCrawlCategoryMeta({
+  category: { id: 'category_housing', name: '租房', slug: 'housing' },
+  categoryMetaSchema: {
+    categorySlug: 'housing',
+    schemaVersion: 1,
+    name: '租房',
+    fields: [
+      { key: 'price', label: '租金', type: 'number', required: false },
+      { key: 'area', label: '面积', type: 'number', required: false },
+    ],
+  },
+  rawMeta: {
+    price: '2024年新房，租金800元一个月，面积100平',
+    area: '2024年新房，面积100平',
+  },
+  locationPresets: [],
+});
+
+assert.deepEqual(sentenceScopedNumericMeta.meta, {
+  price: 112,
+  area: 100,
+}, 'AI-returned full sentence numeric meta must scope money and area values to the configured field instead of dropping them.');
+
+for (const [rawPrice, expectedPrice] of [
+  ['租金800-1000U/月', 900],
+  ['价格1000-1500U', 1250],
+  ['800-1000U/月', 900],
+] as const) {
+  const rangeMoneyMeta = await normalizeCrawlCategoryMeta({
+    category: { id: 'category_housing', name: '租房', slug: 'housing' },
+    categoryMetaSchema: {
+      categorySlug: 'housing',
+      schemaVersion: 1,
+      name: '租房',
+      fields: [
+        { key: 'price', label: '租金', type: 'number', required: false },
+      ],
+    },
+    rawMeta: { price: rawPrice },
+    locationPresets: [],
+  });
+
+  assert.equal(rangeMoneyMeta.meta.price, expectedPrice, `${rawPrice} must normalize to the range average instead of the first amount or a negative amount.`);
+  assert.equal(rangeMoneyMeta.audit.rejected.price, undefined);
+}
+
+const dateLikeMoneyMeta = await normalizeCrawlCategoryMeta({
+  category: { id: 'category_housing', name: '租房', slug: 'housing' },
+  categoryMetaSchema: {
+    categorySlug: 'housing',
+    schemaVersion: 1,
+    name: '租房',
+    fields: [
+      { key: 'price', label: '租金', type: 'number', required: false },
+    ],
+  },
+  rawMeta: { price: '2024-01' },
+  locationPresets: [],
+});
+
+assert.equal(dateLikeMoneyMeta.meta.price, undefined, 'date-like values must not be mistaken for money ranges.');
+assert.equal(dateLikeMoneyMeta.audit.rejected.price?.reason, 'money_number_not_matched');
+
+const unitWordMoneyMeta = await normalizeCrawlCategoryMeta({
+  category: { id: 'category_housing', name: '租房', slug: 'housing' },
+  categoryMetaSchema: {
+    categorySlug: 'housing',
+    schemaVersion: 1,
+    name: '租房',
+    fields: [
+      { key: 'price', label: '租金', type: 'number', required: false },
+    ],
+  },
+  rawMeta: { price: '100 units' },
+  locationPresets: [],
+});
+
+assert.equal(unitWordMoneyMeta.meta.price, undefined, 'English words starting with u must not be mistaken for USD/U currency.');
+assert.equal(unitWordMoneyMeta.audit.rejected.price?.reason, 'money_number_not_matched');
+
 const usdRentMeta = await normalizeCrawlCategoryMeta({
   category: { id: 'category_housing', name: '租房', slug: 'housing' },
   categoryMetaSchema: {
@@ -475,6 +557,24 @@ assert.deepEqual(abbreviatedChineseNumberMeta.meta, {
   price: 1680,
   area: 3500,
 }, 'abbreviated Chinese numeric meta such as 一万二 and 三千五 must be parsed as 12000 and 3500.');
+
+const chineseNumberWithZeroMeta = await normalizeCrawlCategoryMeta({
+  category: { id: 'category_housing', name: '租房', slug: 'housing' },
+  categoryMetaSchema: {
+    categorySlug: 'housing',
+    schemaVersion: 1,
+    name: '租房',
+    fields: [
+      { key: 'area', label: '面积', type: 'number', required: false },
+    ],
+  },
+  rawMeta: {
+    area: '一百零五平',
+  },
+  locationPresets: [],
+});
+
+assert.equal(chineseNumberWithZeroMeta.meta.area, 105, 'Chinese numeric meta containing 零 must not be split and dropped.');
 
 const secondhandNumericPriceMeta = await normalizeCrawlCategoryMeta({
   category: { id: 'category_secondhand', name: '二手', slug: 'secondhand' },

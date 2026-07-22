@@ -32,10 +32,66 @@ export type CrawlCategoryMetaNormalizationResult = {
   };
 };
 
+const UNSIGNED_NUMBER_TOKEN_PATTERN_SOURCE = '\\d[\\d,]*(?:\\.\\d+)?\\s*(?:k|K|千|w|W|万)?|[零一二两三四五六七八九十百千万]{1,12}';
+const NUMBER_TOKEN_PATTERN_SOURCE = '[+-]?\\d[\\d,]*(?:\\.\\d+)?\\s*(?:k|K|千|w|W|万)?|[零一二两三四五六七八九十百千万]{1,12}';
+const NUMBER_RANGE_SEPARATOR_PATTERN_SOURCE = '\\s*(?:-|~|～|—|–|至|到|－)\\s*';
+const MONEY_CURRENCY_PATTERN_SOURCE = [
+  'usdt',
+  'usd',
+  'u(?![a-z])',
+  '美元',
+  '美金',
+  '刀',
+  '\\$',
+  'rmb',
+  'cny',
+  '人民币',
+  '元',
+  '¥',
+  'php',
+  '披索',
+  '比索',
+  'peso',
+  'thb',
+  '泰铢',
+  'khr',
+  '瑞尔',
+  'vnd',
+  '越南盾',
+  'aed',
+  '迪拉姆',
+  'myr',
+  '马币',
+  '林吉特',
+  'sgd',
+  '新币',
+  '新加坡元',
+  'idr',
+  '印尼盾',
+  'lak',
+  '基普',
+  'mmk',
+  '缅币',
+  'jpy',
+  '日元',
+  'krw',
+  '韩元',
+  'hkd',
+  '港币',
+  'mop',
+  '澳门币',
+  'eur',
+  '欧元',
+].join('|');
+
 function objectValue(value: unknown) {
   return value && typeof value === 'object' && !Array.isArray(value)
     ? value as Record<string, unknown>
     : {};
+}
+
+function escapeRegex(raw: unknown) {
+  return String(raw ?? '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function fieldKey(field: PublishCategoryMetaFieldConfig) {
@@ -112,7 +168,7 @@ function parseChineseNumber(raw: string) {
 }
 
 function parseChineseAmounts(raw: string) {
-  return [...raw.matchAll(/[一二两三四五六七八九十百千万]{1,12}/g)]
+  return [...raw.matchAll(/[零一二两三四五六七八九十百千万]{1,12}/g)]
     .filter((match) => {
       const token = match[0] || '';
       if (!token) return false;
@@ -126,17 +182,43 @@ function parseChineseAmounts(raw: string) {
     .filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
 }
 
+function numericUnitFactor(unit: string | undefined) {
+  if (/^(?:k|K|千)$/.test(unit || '')) return 1000;
+  if (/^(?:w|W|万)$/.test(unit || '')) return 10000;
+  return 1;
+}
+
 function parseNumericAmounts(raw: string) {
-  const matches = [...raw.matchAll(/([+-]?\d[\d,]*(?:\.\d+)?)\s*(k|K|千|w|W|万)?/g)];
-  return matches
+  const matches = [...raw.matchAll(/(?<![\d.])([+-]?\d[\d,]*(?:\.\d+)?)\s*(k|K|千|w|W|万)?/g)];
+  const parsed = matches
     .map((match) => {
       const parsed = Number(String(match[1] || '').replace(/,/g, ''));
       if (!Number.isFinite(parsed)) return null;
       const unit = match[2];
-      if (/^(?:k|K|千)$/.test(unit || '')) return parsed * 1000;
-      if (/^(?:w|W|万)$/.test(unit || '')) return parsed * 10000;
-      return parsed;
+      const unitFactor = numericUnitFactor(unit);
+      return {
+        value: parsed * unitFactor,
+        unitFactor,
+        hasUnit: Boolean(unit),
+        start: match.index ?? 0,
+        end: (match.index ?? 0) + String(match[0] || '').length,
+      };
     })
+    .filter((value): value is NonNullable<typeof value> => Boolean(value));
+
+  for (let index = 0; index < parsed.length - 1; index += 1) {
+    const current = parsed[index];
+    const next = parsed[index + 1];
+    const between = raw.slice(current.end, next.start);
+    if (!current.hasUnit && next.hasUnit && new RegExp(`^${NUMBER_RANGE_SEPARATOR_PATTERN_SOURCE}$`).test(between)) {
+      current.value *= next.unitFactor;
+      current.unitFactor = next.unitFactor;
+      current.hasUnit = true;
+    }
+  }
+
+  return parsed
+    .map((match) => match.value)
     .filter((value): value is number => typeof value === 'number' && Number.isFinite(value));
 }
 
@@ -167,9 +249,10 @@ function normalizePlainNumber(raw: unknown) {
 function contextualNumberPattern(field: PublishCategoryMetaFieldConfig) {
   const key = normalizedComparable(field.key);
   const label = normalizedComparable(field.label);
-  if (/deposit/.test(key) || /押/.test(label)) return /押\s*([+-]?\d+(?:\.\d+)?|[一二两三四五六七八九十百千万]{1,12})/;
-  if (/payment/.test(key) || /付/.test(label)) return /付\s*([+-]?\d+(?:\.\d+)?|[一二两三四五六七八九十百千万]{1,12})/;
-  if (/bed(room)?s?/.test(key) || /卧室|房间|几房|房型/.test(label)) return /([+-]?\d+(?:\.\d+)?|[一二两三四五六七八九十百千万]{1,12})\s*(?:房|室|bedrooms?|br)(?:\b|$)?/i;
+  if (/deposit/.test(key) || /押/.test(label)) return new RegExp(`押\\s*(${NUMBER_TOKEN_PATTERN_SOURCE})`);
+  if (/payment/.test(key) || /付/.test(label)) return new RegExp(`付\\s*(${NUMBER_TOKEN_PATTERN_SOURCE})`);
+  if (/bed(room)?s?/.test(key) || /卧室|房间|几房|房型/.test(label)) return new RegExp(`(${NUMBER_TOKEN_PATTERN_SOURCE})\\s*(?:房|室|bedrooms?|br)(?:\\b|$)?`, 'i');
+  if (/area|size/.test(key) || /面积|平方|平米/.test(label)) return new RegExp(`(${NUMBER_TOKEN_PATTERN_SOURCE})\\s*(?:平|平方|平米|㎡|m2|sqm|sq\\.m)`, 'i');
   return null;
 }
 
@@ -311,6 +394,55 @@ function moneyField(field: PublishCategoryMetaFieldConfig) {
     || /价格|租金|房租|薪资|工资|待遇|费用|金额|月租/.test(label);
 }
 
+function moneyFieldSearchTerms(field: PublishCategoryMetaFieldConfig) {
+  const key = normalizedComparable(field.key);
+  const label = normalizedComparable(field.label);
+  const terms = new Set<string>([String(field.label || '').trim(), String(field.key || '').trim()].filter(Boolean));
+  if (/salary|wage|pay/.test(key) || /薪资|工资|待遇|月薪|薪酬/.test(label)) {
+    ['薪资', '工资', '待遇', '月薪', '薪酬', '底薪', 'salary', 'wage', 'pay'].forEach((term) => terms.add(term));
+  }
+  if (/price|rent|cost|fee|amount/.test(key) || /价格|租金|房租|费用|金额|月租/.test(label)) {
+    ['价格', '租金', '房租', '费用', '金额', '月租', 'price', 'rent', 'cost', 'fee', 'amount'].forEach((term) => terms.add(term));
+  }
+  return Array.from(terms).map((term) => term.trim()).filter(Boolean);
+}
+
+function moneyAmountRangeMatched(raw: string) {
+  const text = raw.normalize('NFKC').replace(/\s+/g, ' ').trim();
+  if (/^\d{4}[-/]\d{1,2}(?:[-/]\d{1,2})?$/.test(text)) return false;
+  const rangePattern = new RegExp(`(?:${UNSIGNED_NUMBER_TOKEN_PATTERN_SOURCE})${NUMBER_RANGE_SEPARATOR_PATTERN_SOURCE}(?:${UNSIGNED_NUMBER_TOKEN_PATTERN_SOURCE})`, 'i');
+  if (!rangePattern.test(text)) return false;
+  const hasCurrency = currencyRate(text) !== null;
+  const hasMoneyTerm = /薪资|工资|待遇|月薪|薪酬|底薪|价格|租金|房租|费用|金额|月租|salary|wage|pay|price|rent|cost|fee|amount/i.test(text);
+  const standaloneRange = new RegExp(`^\\s*(?:${UNSIGNED_NUMBER_TOKEN_PATTERN_SOURCE})${NUMBER_RANGE_SEPARATOR_PATTERN_SOURCE}(?:${UNSIGNED_NUMBER_TOKEN_PATTERN_SOURCE})(?:\\s*(?:${MONEY_CURRENCY_PATTERN_SOURCE}))?(?:\\s*(?:\\/|每)?\\s*(?:月|年|天|日|周|小时|h|hr|hour|day|week|month|year))?\\s*$`, 'i');
+  return hasCurrency || hasMoneyTerm || standaloneRange.test(text);
+}
+
+function hasUnsupportedMoneyUnitWord(raw: string, rate: number | null) {
+  if (rate !== null) return false;
+  const normalized = raw.normalize('NFKC').toLowerCase();
+  const withoutAllowedWords = normalized
+    .replace(/\b(?:rent|price|salary|wage|pay|cost|fee|amount|per|month|monthly|year|yearly|day|daily|week|weekly|hour|hourly)\b/g, ' ')
+    .replace(/\s+/g, ' ');
+  return /\b[a-z]{2,}\b/.test(withoutAllowedWords);
+}
+
+function contextualMoneySource(raw: unknown, field: PublishCategoryMetaFieldConfig) {
+  if (typeof raw !== 'string') return '';
+  const text = raw.normalize('NFKC').replace(/\s+/g, ' ').trim();
+  if (!text) return '';
+
+  for (const term of moneyFieldSearchTerms(field)) {
+    const pattern = new RegExp(`${escapeRegex(term)}\\s*[:：]?\\s*(?:${UNSIGNED_NUMBER_TOKEN_PATTERN_SOURCE})(?:${NUMBER_RANGE_SEPARATOR_PATTERN_SOURCE}(?:${UNSIGNED_NUMBER_TOKEN_PATTERN_SOURCE}))?(?:\\s*(?:${MONEY_CURRENCY_PATTERN_SOURCE}))?`, 'i');
+    const match = text.match(pattern);
+    if (match?.[0]) return match[0];
+  }
+
+  const explicitMoneyPattern = new RegExp(`(?:${UNSIGNED_NUMBER_TOKEN_PATTERN_SOURCE})(?:${NUMBER_RANGE_SEPARATOR_PATTERN_SOURCE}(?:${UNSIGNED_NUMBER_TOKEN_PATTERN_SOURCE}))?\\s*(?:${MONEY_CURRENCY_PATTERN_SOURCE})`, 'gi');
+  const explicitMatches = [...text.matchAll(explicitMoneyPattern)];
+  return explicitMatches.length === 1 ? explicitMatches[0]?.[0] || '' : '';
+}
+
 function normalizeMoneyNumber(raw: unknown) {
   if (typeof raw === 'number') {
     return Number.isFinite(raw) ? { value: raw, reason: 'money_number_without_currency' } : { value: null, reason: 'money_number_not_matched' };
@@ -320,8 +452,17 @@ function normalizeMoneyNumber(raw: unknown) {
   if (!text) return { value: null, reason: 'money_number_not_matched' };
 
   const rate = currencyRate(text);
+  if (hasUnsupportedMoneyUnitWord(text, rate)) return { value: null, reason: 'money_number_not_matched' };
   const numericAmounts = parseNumericAmounts(text);
   const amounts = numericAmounts.length ? numericAmounts : parseChineseAmounts(text);
+  if (amounts.length === 2 && moneyAmountRangeMatched(text)) {
+    const usd = ((amounts[0] + amounts[1]) / 2) * (rate || 1);
+    if (!Number.isFinite(usd)) return { value: null, reason: 'money_number_not_matched' };
+    return {
+      value: Math.round(usd * 100) / 100,
+      reason: !rate ? 'money_range_without_currency' : rate === 1 ? 'money_usd_range_average' : 'money_currency_range_converted_usd',
+    };
+  }
   if (amounts.length !== 1) return { value: null, reason: 'money_number_not_matched' };
   const usd = amounts[0] * (rate || 1);
   if (!Number.isFinite(usd)) return { value: null, reason: 'money_number_not_matched' };
@@ -332,7 +473,15 @@ function normalizeMoneyNumber(raw: unknown) {
 }
 
 function normalizeNumber(raw: unknown, field: PublishCategoryMetaFieldConfig) {
-  if (moneyField(field)) return normalizeMoneyNumber(raw);
+  if (moneyField(field)) {
+    const contextualSource = contextualMoneySource(raw, field);
+    const contextual = contextualSource
+      ? normalizeMoneyNumber(contextualSource)
+      : { value: null, reason: 'contextual_money_number_not_matched' };
+    return contextual.value !== null && contextual.value !== undefined
+      ? { ...contextual, reason: `contextual_${contextual.reason}` }
+      : normalizeMoneyNumber(raw);
+  }
   const contextual = normalizeContextualNumber(raw, field);
   return contextual.value !== null && contextual.value !== undefined
     ? { ...contextual, reason: 'contextual_number_extracted' }
