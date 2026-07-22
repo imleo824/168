@@ -141,6 +141,16 @@ function assertForbiddenMarkers(label, content, markers) {
   return true;
 }
 
+function assertMarkerOrder(label, content, earlierMarker, laterMarker) {
+  const earlierIndex = content.indexOf(earlierMarker);
+  const laterIndex = content.indexOf(laterMarker);
+  if (earlierIndex >= 0 && laterIndex >= 0 && earlierIndex < laterIndex) return true;
+  console.log(`\n${label} has an unsafe marker order:`);
+  console.log(`  - expected ${earlierMarker} before ${laterMarker}`);
+  process.exitCode = 1;
+  return false;
+}
+
 async function main() {
   console.log('\n=== Post Main Chain Guard ===');
 
@@ -159,6 +169,7 @@ async function main() {
   const postRoutes = await read('server/routes/post.routes.ts');
   const postCreateRoutes = await read('server/routes/post-create.routes.ts');
   const postActions = await read('server/routes/post-actions.routes.ts');
+  const bootstrap = await read('server/bootstrap.ts');
   const postModule = await read('server/modules/post/index.ts');
   const postAudit = await read('scripts/post-main-chain-audit.mjs');
   const postService = await read('server/services/post/index.ts');
@@ -171,6 +182,7 @@ async function main() {
     assertMarkers('Post create route module', postCreateRoutes, REQUIRED_POST_CREATE_MARKERS),
     assertForbiddenMarkers('Post create route module', postCreateRoutes, FORBIDDEN_POST_CREATE_MARKERS),
     assertMarkers('Post action routes module', postActions, REQUIRED_POST_ACTION_MARKERS),
+    assertMarkerOrder('Bootstrap post route registration', bootstrap, 'registerPostCreateRoutes(app,', 'registerPostReadRoutes(app,'),
     assertMarkers('Post module index', postModule, REQUIRED_POST_MODULE_MARKERS),
     assertMarkers('Post main-chain audit', postAudit, REQUIRED_POST_AUDIT_MARKERS),
     assertMarkers('PostService main-chain behavior anchors', postService, REQUIRED_POST_SERVICE_MARKERS),

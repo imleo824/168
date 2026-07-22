@@ -241,6 +241,7 @@ export const HomePageSkeleton = memo(function HomePageSkeleton({
         locationPresets={[]}
         onlineCount={null}
         showHomeTopicFilters={false}
+        visualState="skeleton"
         onHomeTopicTabSelect={noopHomeTopicTabSelect}
         onHomeTopicCategoryMetaFilterApply={noopHomeTopicFilterApply}
       />

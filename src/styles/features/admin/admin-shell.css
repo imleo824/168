@@ -2,6 +2,40 @@
 /* Admin shell, navigation, mobile topbar, page header, and config cards. */
 
 @layer utilities {
+  .admin-console-page {
+    width: 100%;
+    min-height: var(--ui-visual-viewport-height);
+  }
+
+  .admin-console-layout {
+    display: flex;
+    width: 100%;
+  }
+
+  .admin-console-main {
+    min-width: 0;
+    flex: 1 1 auto;
+    padding: var(--ui-admin-console-main-padding-y-mobile) var(--ui-admin-console-main-padding-x-mobile);
+  }
+
+  .admin-console-content {
+    animation:
+      fade-in var(--ui-duration-slow) var(--ease-standard),
+      slide-in-from-bottom var(--ui-duration-slow) var(--ease-standard);
+  }
+
+  .admin-console-stack {
+    display: grid;
+    gap: var(--ui-space-6);
+    padding-bottom: var(--ui-admin-console-bottom-space);
+  }
+
+  .admin-console-save-row {
+    display: flex;
+    justify-content: center;
+    padding-top: var(--ui-admin-console-save-row-padding-top);
+  }
+
   .admin-data-panel {
     overflow: visible;
     border: var(--ui-border-width-hairline) solid var(--ui-admin-line);
@@ -42,7 +76,7 @@
   .admin-config-surface {
     border: var(--ui-border-width-hairline) solid var(--ui-line-medium);
     border-radius: var(--ui-radius-xl);
-    background: color-mix(in srgb, var(--ui-surface-muted) 60%, transparent);
+    background: var(--ui-admin-config-surface);
     padding: var(--ui-space-4);
   }
 
@@ -139,7 +173,7 @@
 
   .admin-brand-kicker,
   .admin-nav-section-label {
-    color: rgba(255, 255, 255, 0.78);
+    color: var(--ui-admin-sidebar-kicker-text);
   }
 
   .admin-sidebar-nav {
@@ -210,7 +244,7 @@
     display: inline-flex;
     margin-left: auto;
     color: currentColor;
-    opacity: 0.82;
+    opacity: var(--ui-admin-sidebar-expand-opacity);
   }
 
   .admin-nav-submenu {
@@ -344,5 +378,41 @@
 
   .admin-data-panel > .admin-filter-bar + .admin-table-scroll {
     margin-top: var(--ui-admin-filter-gap);
+  }
+
+  @media (min-width: 40rem) {
+    .admin-console-main {
+      padding-inline: var(--ui-admin-console-main-padding-x-sm);
+    }
+  }
+
+  @media (min-width: 64rem) {
+    .admin-console-layout {
+      min-height: var(--ui-visual-viewport-height);
+    }
+
+    .admin-console-main {
+      padding: var(--ui-admin-console-main-padding-y-desktop) var(--ui-admin-console-main-padding-x-lg);
+    }
+
+    .admin-console-content {
+      padding-block: var(--ui-admin-console-content-padding-y-desktop);
+    }
+
+    .admin-console-save-row {
+      padding-top: var(--ui-admin-console-save-row-padding-top-desktop);
+    }
+  }
+
+  @media (min-width: 80rem) {
+    .admin-console-main {
+      padding-inline: var(--ui-admin-console-main-padding-x-xl);
+    }
+  }
+
+  @media (min-width: 96rem) {
+    .admin-console-main {
+      padding-inline: var(--ui-admin-console-main-padding-x-2xl);
+    }
   }
 }

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 
+import { APP_ROUTES } from '@/app/routePaths';
 import { useAuth } from '@/context/AuthContext';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import SEO from '@/platform/SEO';
@@ -30,7 +31,7 @@ export default function ProfileBioEditorMobile() {
   const remainingCount = useMemo(() => Math.max(0, PROFILE_BIO_MAX_LENGTH - bio.length), [bio.length]);
 
   const goBack = useCallback(() => {
-    navigate('/profile', { replace: true });
+    navigate(APP_ROUTES.profile, { replace: true });
   }, [navigate]);
 
   const saveBio = useCallback(async () => {
@@ -50,7 +51,7 @@ export default function ProfileBioEditorMobile() {
       await refreshUser(true);
       if (user?.id) queryClient.invalidateQueries({ queryKey: ['user-profile', user.id] });
       showToast('简介保存成功', 'success');
-      navigate('/profile', { replace: true });
+      navigate(APP_ROUTES.profile, { replace: true });
     } catch (error: any) {
       showToast(error?.message || '保存简介失败', 'error');
     } finally {

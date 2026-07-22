@@ -388,51 +388,6 @@ export const allowedSelectorPropertyOverlapManifests = [
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
   },
   {
-    selector: ".tui-plus-checkout-actions[data-actions='one']",
-    files: [
-      "src/styles/features/tui-plus-premium-layout.css",
-      "src/styles/features/tui-plus-request-fixes.css",
-    ],
-    property: "grid-template-columns",
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-  {
-    selector: ".tui-plus-checkout-actions[data-actions='two']",
-    files: [
-      "src/styles/features/tui-plus-premium-layout.css",
-      "src/styles/features/tui-plus-request-fixes.css",
-    ],
-    property: "grid-template-columns",
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-  {
-    selector: ".tui-plus-checkout-actions",
-    files: [
-      "src/styles/features/tui-plus-premium-layout.css",
-      "src/styles/features/tui-plus-request-fixes.css",
-    ],
-    properties: ["display", "gap", "min-width", "width"],
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-  {
-    selector: ".tui-plus-checkout-row--plans, .tui-plus-checkout-row[data-layout='single-action'], .tui-plus-checkout-row[data-layout='trial-and-plan']",
-    files: [
-      "src/styles/features/tui-plus-premium-layout.css",
-      "src/styles/features/tui-plus-request-fixes.css",
-    ],
-    properties: ["gap", "grid-template-columns"],
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-  {
-    selector: ".tui-plus-checkout-shell, .tui-plus-link-editor-sticky-shell",
-    files: [
-      "src/styles/features/tui-plus-premium-layout.css",
-      "src/styles/features/tui-plus-visual.css",
-    ],
-    property: "padding",
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-  {
     selector: ".tui-plus-link-editor-card",
     files: [
       "src/styles/features/tui-plus-visual.css",
@@ -550,24 +505,6 @@ export const allowedSelectorPropertyOverlapManifests = [
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
   },
   {
-    selector: ".tui-plus-link-editor-sticky-shell[data-compact='true']",
-    files: [
-      "src/styles/features/tui-plus-premium-layout.css",
-      "src/styles/features/tui-plus-request-fixes.css",
-    ],
-    property: "grid-template-columns",
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-  {
-    selector: ".tui-plus-main",
-    files: [
-      "src/styles/features/profile-plus-visual.css",
-      "src/styles/features/tui-plus-premium-layout.css",
-    ],
-    property: "padding-bottom",
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-  {
     selector: ".tui-plus-main",
     files: [
       "src/styles/features/tui-plus-premium-layout.css",
@@ -682,33 +619,6 @@ export const allowedSelectorPropertyOverlapManifests = [
       "src/styles/features/tui-plus-request-fixes.css",
     ],
     properties: ["display", "gap", "grid-template-columns"],
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-  {
-    selector: ".tui-plus-sticky-cta span",
-    files: [
-      "src/styles/features/tui-plus-mobile.css",
-      "src/styles/features/tui-plus.css",
-    ],
-    properties: ["color", "font-size", "line-height"],
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-  {
-    selector: ".tui-plus-sticky-cta strong",
-    files: [
-      "src/styles/features/tui-plus-mobile.css",
-      "src/styles/features/tui-plus.css",
-    ],
-    properties: ["color", "font-size", "font-weight", "line-height"],
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-  {
-    selector: ".tui-plus-sticky-cta",
-    files: [
-      "src/styles/features/tui-plus-mobile.css",
-      "src/styles/features/tui-plus.css",
-    ],
-    properties: ["-webkit-backdrop-filter", "align-items", "backdrop-filter", "background", "border", "border-radius", "bottom", "box-shadow", "display", "gap", "left", "padding", "position", "right", "z-index"],
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
   },
   {

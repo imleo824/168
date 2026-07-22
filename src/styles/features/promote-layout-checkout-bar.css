@@ -2,29 +2,14 @@
 
 @layer utilities {
   .promote-mobile-page .promote-checkout-bar {
-    position: fixed;
-    right: var(--ui-space-none);
-    bottom: var(--ui-keyboard-inset);
-    left: var(--ui-space-none);
-    z-index: var(--ui-z-checkout-bar);
-    border-top: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
-    background: var(--ui-topbar-surface-standard, var(--ui-glass-white-96));
-    box-shadow: var(--ui-shadow-none);
     padding: var(--ui-space-none);
-    backdrop-filter: var(--ui-topbar-backdrop-filter, var(--ui-glass-blur-md));
-    -webkit-backdrop-filter: var(--ui-topbar-backdrop-filter, var(--ui-glass-blur-md));
-    transform: translate3d(var(--ui-space-none), var(--ui-space-none), var(--ui-space-none));
-    backface-visibility: hidden;
-    contain: layout paint;
-    overflow: visible;
-    pointer-events: auto;
   }
 
   .promote-mobile-page .promote-checkout-shell {
     box-sizing: border-box;
     display: grid;
     width: 100%;
-    max-width: min(100%, var(--ui-home-desktop-feed-width));
+    max-width: min(100%, var(--ui-promote-page-content-max));
     min-width: 0;
     min-height: var(--promote-checkout-shell-min-height);
     margin-inline: auto;

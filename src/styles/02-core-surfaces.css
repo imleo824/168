@@ -1,6 +1,7 @@
 /* 02-core-surfaces.css */
 @layer utilities {
   .ui-shell-narrow {
+      box-sizing: border-box;
       width: 100%;
       max-width: var(--ui-page-content-max-width);
       margin-inline: auto;

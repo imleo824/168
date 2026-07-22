@@ -34,7 +34,7 @@
     }
   .ui-loading-block {
       display: flex;
-      min-height: 46svh;
+      min-height: var(--ui-loading-block-min-height);
       flex-direction: column;
       align-items: center;
       justify-content: center;

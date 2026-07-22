@@ -59,24 +59,24 @@ const CategoryFeed = lazy(() => import('@/pages/CategoryFeedMobile'));
 const BrandAbout = lazy(() => import('@/pages/BrandAbout'));
 
 const DESKTOP_NAV_ITEMS = [
-  { to: '/', label: '首页', icon: House, end: true },
-  { to: '/messages', label: '消息', icon: Bell, end: false },
-  { to: '/create', label: '发推', icon: CirclePlus, end: false },
+  { to: APP_ROUTES.home, label: '首页', icon: House, end: true },
+  { to: APP_ROUTES.messages, label: '消息', icon: Bell, end: false },
+  { to: APP_ROUTES.create, label: '发推', icon: CirclePlus, end: false },
   { to: APP_ROUTES.sponsor, label: '买曝光', icon: TrendingUp, end: false },
-  { to: '/profile', label: '我的', icon: UserRound, end: false },
-  { to: '/about', label: '关于推推', icon: Info, end: false },
+  { to: APP_ROUTES.profile, label: '我的', icon: UserRound, end: false },
+  { to: APP_ROUTES.about, label: '关于推推', icon: Info, end: false },
 ] as const;
 
 const PAGE_OWNED_HEADER_PREFIXES = [
   '/post/',
   '/category/',
   '/user/',
-  '/profile',
-  '/messages',
+  APP_ROUTES.profile,
+  APP_ROUTES.messages,
   '/settings',
   APP_ROUTES.sponsor,
   APP_ROUTES.invite,
-  '/create',
+  APP_ROUTES.create,
   APP_ROUTES.promote,
   APP_ROUTES.promotions,
   APP_ROUTES.promotionEffects,
@@ -84,22 +84,87 @@ const PAGE_OWNED_HEADER_PREFIXES = [
   APP_ROUTES.tuiPlus,
   APP_ROUTES.transactions,
   '/168wc',
-  '/about',
+  APP_ROUTES.about,
   '/404',
 ];
 
-function hasPrefix(pathname: string, prefixes: string[]) {
+const AUTH_REQUIRED_WORKSPACE_PATHS = [
+  APP_ROUTES.create,
+  APP_ROUTES.messages,
+  APP_ROUTES.profile,
+  APP_ROUTES.sponsor,
+  APP_ROUTES.invite,
+  APP_ROUTES.inviteRecords,
+  APP_ROUTES.promote,
+  APP_ROUTES.promotions,
+  APP_ROUTES.promotionEffects,
+  APP_ROUTES.recharge,
+  APP_ROUTES.transactions,
+  APP_ROUTES.tuiPlus,
+  APP_ROUTES.profileBioEditor,
+  APP_ROUTES.tuiPlusLinkEditor,
+] as const;
+
+const AUTH_REQUIRED_WORKSPACE_PREFIXES = [
+  `${APP_ROUTES.tuiPlusLinkEditor}/`,
+  '/settings/',
+] as const;
+
+const KNOWN_USER_ROUTE_EXACT_PATHS = [
+  APP_ROUTES.home,
+  APP_ROUTES.profile,
+  APP_ROUTES.about,
+  APP_ROUTES.create,
+  APP_ROUTES.messages,
+  APP_ROUTES.sponsor,
+  APP_ROUTES.invite,
+  APP_ROUTES.inviteRecords,
+  APP_ROUTES.promote,
+  APP_ROUTES.promotions,
+  APP_ROUTES.legacyPromoteHistory,
+  APP_ROUTES.promotionEffects,
+  APP_ROUTES.legacyPromotionEffects,
+  APP_ROUTES.recharge,
+  APP_ROUTES.transactions,
+  APP_ROUTES.tuiPlus,
+  APP_ROUTES.profileBioEditor,
+  APP_ROUTES.tuiPlusLinkEditor,
+] as const;
+
+const KNOWN_USER_ROUTE_PREFIXES = [
+  '/post/',
+  '/category/',
+  '/user/',
+  '/settings/',
+  `${APP_ROUTES.tuiPlusLinkEditor}/`,
+] as const;
+
+function hasPrefix(pathname: string, prefixes: readonly string[]) {
   return prefixes.some((prefix) => pathname.startsWith(prefix));
 }
 
+function isKnownUserRoutePath(pathname: string) {
+  return (
+    KNOWN_USER_ROUTE_EXACT_PATHS.some((path) => pathname === path) ||
+    hasPrefix(pathname, KNOWN_USER_ROUTE_PREFIXES)
+  );
+}
+
 function isPageOwnedHeaderPath(pathname: string) {
-  return pathname === '/' || hasPrefix(pathname, PAGE_OWNED_HEADER_PREFIXES);
+  return pathname === APP_ROUTES.home || hasPrefix(pathname, PAGE_OWNED_HEADER_PREFIXES) || !isKnownUserRoutePath(pathname);
+}
+
+function isAuthRequiredWorkspacePath(pathname: string) {
+  return (
+    AUTH_REQUIRED_WORKSPACE_PATHS.some((path) => pathname === path) ||
+    hasPrefix(pathname, AUTH_REQUIRED_WORKSPACE_PREFIXES)
+  );
 }
 
 function getDesktopSurfaceKind(pathname: string) {
-  if (pathname === '/messages') return 'conversation';
+  if (pathname === APP_ROUTES.messages) return 'conversation';
   if (pathname.startsWith('/post/')) return 'detail';
-  if (pathname === '/create') return 'compose';
+  if (pathname === APP_ROUTES.create) return 'compose';
   if (
     pathname === APP_ROUTES.sponsor ||
     pathname === APP_ROUTES.invite ||
@@ -115,9 +180,10 @@ function getDesktopSurfaceKind(pathname: string) {
     pathname.startsWith(`${APP_ROUTES.tuiPlusLinkEditor}/`) ||
     pathname.startsWith('/settings/')
   ) return 'workspace';
-  if (pathname === '/profile' || pathname.startsWith('/profile/') || pathname.startsWith('/user/')) return 'profile';
-  if (pathname === '/about') return 'content';
-  if (pathname === '/' || pathname.startsWith('/category/')) return 'feed';
+  if (pathname === APP_ROUTES.profile || pathname.startsWith('/user/')) return 'profile';
+  if (pathname === APP_ROUTES.about) return 'content';
+  if (pathname === APP_ROUTES.home || pathname.startsWith('/category/')) return 'feed';
+  if (!isKnownUserRoutePath(pathname)) return 'content';
   return 'utility';
 }
 
@@ -154,15 +220,15 @@ function Navigation() {
 
   const openProfile = () => {
     warmupNavigationIntent('profile');
-    navigate('/profile');
+    navigate(APP_ROUTES.profile);
   };
 
   const openCreate = () => {
-    if (location.pathname === '/create') return;
+    if (location.pathname === APP_ROUTES.create) return;
     warmupNavigationIntent('create');
     requireAuth(() => {
       primePostCreateComposerFocus();
-      navigate('/create');
+      navigate(APP_ROUTES.create);
     });
   };
 
@@ -246,7 +312,7 @@ function GlobalAuthOverlay() {
 function AppDesktopSidebar() {
   return (
     <aside className="app-desktop-sidebar" aria-label="桌面主导航">
-      <NavLink className="app-desktop-brand" to="/" aria-label="返回首页">
+      <NavLink className="app-desktop-brand" to={APP_ROUTES.home} aria-label="返回首页">
         <span className="app-desktop-brand-mark">T</span>
         <span className="app-desktop-brand-copy">
           <span className="app-desktop-brand-name">推推</span>
@@ -288,13 +354,13 @@ function AppDesktopContextRail({ onlineCountText }: { onlineCountText: string })
       <section className="app-desktop-context-card">
         <h2 className="app-desktop-context-title">快速操作</h2>
         <div className="app-desktop-context-actions">
-          <NavLink className="app-desktop-context-action app-desktop-context-action--primary" to="/create">
+          <NavLink className="app-desktop-context-action app-desktop-context-action--primary" to={APP_ROUTES.create}>
             发布分类信息
           </NavLink>
           <NavLink className="app-desktop-context-action" to={APP_ROUTES.sponsor}>
             购买曝光
           </NavLink>
-          <NavLink className="app-desktop-context-action" to="/about">
+          <NavLink className="app-desktop-context-action" to={APP_ROUTES.about}>
             了解推推
           </NavLink>
         </div>
@@ -329,12 +395,12 @@ function AdminRouteGate({ children }: { children: ReactNode }) {
       </PageContentShell>
     );
   }
-  if (user.role !== 'ADMIN') return <Navigate to="/" replace />;
+  if (user.role !== 'ADMIN') return <Navigate to={APP_ROUTES.home} replace />;
   return <>{children}</>;
 }
 
 function AppLayout() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const location = useLocation();
   const pathname = location.pathname;
   const { data: homeBootstrap } = useHomeBootstrap();
@@ -352,12 +418,16 @@ function AppLayout() {
   const isAdminRoute = pathname.startsWith('/168wc');
   const routeSurface = isAdminRoute ? 'admin' : 'user';
   const isUserSurface = routeSurface === 'user';
-  const desktopSurfaceKind = isUserSurface ? getDesktopSurfaceKind(pathname) : 'admin';
+  const useAuthRequiredWorkspaceSurface =
+    isUserSurface && !authLoading && !user && isAuthRequiredWorkspacePath(pathname);
+  const desktopSurfaceKind = isUserSurface
+    ? useAuthRequiredWorkspaceSurface ? 'workspace' : getDesktopSurfaceKind(pathname)
+    : 'admin';
   const isDesktopViewport = useIsDesktopViewport();
 
   useMobileAddressBar(pathname);
   useBrowserPushResync(user?.id);
-  useHomeBootstrapPrefetch(pathname === '/');
+  useHomeBootstrapPrefetch(pathname === APP_ROUTES.home);
   usePostCreateFocusIntentCapture(Boolean(user));
   useReferralInviteAttributionCapture(location.search);
 
@@ -388,15 +458,15 @@ function AppLayout() {
           data-route-overlay-active={isRouteOverlay ? 'true' : undefined}
         >
           <ErrorBoundary resetKeys={[location.key, location.pathname]}>
-            <Suspense fallback={location.pathname === '/' ? <HomePageSkeleton /> : <PageLoader />}>
+            <Suspense fallback={location.pathname === APP_ROUTES.home ? <HomePageSkeleton /> : <PageLoader />}>
               <Routes location={location}>
-                <Route path="/" element={<Home />} />
+                <Route path={APP_ROUTES.home} element={<Home />} />
                 <Route path="/post/:id" element={<PostDetail />} />
                 <Route path="/category/:id" element={<CategoryFeed />} />
                 <Route path="/user/:id" element={<UserSpace />} />
-                <Route path="/create" element={<AppRequireAuthRoute><PostCreate /></AppRequireAuthRoute>} />
-                <Route path="/messages" element={<AppRequireAuthRoute><Messages /></AppRequireAuthRoute>} />
-                <Route path="/profile" element={<Profile />} />
+                <Route path={APP_ROUTES.create} element={<AppRequireAuthRoute><PostCreate /></AppRequireAuthRoute>} />
+                <Route path={APP_ROUTES.messages} element={<AppRequireAuthRoute><Messages /></AppRequireAuthRoute>} />
+                <Route path={APP_ROUTES.profile} element={<Profile />} />
                 <Route path={APP_ROUTES.profileBioEditor} element={<AppRequireAuthRoute><ProfileBioEditor /></AppRequireAuthRoute>} />
                 <Route path={APP_ROUTES.tuiPlusLinkEditor} element={<AppRequireAuthRoute><AppRequireTuiPlusRoute benefit="profileLinks"><TuiPlusLinkEditor /></AppRequireTuiPlusRoute></AppRequireAuthRoute>} />
                 <Route path={`${APP_ROUTES.tuiPlusLinkEditor}/:target`} element={<AppRequireAuthRoute><AppRequireTuiPlusRoute benefit="profileLinks"><TuiPlusLinkEditor /></AppRequireTuiPlusRoute></AppRequireAuthRoute>} />
@@ -411,9 +481,9 @@ function AppLayout() {
                 <Route path={APP_ROUTES.legacyPromotionEffects} element={<Navigate to={APP_ROUTES.promotionEffects} replace state={location.state} />} />
                 <Route path={APP_ROUTES.recharge} element={<AppRequireAuthRoute><Recharge /></AppRequireAuthRoute>} />
                 <Route path={APP_ROUTES.transactions} element={<AppRequireAuthRoute><TransactionHistory /></AppRequireAuthRoute>} />
-                <Route path="/settings/notifications" element={<AppRequireAuthRoute><NotificationSettings /></AppRequireAuthRoute>} />
+                <Route path={APP_ROUTES.notificationSettings} element={<AppRequireAuthRoute><NotificationSettings /></AppRequireAuthRoute>} />
                 <Route path="/168wc" element={<AdminRouteGate><Admin /></AdminRouteGate>} />
-                <Route path="/about" element={<BrandAbout />} />
+                <Route path={APP_ROUTES.about} element={<BrandAbout />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>

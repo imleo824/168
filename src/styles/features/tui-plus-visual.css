@@ -2,13 +2,7 @@
 
 @layer utilities {
   :where(.profile-avatar-button[data-tui-plus='true'], .app-bottom-nav-avatar-shell[data-tui-plus='true'], .tui-plus-x-mark) {
-    --tui-plus-ring-gradient: conic-gradient(
-      from 35deg,
-      var(--ui-brand),
-      var(--ui-brand-strong),
-      color-mix(in srgb, var(--ui-brand) 62%, var(--ui-color-white)),
-      var(--ui-brand)
-    );
+    --tui-plus-ring-gradient: var(--ui-tui-plus-ring-gradient);
   }
 
   .ins-post-card .feed-card-author-avatar-link[data-tui-plus='true'] {
@@ -29,16 +23,13 @@
 
   .tui-plus-page,
   .tui-plus-link-editor-page {
-    background:
-      radial-gradient(circle at 50% calc(var(--ui-space-8) * -1), color-mix(in srgb, var(--ui-brand) 12%, transparent), transparent 34%),
-      linear-gradient(180deg, color-mix(in srgb, var(--ui-brand) 4%, var(--ui-surface-page)), var(--ui-surface-page) 42%);
+    background: var(--ui-tui-plus-page-surface);
   }
 
   .tui-plus-main,
   .tui-plus-link-editor-main {
     gap: var(--ui-space-3);
     padding-top: var(--ui-space-2);
-    padding-bottom: calc(var(--ui-control-lg) + var(--ui-space-8) + env(safe-area-inset-bottom));
   }
 
   .tui-plus-topbar-title {
@@ -47,12 +38,12 @@
     align-items: center;
     justify-content: center;
     gap: var(--ui-space-1);
-    border: var(--ui-border-width-hairline) solid color-mix(in srgb, var(--ui-brand) 20%, transparent);
+    border: var(--ui-border-width-hairline) solid var(--ui-tui-plus-topbar-title-border);
     border-radius: var(--ui-radius-pill);
-    background: linear-gradient(135deg, color-mix(in srgb, var(--ui-brand) 10%, var(--ui-color-white)), var(--ui-color-white));
+    background: var(--ui-tui-plus-topbar-title-surface);
     color: var(--ui-brand-strong);
     padding: var(--ui-space-1) var(--ui-space-3);
-    box-shadow: 0 var(--ui-border-width-hairline) var(--ui-space-half) color-mix(in srgb, var(--ui-brand) 12%, transparent);
+    box-shadow: var(--ui-tui-plus-topbar-title-shadow);
   }
 
   .tui-plus-topbar-title-icon {
@@ -76,11 +67,9 @@
     justify-items: start;
     gap: var(--ui-space-2);
     overflow: hidden;
-    border: var(--ui-border-width-hairline) solid color-mix(in srgb, var(--ui-brand) 16%, var(--ui-line-subtle));
+    border: var(--ui-border-width-hairline) solid var(--ui-tui-plus-hero-border);
     border-radius: var(--ui-radius-2xl);
-    background:
-      radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--ui-brand) 16%, transparent), transparent 36%),
-      linear-gradient(135deg, color-mix(in srgb, var(--ui-brand) 7%, var(--ui-surface-card)), var(--ui-surface-card));
+    background: var(--ui-tui-plus-hero-surface);
     padding: var(--ui-space-4);
     box-shadow: var(--ui-shadow-card);
     text-align: left;
@@ -91,9 +80,7 @@
     pointer-events: none;
     position: absolute;
     inset: var(--ui-inset-none);
-    background:
-      linear-gradient(120deg, color-mix(in srgb, var(--ui-color-white) 58%, transparent), transparent 40%),
-      radial-gradient(circle at 12% 12%, color-mix(in srgb, var(--ui-brand) 10%, transparent), transparent 30%);
+    background: var(--ui-tui-plus-hero-overlay);
   }
 
   .tui-plus-x-brand-row,
@@ -121,7 +108,7 @@
     border-radius: var(--ui-radius-pill);
     background: var(--tui-plus-ring-gradient);
     color: var(--ui-color-white);
-    box-shadow: 0 var(--ui-space-1) var(--ui-space-4) color-mix(in srgb, var(--ui-brand) 18%, transparent);
+    box-shadow: var(--ui-tui-plus-mark-shadow-compact);
   }
 
   .tui-plus-x-mark svg {
@@ -135,7 +122,7 @@
     align-items: center;
     width: fit-content;
     border-radius: var(--ui-radius-pill);
-    background: color-mix(in srgb, var(--ui-brand) 8%, transparent);
+    background: var(--ui-tui-plus-eyebrow-surface);
     color: var(--ui-brand-strong);
     padding: var(--ui-space-1) var(--ui-space-2);
     font-size: var(--ui-text-xs);
@@ -161,7 +148,7 @@
     align-items: center;
     overflow: hidden;
     border-radius: var(--ui-radius-pill);
-    background: color-mix(in srgb, var(--ui-brand) 7%, var(--ui-surface-card));
+    background: var(--ui-tui-plus-status-surface);
     color: var(--ui-brand-strong);
     margin: var(--ui-space-none);
     padding: var(--ui-space-1) var(--ui-space-2);
@@ -178,7 +165,7 @@
     overflow: hidden;
     border: var(--ui-border-width-hairline) solid var(--ui-line-subtle);
     border-radius: var(--ui-radius-2xl);
-    background: color-mix(in srgb, var(--ui-surface-card) 96%, var(--ui-brand));
+    background: var(--ui-tui-plus-benefits-surface);
     padding: var(--ui-space-3);
     box-shadow: var(--ui-shadow-card);
   }
@@ -218,13 +205,13 @@
     gap: var(--ui-space-2);
     border: var(--ui-border-width-hairline) solid transparent;
     border-radius: var(--ui-radius-xl);
-    background: color-mix(in srgb, var(--ui-brand) 4%, var(--ui-surface-card));
+    background: var(--ui-tui-plus-benefit-item-surface);
     padding: var(--ui-space-2);
   }
 
   .tui-plus-x-benefit-item:hover {
-    border-color: color-mix(in srgb, var(--ui-brand) 14%, var(--ui-line-subtle));
-    background: color-mix(in srgb, var(--ui-brand) 6%, var(--ui-surface-card));
+    border-color: var(--ui-tui-plus-benefit-item-hover-border);
+    background: var(--ui-tui-plus-benefit-item-hover-surface);
   }
 
   .tui-plus-x-benefit-icon {
@@ -234,7 +221,7 @@
     align-items: center;
     justify-content: center;
     border-radius: var(--ui-radius-pill);
-    background: color-mix(in srgb, var(--ui-brand) 10%, var(--ui-color-white));
+    background: var(--ui-tui-plus-benefit-icon-surface-soft);
     color: var(--ui-brand-strong);
   }
 
@@ -277,55 +264,12 @@
     line-height: var(--ui-line-tight);
   }
 
-  .tui-plus-checkout-bar,
-  .tui-plus-link-editor-sticky-action {
-    position: fixed;
-    right: var(--ui-space-none);
-    bottom: var(--ui-keyboard-inset);
-    left: var(--ui-space-none);
-    z-index: var(--ui-z-checkout-bar);
-    border-top: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
-    background: var(--ui-topbar-surface-standard, var(--ui-glass-white-96));
-    box-shadow: var(--ui-shadow-none);
-    padding: var(--ui-space-none);
-    backdrop-filter: var(--ui-topbar-backdrop-filter, var(--ui-glass-blur-md));
-    -webkit-backdrop-filter: var(--ui-topbar-backdrop-filter, var(--ui-glass-blur-md));
-    transform: translate3d(var(--ui-space-none), var(--ui-space-none), var(--ui-space-none));
-    backface-visibility: hidden;
-    contain: layout paint;
-    overflow: visible;
-    pointer-events: auto;
-  }
-
-  .tui-plus-checkout-shell,
-  .tui-plus-link-editor-sticky-shell {
-    box-sizing: border-box;
-    display: grid;
-    width: 100%;
-    max-width: min(100%, var(--ui-home-desktop-feed-width));
-    min-width: 0;
-    margin-inline: auto;
-    gap: var(--ui-space-2);
-    padding: var(--promote-checkout-shell-padding-y) var(--ui-page-padding-x) calc(var(--promote-checkout-shell-padding-y) + env(safe-area-inset-bottom));
-  }
-
-  .tui-plus-checkout-row,
-  .tui-plus-link-editor-sticky-shell {
-    grid-template-columns: minmax(0, 1fr) minmax(var(--promote-checkout-action-min-width), auto);
-    align-items: center;
-  }
-
-  .tui-plus-checkout-row {
-    display: grid;
-    gap: var(--ui-space-2);
-  }
-
   .tui-plus-x-toggle {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--ui-space-1);
     border-radius: var(--ui-radius-pill);
-    background: color-mix(in srgb, var(--ui-brand) 5%, var(--ui-surface-muted));
+    background: var(--ui-tui-plus-toggle-surface);
     padding: var(--ui-space-1);
   }
 
@@ -337,7 +281,7 @@
     gap: var(--ui-space-1);
     border: var(--ui-border-none);
     border-radius: var(--ui-radius-pill);
-    background: transparent;
+    background: var(--ui-surface-transparent);
     color: var(--ui-text-secondary);
     font-size: var(--ui-text-sm);
     font-weight: var(--ui-font-weight-strong);
@@ -384,11 +328,11 @@
     max-width: 100%;
     align-items: center;
     overflow: hidden;
-    border: var(--ui-border-width-hairline) solid color-mix(in srgb, var(--ui-brand) 14%, var(--ui-line-hairline));
+    border: var(--ui-border-width-hairline) solid var(--ui-tui-plus-price-badge-border);
     border-radius: var(--ui-radius-pill);
-    background: color-mix(in srgb, var(--ui-brand) 6%, var(--ui-surface-muted));
+    background: var(--ui-tui-plus-price-badge-surface);
     color: var(--ui-text-secondary);
-    padding: 0 var(--ui-space-2);
+    padding: var(--ui-space-none) var(--ui-space-2);
     font-size: var(--ui-text-xs);
     font-weight: var(--ui-font-weight-strong);
     line-height: var(--ui-control-sm);
@@ -417,7 +361,7 @@
     display: grid;
     gap: var(--ui-space-3);
     border: var(--ui-border-none);
-    background: transparent;
+    background: var(--ui-surface-transparent);
     padding: var(--ui-space-none);
     box-shadow: var(--ui-shadow-none);
   }
@@ -426,9 +370,9 @@
     display: grid;
     gap: var(--ui-space-2);
     overflow: hidden;
-    border: var(--ui-border-width-hairline) solid color-mix(in srgb, var(--ui-brand) 10%, var(--ui-line-subtle));
+    border: var(--ui-border-width-hairline) solid var(--ui-tui-plus-link-section-border);
     border-radius: var(--ui-radius-2xl);
-    background: color-mix(in srgb, var(--ui-surface-card) 96%, var(--ui-brand));
+    background: var(--ui-tui-plus-link-section-surface);
     padding: var(--ui-space-3);
     box-shadow: var(--ui-shadow-card);
   }
@@ -453,9 +397,9 @@
     flex: 0 0 auto;
     align-items: center;
     border-radius: var(--ui-radius-pill);
-    background: color-mix(in srgb, var(--ui-brand) 7%, var(--ui-surface-muted));
+    background: var(--ui-tui-plus-link-section-badge-surface);
     color: var(--ui-brand-strong);
-    padding: 0 var(--ui-space-2);
+    padding: var(--ui-space-none) var(--ui-space-2);
     font-size: var(--ui-text-xs);
     font-weight: var(--ui-font-weight-strong);
     line-height: var(--ui-control-xs, var(--ui-control-sm));
@@ -480,13 +424,13 @@
   }
 
   .tui-plus-link-editor-slot[data-filled='true'] {
-    border-color: color-mix(in srgb, var(--ui-brand) 12%, var(--ui-line-subtle));
-    background: color-mix(in srgb, var(--ui-brand) 3%, var(--ui-surface-card));
+    border-color: var(--ui-tui-plus-link-slot-filled-border);
+    background: var(--ui-tui-plus-link-slot-filled-surface);
   }
 
   .tui-plus-link-editor-slot[data-dirty='true'] {
-    border-color: color-mix(in srgb, var(--ui-brand) 34%, var(--ui-line-subtle));
-    background: color-mix(in srgb, var(--ui-brand) 5%, var(--ui-surface-card));
+    border-color: var(--ui-tui-plus-link-slot-dirty-border);
+    background: var(--ui-tui-plus-link-slot-dirty-surface);
   }
 
   .tui-plus-link-editor-slot-index {
@@ -496,7 +440,7 @@
     align-items: center;
     justify-content: center;
     border-radius: var(--ui-radius-pill);
-    background: color-mix(in srgb, var(--ui-brand) 7%, var(--ui-surface-muted));
+    background: var(--ui-tui-plus-link-slot-index-surface);
     color: var(--ui-brand-strong);
     font-size: var(--ui-text-xs);
     font-weight: var(--ui-font-weight-strong);
@@ -527,9 +471,9 @@
     border-radius: var(--ui-radius-xl);
     background: var(--ui-surface-base);
     color: var(--ui-text-strong);
-    padding: 0 var(--ui-space-3);
+    padding: var(--ui-space-none) var(--ui-space-3);
     font-size: var(--ui-root-font-size);
-    outline: none;
+    outline: var(--ui-outline-none);
     scroll-margin-block: var(--ui-form-scroll-margin-top-extra) var(--ui-form-scroll-margin-bottom);
     touch-action: manipulation;
   }
@@ -537,7 +481,7 @@
   .tui-plus-link-editor-field input:focus {
     border-color: var(--ui-brand);
     background: var(--ui-surface-focus);
-    box-shadow: 0 0 0 calc(var(--ui-border-width-hairline) * 3) var(--ui-ring-brand-soft);
+    box-shadow: var(--ui-tui-plus-link-field-focus-shadow);
   }
 
   .tui-plus-link-editor-check {

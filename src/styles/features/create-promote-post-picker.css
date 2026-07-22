@@ -171,9 +171,9 @@
     flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-    border: var(--ui-border-width-hairline) solid color-mix(in srgb, var(--ui-danger-classic) 32%, transparent);
+    border: var(--ui-border-width-hairline) solid var(--post-create-category-clear-border);
     border-radius: var(--ui-radius-pill);
-    background: color-mix(in srgb, var(--ui-danger-classic) 8%, transparent);
+    background: var(--post-create-category-clear-surface);
     padding: var(--ui-space-half) var(--ui-space-3);
     color: var(--ui-danger-classic);
     font: inherit;
@@ -183,7 +183,7 @@
   }
 
   .post-create-category-clear-button:active {
-    background: color-mix(in srgb, var(--ui-danger-classic) 14%, transparent);
+    background: var(--post-create-category-clear-active-surface);
   }
 
   .post-create-picker-category-grid {

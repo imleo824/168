@@ -73,7 +73,7 @@ const getRechargeStatusMeta = (item: any) => {
     return { label: '已过期', className: 'admin-tone-neutral', active: false };
   }
   if (status === 'BELOW_MINIMUM') {
-    return { label: '低于最低入账', className: 'bg-orange-50 text-orange-600', active: false };
+    return { label: '低于最低入账', className: 'admin-tone-below-minimum', active: false };
   }
   if (status === 'CANCELLED') {
     return { label: '已取消', className: 'admin-tone-neutral', active: false };

@@ -62,7 +62,7 @@
   .ins-post-card .feed-card-author-avatar-link[data-tui-plus='true']::before,
   .ui-profile-icon-button[data-tui-plus='true']::before {
     inset: calc((var(--ui-avatar-tui-plus-ring-gap) + var(--ui-avatar-tui-plus-ring-size)) * -1);
-    z-index: -2;
+    z-index: var(--ui-z-local-underlay);
     background: var(--ui-avatar-tui-plus-ring-gradient);
   }
 
@@ -78,7 +78,7 @@
   .ins-post-card .feed-card-author-avatar-link[data-tui-plus='true']::after,
   .ui-profile-icon-button[data-tui-plus='true']::after {
     inset: calc(var(--ui-avatar-tui-plus-ring-gap) * -1);
-    z-index: -1;
+    z-index: var(--ui-z-local-behind);
     background: var(--ui-avatar-tui-plus-ring-surface, var(--ui-surface-card));
   }
 
@@ -94,7 +94,7 @@
   .ins-post-card .feed-card-author-avatar-link[data-tui-plus='true'] :where(.ui-avatar, img),
   .ui-profile-icon-button[data-tui-plus='true'] :where(.ui-avatar, img) {
     position: relative;
-    z-index: 1;
+    z-index: var(--ui-z-local-raised);
     overflow: hidden;
     border-radius: inherit;
     box-shadow: var(--ui-shadow-none);

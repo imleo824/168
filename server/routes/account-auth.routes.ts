@@ -68,14 +68,14 @@ export function registerAccountAuthRoutes(app: Express, context: AccountAuthRout
     if (passwordError) {
       return res.status(400).json({ error: passwordError });
     }
-    if (!isDbConfigured()) {
-      return res.status(503).json({ error: '服务暂时不可用，请稍后再试' });
-    }
 
     const rawInviteCode = req.body?.inviteCode ?? req.body?.referralCode ?? req.body?.invite;
     const inviteCode = normalizeReferralInviteCode(rawInviteCode);
     if (rawInviteCode && !inviteCode) {
       return res.status(400).json({ error: '邀请码格式不正确' });
+    }
+    if (!isDbConfigured()) {
+      return res.status(503).json({ error: '服务暂时不可用，请稍后再试' });
     }
 
     const configs = await getConfigs();

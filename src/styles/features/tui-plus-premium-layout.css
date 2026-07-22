@@ -3,28 +3,21 @@
 @layer utilities {
   .tui-plus-page,
   .tui-plus-link-editor-page {
-    background:
-      radial-gradient(circle at 50% calc(var(--ui-space-8) * -1), color-mix(in srgb, var(--ui-brand) 15%, transparent), transparent 36%),
-      radial-gradient(circle at 100% 10%, color-mix(in srgb, var(--ui-brand-warm) 9%, transparent), transparent 30%),
-      linear-gradient(180deg, color-mix(in srgb, var(--ui-brand) 5%, var(--ui-surface-page)), var(--ui-surface-page) 46%);
+    background: var(--ui-tui-plus-page-surface);
   }
 
   .tui-plus-main {
     gap: var(--ui-space-3);
     padding-top: var(--ui-space-2);
-    padding-bottom: calc(env(safe-area-inset-bottom) + (var(--ui-control-lg) * 2) + var(--ui-space-8));
   }
 
   .tui-plus-x-hero {
-    border-color: color-mix(in srgb, var(--ui-brand) 20%, var(--ui-line-subtle));
-    background:
-      radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--ui-brand) 18%, transparent), transparent 36%),
-      radial-gradient(circle at 0% 100%, color-mix(in srgb, var(--ui-brand-warm) 10%, transparent), transparent 42%),
-      linear-gradient(135deg, color-mix(in srgb, var(--ui-brand) 8%, var(--ui-surface-card)), var(--ui-surface-card));
+    border-color: var(--ui-tui-plus-hero-border);
+    background: var(--ui-tui-plus-hero-surface);
     padding: var(--ui-space-4);
     box-shadow:
       var(--ui-shadow-card),
-      inset 0 1px 0 color-mix(in srgb, var(--ui-color-white) 72%, transparent);
+      var(--ui-tui-plus-hero-inset-shadow);
   }
 
   .tui-plus-x-brand-row {
@@ -36,8 +29,7 @@
     width: calc(var(--ui-control-lg) + var(--ui-space-1));
     height: calc(var(--ui-control-lg) + var(--ui-space-1));
     box-shadow:
-      0 var(--ui-space-2) var(--ui-space-6) color-mix(in srgb, var(--ui-brand) 22%, transparent),
-      inset 0 1px 0 color-mix(in srgb, var(--ui-color-white) 42%, transparent);
+      var(--ui-tui-plus-mark-shadow);
   }
 
   .tui-plus-x-title-stack h1 {
@@ -53,9 +45,8 @@
   }
 
   .tui-plus-x-benefits {
-    border-color: color-mix(in srgb, var(--ui-brand) 12%, var(--ui-line-subtle));
-    background:
-      linear-gradient(180deg, color-mix(in srgb, var(--ui-brand) 4%, var(--ui-surface-card)), var(--ui-surface-card));
+    border-color: var(--ui-tui-plus-benefits-border);
+    background: var(--ui-tui-plus-benefits-surface);
     box-shadow: var(--ui-shadow-card);
   }
 
@@ -66,27 +57,15 @@
   .tui-plus-x-benefit-item {
     min-height: calc(var(--ui-control-lg) + var(--ui-space-1));
     align-items: center;
-    border: var(--ui-border-width-hairline) solid color-mix(in srgb, var(--ui-brand) 8%, var(--ui-line-subtle));
+    border: var(--ui-border-width-hairline) solid var(--ui-tui-plus-benefit-item-border);
     border-radius: var(--ui-radius-xl);
-    background: color-mix(in srgb, var(--ui-brand) 4%, var(--ui-surface-card));
+    background: var(--ui-tui-plus-benefit-item-surface);
     padding: var(--ui-space-2);
     box-shadow: var(--ui-shadow-hairline);
   }
 
   .tui-plus-x-benefit-icon {
-    background: color-mix(in srgb, var(--ui-brand) 11%, var(--ui-surface-card));
-  }
-
-  .tui-plus-checkout-shell,
-  .tui-plus-link-editor-sticky-shell {
-    padding: var(--ui-space-3) var(--ui-page-padding-x) calc(var(--ui-space-3) + env(safe-area-inset-bottom));
-  }
-
-  .tui-plus-checkout-row--plans,
-  .tui-plus-checkout-row[data-layout='single-action'],
-  .tui-plus-checkout-row[data-layout='trial-and-plan'] {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--ui-space-2);
+    background: var(--ui-tui-plus-benefit-icon-surface);
   }
 
   .tui-plus-plan-pair {
@@ -107,11 +86,9 @@
     align-items: start;
     gap: var(--ui-space-2) var(--ui-space-3);
     overflow: hidden;
-    border-color: color-mix(in srgb, var(--ui-brand) 10%, var(--ui-line-subtle));
+    border-color: var(--ui-tui-plus-plan-border);
     border-radius: var(--ui-radius-2xl);
-    background:
-      linear-gradient(180deg, color-mix(in srgb, var(--ui-color-white) 64%, transparent), transparent 42%),
-      var(--ui-surface-card);
+    background: var(--ui-tui-plus-plan-surface);
     padding: var(--ui-space-3);
     box-shadow: var(--ui-shadow-hairline);
   }
@@ -121,13 +98,13 @@
     pointer-events: none;
     position: absolute;
     inset: var(--ui-inset-none);
-    background: radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--ui-brand) 10%, transparent), transparent 42%);
-    opacity: 0;
+    background: var(--ui-tui-plus-plan-overlay);
+    opacity: var(--ui-opacity-hidden);
     transition: opacity var(--ui-motion-duration-fast, 160ms) var(--ui-motion-ease-standard, ease);
   }
 
   .tui-plus-plan-card[data-selected='true']::before {
-    opacity: 1;
+    opacity: var(--ui-opacity-visible);
   }
 
   .tui-plus-plan-card-mark {
@@ -136,7 +113,7 @@
     right: var(--ui-space-2);
     width: var(--ui-control-sm);
     height: var(--ui-control-sm);
-    opacity: .9;
+    opacity: var(--ui-tui-plus-plan-mark-opacity);
   }
 
   .tui-plus-plan-card-radio {
@@ -195,21 +172,6 @@
     font-size: var(--ui-text-2xs);
   }
 
-  .tui-plus-checkout-actions {
-    display: grid;
-    width: 100%;
-    min-width: 0;
-    gap: var(--ui-space-2);
-  }
-
-  .tui-plus-checkout-actions[data-actions='two'] {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .tui-plus-checkout-actions[data-actions='one'] {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
   .tui-plus-x-action,
   .tui-plus-x-primary,
   .tui-plus-link-editor-save {
@@ -225,7 +187,4 @@
     touch-action: manipulation;
   }
 
-  .tui-plus-link-editor-sticky-shell[data-compact='true'] {
-    grid-template-columns: minmax(0, 1fr);
-  }
 }

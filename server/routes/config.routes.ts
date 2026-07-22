@@ -1,6 +1,6 @@
 import type { Express } from 'express';
 import { ConfigService, parsePublishCategorySchema, type PublishCategoryMetaConfig } from '../config.service';
-import prisma from '../db';
+import prisma, { isDbConfigured } from '../db';
 import { catchAsync } from '../middlewares/error';
 import { adminOnly, authMiddleware } from '../middlewares/auth';
 import { publicReadLimiter } from '../middlewares/rateLimit';
@@ -29,6 +29,8 @@ export function clearCachedConfigs() {
 }
 
 export async function listDatabaseCategoryOptions() {
+  if (!isDbConfigured()) return [];
+
   return await prisma.category.findMany({
     select: {
       id: true,
@@ -72,6 +74,8 @@ export async function getConfigs(options: { bypassCache?: boolean } = {}) {
 }
 
 async function getSavedPublishCategorySchema() {
+  if (!isDbConfigured()) return [] as PublishCategoryMetaConfig[];
+
   try {
     const row = await prisma.systemConfig.findUnique({
       where: { key: 'publish_category_schema' },

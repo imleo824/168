@@ -72,7 +72,7 @@
     .feed-card-author-avatar-link[data-tui-plus='true']
   )::before {
     inset: calc((var(--ui-avatar-tui-plus-ring-gap) + var(--ui-avatar-tui-plus-ring-size)) * -1);
-    z-index: -2;
+    z-index: var(--ui-z-local-underlay);
     background: var(--ui-avatar-tui-plus-ring-gradient);
     box-shadow: var(--ui-shadow-none);
   }
@@ -85,7 +85,7 @@
     .feed-card-author-avatar-link[data-tui-plus='true']
   )::after {
     inset: calc(var(--ui-avatar-tui-plus-ring-gap) * -1);
-    z-index: -1;
+    z-index: var(--ui-z-local-behind);
     background: var(--ui-avatar-tui-plus-ring-surface);
     box-shadow: var(--ui-shadow-none);
   }
@@ -115,7 +115,7 @@
   ) .ui-avatar,
   .ui-avatar[data-tui-plus='true'] {
     position: relative;
-    z-index: 1;
+    z-index: var(--ui-z-local-raised);
     overflow: hidden;
     border-radius: inherit;
     box-shadow: var(--ui-shadow-none);

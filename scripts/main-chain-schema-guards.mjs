@@ -105,6 +105,14 @@ async function assertAutoCommentRankingContract() {
   assertIncludes(file, content, 'ORDER BY COALESCE(prs."recommendationScore", 0) DESC, p."createdAt" DESC', 'Auto-comment candidate SQL must order by PostRankingScore.recommendationScore, not a Post column.');
 }
 
+async function assertPublicConfigNoDbFallbackContract() {
+  const file = 'server/routes/config.routes.ts';
+  const content = await fs.readFile(path.join(ROOT, file), 'utf8');
+  assertIncludes(file, content, "import prisma, { isDbConfigured } from '../db';", 'Public config routes must know whether the database is configured before reading DB-backed category config.');
+  assertIncludes(file, content, 'if (!isDbConfigured()) return [];', 'Admin category options must short-circuit when the database is not configured.');
+  assertIncludes(file, content, 'if (!isDbConfigured()) return [] as PublishCategoryMetaConfig[];', 'Public category schema fallback must not query Prisma when the database is not configured.');
+}
+
 async function main() {
   for await (const file of walk(ROOT)) {
     const content = await fs.readFile(path.join(ROOT, file), 'utf8');
@@ -139,6 +147,7 @@ async function main() {
   await assertAutomationAiJsonModeContract();
   await assertAutoCrawlAiParserContract();
   await assertAutoCommentRankingContract();
+  await assertPublicConfigNoDbFallbackContract();
 
   if (process.exitCode) return;
   console.log('[main-chain-schema-guards] passed');

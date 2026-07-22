@@ -19,14 +19,14 @@
 
   .ins-post-card .feed-card-author-avatar-link[data-recent-post="true"]::before {
     inset: calc((var(--ui-feed-avatar-activity-ring-size) + var(--ui-feed-avatar-activity-ring-gap)) * -1);
-    z-index: -2;
+    z-index: var(--ui-z-local-underlay);
     background: var(--ui-feed-avatar-activity-ring-color);
     box-shadow: var(--ui-shadow-none);
   }
 
   .ins-post-card .feed-card-author-avatar-link[data-recent-post="true"]::after {
     inset: calc(var(--ui-feed-avatar-activity-ring-gap) * -1);
-    z-index: -1;
+    z-index: var(--ui-z-local-behind);
     background: var(--ui-feed-avatar-activity-ring-surface);
     box-shadow: var(--ui-shadow-none);
   }

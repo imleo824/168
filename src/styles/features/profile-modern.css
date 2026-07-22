@@ -2,8 +2,7 @@
 
 @layer utilities {
   .profile-modern-page {
-    --profile-modern-sticky-tab-top: var(--ui-space-none);
-    --ui-sticky-tab-top: var(--ui-space-none);
+    --ui-sticky-tab-top: var(--ui-profile-sticky-tab-top);
     z-index: var(--ui-z-page-header);
 
     min-height: var(--app-layout-vh);
@@ -17,26 +16,6 @@
     padding: var(--ui-space-none) var(--ui-space-none) var(--ui-page-bottom-safe);
     isolation: isolate;
     background: var(--ui-surface-page);
-  }
-
-  .profile-modern-page .profile-modern-topbar {
-    pointer-events: none;
-    background: var(--ui-surface-transparent);
-    box-shadow: var(--ui-shadow-none);
-    backdrop-filter: var(--ui-backdrop-filter-none);
-    -webkit-backdrop-filter: var(--ui-backdrop-filter-none);
-  }
-
-  .profile-modern-page .profile-modern-topbar.nav-blur {
-    background-clip: padding-box;
-  }
-
-  .profile-modern-page .profile-modern-topbar :is(.ui-topbar-shell, .ui-topbar-inner) {
-    background: var(--ui-surface-transparent);
-  }
-
-  .profile-modern-page .profile-modern-topbar :is(a, button, [role='button'], input, select, textarea) {
-    pointer-events: auto;
   }
 
   .profile-modern-page .profile-list-section {
@@ -254,6 +233,12 @@
     height: var(--ui-control-icon-xs);
     flex: 0 0 var(--ui-control-icon-xs);
     stroke-width: var(--ui-icon-stroke);
+  }
+
+  @media (min-width: 1024px) {
+    .app-shell[data-route-surface='user'][data-desktop-surface='profile'] :is(.profile-modern-page, .user-space-page-next) {
+      --ui-profile-content-max-width: var(--app-desktop-page-content-width);
+    }
   }
 
   @media (max-width: 390px) {

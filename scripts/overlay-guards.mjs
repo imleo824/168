@@ -54,6 +54,7 @@ const contractsLayerCss = read('src/styles/layers/contracts.css');
 const mobileViewportContractCss = read('src/styles/system/mobile-viewport-contract.css');
 const overlayCss = read('src/styles/utilities/mobile-overlay-stability.css');
 const profileDialogCss = read('src/styles/components/profile-dialog.css');
+const profileFeatureDialogCss = read('src/styles/features/profile-dialog.css');
 const profileModernCss = read('src/styles/features/profile-modern.css');
 const profileSecuritySheetCss = [
   read('src/styles/features/profile-security-sheet.css'),
@@ -70,12 +71,14 @@ const promoteCheckoutCss = [
   read('src/styles/features/promote-layout-picker-sheet.css'),
 ].join('\n');
 const postDetailCss = [
+  read('src/styles/system/ui-detail-topbar-identity-contract.css'),
   read('src/styles/features/post-detail.css'),
   read('src/styles/features/post-detail-shell.css'),
   read('src/styles/features/post-detail-topbar.css'),
   read('src/styles/features/post-detail-engagement.css'),
   read('src/styles/features/post-detail-bottom-actions.css'),
 ].join('\n');
+const postDetailActionbarCss = read('src/styles/features/post-detail-bottom-actions.css');
 const createPromoteSubmitCss = read('src/styles/features/create-promote-submit.css');
 const secondaryPageActionsCss = read('src/styles/system/secondary-page-actions.css');
 const uiPrimitivesFeedbackCss = read('src/styles/system/ui-primitives-feedback.css');
@@ -262,7 +265,6 @@ assert(
     '../features/brand.css',
     '../features/settings.css',
     '../../features/admin/AdminDesktop.css',
-    '../../features/desktop/DesktopRouteFallback.css',
     '../features/home.css',
     '../features/home-feed.css',
     '../features/category-feed.css',
@@ -355,6 +357,9 @@ assert(
     !profileDialogCss.includes('330px') &&
     !profileDialogCss.includes('100dvh') &&
     !profileDialogCss.includes('var(--app-layout-vh)') &&
+    profileFeatureDialogCss.includes('var(--ui-visual-viewport-height)') &&
+    !profileFeatureDialogCss.includes('100svh') &&
+    !profileFeatureDialogCss.includes('var(--app-layout-vh)') &&
     !uiPrimitivesFeedbackCss.includes('.profile-dialog-panel') &&
     !profileAvatarActionCss.includes('.profile-dialog-panel') &&
     !uiArchitectureContractCss.includes('.profile-dialog-panel') &&
@@ -378,18 +383,16 @@ assert(
 );
 
 assert(
-    promoteCheckoutCss.includes('bottom: var(--ui-keyboard-inset)') &&
-    promoteCheckoutCss.includes('var(--ui-visual-viewport-height)') &&
-    (
-      !postDetailCss.includes('position: fixed') ||
-      (
-        postDetailCss.includes('bottom: var(--ui-keyboard-inset)') &&
-        !/(^|\n)\s*bottom\s*:\s*0\s*;/.test(postDetailCss)
-      )
-    ) &&
+    secondaryPageActionsCss.includes(':is(.detail-bottom-bar, .promote-checkout-bar, .ui-checkout-bar)') &&
+    secondaryPageActionsCss.includes('position: fixed') &&
     secondaryPageActionsCss.includes('bottom: var(--ui-keyboard-inset)') &&
-    uiPrimitivesFeedbackCss.includes('bottom: var(--ui-keyboard-inset)'),
-  'Page-level fixed bottom bars must consume the shared keyboard inset instead of anchoring directly to bottom: 0.',
+    promoteCheckoutCss.includes('var(--ui-visual-viewport-height)') &&
+    !promoteCheckoutCss.includes('position: fixed') &&
+    !/(^|\n)\s*bottom\s*:\s*0\s*;/.test(promoteCheckoutCss) &&
+    !postDetailActionbarCss.includes('position: fixed') &&
+    !/(^|\n)\s*bottom\s*:\s*0\s*;/.test(postDetailActionbarCss) &&
+    !uiPrimitivesFeedbackCss.includes('bottom: var(--ui-keyboard-inset)'),
+  'Page-level fixed bottom bars must be owned by the shared action layer, consume the keyboard inset, and avoid business-page bottom: 0 anchoring.',
 );
 
 assert(

@@ -8,16 +8,6 @@
  * owned by feed-card-shell.css; this file only owns button interaction states.
  */
 
-@layer base {
-  :root {
-    --ui-feed-inline-action-min-width: calc(2em + var(--ui-space-5));
-    --ui-feed-inline-action-active-min-width: calc(3em + var(--ui-space-5));
-    --ui-feed-inline-action-radius: var(--ui-action-radius, var(--ui-radius-pill));
-    --ui-feed-inline-action-padding-x: var(--ui-space-2);
-    --ui-feed-inline-action-gap: var(--ui-space-1);
-  }
-}
-
 @layer utilities {
   .feed-follow-button {
     --feed-follow-idle-min-width: var(--ui-feed-inline-action-min-width);

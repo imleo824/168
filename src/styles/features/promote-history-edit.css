@@ -71,7 +71,7 @@
 
   .promote-history-actions {
     position: sticky;
-    bottom: calc(var(--ui-bottom-nav-height, 0px) + var(--ui-space-3));
+    bottom: calc(var(--ui-bottom-nav-height, var(--ui-space-none)) + var(--ui-space-3));
     z-index: var(--ui-z-content-raised);
     display: grid;
     gap: var(--ui-space-2);

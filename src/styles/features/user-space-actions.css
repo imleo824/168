@@ -138,7 +138,7 @@
     font-size: var(--ui-text-xs);
     font-weight: var(--ui-font-weight-strong);
     line-height: var(--ui-line-none);
-    text-decoration: none;
+    text-decoration: var(--ui-text-decoration-none);
   }
 
   .user-space-plus-link.telegram-sync-confirm-channel-link {
@@ -147,23 +147,23 @@
     justify-content: flex-start;
     gap: var(--ui-space-1);
     border: var(--ui-border-none);
-    border-radius: var(--ui-radius-none, 0);
-    background: transparent;
+    border-radius: var(--ui-radius-none);
+    background: var(--ui-surface-transparent);
     color: var(--ui-brand);
-    padding: 0;
-    box-shadow: none;
+    padding: var(--ui-space-none);
+    box-shadow: var(--ui-shadow-none);
   }
 
   .user-space-plus-link-icon {
-    width: var(--ui-control-icon-xs, 13px);
-    height: var(--ui-control-icon-xs, 13px);
+    width: var(--ui-control-icon-xs);
+    height: var(--ui-control-icon-xs);
     flex: 0 0 auto;
     stroke-width: var(--ui-icon-stroke);
   }
 
   .user-space-plus-link-label {
     display: block;
-    max-width: min(100%, 220px);
+    max-width: min(100%, var(--ui-plus-link-label-max-width));
     overflow: hidden;
     color: inherit;
     font-size: var(--ui-text-xs);
@@ -174,8 +174,8 @@
   }
 
   .user-space-plus-link.telegram-sync-confirm-channel-link:hover {
-    border-color: transparent;
-    background: transparent;
+    border-color: var(--ui-color-transparent);
+    background: var(--ui-surface-transparent);
     color: var(--ui-brand-strong);
   }
 
@@ -193,23 +193,23 @@
     align-items: center;
     justify-content: center;
     gap: var(--ui-space-1);
-    border: var(--ui-border-width-hairline) solid color-mix(in srgb, var(--ui-brand) 30%, var(--ui-line-hairline));
+    border: var(--ui-border-width-hairline) solid var(--ui-user-space-plus-action-border);
     border-radius: var(--ui-radius-pill);
-    background: color-mix(in srgb, var(--ui-brand) 6%, var(--ui-surface-card));
+    background: var(--ui-user-space-plus-action-surface);
     color: var(--ui-brand-strong);
-    padding: 0 var(--ui-space-3);
+    padding: var(--ui-space-none) var(--ui-space-3);
     font-size: var(--ui-text-xs);
     font-weight: var(--ui-font-weight-strong);
     line-height: var(--ui-line-none);
-    text-decoration: none;
+    text-decoration: var(--ui-text-decoration-none);
     box-shadow: var(--ui-shadow-hairline);
   }
 
   .user-space-plus-action:hover {
-    border-color: color-mix(in srgb, var(--ui-brand) 48%, var(--ui-line-soft));
-    background: color-mix(in srgb, var(--ui-brand) 9%, var(--ui-surface-card));
+    border-color: var(--ui-user-space-plus-action-hover-border);
+    background: var(--ui-user-space-plus-action-hover-surface);
     color: var(--ui-brand-strong);
-    transform: translateY(-1px);
+    transform: translateY(var(--ui-user-space-plus-action-hover-y));
   }
 
   .user-space-plus-action:active {
@@ -217,8 +217,8 @@
   }
 
   .user-space-plus-action-plus {
-    width: var(--ui-control-icon-xs, 13px);
-    height: var(--ui-control-icon-xs, 13px);
+    width: var(--ui-control-icon-xs);
+    height: var(--ui-control-icon-xs);
     flex: 0 0 auto;
     stroke-width: var(--ui-icon-stroke);
   }
@@ -248,7 +248,7 @@
     gap: var(--ui-space-2);
     border: var(--ui-border-width-hairline) solid var(--ui-line-subtle);
     border-radius: var(--ui-radius-xl);
-    background: color-mix(in srgb, var(--ui-surface-muted) 45%, transparent);
+    background: var(--ui-user-space-link-section-surface);
     padding: var(--ui-space-2);
   }
 
@@ -299,7 +299,7 @@
   }
 
   .tui-plus-link-editor-slot[data-filled='true'] .tui-plus-link-editor-slot-index {
-    background: color-mix(in srgb, var(--ui-brand) 10%, var(--ui-surface-card));
+    background: var(--ui-user-space-link-index-filled-surface);
     color: var(--ui-brand-strong);
   }
 
@@ -344,9 +344,9 @@
     border-radius: var(--ui-radius-xl);
     background: var(--ui-surface-base);
     color: var(--ui-text-strong);
-    padding: 0 var(--ui-space-3);
+    padding: var(--ui-space-none) var(--ui-space-3);
     font-size: var(--ui-root-font-size);
-    outline: none;
+    outline: var(--ui-outline-none);
     scroll-margin-block: var(--ui-form-scroll-margin-top-extra) var(--ui-form-scroll-margin-bottom);
     touch-action: manipulation;
   }
@@ -354,11 +354,11 @@
   .tui-plus-link-editor-field input:focus {
     border-color: var(--ui-brand);
     background: var(--ui-surface-focus);
-    box-shadow: 0 0 0 calc(var(--ui-border-width-hairline) * 3) var(--ui-ring-brand-soft);
+    box-shadow: var(--ui-tui-plus-link-field-focus-shadow);
   }
 
   .tui-plus-link-editor-field input:disabled {
-    opacity: .6;
+    opacity: var(--ui-user-space-link-field-disabled-opacity);
   }
 
   .tui-plus-link-editor-save {
@@ -372,26 +372,24 @@
   }
 
   .profile-tui-plus-chip[data-state='trial'] {
-    border-color: color-mix(in srgb, var(--ui-brand-warm) 42%, var(--ui-line-hairline));
-    background:
-      linear-gradient(135deg, color-mix(in srgb, var(--ui-text-strong) 88%, var(--ui-surface-card)), color-mix(in srgb, var(--ui-brand-warm) 20%, var(--ui-text-strong)));
+    border-color: var(--ui-profile-tui-plus-trial-border);
+    background: var(--ui-profile-tui-plus-trial-surface);
     color: var(--ui-color-white);
-    box-shadow: 0 1px 6px color-mix(in srgb, var(--ui-text-strong) 16%, transparent);
+    box-shadow: var(--ui-profile-tui-plus-trial-shadow);
   }
 
   .profile-tui-plus-chip[data-state='trial']:hover {
-    border-color: color-mix(in srgb, var(--ui-brand-warm) 62%, var(--ui-line-soft));
-    background:
-      linear-gradient(135deg, color-mix(in srgb, var(--ui-text-strong) 82%, var(--ui-surface-card)), color-mix(in srgb, var(--ui-brand-warm) 28%, var(--ui-text-strong)));
+    border-color: var(--ui-profile-tui-plus-trial-hover-border);
+    background: var(--ui-profile-tui-plus-trial-hover-surface);
     color: var(--ui-color-white);
   }
 
   .profile-tui-plus-chip-icon {
-    width: var(--ui-control-icon-xs, 13px);
-    height: var(--ui-control-icon-xs, 13px);
+    width: var(--ui-control-icon-xs);
+    height: var(--ui-control-icon-xs);
     flex: 0 0 auto;
     color: var(--ui-brand-warm);
-    fill: color-mix(in srgb, var(--ui-brand-warm) 32%, transparent);
+    fill: var(--ui-profile-tui-plus-trial-icon-fill);
     stroke-width: var(--ui-icon-stroke);
   }
 }

@@ -53,7 +53,7 @@
   }
 
   .post-create-textarea::placeholder {
-    color: color-mix(in srgb, var(--ui-text-placeholder) 72%, transparent);
+    color: var(--post-create-placeholder-text);
   }
 
   .post-create-page .image-upload--field {
@@ -92,8 +92,8 @@
   .post-create-page .image-upload--field .image-upload-add:hover,
   .post-create-page .image-upload--field .image-upload-add:focus-visible,
   .post-create-page .image-upload--field .image-upload-add.is-active {
-    border-color: color-mix(in srgb, var(--ui-brand) 38%, var(--ui-line-subtle));
-    background: color-mix(in srgb, var(--ui-brand) 7%, var(--ui-surface-muted));
+    border-color: var(--post-create-image-upload-hover-border);
+    background: var(--post-create-image-upload-hover-surface);
     color: var(--ui-brand-strong);
   }
 
@@ -137,7 +137,7 @@
     background: var(--ui-surface-transparent);
     box-shadow: var(--ui-shadow-none);
     padding-inline: var(--ui-space-1);
-    color: color-mix(in srgb, var(--ui-social-action-muted) 84%, transparent);
+    color: var(--post-create-tool-muted-text);
     transition:
       color var(--ui-duration-base) var(--ease-standard),
       opacity var(--ui-duration-base) var(--ease-standard),
@@ -197,7 +197,7 @@
     border: var(--ui-border-none);
     background: var(--ui-surface-transparent);
     box-shadow: var(--ui-shadow-none);
-    color: color-mix(in srgb, var(--ui-social-action-muted) 84%, transparent);
+    color: var(--post-create-tool-muted-text);
   }
 
   .post-create-tool-button[data-tool='telegram'][data-state='on'],
@@ -420,7 +420,7 @@
     inset-inline: var(--ui-space-none);
     border: var(--ui-border-none);
     border-radius: var(--ui-radius-pill);
-    background: transparent;
+    background: var(--post-create-location-idle-overlay-surface);
   }
 
   .post-create-tool-button[data-state='on'],

@@ -18,9 +18,9 @@ type AppRequireTuiPlusRouteProps = {
 };
 
 function defaultFallbackForBenefit(benefit: TuiPlusBenefitKey) {
-  if (benefit === 'profileLinks') return '/profile';
+  if (benefit === 'profileLinks') return APP_ROUTES.profile;
   if (benefit === 'promotionBooking') return APP_ROUTES.sponsor;
-  return '/';
+  return APP_ROUTES.home;
 }
 
 function getFallbackFrom(location: ReturnType<typeof useLocation>, benefit: TuiPlusBenefitKey) {

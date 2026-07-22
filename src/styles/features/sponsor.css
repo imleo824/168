@@ -210,7 +210,7 @@
 
   @media (min-width: 1024px) {
     .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] :is(.sponsor-page, .referral-page) {
-      min-height: calc(100svh - (var(--app-desktop-shell-padding-y) * 2) - (var(--ui-border-width-hairline) * 2));
+      min-height: var(--app-desktop-main-content-height);
       max-height: var(--ui-max-height-none);
       overflow: visible;
     }

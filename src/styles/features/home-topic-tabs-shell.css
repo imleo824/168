@@ -150,13 +150,14 @@
   }
 
   .home-topic-tab-label {
-    display: block;
+    display: inline-block;
+    width: auto;
     min-width: 0;
     max-width: 100%;
     overflow: visible;
     font-size: inherit;
     font-weight: inherit;
-    line-height: inherit;
+    line-height: var(--ui-line-normal);
     text-overflow: clip;
     white-space: nowrap;
   }

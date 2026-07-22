@@ -13,6 +13,7 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import SEO from '@/platform/SEO';
 import { buildPostSeo } from '@/platform/brand';
+import { APP_ROUTES } from '@/app/routePaths';
 import { FollowButton } from '@/features/social/FollowButton';
 import { HashtagText } from '@/features/post/HashtagText';
 import { openTelegramContact } from '@/utils/contact';
@@ -45,6 +46,7 @@ import {
 import { buildPostStructuredMetaItems, isPostStructuredLocationMeta } from '@/utils/postStructuredMeta';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import { useLikeFeedback } from '@/hooks/useLikeFeedback';
+import { useIsDesktopViewport } from '@/hooks/useIsDesktopViewport';
 import { formatRelativeTime } from '@/utils/time';
 import {
   buildPostDetailContentModel,
@@ -82,9 +84,11 @@ export default function PostDetail() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user: currentUser, requireAuth, showToast } = useAuth();
-  const isMobile = true;
+  const isDesktopViewport = useIsDesktopViewport();
+  const isDetailMobile = !isDesktopViewport;
+  const isMobile = isDetailMobile;
   const routeState = getRouteState(location.state);
-  const isOverlayDetail = isMobile && Boolean(routeState?.backgroundLocation?.pathname);
+  const isOverlayDetail = isDetailMobile && Boolean(routeState?.backgroundLocation?.pathname);
   const shouldUseDetailPageScroll = false;
 
   const { data: post, isLoading, isFetching, isError, error, refetch: refetchPost } = usePost(id);
@@ -188,7 +192,7 @@ export default function PostDetail() {
       const normalizedUid = String(uid || '').trim();
       if (!normalizedUid || normalizedUid === 'anonymous') return;
       if (currentUser?.id === normalizedUid) {
-        navigate('/profile');
+        navigate(APP_ROUTES.profile);
         return;
       }
       navigate(`/user/${normalizedUid}`, {

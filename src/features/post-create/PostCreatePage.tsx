@@ -472,7 +472,7 @@ export default function PostCreate({
           return;
         }
 
-        navigate('/', { replace: true });
+        navigate(APP_ROUTES.home, { replace: true });
       } catch (error: any) {
         if (!isActive()) return;
         if (isProbablyNetworkError(error)) {
@@ -690,7 +690,7 @@ export default function PostCreate({
   const handleConfirmTuiPlusPrompt = useCallback(() => {
     const benefit = tuiPlusPromptBenefit || 'postContact';
     setTuiPlusPromptBenefit(null);
-    navigate(APP_ROUTES.tuiPlus, { state: buildTuiPlusBenefitRouteState(benefit, '/create') });
+    navigate(APP_ROUTES.tuiPlus, { state: buildTuiPlusBenefitRouteState(benefit, APP_ROUTES.create) });
   }, [navigate, tuiPlusPromptBenefit]);
 
   const handleLogin = useCallback(() => {
@@ -699,7 +699,7 @@ export default function PostCreate({
 
   const handleSkipPromote = useCallback(() => {
     setIsPromoteChoiceOpen(false);
-    navigate('/', { replace: true });
+    navigate(APP_ROUTES.home, { replace: true });
   }, [navigate]);
 
   const handleGoPromote = useCallback(() => {

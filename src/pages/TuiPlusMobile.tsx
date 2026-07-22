@@ -4,6 +4,7 @@ import { AtSign, CalendarClock, CheckCircle2, Crown, Globe2, Link2, Radio, Send,
 
 import { APP_ROUTES } from '@/app/routePaths';
 import { useAuth } from '@/context/AuthContext';
+import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import SEO from '@/platform/SEO';
 import { apiFetch, ApiError } from '@/services/api';
 import type { TuiPlusStatusPayload } from '@/types';
@@ -297,6 +298,19 @@ export default function TuiPlusMobile() {
   }, [afterMembershipMutation, busyAction, hasPlans, navigate, showToast]);
 
   const runPrimaryAction = useCallback(() => purchasePlan(selectedPlan), [purchasePlan, selectedPlan]);
+  const { guarded: guardedStartTrial, isPending: trialGuardPending } = useInteractionGuard(startTrial, {
+    policy: 'critical',
+    cooldownMs: 720,
+    minPendingMs: 180,
+    mode: 'drop',
+  });
+  const { guarded: guardedRunPrimaryAction, isPending: planGuardPending } = useInteractionGuard(runPrimaryAction, {
+    policy: 'critical',
+    cooldownMs: 720,
+    minPendingMs: 180,
+    mode: 'drop',
+  });
+  const guardedActionLocked = actionLocked || trialGuardPending || planGuardPending;
 
   return (
     <AppPage mobileAddressBarScroll bottomSafe className="tui-plus-page surface-page">
@@ -356,11 +370,11 @@ export default function TuiPlusMobile() {
                     type="button"
                     variant="muted"
                     className="tui-plus-x-action tui-plus-x-trial-action"
-                    disabled={actionLocked || isLoading}
-                    state={trialBusy ? 'loading' : actionLocked || isLoading ? 'disabled' : 'idle'}
-                    onClick={() => void startTrial()}
+                    disabled={guardedActionLocked || isLoading}
+                    state={trialBusy || trialGuardPending ? 'loading' : guardedActionLocked || isLoading ? 'disabled' : 'idle'}
+                    onClick={() => void guardedStartTrial()}
                   >
-                    {trialBusy ? <InlineSpinner /> : null}
+                    {trialBusy || trialGuardPending ? <InlineSpinner /> : null}
                     {trialActionLabel(trialDays)}
                   </ActionButton>
                 ) : null}
@@ -368,12 +382,12 @@ export default function TuiPlusMobile() {
                   type="button"
                   variant="brand"
                   className="tui-plus-x-primary"
-                  disabled={actionLocked || isLoading || !hasPlans}
-                  state={planBusy ? 'loading' : actionLocked || isLoading || !hasPlans ? 'disabled' : 'idle'}
-                  onClick={() => void runPrimaryAction()}
+                  disabled={guardedActionLocked || isLoading || !hasPlans}
+                  state={planBusy || planGuardPending ? 'loading' : guardedActionLocked || isLoading || !hasPlans ? 'disabled' : 'idle'}
+                  onClick={() => void guardedRunPrimaryAction()}
                 >
-                  {planBusy ? <InlineSpinner /> : <CheckCircle2 />}
-                  {planBusy ? '处理中...' : primaryActionLabel}
+                  {planBusy || planGuardPending ? <InlineSpinner /> : <CheckCircle2 />}
+                  {planBusy || planGuardPending ? '处理中...' : primaryActionLabel}
                 </ActionButton>
               </div>
             </div>

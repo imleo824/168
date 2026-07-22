@@ -199,17 +199,17 @@
     margin-top: var(--ui-space-2);
     overflow: hidden;
     border: var(--ui-border-none);
-    border-radius: var(--ui-radius-none, 0);
-    background: transparent;
+    border-radius: var(--ui-radius-none);
+    background: var(--ui-surface-transparent);
     color: var(--post-card-promotion-link-color);
-    padding: 0;
+    padding: var(--ui-space-none);
     line-height: var(--ui-line-tight);
-    box-shadow: none;
+    box-shadow: var(--ui-shadow-none);
   }
 
   .ins-post-card .post-card-promotion-link:hover {
-    border-color: transparent;
-    background: transparent;
+    border-color: var(--ui-color-transparent);
+    background: var(--ui-surface-transparent);
     color: var(--post-card-promotion-link-color-hover);
   }
 
@@ -223,7 +223,7 @@
 
   .ins-post-card .post-card-promotion-link .post-card-promotion-link-label {
     display: block;
-    max-width: min(100%, 220px);
+    max-width: min(100%, var(--ui-plus-link-label-max-width));
     overflow: hidden;
     color: inherit;
     font-size: var(--ui-text-xs);

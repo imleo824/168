@@ -18,7 +18,7 @@
     --ui-auth-agreement-check-size: var(--ui-auth-field-leading-icon-size);
     --ui-auth-agreement-title-icon-size: var(--ui-control-icon-sm);
     --ui-auth-agreement-collapse-icon-size: var(--ui-control-icon-xs);
-    --ui-auth-agreement-panel-max-height: min(34svh, calc(var(--ui-space-8) * 7));
+    --ui-auth-agreement-panel-max-height: clamp(calc(var(--ui-space-8) * 4), calc(var(--ui-visual-viewport-height) - (var(--ui-space-8) * 19)), calc(var(--ui-space-8) * 7));
     --ui-auth-required-preview-gap: var(--ui-space-2);
     --ui-auth-required-preview-icon-size: var(--ui-control-sm);
     --ui-auth-required-preview-max-width: var(--ui-auth-required-copy-max-width);
@@ -458,7 +458,7 @@
     }
 
     .ui-auth-panel {
-      max-width: calc(100vw - var(--ui-space-6));
+      max-width: calc(var(--ui-viewport-width) - var(--ui-space-6));
       border-radius: var(--ui-radius-2xl);
     }
 

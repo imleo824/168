@@ -149,6 +149,16 @@
     color: var(--ui-admin-state-warning-text);
   }
 
+  .admin-tone-below-minimum {
+    background: var(--ui-admin-state-below-minimum-surface);
+    color: var(--ui-admin-state-below-minimum-text);
+  }
+
+  .admin-tone-bot {
+    background: var(--ui-admin-state-bot-surface);
+    color: var(--ui-admin-state-bot-text);
+  }
+
   .admin-tone-danger {
     background: var(--ui-admin-state-danger-surface);
     color: var(--ui-admin-state-danger-text);
@@ -170,7 +180,7 @@
   }
 
   .admin-tone-neutral-hover:hover {
-    background: color-mix(in srgb, var(--ui-admin-state-neutral-surface) 76%, var(--ui-text-primary));
+    background: var(--ui-admin-state-neutral-hover-surface);
   }
 
   .admin-tone-neutral-strong {
@@ -389,6 +399,18 @@
     font-weight: var(--ui-font-weight-title);
   }
 
+  .admin-editor-field-stack {
+    display: grid;
+    gap: var(--ui-space-2);
+  }
+
+  .admin-editor-action-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ui-space-2);
+    margin-top: var(--ui-space-4);
+  }
+
   .admin-form-control {
     width: 100%;
     min-height: var(--ui-admin-form-control-height-md);
@@ -513,7 +535,7 @@
   }
 
   .admin-submit-button:hover {
-    background: color-mix(in srgb, var(--ui-admin-state-primary-surface) 88%, var(--ui-color-white));
+    background: var(--ui-admin-submit-hover-surface);
   }
 
   .admin-submit-button:active {
@@ -522,6 +544,159 @@
 
   .admin-submit-button:disabled {
     opacity: var(--ui-admin-action-disabled-opacity);
+  }
+
+  .admin-modal-scrim,
+  .admin-modal-scrim-soft {
+    background: var(--ui-admin-modal-scrim-surface);
+  }
+
+  .admin-modal-scrim-soft {
+    background: var(--ui-admin-modal-scrim-soft-surface);
+  }
+
+  .admin-dialog-overlay {
+    position: fixed;
+    inset: var(--ui-space-none);
+    z-index: var(--ui-z-modal);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: var(--ui-admin-dialog-overlay-padding);
+  }
+
+  .admin-dialog-panel {
+    width: 100%;
+    max-height: var(--ui-admin-dialog-panel-max-height);
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .admin-dialog-panel--wide {
+    max-width: min(100%, var(--ui-admin-dialog-panel-max-width));
+  }
+
+  .admin-table-row-interactive:hover {
+    background: var(--ui-admin-table-row-hover-surface);
+  }
+
+  .admin-table-state-cell--danger,
+  .admin-text-danger {
+    color: var(--ui-admin-table-error-text);
+  }
+
+  .admin-primary-action {
+    border-color: var(--ui-admin-state-primary-surface);
+    background: var(--ui-admin-state-primary-surface);
+    color: var(--ui-admin-state-primary-text);
+  }
+
+  .admin-primary-action:hover {
+    background: var(--ui-admin-state-primary-hover-surface);
+  }
+
+  .admin-primary-action--muted {
+    color: var(--ui-admin-state-primary-disabled-text);
+  }
+
+  .admin-value-success {
+    color: var(--ui-admin-value-success-text);
+  }
+
+  .admin-value-danger {
+    color: var(--ui-admin-value-danger-text);
+  }
+
+  .admin-section-heading--pin {
+    color: var(--ui-admin-section-pin-text);
+  }
+
+  .admin-section-heading--ad {
+    color: var(--ui-admin-section-ad-text);
+  }
+
+  .admin-section-heading--default {
+    color: var(--ui-admin-section-default-text);
+  }
+
+  .admin-choice-button {
+    min-height: var(--ui-admin-choice-height);
+    border: var(--ui-border-width-hairline) solid var(--ui-admin-choice-idle-border);
+    border-radius: var(--ui-radius-xl);
+    background: var(--ui-surface-card);
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-title);
+    transition:
+      background-color var(--ui-duration-base) var(--ease-standard),
+      border-color var(--ui-duration-base) var(--ease-standard),
+      color var(--ui-duration-base) var(--ease-standard);
+  }
+
+  .admin-choice-button[data-state='selected'] {
+    border-color: var(--ui-admin-choice-active-border);
+    background: var(--ui-admin-state-primary-surface);
+    color: var(--ui-admin-state-primary-text);
+  }
+
+  .admin-inline-primary-button {
+    display: inline-flex;
+    height: var(--ui-admin-action-height-lg);
+    flex-shrink: 0;
+    align-items: center;
+    gap: calc(var(--ui-space-1) + var(--ui-space-half));
+    border-radius: var(--ui-radius-lg);
+    background: var(--ui-admin-state-primary-surface);
+    color: var(--ui-admin-state-primary-text);
+    padding-inline: var(--ui-space-3);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-display);
+    transition:
+      background-color var(--ui-duration-base) var(--ease-standard),
+      color var(--ui-duration-base) var(--ease-standard);
+  }
+
+  .admin-inline-primary-button:hover {
+    background: var(--ui-admin-state-primary-hover-surface);
+  }
+
+  .admin-index-badge {
+    display: grid;
+    width: var(--ui-control-xs);
+    height: var(--ui-control-xs);
+    flex-shrink: 0;
+    place-items: center;
+    border-radius: var(--ui-radius-lg);
+    background: var(--ui-admin-index-badge-surface);
+  }
+
+  .admin-danger-icon-action {
+    display: grid;
+    width: var(--ui-admin-icon-action-size);
+    height: var(--ui-admin-icon-action-size);
+    place-items: center;
+    border-radius: var(--ui-radius-lg);
+    color: var(--ui-admin-state-danger-text);
+    transition:
+      background-color var(--ui-duration-base) var(--ease-standard),
+      color var(--ui-duration-base) var(--ease-standard);
+  }
+
+  .admin-danger-icon-action:hover {
+    background: var(--ui-admin-danger-icon-hover-surface);
+  }
+
+  .admin-note-panel {
+    border-radius: var(--ui-radius-lg);
+    background: var(--ui-admin-note-panel-surface);
+    padding: var(--ui-space-2) var(--ui-space-3);
+  }
+
+  .admin-withdrawal-address-cell {
+    min-width: calc(var(--ui-space-8) * 10);
+    max-width: calc(var(--ui-space-8) * 16 + var(--ui-space-2));
   }
 
   .admin-config-choice {
@@ -545,6 +720,10 @@
   }
 
   @media (min-width: 40rem) {
+    .admin-dialog-overlay {
+      align-items: center;
+    }
+
     .admin-submit-button {
       width: auto;
       min-height: var(--ui-admin-submit-height-desktop);

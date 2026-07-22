@@ -10,6 +10,11 @@
     right: var(--ui-space-none);
     bottom: var(--ui-keyboard-inset);
     left: var(--ui-space-none);
+    z-index: var(--ui-z-page-header);
+    transform: var(--ui-transform-none);
+    backface-visibility: hidden;
+    contain: var(--ui-contain-none);
+    will-change: auto;
   }
 
   .ui-checkout-bar .ui-button {
@@ -47,10 +52,14 @@
     }
 
     .app-shell[data-route-surface='user'][data-desktop-surface='detail'] .detail-bottom-bar,
-    .app-shell[data-route-surface='user'][data-desktop-surface='profile'] .ui-checkout-bar,
-    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] :is(.promote-checkout-bar, .ui-checkout-bar) {
+    .app-shell[data-route-surface='user'][data-desktop-surface='profile'] .ui-checkout-bar {
       --secondary-page-action-width: min(var(--app-desktop-main-active-width), var(--app-desktop-reading-main-width));
       --secondary-page-action-offset: max(var(--ui-space-none), calc((var(--app-desktop-main-active-width) - var(--secondary-page-action-width)) / 2));
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] :is(.promote-checkout-bar, .ui-checkout-bar) {
+      --secondary-page-action-width: var(--app-desktop-page-content-width);
+      --secondary-page-action-offset: var(--ui-app-shell-desktop-padding-x);
     }
   }
 }

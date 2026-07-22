@@ -18,16 +18,16 @@
     bottom: calc(env(safe-area-inset-bottom) + var(--ui-bottom-nav-bottom-offset));
     z-index: var(--ui-z-bottom-nav);
     display: flex;
-    width: var(--ui-viewport-width);
+    width: auto;
     margin: var(--ui-space-none);
     justify-content: center;
     border: var(--ui-border-none);
     background: var(--ui-surface-transparent);
     padding: var(--ui-space-none) var(--ui-bottom-nav-padding-x);
     box-shadow: var(--ui-shadow-none);
-    transform: translateZ(var(--ui-space-none));
-    will-change: transform;
-    contain: layout paint style;
+    transform: var(--ui-transform-none);
+    will-change: auto;
+    contain: var(--ui-contain-none);
     backface-visibility: hidden;
   }
 
@@ -54,7 +54,7 @@
     border: var(--ui-border-none);
     border-radius: var(--ui-radius-pill);
     background: var(--ui-surface-transparent);
-    color: color-mix(in srgb, var(--ui-bottom-nav-idle) 88%, transparent);
+    color: var(--ui-bottom-nav-idle-color);
     font-size: var(--ui-text-sm);
     font-weight: var(--ui-font-weight-strong);
     line-height: var(--ui-line-none);
@@ -127,18 +127,15 @@
     content: "";
     position: absolute;
     inset: var(--ui-space-half);
-    z-index: 0;
+    z-index: var(--ui-z-local-base);
     border-radius: var(--ui-radius-pill);
-    background:
-      radial-gradient(circle at 50% 38%, color-mix(in srgb, var(--ui-brand) 18%, var(--ui-color-white)) 0 24%, transparent 25%),
-      radial-gradient(circle at 50% 80%, color-mix(in srgb, var(--ui-brand) 12%, var(--ui-color-white)) 0 34%, transparent 35%),
-      color-mix(in srgb, var(--ui-surface-muted) 72%, var(--ui-color-white));
+    background: var(--ui-bottom-nav-avatar-placeholder-surface);
     box-shadow: var(--ui-bottom-nav-avatar-placeholder-inset-shadow);
   }
 
   .app-bottom-nav-avatar {
     position: relative;
-    z-index: 1;
+    z-index: var(--ui-z-local-raised);
     width: 100%;
     height: 100%;
     border-radius: var(--ui-radius-pill);
@@ -216,12 +213,12 @@
 
   @media (hover: hover) and (pointer: fine) {
     .app-bottom-nav-item:hover .app-bottom-nav-icon-shell {
-      background: color-mix(in srgb, var(--ui-text-strong) 4.5%, transparent);
+      background: var(--ui-bottom-nav-hover-surface);
       color: var(--ui-text-strong);
     }
 
     .app-bottom-nav-item[data-state='active']:hover .app-bottom-nav-icon-shell {
-      background: color-mix(in srgb, var(--ui-brand) 12%, var(--ui-color-white));
+      background: var(--ui-bottom-nav-active-hover-surface);
       color: var(--ui-bottom-nav-active);
     }
   }

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 
+import { APP_ROUTES } from '@/app/routePaths';
 import SEO from '@/platform/SEO';
 import AppPage from '@/ui/AppPage';
 import PageHeader from '@/ui/PageHeader';
@@ -80,7 +81,7 @@ export default function PromoteMobile() {
 
   const handleCreatePost = useCallback(() => {
     primePostCreateComposerFocus();
-    navigate('/create');
+    navigate(APP_ROUTES.create);
   }, [navigate]);
 
   const promotedType: PromotionTypeId | undefined = resolvePromotionType(

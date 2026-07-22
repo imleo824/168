@@ -6,7 +6,7 @@
   }
 
   .home-page-skeleton .home-topbar-brand-lockup[data-skeleton='true'] .home-topbar-brand-vector {
-    opacity: 1;
+    opacity: var(--ui-skeleton-brand-lockup-opacity);
   }
 
   .ui-feed-skeleton-media-block,

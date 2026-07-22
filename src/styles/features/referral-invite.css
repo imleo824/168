@@ -41,9 +41,7 @@
     min-width: 0;
     gap: var(--ui-space-4);
     border-radius: var(--ui-radius-card);
-    background:
-      radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--ui-brand) 16%, transparent), transparent 34%),
-      linear-gradient(135deg, color-mix(in srgb, var(--ui-brand) 14%, var(--ui-surface-card)), var(--ui-surface-card));
+    background: var(--ui-referral-hero-surface);
     padding: var(--ui-space-4);
     box-shadow: var(--ui-shadow-card);
   }
@@ -76,9 +74,9 @@
     grid-template-columns: minmax(0, 1fr) auto;
     align-items: center;
     gap: var(--ui-space-3);
-    border: var(--ui-border-width-hairline) solid color-mix(in srgb, var(--ui-text-strong) 5%, transparent);
+    border: var(--ui-border-width-hairline) solid var(--ui-referral-metric-border);
     border-radius: var(--ui-radius-card);
-    background: color-mix(in srgb, var(--ui-surface-card) 78%, transparent);
+    background: var(--ui-referral-available-surface);
     padding: var(--ui-space-3);
   }
 
@@ -132,9 +130,9 @@
     display: grid;
     min-width: 0;
     gap: var(--ui-space-half);
-    border: var(--ui-border-width-hairline) solid color-mix(in srgb, var(--ui-text-strong) 5%, transparent);
+    border: var(--ui-border-width-hairline) solid var(--ui-referral-metric-border);
     border-radius: var(--ui-radius-md);
-    background: color-mix(in srgb, var(--ui-surface-card) 74%, transparent);
+    background: var(--ui-referral-stat-surface);
     padding: var(--ui-space-2) var(--ui-space-1);
     text-align: center;
   }

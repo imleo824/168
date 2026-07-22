@@ -13,11 +13,11 @@
     --ui-promote-ad-mobile-ratio: 3.82 / 1;
     --ui-promote-mobile-input-size: var(--ui-mobile-form-font-size);
     --ui-promote-mobile-input-line: 1.35;
-    --ui-promote-checkout-content-bottom-space: calc(var(--ui-control-lg) + var(--ui-space-8) + var(--ui-space-2) + var(--ui-space-half));
-    --ui-promote-checkout-shell-min-height: calc(var(--ui-control-lg) + var(--ui-space-6) + var(--ui-space-half));
-    --ui-promote-checkout-action-min-width: calc(var(--ui-space-8) * 3 + var(--ui-space-7));
-    --ui-promote-checkout-action-min-width-compact: calc(var(--ui-space-8) * 3 + var(--ui-space-6) - var(--ui-space-half));
-    --ui-promote-checkout-shell-padding-y: calc(var(--ui-space-2) + var(--ui-space-half));
+    --ui-promote-checkout-content-bottom-space: var(--ui-checkout-content-bottom-space);
+    --ui-promote-checkout-shell-min-height: var(--ui-checkout-shell-min-height);
+    --ui-promote-checkout-action-min-width: var(--ui-checkout-action-min-width);
+    --ui-promote-checkout-action-min-width-compact: var(--ui-checkout-action-min-width-compact);
+    --ui-promote-checkout-shell-padding-y: var(--ui-checkout-shell-padding-y);
     --ui-promote-option-selected-border: var(--ui-action-primary);
     --ui-promote-option-selected-surface: var(--ui-action-primary-soft);
     --ui-promote-option-selected-text: var(--ui-action-primary-strong);

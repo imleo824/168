@@ -315,8 +315,8 @@ export function AdminAutoCrawlPanel({ view = 'config' }: { view?: AutoCrawlView 
     <>
       {view === 'executionLogs' ? <AdminAutoCrawlExecutionLogsCompactPanel /> : view === 'sources' ? renderSources() : renderConfig()}
       {view === 'sources' && dialogOpen ? (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/45 p-4 sm:items-center" role="dialog" aria-modal="true" aria-label={editingSourceId ? '编辑数据源' : '新增数据源'}>
-          <div className="admin-config-surface admin-config-surface--comfortable max-h-[88vh] w-full max-w-4xl overflow-y-auto">
+        <div className="admin-dialog-overlay admin-modal-scrim" role="dialog" aria-modal="true" aria-label={editingSourceId ? '编辑数据源' : '新增数据源'}>
+          <div className="admin-config-surface admin-config-surface--comfortable admin-dialog-panel admin-dialog-panel--wide">
             <div className="mb-4 flex items-start justify-between gap-3"><div><h5 className="admin-text-title-sm">{editingSourceId ? '编辑数据源' : '新增数据源'}</h5><div className="admin-form-note mt-1">{editingSourceId ? `${editingSource?.sourceName || sourceDraft.sourceName || '当前数据源'} · ${shortId(editingSourceId)}` : '保存后仅按 categoryId 绑定数据库分类。'}</div></div><button type="button" onClick={closeDialog} disabled={savingSource} className="pressable admin-quote-action"><X size={15} />关闭</button></div>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <label className="admin-field-label">类型<select className="mt-1 admin-form-control admin-form-control--field" value={sourceDraft.type || 'telegram'} onChange={(event) => setSourceDraft((current) => ({ ...current, type: event.target.value as SourceType }))}><option value="telegram">Telegram</option><option value="rss">RSS</option></select></label>

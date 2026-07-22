@@ -63,6 +63,10 @@
     --ui-feed-options-sheet-surface: var(--ui-surface-card-solid);
     --ui-feed-options-sheet-shadow: var(--ui-core-sheet-shadow);
     --ui-feed-options-sheet-body-padding: var(--ui-space-3) var(--ui-space-4) var(--ui-space-4);
+    --ui-feed-options-sheet-button-height: var(--ui-control-lg);
+    --ui-feed-options-sheet-button-padding-x: var(--ui-space-3);
+    --ui-feed-options-sheet-button-padding-y: var(--ui-space-2);
+    --ui-feed-options-sheet-status-margin-bottom: var(--ui-space-1);
     --ui-ins-like: var(--ui-brand);
   }
 }

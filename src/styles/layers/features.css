@@ -1,7 +1,6 @@
 @import "../features/brand.css";
 @import "../features/settings.css";
 @import "../../features/admin/AdminDesktop.css";
-@import "../../features/desktop/DesktopRouteFallback.css";
 
 @import "../features/home.css";
 @import "../features/home-feed.css";
@@ -17,6 +16,7 @@
 @import "../features/tui-plus-mobile.css";
 @import "../features/user-space-next.css";
 @import "../features/tui-plus-visual.css";
+@import "../features/tui-plus-checkout.css";
 @import "../features/tui-plus-request-fixes.css";
 @import "../features/tui-plus-premium-layout.css";
 @import "../features/profile-membership-performance.css";

@@ -1,5 +1,9 @@
 export const APP_ROUTES = {
   home: '/',
+  messages: '/messages',
+  create: '/create',
+  profile: '/profile',
+  about: '/about',
   sponsor: '/sponsor',
   invite: '/invite',
   inviteRecords: '/invite/records',
@@ -11,6 +15,7 @@ export const APP_ROUTES = {
   tuiPlus: '/tui-plus',
   tuiPlusLinkEditor: '/profile/tui-plus-link',
   profileBioEditor: '/profile/bio',
+  notificationSettings: '/settings/notifications',
   legacyPromoteHistory: '/promote/history',
   legacyPromotionEffects: '/promote/effects',
 } as const;

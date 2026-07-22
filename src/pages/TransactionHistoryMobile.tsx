@@ -24,6 +24,7 @@ import ListLoadMoreState from '@/ui/ListLoadMoreState';
 import ActionButton from '@/ui/ActionButton';
 import EmptyStateCard from '@/ui/EmptyStateCard';
 import PageContentShell from '@/ui/PageContentShell';
+import { APP_ROUTES } from '@/app/routePaths';
 
 type RechargeStatusFilter = '' | RechargeStatusGroup;
 type UnifiedRecordType =
@@ -107,7 +108,7 @@ export default function TransactionHistoryMobile() {
   const navigate = useNavigate();
   const location = useLocation();
   const routeState = location.state as TransactionHistoryRouteState | null;
-  const returnTo = normalizePath(routeState?.from) || '/profile';
+  const returnTo = normalizePath(routeState?.from) || APP_ROUTES.profile;
   const { showToast } = useAuth();
   const { data: config } = useConfig();
   const [searchParams, setSearchParams] = useSearchParams();

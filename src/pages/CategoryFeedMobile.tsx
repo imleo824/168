@@ -26,6 +26,7 @@ import ActionButton, { ActionLink } from '@/ui/ActionButton';
 import { TopbarActionGroup } from '@/ui/TopbarActions';
 import AppPage from '@/ui/AppPage';
 import PageContentShell from '@/ui/PageContentShell';
+import { APP_ROUTES } from '@/app/routePaths';
 import { HomeFeedSkeleton } from '@/ui/Skeleton';
 import type { CategoryMetaFeedFilters } from '@/types';
 
@@ -71,7 +72,7 @@ const EmptyState = memo(function EmptyState({ categoryName }: { categoryName: st
       tone="empty"
       className="category-feed-empty"
       icon={<Sparkles className="category-feed-empty-icon" aria-hidden="true" />}
-      action={<ActionLink to="/create" variant="primary">立即发布</ActionLink>}
+      action={<ActionLink to={APP_ROUTES.create} variant="primary">立即发布</ActionLink>}
     />
   );
 });

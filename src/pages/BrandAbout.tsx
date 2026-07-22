@@ -3,6 +3,7 @@ import AppPage from '@/ui/AppPage';
 import PageHeader from '@/ui/PageHeader';
 import PageContentShell from '@/ui/PageContentShell';
 import { ActionLink } from '@/ui/ActionButton';
+import { APP_ROUTES } from '@/app/routePaths';
 import SEO from '@/platform/SEO';
 import {
   HOME_FAQ,
@@ -83,7 +84,7 @@ export default function BrandAbout() {
         socialTitle={`${SITE_NAME}｜${SITE_SLOGAN}`}
         description={SITE_DESCRIPTION}
         keywords={`${SITE_KEYWORDS},关于推推,推推介绍,匿名社交,圈内分类信息网`}
-        canonicalPath="/about"
+        canonicalPath={APP_ROUTES.about}
         jsonLd={jsonLd}
       />
       <PageHeader title={`关于${SITE_NAME}`} titleAs="div" />
@@ -104,7 +105,7 @@ export default function BrandAbout() {
               </p>
               <div className="brand-about-actions">
                 <ActionLink
-                  to="/"
+                  to={APP_ROUTES.home}
                   variant="primary"
                   className="brand-about-action"
                 >
@@ -112,7 +113,7 @@ export default function BrandAbout() {
                   <ArrowRight className="brand-about-action-icon" />
                 </ActionLink>
                 <ActionLink
-                  to="/create"
+                  to={APP_ROUTES.create}
                   variant="muted"
                   className="brand-about-action"
                 >

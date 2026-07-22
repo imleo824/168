@@ -23,9 +23,14 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     font-size: var(--ui-root-font-size);
-    scrollbar-gutter: stable;
     scroll-padding-top: calc(var(--ui-topbar-height) + env(safe-area-inset-top) + var(--ui-root-scroll-padding-top-extra));
     scroll-padding-bottom: calc(env(safe-area-inset-bottom) + var(--ui-root-scroll-padding-bottom));
+  }
+
+  @media (min-width: 1024px) {
+    html {
+      scrollbar-gutter: stable;
+    }
   }
 
   body {

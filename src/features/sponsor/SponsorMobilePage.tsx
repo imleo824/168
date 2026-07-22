@@ -54,7 +54,7 @@ const SPONSOR_NAV_GUARD = {
 };
 const SPONSOR_RECORD_TABS: Array<{ key: SponsorRecordTab; label: string }> = [
   { key: 'effects', label: '效果分析' },
-  { key: 'ledger', label: '积分记录' },
+  { key: 'ledger', label: '交易记录' },
   { key: 'promotions', label: '曝光记录' },
 ];
 
@@ -287,7 +287,7 @@ export default function SponsorMobilePage() {
               ) : visibleLedgerRecords.length > 0 ? (
                 <>
                   <div className="record-list sponsor-record-list">{visibleLedgerRecords.map((record) => <LedgerRecordCard key={`${record.kind}-${record.id}`} record={record} pointsPerUsdt={pointsPerUsdt} onCopyRecordId={handleCopyRecordId} />)}</div>
-                  {hasMoreLedgerRecords ? <RecordMoreLink label="查看更多积分记录" onClick={() => void guardedGoTransactions()} /> : null}
+                  {hasMoreLedgerRecords ? <RecordMoreLink label="查看更多交易记录" onClick={() => void guardedGoTransactions()} /> : null}
                 </>
               ) : <EmptyStateCard title="暂无积分记录" description="充积分到账或买曝光消费后会在这里展示。" compact className="sponsor-empty-state" action={<ActionButton type="button" variant="muted" size="sm" onClick={() => void guardedGoRecharge()}>充积分</ActionButton>} />}
             </div>

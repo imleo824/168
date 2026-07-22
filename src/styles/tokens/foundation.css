@@ -42,6 +42,7 @@
     --ui-brand-warm-soft: rgba(255, 180, 0, 0.14);
     --ui-danger: #dc2626;
     --ui-danger-classic: #ef4444;
+    --ui-accent: var(--ui-brand);
     --ui-brand-blue: #287dfa;
     --ui-brand-blue-hover: #1f6ee8;
     --ui-brand-blue-strong: #1557c7;
@@ -71,6 +72,8 @@
     --ui-text-danger: var(--ui-danger);
     --ui-text-inverse: var(--ui-color-white);
     --ui-text-inverse-muted: rgba(255, 255, 255, 0.64);
+    --ui-text: var(--ui-text-primary);
+    --ui-text-tertiary: var(--ui-text-subtle);
 
     --ui-surface-page: #f5f8ff;
     --ui-surface-card: var(--ui-color-white);
@@ -81,6 +84,8 @@
     --ui-surface-soft: #fbfdff;
     --ui-surface-elevated: var(--ui-color-white);
     --ui-surface-pressed: rgba(247, 249, 249, 0.82);
+    --ui-surface-base: var(--ui-surface-card);
+    --ui-panel-card-surface: var(--ui-surface-card);
     --ui-color-transparent: transparent;
     --ui-surface-transparent: var(--ui-color-transparent);
     --ui-tap-highlight-color: var(--ui-color-transparent);
@@ -108,6 +113,7 @@
     --ui-line-fainter: rgba(15, 20, 25, 0.022);
     --ui-line-glass: rgba(209, 217, 224, 0.28);
     --ui-line-glass-strong: rgba(209, 217, 224, 0.48);
+    --ui-border-muted: var(--ui-line-hairline);
     --ui-line-focus: rgba(15, 20, 25, 0.34);
     --ui-focus-ring: rgba(15, 20, 25, 0.09);
     --ui-ring-brand-soft: color-mix(in srgb, var(--ui-brand) 14%, transparent);
@@ -140,6 +146,7 @@
     --ui-font-weight-strong: 600;
     --ui-font-weight-title: 600;
     --ui-font-weight-display: 700;
+    --ui-font-weight-regular: var(--ui-font-weight-body);
 
     --ui-text-xs: 0.75rem;
     --ui-text-2xs: 0.625rem;
@@ -151,6 +158,8 @@
     --ui-text-xl: 1.25rem;
     --ui-text-page-title: 1.0625rem;
     --ui-text-profile-name: 1.3125rem;
+    --ui-font-size-xs: var(--ui-text-xs);
+    --ui-font-size-sm: var(--ui-text-sm);
 
     --ui-type-display-size: 1.35rem;
     --ui-type-page-title-size: var(--ui-text-page-title);
@@ -176,6 +185,7 @@
     --ui-line-compact: 1.28;
     --ui-line-normal: 1.42;
     --ui-line-readable: 1.58;
+    --ui-line-relaxed: var(--ui-line-readable);
 
     --ui-space-none: 0;
     --ui-space-1: 4px;
@@ -195,6 +205,7 @@
     --ui-inset-none: 0;
     --ui-opacity-hidden: 0;
     --ui-opacity-visible: 1;
+    --ui-opacity-disabled: var(--ui-disabled-opacity, 0.6);
     --ui-transform-none: none;
     --ui-transition-none: none;
     --ui-animation-none: none;
@@ -207,6 +218,7 @@
     --ui-background-image-none: none;
     --ui-max-width-none: none;
     --ui-max-height-none: none;
+    --ui-aspect-ratio-auto: auto;
     --ui-max-block-size-none: none;
     --ui-root-font-size: 16px;
     --ui-root-scroll-padding-top-extra: var(--ui-space-3);
@@ -230,6 +242,7 @@
     --ui-radius-media: 8px;
     --ui-radius-pill: 999px;
     --ui-radius-full: var(--ui-radius-pill);
+    --ui-radius-card: var(--ui-section-card-radius, var(--ui-radius-xl));
 
     --ui-shadow-hairline: 0 var(--ui-border-width-hairline) 0 color-mix(in srgb, var(--ui-text-strong) 3.5%, transparent);
     --ui-shadow-card: 0 var(--ui-border-width-hairline) 0 color-mix(in srgb, var(--ui-text-strong) 3.2%, transparent), 0 calc(var(--ui-space-1) + var(--ui-space-half)) calc(var(--ui-space-4) + var(--ui-space-half)) color-mix(in srgb, var(--ui-text-strong) 1.2%, transparent);
@@ -243,6 +256,7 @@
     --ui-shadow-rank-card: 0 calc(var(--ui-space-2) + var(--ui-space-half)) var(--ui-space-6) color-mix(in srgb, var(--ui-text-strong) 4%, transparent);
     --ui-shadow-rank-active: 0 calc(var(--ui-space-2) + var(--ui-space-half)) var(--ui-space-7) color-mix(in srgb, var(--ui-color-black) 10%, transparent);
     --ui-shadow-brand-soft: 0 var(--ui-space-2) calc(var(--ui-space-4) + var(--ui-space-half)) color-mix(in srgb, var(--ui-brand) 18%, transparent);
+    --ui-shadow-airy: var(--ui-shadow-panel);
     --ui-shadow-none: none;
     --ui-text-shadow-none: none;
     --ui-text-transform-none: none;
@@ -256,6 +270,7 @@
     --ui-control-md: 40px;
     --ui-control-lg: 44px;
     --ui-control-hit: 44px;
+    --ui-control-height-sm: var(--ui-control-sm);
     --ui-control-compact: var(--ui-control-sm);
     --ui-control-icon-xs: 14px;
     --ui-control-icon-sm: 16px;
@@ -275,16 +290,24 @@
     --ui-section-card-padding-compact: var(--ui-space-3);
     --ui-section-card-padding-default: calc(var(--ui-space-3) + var(--ui-space-half));
     --ui-section-card-padding-default-sm: var(--ui-space-4);
+    --ui-rhythm-card-padding: var(--ui-section-card-padding-default);
     --ui-core-state-gap: calc(var(--ui-space-2) + var(--ui-space-half));
     --ui-core-panel-shadow: 0 var(--ui-space-6) calc(var(--ui-space-8) * 2) var(--ui-line-faint);
+    --ui-page-loader-min-height: clamp(calc(var(--ui-space-8) * 6), calc(var(--ui-visual-viewport-height) - (var(--ui-space-8) * 14)), calc(var(--ui-space-8) * 14));
+    --ui-loading-block-min-height: clamp(calc(var(--ui-space-8) * 5), calc(var(--ui-visual-viewport-height) - (var(--ui-space-8) * 14)), calc(var(--ui-space-8) * 13));
     --ui-state-block-min-height: calc(var(--ui-space-8) * 6 + var(--ui-space-7));
     --ui-state-block-inline-min-height: calc(var(--ui-space-8) * 3);
     --ui-state-block-padding-x: var(--ui-space-6);
     --ui-state-block-padding-y: var(--ui-space-6);
     --ui-state-block-compact-padding-y: var(--ui-space-7);
+    --ui-state-block-border: var(--ui-line-hairline);
+    --ui-state-block-surface: var(--ui-surface-card);
+    --ui-state-block-shadow: var(--ui-shadow-card);
     --ui-state-icon-size: calc(var(--ui-control-lg) + var(--ui-space-1));
     --ui-state-icon-size-compact: var(--ui-control-lg);
     --ui-state-icon-graphic-size: var(--ui-control-icon-md);
+    --ui-state-icon-surface: var(--ui-state-selected-soft);
+    --ui-state-icon-color: var(--ui-brand-strong);
     --ui-state-copy-max-width: calc(var(--ui-space-8) * 9);
     --ui-state-actions-gap: var(--ui-space-2);
     --ui-state-action-secondary-opacity: 0.92;
@@ -299,18 +322,25 @@
     --ui-empty-state-card-padding-y-spacious: calc(var(--ui-space-8) + var(--ui-space-6));
     --ui-notfound-state-min-height: calc(var(--ui-state-block-min-height) + var(--ui-space-8));
     --ui-refresh-hint-min-height: var(--ui-control-sm);
+    --ui-refresh-hint-border: var(--ui-line-hairline);
+    --ui-refresh-hint-surface: var(--ui-surface-card);
     --ui-refresh-hint-error-border: color-mix(in srgb, var(--ui-danger-classic) 16%, var(--ui-social-line-soft));
     --ui-refresh-hint-error-surface: color-mix(in srgb, var(--ui-danger-classic) 5%, var(--ui-surface-card));
     --ui-refresh-hint-padding-x: var(--ui-space-3);
     --ui-refresh-hint-gap: var(--ui-space-1);
     --ui-list-loadmore-min-height: calc(var(--ui-space-8) * 2);
     --ui-feed-footer-padding-y: calc(var(--ui-space-8) + var(--ui-space-2));
+    --ui-feed-footer-state-min-height: clamp(calc(var(--ui-space-8) * 6), calc(var(--ui-visual-viewport-height) - (var(--ui-space-8) * 16)), calc(var(--ui-space-8) * 10));
     --ui-feed-list-intrinsic-height: calc(var(--ui-space-8) * 11 + var(--ui-space-2));
     --ui-feed-footer-state-icon-shadow:
       inset 0 0 0 var(--ui-border-width-hairline) color-mix(in srgb, var(--ui-color-black) 4%, transparent),
       0 var(--ui-space-2) var(--ui-space-6) color-mix(in srgb, var(--ui-color-black) 3.5%, transparent);
     --ui-feed-footer-state-icon-surface: color-mix(in srgb, var(--ui-color-black) 3%, var(--ui-color-white));
     --ui-feed-footer-state-icon-color: color-mix(in srgb, var(--ui-color-black) 42%, transparent);
+    --ui-skeleton-opacity: var(--ui-opacity-visible);
+    --ui-skeleton-media-radius: var(--ui-radius-xl);
+    --ui-feed-skeleton-media-radius: var(--ui-radius-card);
+    --ui-feed-list-item-media-intrinsic-size: calc(var(--ui-space-8) * 16 + var(--ui-space-2));
     --ui-skeleton-relation-avatar-size: calc(var(--ui-control-lg) - var(--ui-space-1));
     --ui-skeleton-relation-action-width: calc(var(--ui-space-8) + var(--ui-space-7));
     --ui-floating-brand-shadow: inset 0 var(--ui-border-width-hairline) 0 color-mix(in srgb, var(--ui-color-white) 16%, transparent), 0 calc(var(--ui-space-3) + var(--ui-space-half)) calc(var(--ui-space-6) + var(--ui-space-half)) var(--ui-brand-elevated-shadow);
@@ -329,12 +359,12 @@
     --ui-sheet-body-padding: var(--ui-space-4);
     --ui-sheet-handle-width: var(--ui-control-md);
     --ui-sheet-handle-height: var(--ui-space-1);
-    --ui-sheet-max-height: min(86dvh, calc(var(--ui-space-8) * 22 + var(--ui-space-4)));
+    --ui-sheet-max-height: min(calc(var(--ui-visual-viewport-height) - var(--ui-space-4)), calc(var(--ui-space-8) * 22 + var(--ui-space-4)));
     --ui-viewport-width: 100vw;
     --ui-toast-min-width: min(calc(var(--ui-space-8) * 8 + var(--ui-space-6)), calc(var(--ui-viewport-width) - var(--ui-space-8)));
     --ui-toast-max-width: calc(var(--ui-viewport-width) - var(--ui-space-8));
     --ui-auth-panel-max-width: calc(var(--ui-space-8) * 11 + var(--ui-space-7));
-    --ui-auth-panel-max-height: 90vh;
+    --ui-auth-panel-max-height: calc(var(--ui-visual-viewport-height) - var(--ui-space-8));
     --ui-auth-required-copy-max-width: calc(var(--ui-space-8) * 11);
     --ui-auth-required-cta-min-width: min(100%, calc(var(--ui-space-8) * 9 + var(--ui-space-3)));
     --ui-auth-required-card-glow-opacity: 0.72;
@@ -351,10 +381,14 @@
     --ui-tab-indicator-inset: 28%;
     --ui-segment-tab-indicator-inset: var(--ui-tab-indicator-inset);
     --ui-lightbox-image-max-width: var(--ui-viewport-width);
-    --ui-lightbox-image-max-height: 100dvh;
+    --ui-lightbox-image-max-height: var(--ui-visual-viewport-height);
     --ui-z-busy-overlay: var(--ui-z-content-overlay);
     --ui-z-pull-indicator: 30;
-    --ui-z-checkout-bar: 40;
+    --ui-checkout-content-bottom-space: calc(var(--ui-control-lg) + var(--ui-space-8) + var(--ui-space-2) + var(--ui-space-half));
+    --ui-checkout-shell-min-height: calc(var(--ui-control-lg) + var(--ui-space-6) + var(--ui-space-half));
+    --ui-checkout-action-min-width: calc(var(--ui-space-8) * 3 + var(--ui-space-7));
+    --ui-checkout-action-min-width-compact: calc(var(--ui-space-8) * 3 + var(--ui-space-6) - var(--ui-space-half));
+    --ui-checkout-shell-padding-y: calc(var(--ui-space-2) + var(--ui-space-half));
     --ui-secondary-page-gap: var(--ui-space-3);
     --ui-secondary-page-gap-loose: var(--ui-space-4);
     --ui-secondary-state-padding-y: calc(var(--ui-space-8) * 3);

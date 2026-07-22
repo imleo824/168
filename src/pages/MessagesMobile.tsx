@@ -12,6 +12,7 @@ import { LoadingBlock } from '@/ui/LoadingState';
 import SEO from '@/platform/SEO';
 import SegmentTabs from '@/ui/SegmentTabs';
 import TopbarIconButton from '@/ui/TopbarIconButton';
+import { APP_ROUTES } from '@/app/routePaths';
 import { apiFetch } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 import PushNotificationSetting from '@/features/notifications/PushNotificationSetting';
@@ -117,7 +118,7 @@ function getNotificationTargetPath(item: NotificationItem) {
   if (item.quotePost?.id) return `/post/${item.quotePost.id}`;
   if (item.post?.id) return `/post/${item.post.id}`;
   if (item.actor?.id) return `/user/${item.actor.id}`;
-  return '/messages';
+  return APP_ROUTES.messages;
 }
 
 function getNotificationTargetText(item: NotificationItem) {
@@ -255,7 +256,7 @@ export default function MessagesMobile() {
   });
 
   const goNotificationSettings = useCallback(() => {
-    navigate('/settings/notifications');
+    navigate(APP_ROUTES.notificationSettings);
   }, [navigate]);
   const { guarded: guardedGoNotificationSettings } = useInteractionGuard(goNotificationSettings, {
     policy: 'instant',

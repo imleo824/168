@@ -45,6 +45,7 @@
   }
 
   .ui-page-content-shell {
+    box-sizing: border-box;
     min-width: 0;
   }
 
@@ -177,7 +178,7 @@
 
   .ui-page-loader {
     width: 100%;
-    min-height: 48svh;
+    min-height: var(--ui-page-loader-min-height);
     background: var(--ui-surface-page);
     padding-block: var(--ui-space-3);
   }

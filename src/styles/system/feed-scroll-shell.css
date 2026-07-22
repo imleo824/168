@@ -81,7 +81,7 @@
   }
 
   .feed-scroll-content[data-feed-footer-only='true'] .ui-feed-footer-state {
-    min-height: min(58svh, calc(var(--ui-space-8) * 10));
+    min-height: var(--ui-feed-footer-state-min-height);
     padding-block: var(--ui-space-8);
   }
 

@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import type { Location, NavigateFunction } from 'react-router-dom';
 
+import { APP_ROUTES } from '@/app/routePaths';
 import {
   getHistoryIndex,
   getRouteState,
@@ -39,7 +40,7 @@ export function usePostDetailReturn(location: Location, navigate: NavigateFuncti
     const currentHref = `${location.pathname}${location.search}${location.hash}`;
     const navigateToTarget = (replace = true) => {
       if (!target) {
-        navigate('/', { replace: true });
+        navigate(APP_ROUTES.home, { replace: true });
         return;
       }
 
@@ -74,12 +75,12 @@ export function usePostDetailReturn(location: Location, navigate: NavigateFuncti
       navigate(-1);
       window.setTimeout(() => {
         const nextHref = `${window.location.pathname}${window.location.search}${window.location.hash}`;
-        if (nextHref === currentHref) navigate('/', { replace: true });
+        if (nextHref === currentHref) navigate(APP_ROUTES.home, { replace: true });
       }, DETAIL_BACK_FALLBACK_MS);
       return;
     }
 
-    navigate('/', { replace: true });
+    navigate(APP_ROUTES.home, { replace: true });
   }, [getReturnTarget, location.state, navigate]);
 
   return {

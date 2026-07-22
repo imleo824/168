@@ -1,40 +1,15 @@
 /* Post detail topbar and author summary. */
 
 @layer utilities {
-  .detail-page .detail-page-topbar.ui-topbar {
-    position: sticky;
-    top: var(--ui-space-none);
-    z-index: var(--ui-z-sticky, var(--ui-z-header));
-    background: var(--ui-topbar-surface-detail);
-    transform: var(--ui-transform-none);
-    backface-visibility: visible;
-    contain: layout style;
-    will-change: auto;
-  }
-
-  .detail-page--mobile .detail-page-topbar.ui-topbar {
-    position: relative;
-    inset: auto;
-    z-index: var(--ui-z-page-header);
-    width: 100%;
-    min-width: 0;
-    flex: 0 0 auto;
-    transform: var(--ui-transform-none);
-  }
-
-  .detail-page[data-route-overlay] .detail-page-topbar.ui-topbar {
-    top: var(--ui-space-none);
-  }
-
   .detail-topbar-inner {
     gap: var(--ui-space-1);
   }
 
-  @media (min-width: 1024px) {
-    .app-shell[data-route-surface='user'][data-desktop-surface='detail'] .detail-page--desktop .detail-page-topbar.ui-topbar {
-      top: var(--app-desktop-shell-padding-y);
-    }
+  .detail-page-topbar.ui-topbar {
+    position: relative;
+  }
 
+  @media (min-width: 1024px) {
     .app-shell[data-route-surface='user'][data-desktop-surface='detail'] .detail-page--desktop .detail-topbar-inner {
       grid-template-columns: minmax(0, 1fr) 0 minmax(var(--ui-detail-topbar-action-slot-min-width), max-content);
     }

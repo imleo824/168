@@ -30,11 +30,11 @@
   @media (hover: hover) and (pointer: fine) {
     .topbar-icon-button:not(.ui-topbar-back-button):hover,
     .ui-topbar :is(.ui-topbar-publish-btn):hover {
-      background: color-mix(in srgb, var(--ui-text-strong) 4%, transparent);
+      background: var(--ui-topbar-icon-hover-surface);
     }
 
     .ui-topbar-back-button:hover {
-      background: color-mix(in srgb, var(--ui-text-strong) 3.5%, transparent);
+      background: var(--ui-topbar-back-hover-surface);
     }
   }
 

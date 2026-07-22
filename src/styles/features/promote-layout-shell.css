@@ -15,6 +15,7 @@
     --promote-idle-surface: var(--ui-promote-option-idle-surface);
     --promote-idle-surface-hover: var(--ui-promote-option-idle-surface-hover);
     --promote-idle-text: var(--ui-promote-option-idle-text);
+    --ui-promote-page-content-max: var(--ui-page-content-max-width);
     position: relative;
     min-height: var(--app-layout-vh);
     overflow-x: visible;
@@ -41,12 +42,12 @@
     box-sizing: border-box;
     display: flex;
     width: 100%;
-    max-width: min(100%, var(--ui-home-desktop-feed-width));
+    max-width: min(100%, var(--ui-promote-page-content-max));
     margin-inline: auto;
     flex-direction: column;
     gap: var(--ui-space-none);
     overflow-x: clip;
-    padding: 0 var(--ui-page-padding-x) var(--promote-checkout-content-bottom-space);
+    padding: var(--ui-space-none) var(--ui-page-padding-x) var(--promote-checkout-content-bottom-space);
     color: var(--ui-text-strong);
   }
 
@@ -155,5 +156,11 @@
     font-size: var(--ui-text-xs);
     font-weight: var(--ui-font-weight-medium);
     line-height: var(--ui-line-tight);
+  }
+
+  @media (min-width: 1024px) {
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .promote-mobile-page.promote-page {
+      --ui-promote-page-content-max: var(--app-desktop-page-content-width);
+    }
   }
 }

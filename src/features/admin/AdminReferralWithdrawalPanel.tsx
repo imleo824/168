@@ -136,16 +136,16 @@ export default function AdminReferralWithdrawalPanel() {
             {loading ? (
               <tr><td colSpan={7} className="admin-table-state-cell">加载中...</td></tr>
             ) : error ? (
-              <tr><td colSpan={7} className="admin-table-state-cell text-rose-500">{error}</td></tr>
+              <tr><td colSpan={7} className="admin-table-state-cell admin-table-state-cell--danger">{error}</td></tr>
             ) : items.length === 0 ? (
               <tr><td colSpan={7} className="admin-table-state-cell">暂无提现申请</td></tr>
             ) : items.map((item) => {
               const meta = statusMeta(item.status);
               return (
-                <tr key={item.id} className="hover:bg-gray-50/50 transition-colors align-top">
+                <tr key={item.id} className="admin-table-row-interactive transition-colors align-top">
                   <td className="px-6 py-4"><div className="flex flex-col"><span className="admin-text-title-sm">{item.displayName || item.loginAccount || '推推用户'}</span><span className="admin-table-meta admin-table-meta--mono">ID: {item.userId}</span></div></td>
                   <td className="px-6 py-4"><span className="admin-text-value-sm">{formatMoney(item.amount)} {item.currency || 'USDT'}</span></td>
-                  <td className="px-6 py-4"><div className="flex min-w-[320px] max-w-[520px] flex-col whitespace-normal break-all"><span className="admin-data-copy">{item.address || '-'}</span><span className="admin-table-meta">{item.network || 'TRC20'}</span></div></td>
+                  <td className="px-6 py-4"><div className="admin-withdrawal-address-cell flex flex-col whitespace-normal break-all"><span className="admin-data-copy">{item.address || '-'}</span><span className="admin-table-meta">{item.network || 'TRC20'}</span></div></td>
                   <td className="px-6 py-4"><span className={`admin-status-badge ${meta.className}`}>{meta.label}</span></td>
                   <td className="px-6 py-4 admin-table-meta">{formatDateTime(item.createdAt)}</td>
                   <td className="px-6 py-4 admin-table-meta">{item.adminNote || '-'}</td>

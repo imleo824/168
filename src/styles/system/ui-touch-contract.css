@@ -18,7 +18,7 @@
   [role='button'],
   [role='link'] {
     touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
+    -webkit-tap-highlight-color: var(--ui-touch-tap-highlight-color);
   }
 }
 
@@ -45,7 +45,7 @@
   .detail-bottom-action,
   .ins-post-card[role='button'] {
     touch-action: manipulation;
-    -webkit-tap-highlight-color: transparent;
+    -webkit-tap-highlight-color: var(--ui-touch-tap-highlight-color);
   }
 
   .pressable,

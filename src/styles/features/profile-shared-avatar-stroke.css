@@ -13,7 +13,7 @@
 
   :is(.profile-modern-page, .user-space-page-next) :is(.profile-avatar-button, .user-space-avatar-next)::before,
   :is(.profile-modern-page, .user-space-page-next) :is(.profile-avatar-button, .user-space-avatar-next)::after {
-    opacity: 0;
+    opacity: var(--ui-profile-avatar-pseudo-hidden-opacity);
     width: var(--ui-space-none);
     height: var(--ui-space-none);
     background: var(--ui-surface-transparent);

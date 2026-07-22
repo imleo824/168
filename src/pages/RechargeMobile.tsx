@@ -13,6 +13,7 @@ import { PaymentInfoSkeleton, Skeleton } from '@/ui/Skeleton';
 import type { RechargeOrder } from '@/types';
 import { InlineSpinner } from '@/ui/LoadingState';
 import PageContentShell from '@/ui/PageContentShell';
+import { APP_ROUTES } from '@/app/routePaths';
 import { useAuth } from '@/context/AuthContext';
 
 type DepositInfo = {
@@ -63,7 +64,7 @@ export default function RechargeMobile() {
   const navigate = useNavigate();
   const location = useLocation();
   const routeState = location.state as ReturnPathState | null;
-  const returnTo = normalizeReturnPath(routeState?.from) || '/profile';
+  const returnTo = normalizeReturnPath(routeState?.from) || APP_ROUTES.profile;
   const returnFromState = normalizeReturnPath(
     routeState?.returnState && typeof routeState.returnState === 'object'
       ? (routeState.returnState as { from?: string }).from

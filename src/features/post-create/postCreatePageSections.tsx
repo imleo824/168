@@ -275,7 +275,7 @@ export function PostCreateComposerSection({
         </AppPage>
       ) : null}
 
-      <TuiPlusBenefitPromptDialog open={isLinkPromptOpen} benefit="postPromotionLink" onClose={() => setIsLinkPromptOpen(false)} onConfirm={() => navigate(APP_ROUTES.tuiPlus, { state: buildTuiPlusBenefitRouteState('postPromotionLink', '/create') })} />
+      <TuiPlusBenefitPromptDialog open={isLinkPromptOpen} benefit="postPromotionLink" onClose={() => setIsLinkPromptOpen(false)} onConfirm={() => navigate(APP_ROUTES.tuiPlus, { state: buildTuiPlusBenefitRouteState('postPromotionLink', APP_ROUTES.create) })} />
     </>
   );
 }

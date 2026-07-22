@@ -15,12 +15,30 @@
     --ui-admin-sidebar-hover-surface: rgba(255, 255, 255, 0.12);
     --ui-admin-line: rgba(32, 38, 55, 0.1);
     --ui-admin-table-edge: rgba(32, 38, 55, 0.1);
+    --ui-admin-table-row-hover-surface: color-mix(in srgb, var(--ui-surface-muted) 50%, transparent);
+    --ui-admin-table-error-text: var(--ui-danger);
+    --ui-admin-modal-scrim-surface: color-mix(in srgb, var(--ui-color-black) 45%, transparent);
+    --ui-admin-modal-scrim-soft-surface: color-mix(in srgb, var(--ui-color-black) 40%, transparent);
+    --ui-admin-dialog-overlay-padding: var(--ui-space-4);
+    --ui-admin-dialog-panel-max-width: calc(var(--ui-space-8) * 28);
+    --ui-admin-dialog-panel-max-height: min(calc(var(--ui-visual-viewport-height) - (var(--ui-admin-dialog-overlay-padding) * 2)), calc(var(--ui-space-8) * 25));
     --ui-admin-card-radius: var(--ui-surface-card-radius);
     --ui-admin-card-padding: var(--ui-space-4);
     --ui-admin-card-padding-desktop: var(--ui-space-5);
     --ui-admin-panel-surface: var(--ui-product-glass-white-82);
     --ui-admin-panel-filter: var(--ui-product-glass-filter-soft);
     --ui-admin-sidebar-width: calc(var(--ui-space-8) * 7 + var(--ui-space-6));
+    --ui-admin-console-main-padding-x-mobile: var(--ui-space-2);
+    --ui-admin-console-main-padding-y-mobile: var(--ui-space-3);
+    --ui-admin-console-main-padding-x-sm: var(--ui-space-4);
+    --ui-admin-console-main-padding-x-lg: var(--ui-space-5);
+    --ui-admin-console-main-padding-x-xl: var(--ui-space-6);
+    --ui-admin-console-main-padding-x-2xl: var(--ui-space-8);
+    --ui-admin-console-main-padding-y-desktop: var(--ui-space-4);
+    --ui-admin-console-content-padding-y-desktop: var(--ui-space-4);
+    --ui-admin-console-bottom-space: calc(var(--ui-space-8) * 2 + var(--ui-space-4));
+    --ui-admin-console-save-row-padding-top: var(--ui-space-8);
+    --ui-admin-console-save-row-padding-top-desktop: calc(var(--ui-space-8) + var(--ui-space-2));
     --ui-admin-mobile-card-padding: var(--ui-space-3);
     --ui-admin-nav-item-height: var(--ui-control-md);
     --ui-admin-nav-icon-size: calc(var(--ui-control-sm) - var(--ui-space-1));
@@ -56,6 +74,22 @@
     --ui-admin-scope-deposit: var(--ui-brand-warm);
     --ui-admin-chat-card-surface: var(--ui-surface-muted);
     --ui-admin-chat-field-grid-min: calc(var(--ui-space-8) * 5);
+    --ui-admin-auto-post-card-border: color-mix(in srgb, var(--ui-text-strong) 5.5%, transparent);
+    --ui-admin-auto-post-card-surface: color-mix(in srgb, var(--ui-surface-card) 94%, var(--ui-surface-page));
+    --ui-admin-auto-post-card-shadow:
+      0 0 0 var(--ui-border-width-hairline) color-mix(in srgb, var(--ui-color-white) 58%, transparent),
+      0 var(--ui-space-2) var(--ui-space-6) color-mix(in srgb, var(--ui-text-strong) 2.8%, transparent);
+    --ui-admin-filter-bar-surface: color-mix(in srgb, var(--ui-surface-muted) 70%, var(--ui-color-white));
+    --ui-admin-mobile-list-surface: color-mix(in srgb, var(--ui-surface-muted) 64%, var(--ui-color-white));
+    --ui-admin-config-surface: color-mix(in srgb, var(--ui-surface-muted) 60%, transparent);
+    --ui-admin-sidebar-kicker-text: color-mix(in srgb, var(--ui-color-white) 78%, transparent);
+    --ui-admin-sidebar-expand-opacity: 0.82;
+    --ui-admin-state-neutral-hover-surface: color-mix(in srgb, var(--ui-admin-state-neutral-surface) 76%, var(--ui-text-primary));
+    --ui-admin-submit-hover-surface: color-mix(in srgb, var(--ui-admin-state-primary-surface) 88%, var(--ui-color-white));
+    --ui-admin-table-head-surface: color-mix(in srgb, var(--ui-surface-muted) 50%, var(--ui-color-white));
+    --ui-admin-report-metric-surface: color-mix(in srgb, var(--ui-surface-muted) 40%, var(--ui-color-white));
+    --ui-admin-report-metric-soft-surface: color-mix(in srgb, var(--ui-surface-muted) 30%, var(--ui-color-white));
+    --ui-admin-report-chart-surface: color-mix(in srgb, var(--ui-surface-muted) 30%, transparent);
     --ui-admin-report-table-min-width: calc(var(--ui-space-8) * 16 + var(--ui-space-2));
     --ui-admin-report-chart-min-width: calc(var(--ui-space-8) * 20);
     --ui-admin-report-chart-height: calc(var(--ui-space-8) * 7 - var(--ui-space-1));
@@ -111,6 +145,10 @@
     --ui-admin-state-success-text: var(--ui-success-strong);
     --ui-admin-state-warning-surface: var(--ui-warning-bg);
     --ui-admin-state-warning-text: var(--ui-warning);
+    --ui-admin-state-below-minimum-surface: color-mix(in srgb, var(--ui-warning) 10%, var(--ui-color-white));
+    --ui-admin-state-below-minimum-text: var(--ui-warning);
+    --ui-admin-state-bot-surface: color-mix(in srgb, var(--ui-brand) 9%, var(--ui-color-white));
+    --ui-admin-state-bot-text: var(--ui-brand-strong);
     --ui-admin-state-danger-surface: color-mix(in srgb, var(--ui-danger) 8%, var(--ui-color-white));
     --ui-admin-state-danger-pressed-surface: color-mix(in srgb, var(--ui-danger) 12%, var(--ui-color-white));
     --ui-admin-state-danger-text: var(--ui-danger);
@@ -122,6 +160,16 @@
     --ui-admin-state-neutral-strong-text: var(--ui-text-secondary);
     --ui-admin-state-primary-surface: var(--ui-text-strong);
     --ui-admin-state-primary-text: var(--ui-color-white);
+    --ui-admin-state-primary-disabled-text: color-mix(in srgb, var(--ui-color-white) 50%, transparent);
+    --ui-admin-state-primary-hover-surface: color-mix(in srgb, var(--ui-text-strong) 82%, var(--ui-color-white));
+    --ui-admin-value-success-text: var(--ui-success-strong);
+    --ui-admin-value-danger-text: var(--ui-danger);
+    --ui-admin-section-pin-text: var(--ui-warning);
+    --ui-admin-section-ad-text: var(--ui-danger);
+    --ui-admin-section-default-text: var(--ui-text-strong);
+    --ui-admin-index-badge-surface: var(--ui-surface-muted);
+    --ui-admin-note-panel-surface: var(--ui-surface-card);
+    --ui-admin-danger-icon-hover-surface: var(--ui-admin-state-danger-surface);
     --ui-admin-meta-mono-family: var(--ui-font-family-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
     --ui-media-single-max-height: calc(var(--ui-space-8) * 16);
     --ui-upload-remove-backdrop-filter: blur(var(--ui-space-2)) saturate(1.08);
@@ -146,6 +194,26 @@
     --ui-overlay-sheet: rgba(0, 0, 0, 0.28);
     --ui-online-pulse: var(--ui-brand);
     --ui-online-dot: var(--ui-brand);
+    --ui-count-badge-border: color-mix(in srgb, var(--ui-social-line-soft) 86%, transparent);
+    --ui-count-badge-surface: color-mix(in srgb, var(--ui-surface-raised) 78%, transparent);
+    --ui-count-badge-text: color-mix(in srgb, var(--ui-text-muted) 90%, transparent);
+    --ui-state-icon-empty-surface: color-mix(in srgb, var(--ui-brand) 5%, var(--ui-surface-muted));
+    --ui-state-icon-empty-text: color-mix(in srgb, var(--ui-brand) 76%, var(--ui-text-secondary));
+    --ui-state-icon-empty-shadow: inset 0 0 0 var(--ui-border-width-hairline) color-mix(in srgb, var(--ui-brand) 7%, transparent);
+    --ui-token-qr-card-border: color-mix(in srgb, var(--ui-social-line-soft) 86%, transparent);
+    --ui-token-qr-card-surface: color-mix(in srgb, var(--ui-surface-card) 96%, var(--ui-surface-page));
+    --ui-token-qr-card-shadow:
+      0 0 0 var(--ui-border-width-hairline) color-mix(in srgb, var(--ui-color-white) 58%, transparent),
+      0 var(--ui-space-2) var(--ui-space-6) color-mix(in srgb, var(--ui-color-black) 2.6%, transparent);
+    --ui-amount-option-border: color-mix(in srgb, var(--ui-social-line-soft) 86%, transparent);
+    --ui-amount-option-active-border: color-mix(in srgb, var(--ui-brand) 22%, transparent);
+    --ui-amount-option-active-surface: color-mix(in srgb, var(--ui-brand) 92%, var(--ui-color-white));
+    --ui-amount-option-active-shadow: 0 var(--ui-space-1) calc(var(--ui-space-3) + var(--ui-space-half)) color-mix(in srgb, var(--ui-brand) 12%, transparent);
+    --ui-amount-option-idle-surface: color-mix(in srgb, var(--ui-surface-card) 96%, var(--ui-surface-muted));
+    --ui-amount-option-idle-text: color-mix(in srgb, var(--ui-text-secondary) 92%, var(--ui-text-strong));
+    --ui-amount-option-hover-border: color-mix(in srgb, var(--ui-text-strong) 8%, transparent);
+    --ui-input-focus-ring-border: color-mix(in srgb, var(--ui-brand) 16%, transparent);
+    --ui-input-focus-ring-shadow: 0 0 0 calc(var(--ui-border-width-hairline) * 3) color-mix(in srgb, var(--ui-brand) 8%, transparent);
 
     --ui-post-create-main-padding-top: var(--ui-space-none);
     --ui-post-create-submit-label-size: var(--ui-text-title);
@@ -179,12 +247,18 @@
     --ui-feed-list-item-animation-duration: 180ms;
     --ui-feed-list-item-animation-stagger-step: 20ms;
     --ui-feed-list-item-animation-stagger-max: 80ms;
+    --ui-feed-list-item-intrinsic-inline-size: var(--ui-border-width-hairline);
     --ui-feed-list-item-intrinsic-size: calc(var(--ui-space-8) * 10);
+    --ui-feed-plain-action-surface: color-mix(in srgb, var(--ui-brand) 12%, transparent);
+    --ui-feed-append-skeleton-opacity: 0.88;
+    --ui-home-topbar-message-ink: color-mix(in srgb, var(--ui-text-strong) 88%, transparent);
+    --ui-home-topbar-message-dot-shadow: var(--ui-shadow-subtle-raise);
     --post-create-section-padding-x: var(--ui-topbar-edge-padding-x, var(--ui-page-padding-x));
     --post-create-media-padding-block: var(--ui-space-3);
     --post-create-input-padding-block-start: var(--ui-space-4);
     --post-create-input-padding-block-end: var(--post-create-media-padding-block);
     --post-create-textarea-min-height: calc(var(--ui-space-8) * 4 + var(--ui-space-3));
+    --ui-create-image-upload-tile-size: calc(var(--ui-control-xl) + var(--ui-space-8));
     --post-create-header-action-min-width: calc(var(--ui-space-8) + var(--ui-space-4));
     --post-create-input-padding: var(--post-create-input-padding-block-start) var(--post-create-section-padding-x) var(--post-create-input-padding-block-end);
     --post-create-sync-width: calc(var(--ui-space-8) * 2);
@@ -203,6 +277,14 @@
     --post-create-option-idle-surface: var(--ui-action-muted-surface);
     --post-create-option-idle-surface-hover: var(--ui-action-muted-surface-hover);
     --post-create-option-idle-text: var(--ui-text-secondary);
+    --post-create-placeholder-text: color-mix(in srgb, var(--ui-text-placeholder) 72%, transparent);
+    --post-create-image-upload-hover-border: color-mix(in srgb, var(--ui-brand) 38%, var(--ui-line-subtle));
+    --post-create-image-upload-hover-surface: color-mix(in srgb, var(--ui-brand) 7%, var(--ui-surface-muted));
+    --post-create-tool-muted-text: color-mix(in srgb, var(--ui-social-action-muted) 84%, transparent);
+    --post-create-location-idle-overlay-surface: var(--ui-surface-transparent);
+    --post-create-category-clear-border: color-mix(in srgb, var(--ui-danger-classic) 32%, transparent);
+    --post-create-category-clear-surface: color-mix(in srgb, var(--ui-danger-classic) 8%, transparent);
+    --post-create-category-clear-active-surface: color-mix(in srgb, var(--ui-danger-classic) 14%, transparent);
     --post-create-meta-card-surface: color-mix(in srgb, var(--ui-social-surface) 92%, transparent);
     --post-create-meta-row-filled-surface: color-mix(in srgb, var(--ui-social-surface-muted) 70%, var(--ui-social-surface));
     --post-create-meta-row-error-border: color-mix(in srgb, var(--ui-danger-classic) 30%, transparent);
@@ -240,8 +322,8 @@
     --ui-detail-topbar-action-slot-min-width: calc(var(--ui-control-lg) + var(--ui-space-4));
     --ui-detail-border: var(--ui-ins-divider);
     --ui-detail-border-soft: var(--ui-ins-divider-soft);
-    --ui-promote-picker-sheet-max-height: 86dvh;
-    --ui-promote-payment-sheet-max-height: 88dvh;
+    --ui-promote-picker-sheet-max-height: calc(var(--ui-visual-viewport-height) - var(--ui-space-4));
+    --ui-promote-payment-sheet-max-height: calc(var(--ui-visual-viewport-height) - env(safe-area-inset-top) - var(--ui-space-3));
     --ui-detail-page-bottom-space: calc(var(--ui-space-8) * 4 + var(--ui-space-2));
     --ui-detail-article-padding-mobile: var(--ui-social-feed-row-padding-y) var(--ui-social-feed-row-padding-x) calc(var(--ui-space-3) + var(--ui-space-half));
     --ui-detail-content-gap: var(--ui-space-3);
@@ -259,6 +341,30 @@
     --ui-promote-ad-input-error-border: color-mix(in srgb, var(--ui-danger-classic) 35%, var(--ui-line-hairline));
     --ui-sponsor-row-skeleton-title-width: 42%;
     --ui-sponsor-row-skeleton-meta-width: var(--ui-skeleton-width-compact);
+    --ui-messages-read-all-hover-border: color-mix(in srgb, var(--ui-brand) 10%, transparent);
+    --ui-messages-read-all-hover-surface: color-mix(in srgb, var(--ui-brand) 6%, transparent);
+    --ui-messages-card-border: color-mix(in srgb, var(--ui-social-line-soft) 88%, transparent);
+    --ui-messages-card-border-strong: color-mix(in srgb, var(--ui-social-line-soft) 90%, transparent);
+    --ui-messages-card-hover-border: color-mix(in srgb, var(--ui-text-strong) 8%, transparent);
+    --ui-messages-unread-border: color-mix(in srgb, var(--ui-brand) 13%, transparent);
+    --ui-messages-unread-surface: color-mix(in srgb, var(--ui-brand) 2%, var(--ui-surface-card));
+    --ui-messages-unread-dot-surface: color-mix(in srgb, var(--ui-brand) 90%, var(--ui-text-strong));
+    --ui-messages-unread-dot-shadow: 0 0 0 var(--ui-border-width-hairline) var(--ui-surface-card), 0 0 0 calc(var(--ui-border-width-hairline) * 3) color-mix(in srgb, var(--ui-brand) 8%, transparent);
+    --ui-messages-system-avatar-border: color-mix(in srgb, var(--ui-brand) 12%, transparent);
+    --ui-messages-system-avatar-surface:
+      radial-gradient(circle at 28% 18%, color-mix(in srgb, var(--ui-brand) 16%, transparent), transparent 42%),
+      color-mix(in srgb, var(--ui-brand) 7%, var(--ui-surface-muted));
+    --ui-messages-system-avatar-color: color-mix(in srgb, var(--ui-brand) 78%, var(--ui-text-secondary));
+    --ui-messages-item-icon-surface: color-mix(in srgb, var(--ui-brand) 5%, var(--ui-surface-muted));
+    --ui-messages-item-icon-color: color-mix(in srgb, var(--ui-brand) 72%, var(--ui-text-secondary));
+    --ui-notification-section-divider: var(--ui-messages-card-border);
+    --ui-notification-item-icon-surface: color-mix(in srgb, var(--ui-brand) 6%, var(--ui-surface-muted));
+    --ui-notification-item-icon-color: color-mix(in srgb, var(--ui-brand) 76%, var(--ui-text-secondary));
+    --ui-notification-switch-border: color-mix(in srgb, var(--ui-line-medium) 78%, transparent);
+    --ui-notification-switch-surface: color-mix(in srgb, var(--ui-surface-muted) 76%, var(--ui-color-white));
+    --ui-notification-switch-thumb-shadow: 0 var(--ui-border-width-hairline) var(--ui-space-1) color-mix(in srgb, var(--ui-color-black) 12%, transparent);
+    --ui-notification-switch-checked-border: color-mix(in srgb, var(--ui-brand) 16%, transparent);
+    --ui-notification-switch-checked-surface: color-mix(in srgb, var(--ui-brand) 18%, var(--ui-color-white));
     --ui-profile-sticky-tab-top: var(--ui-space-none);
     --ui-profile-tab-count: 5;
     --ui-profile-tab-min-height: calc(var(--ui-control-lg) + var(--ui-space-half));
@@ -267,6 +373,16 @@
     --ui-profile-tab-underline-inset: var(--ui-tab-indicator-inset);
     --ui-profile-tab-selected-weight: var(--ui-font-weight-title);
     --ui-profile-tab-meta-opacity: 0.62;
+    --ui-page-tabs-background: var(--ui-surface-transparent);
+    --ui-page-tabs-padding-x: var(--ui-profile-header-padding-x, var(--ui-page-padding-x));
+    --ui-page-tab-min-height: var(--ui-profile-tab-min-height);
+    --ui-page-tab-padding-y: var(--ui-profile-tab-padding-y);
+    --ui-page-tab-padding-x: var(--ui-profile-tab-padding-x);
+    --ui-page-tab-selected-weight: var(--ui-profile-tab-selected-weight);
+    --ui-page-tab-underline-inset: var(--ui-profile-tab-underline-inset);
+    --ui-tab-underline-inset: var(--ui-page-tab-underline-inset);
+    --ui-tab-underline-height: var(--ui-border-width-hairline);
+    --ui-tab-underline-color: var(--ui-action-primary);
     --ui-profile-cover-height: calc(var(--ui-space-8) * 4 + var(--ui-space-4));
     --ui-profile-cover-image-opacity: 1;
     --ui-profile-cover-pattern-opacity: 0.18;
@@ -337,12 +453,134 @@
     --ui-profile-avatar-camera-badge-border: var(--ui-surface-card);
     --ui-profile-avatar-camera-badge-size: calc(var(--ui-control-xs) - var(--ui-space-half) - var(--ui-space-1));
     --ui-profile-avatar-camera-badge-shadow: 0 0 0 var(--ui-border-width-hairline) color-mix(in srgb, var(--ui-brand) 24%, transparent);
+    --ui-profile-avatar-pseudo-hidden-opacity: var(--ui-opacity-hidden);
     --ui-profile-user-list-avatar-size: var(--ui-header-avatar-size);
     --ui-user-space-bottom-mobile: calc(env(safe-area-inset-bottom) + var(--ui-space-8) * 2 + var(--ui-space-4));
     --ui-user-space-bottom-desktop: calc(env(safe-area-inset-bottom) + var(--ui-space-8) + var(--ui-space-5));
     --ui-user-space-following-surface: color-mix(in srgb, var(--ui-surface-muted) 92%, var(--ui-color-white));
+    --ui-user-space-plus-action-border: color-mix(in srgb, var(--ui-brand) 30%, var(--ui-line-hairline));
+    --ui-user-space-plus-action-surface: color-mix(in srgb, var(--ui-brand) 6%, var(--ui-surface-card));
+    --ui-user-space-plus-action-hover-border: color-mix(in srgb, var(--ui-brand) 48%, var(--ui-line-soft));
+    --ui-user-space-plus-action-hover-surface: color-mix(in srgb, var(--ui-brand) 9%, var(--ui-surface-card));
+    --ui-user-space-plus-action-hover-y: calc(var(--ui-border-width-hairline) * -1);
+    --ui-user-space-link-section-surface: color-mix(in srgb, var(--ui-surface-muted) 45%, transparent);
+    --ui-user-space-link-index-filled-surface: color-mix(in srgb, var(--ui-brand) 10%, var(--ui-surface-card));
+    --ui-user-space-link-field-disabled-opacity: 0.6;
+    --ui-profile-tui-plus-trial-border: color-mix(in srgb, var(--ui-brand-warm) 42%, var(--ui-line-hairline));
+    --ui-profile-tui-plus-trial-surface: linear-gradient(135deg, color-mix(in srgb, var(--ui-text-strong) 88%, var(--ui-surface-card)), color-mix(in srgb, var(--ui-brand-warm) 20%, var(--ui-text-strong)));
+    --ui-profile-tui-plus-trial-shadow: 0 var(--ui-border-width-hairline) var(--ui-space-1) color-mix(in srgb, var(--ui-text-strong) 16%, transparent);
+    --ui-profile-tui-plus-trial-hover-border: color-mix(in srgb, var(--ui-brand-warm) 62%, var(--ui-line-soft));
+    --ui-profile-tui-plus-trial-hover-surface: linear-gradient(135deg, color-mix(in srgb, var(--ui-text-strong) 82%, var(--ui-surface-card)), color-mix(in srgb, var(--ui-brand-warm) 28%, var(--ui-text-strong)));
+    --ui-profile-tui-plus-trial-icon-fill: color-mix(in srgb, var(--ui-brand-warm) 32%, transparent);
     --ui-profile-security-scrim-surface: color-mix(in srgb, var(--ui-color-black) 42%, transparent);
     --ui-profile-security-row-border: color-mix(in srgb, var(--ui-line-hairline) 72%, transparent);
+    --ui-profile-dialog-scrim-surface: color-mix(in srgb, var(--ui-color-black) 28%, transparent);
+    --ui-profile-dialog-panel-border: color-mix(in srgb, var(--ui-text-strong) 7%, transparent);
+    --ui-profile-dialog-panel-surface: color-mix(in srgb, var(--ui-surface-card-solid, var(--ui-surface-card)) 96%, var(--ui-surface-page));
+    --ui-profile-dialog-divider: color-mix(in srgb, var(--ui-text-strong) 5%, transparent);
+    --ui-profile-dialog-header-surface: color-mix(in srgb, var(--ui-surface-card-solid, var(--ui-surface-card)) 92%, transparent);
+    --ui-profile-dialog-footer-surface: color-mix(in srgb, var(--ui-surface-card-solid, var(--ui-surface-card)) 94%, transparent);
+    --ui-profile-dialog-field-border: color-mix(in srgb, var(--ui-text-strong) 6%, transparent);
+    --ui-profile-dialog-field-surface: color-mix(in srgb, var(--ui-surface-muted) 68%, var(--ui-surface-card));
+    --ui-profile-dialog-field-inset-shadow: inset 0 0 0 var(--ui-border-width-hairline) color-mix(in srgb, var(--ui-color-white) 54%, transparent);
+    --ui-profile-dialog-field-focus-border: color-mix(in srgb, var(--ui-brand) 34%, transparent);
+    --ui-profile-dialog-field-focus-surface: color-mix(in srgb, var(--ui-surface-card-solid, var(--ui-surface-card)) 92%, var(--ui-brand) 3%);
+    --ui-profile-dialog-contact-prefix-surface: color-mix(in srgb, var(--ui-brand) 7%, transparent);
+    --ui-profile-plus-expired-opacity: 0.58;
+    --ui-profile-plus-expired-filter: grayscale(0.18);
+    --ui-profile-bio-editor-page-surface:
+      radial-gradient(circle at 50% calc(var(--ui-space-8) * -1), color-mix(in srgb, var(--ui-brand) 12%, transparent), transparent 34%),
+      var(--ui-surface-page);
+    --ui-profile-bio-editor-field-min-height: calc(var(--ui-space-8) * 5 + var(--ui-space-2));
+    --ui-profile-bio-editor-field-border: color-mix(in srgb, var(--ui-brand) 14%, var(--ui-line-subtle));
+    --ui-profile-bio-editor-field-surface: color-mix(in srgb, var(--ui-surface-card) 88%, var(--ui-surface-page));
+    --ui-profile-bio-editor-field-focus-border: color-mix(in srgb, var(--ui-brand) 55%, var(--ui-line-subtle));
+    --ui-profile-bio-editor-field-focus-shadow: 0 0 0 var(--ui-focus-ring-width) color-mix(in srgb, var(--ui-brand) 14%, transparent);
+    --ui-skeleton-brand-lockup-opacity: var(--ui-opacity-visible);
+    --ui-touch-tap-highlight-color: var(--ui-color-transparent);
+    --ui-referral-hero-surface:
+      radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--ui-brand) 16%, transparent), transparent 34%),
+      linear-gradient(135deg, color-mix(in srgb, var(--ui-brand) 14%, var(--ui-surface-card)), var(--ui-surface-card));
+    --ui-referral-metric-border: color-mix(in srgb, var(--ui-text-strong) 5%, transparent);
+    --ui-referral-available-surface: color-mix(in srgb, var(--ui-surface-card) 78%, transparent);
+    --ui-referral-stat-surface: color-mix(in srgb, var(--ui-surface-card) 74%, transparent);
+    --ui-tui-plus-ring-gradient:
+      conic-gradient(
+        from 35deg,
+        var(--ui-brand),
+        color-mix(in srgb, var(--ui-brand) 54%, var(--ui-color-white)),
+        var(--ui-brand-strong),
+        color-mix(in srgb, var(--ui-brand-warm) 76%, var(--ui-brand)),
+        var(--ui-brand)
+      );
+    --ui-tui-plus-avatar-ring-shadow:
+      0 0 0 var(--ui-border-width-hairline) color-mix(in srgb, var(--ui-brand) 24%, transparent),
+      0 var(--ui-space-quarter) var(--ui-space-1) color-mix(in srgb, var(--ui-brand) 22%, transparent);
+    --ui-tui-plus-bottom-nav-ring-shadow:
+      var(--ui-bottom-nav-active-avatar-shadow),
+      0 0 0 var(--ui-border-width-hairline) color-mix(in srgb, var(--ui-brand) 18%, transparent);
+    --ui-tui-plus-chip-border: color-mix(in srgb, var(--ui-brand) 22%, transparent);
+    --ui-tui-plus-chip-surface: color-mix(in srgb, var(--ui-brand) 8%, var(--ui-color-white));
+    --ui-tui-plus-chip-active-border: color-mix(in srgb, var(--ui-brand) 34%, transparent);
+    --ui-tui-plus-chip-active-surface: linear-gradient(135deg, color-mix(in srgb, var(--ui-brand) 14%, var(--ui-color-white)), var(--ui-color-white));
+    --ui-tui-plus-chip-active-shadow: 0 var(--ui-border-width-hairline) var(--ui-space-half) color-mix(in srgb, var(--ui-brand) 14%, transparent);
+    --ui-tui-plus-page-surface:
+      radial-gradient(circle at 50% calc(var(--ui-space-8) * -1), color-mix(in srgb, var(--ui-brand) 15%, transparent), transparent 36%),
+      radial-gradient(circle at 100% 10%, color-mix(in srgb, var(--ui-brand-warm) 9%, transparent), transparent 30%),
+      linear-gradient(180deg, color-mix(in srgb, var(--ui-brand) 5%, var(--ui-surface-page)), var(--ui-surface-page) 46%);
+    --ui-tui-plus-topbar-title-border: color-mix(in srgb, var(--ui-brand) 20%, transparent);
+    --ui-tui-plus-topbar-title-surface: linear-gradient(135deg, color-mix(in srgb, var(--ui-brand) 10%, var(--ui-color-white)), var(--ui-color-white));
+    --ui-tui-plus-topbar-title-shadow: 0 var(--ui-border-width-hairline) var(--ui-space-half) color-mix(in srgb, var(--ui-brand) 12%, transparent);
+    --ui-tui-plus-hero-border: color-mix(in srgb, var(--ui-brand) 20%, var(--ui-line-subtle));
+    --ui-tui-plus-hero-surface:
+      radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--ui-brand) 18%, transparent), transparent 36%),
+      radial-gradient(circle at 0% 100%, color-mix(in srgb, var(--ui-brand-warm) 10%, transparent), transparent 42%),
+      linear-gradient(135deg, color-mix(in srgb, var(--ui-brand) 8%, var(--ui-surface-card)), var(--ui-surface-card));
+    --ui-tui-plus-hero-overlay:
+      linear-gradient(120deg, color-mix(in srgb, var(--ui-color-white) 58%, transparent), transparent 40%),
+      radial-gradient(circle at 12% 12%, color-mix(in srgb, var(--ui-brand) 10%, transparent), transparent 30%);
+    --ui-tui-plus-hero-inset-shadow: inset 0 var(--ui-border-width-hairline) 0 color-mix(in srgb, var(--ui-color-white) 72%, transparent);
+    --ui-tui-plus-mark-shadow: 0 var(--ui-space-2) var(--ui-space-6) color-mix(in srgb, var(--ui-brand) 22%, transparent), inset 0 var(--ui-border-width-hairline) 0 color-mix(in srgb, var(--ui-color-white) 42%, transparent);
+    --ui-tui-plus-mark-shadow-compact: 0 var(--ui-space-1) var(--ui-space-4) color-mix(in srgb, var(--ui-brand) 24%, transparent);
+    --ui-tui-plus-eyebrow-surface: color-mix(in srgb, var(--ui-brand) 8%, transparent);
+    --ui-tui-plus-status-surface: color-mix(in srgb, var(--ui-brand) 7%, var(--ui-surface-card));
+    --ui-tui-plus-benefits-border: color-mix(in srgb, var(--ui-brand) 12%, var(--ui-line-subtle));
+    --ui-tui-plus-benefits-surface: linear-gradient(180deg, color-mix(in srgb, var(--ui-brand) 4%, var(--ui-surface-card)), var(--ui-surface-card));
+    --ui-tui-plus-benefit-item-border: color-mix(in srgb, var(--ui-brand) 8%, var(--ui-line-subtle));
+    --ui-tui-plus-benefit-item-surface: color-mix(in srgb, var(--ui-brand) 4%, var(--ui-surface-card));
+    --ui-tui-plus-benefit-item-hover-border: color-mix(in srgb, var(--ui-brand) 14%, var(--ui-line-subtle));
+    --ui-tui-plus-benefit-item-hover-surface: color-mix(in srgb, var(--ui-brand) 6%, var(--ui-surface-card));
+    --ui-tui-plus-benefit-icon-surface: color-mix(in srgb, var(--ui-brand) 11%, var(--ui-surface-card));
+    --ui-tui-plus-benefit-icon-surface-soft: color-mix(in srgb, var(--ui-brand) 8%, var(--ui-color-white));
+    --ui-tui-plus-toggle-surface: color-mix(in srgb, var(--ui-brand) 5%, var(--ui-surface-muted));
+    --ui-tui-plus-price-badge-border: color-mix(in srgb, var(--ui-brand) 14%, var(--ui-line-hairline));
+    --ui-tui-plus-price-badge-surface: color-mix(in srgb, var(--ui-brand) 6%, var(--ui-surface-muted));
+    --ui-tui-plus-price-emphasis-surface: color-mix(in srgb, var(--ui-brand) 8%, var(--ui-color-white));
+    --ui-tui-plus-plan-border: color-mix(in srgb, var(--ui-brand) 10%, var(--ui-line-subtle));
+    --ui-tui-plus-plan-surface:
+      linear-gradient(180deg, color-mix(in srgb, var(--ui-color-white) 64%, transparent), transparent 42%),
+      var(--ui-surface-card);
+    --ui-tui-plus-plan-overlay: radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--ui-brand) 10%, transparent), transparent 42%);
+    --ui-tui-plus-plan-selected-border: color-mix(in srgb, var(--ui-brand) 46%, var(--ui-line-subtle));
+    --ui-tui-plus-plan-selected-surface:
+      radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--ui-brand) 13%, transparent), transparent 40%),
+      color-mix(in srgb, var(--ui-brand) 5%, var(--ui-surface-card));
+    --ui-tui-plus-plan-mark-opacity: 0.9;
+    --ui-tui-plus-plan-mark-surface: color-mix(in srgb, var(--ui-brand) 8%, var(--ui-surface-muted));
+    --ui-tui-plus-plan-badge-border: color-mix(in srgb, var(--ui-brand) 18%, transparent);
+    --ui-tui-plus-plan-badge-surface: color-mix(in srgb, var(--ui-brand) 10%, var(--ui-surface-muted));
+    --ui-tui-plus-link-tabs-border: color-mix(in srgb, var(--ui-brand) 10%, var(--ui-line-subtle));
+    --ui-tui-plus-link-tabs-surface: color-mix(in srgb, var(--ui-brand) 5%, var(--ui-surface-muted));
+    --ui-tui-plus-link-section-border: color-mix(in srgb, var(--ui-brand) 10%, var(--ui-line-subtle));
+    --ui-tui-plus-link-section-surface: color-mix(in srgb, var(--ui-surface-card) 96%, var(--ui-brand));
+    --ui-tui-plus-link-section-badge-surface: color-mix(in srgb, var(--ui-brand) 7%, var(--ui-surface-muted));
+    --ui-tui-plus-link-slot-filled-border: color-mix(in srgb, var(--ui-brand) 12%, var(--ui-line-subtle));
+    --ui-tui-plus-link-slot-filled-surface: color-mix(in srgb, var(--ui-brand) 3%, var(--ui-surface-card));
+    --ui-tui-plus-link-slot-dirty-border: color-mix(in srgb, var(--ui-brand) 34%, var(--ui-line-subtle));
+    --ui-tui-plus-link-slot-dirty-surface: color-mix(in srgb, var(--ui-brand) 5%, var(--ui-surface-card));
+    --ui-tui-plus-link-slot-index-surface: color-mix(in srgb, var(--ui-brand) 7%, var(--ui-surface-muted));
+    --ui-tui-plus-link-field-focus-shadow: 0 0 0 calc(var(--ui-border-width-hairline) * 3) var(--ui-ring-brand-soft);
+    --ui-plus-link-label-max-width: calc(var(--ui-space-8) * 6 + var(--ui-space-7));
     --promote-payment-card-padding: calc(var(--ui-space-3) + var(--ui-space-quarter));
     --promote-category-chip-padding: calc(var(--ui-space-1) + var(--ui-space-half)) calc(var(--ui-space-3) + var(--ui-space-half));
   }

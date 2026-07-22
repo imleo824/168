@@ -43,43 +43,6 @@ function areHomeFeedContentPropsEqual(prev: HomeFeedContentProps, next: HomeFeed
   );
 }
 
-function HomeStandalonePlainState({
-  title,
-  description,
-  actionLabel,
-  onAction,
-  isError = false,
-}: {
-  title: string;
-  description?: string;
-  actionLabel: string;
-  onAction: () => void | Promise<void>;
-  isError?: boolean;
-}) {
-  return (
-    <div
-      className="ui-feed-footer-state"
-      role={isError ? 'alert' : 'status'}
-      aria-live="polite"
-      aria-label={title}
-    >
-      <div className={`ui-feed-plain-state ui-feed-footer-plain-state${isError ? ' ui-feed-footer-plain-state--error' : ''}`}>
-        <span className="ui-feed-plain-state-copy">
-          <span className="ui-feed-plain-state-text">{title}</span>
-          {description ? <span className="ui-feed-plain-state-subtext">{description}</span> : null}
-        </span>
-        <button
-          type="button"
-          className="pressable ui-feed-plain-state-action"
-          onClick={onAction}
-        >
-          {actionLabel}
-        </button>
-      </div>
-    </div>
-  );
-}
-
 export const HomeFeedContent = memo(function HomeFeedContent({
   hideCategoryTag,
   feedIdentity,
@@ -98,44 +61,6 @@ export const HomeFeedContent = memo(function HomeFeedContent({
   onLoadMore,
   onBrowseAll,
 }: HomeFeedContentProps) {
-  const shouldRenderStandaloneEmpty =
-    !showInitialLoading &&
-    !showInitialError &&
-    visibleFeedPosts.length === 0 &&
-    canShowInitialEmpty;
-
-  const shouldRenderStandaloneError =
-    !showInitialLoading &&
-    showInitialError &&
-    visibleFeedPosts.length === 0;
-
-  if (shouldRenderStandaloneEmpty) {
-    return (
-      <div className="home-mobile-feed-panel">
-        <HomeStandalonePlainState
-          title="暂无内容"
-          description="可以切回全部看看最新内容"
-          actionLabel="查看全部"
-          onAction={onBrowseAll}
-        />
-      </div>
-    );
-  }
-
-  if (shouldRenderStandaloneError) {
-    return (
-      <div className="home-mobile-feed-panel">
-        <HomeStandalonePlainState
-          title={initialErrorMessage || '加载失败，稍后再试'}
-          description="点一下重新加载"
-          actionLabel="重试"
-          onAction={onRefreshFromPull}
-          isError
-        />
-      </div>
-    );
-  }
-
   return (
     <div key={feedIdentity} className="home-mobile-feed-panel">
       <FeedViewport

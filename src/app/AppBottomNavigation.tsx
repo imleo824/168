@@ -9,10 +9,16 @@ import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import { primePostCreateComposerFocus } from '@/utils/postCreateFocusBridge';
 import { clearSignupRewardBadge, readSignupRewardBadgePoints, SIGNUP_REWARD_BADGE_EVENT } from '@/utils/signupRewardBadge';
 import { warmupNavigationIntent } from '@/utils/routeWarmups';
+import { APP_ROUTES } from '@/app/routePaths';
 
 const DOUBLE_TAP_INTERVAL_MS = 360;
 const DOUBLE_TAP_DISTANCE_PX = 28;
-const PRIMARY_TAB_PATHS = new Set(['/', '/messages', '/sponsor', '/profile']);
+const PRIMARY_TAB_PATHS = new Set<string>([
+  APP_ROUTES.home,
+  APP_ROUTES.messages,
+  APP_ROUTES.sponsor,
+  APP_ROUTES.profile,
+]);
 
 function scrollActivePageToTop(behavior: ScrollBehavior = 'smooth') {
   document.scrollingElement?.scrollTo({ top: 0, left: 0, behavior });
@@ -44,16 +50,16 @@ export default function AppBottomNavigation() {
   const [signupRewardBadgePoints, setSignupRewardBadgePoints] = useState(readSignupRewardBadgePoints);
 
   const goHome = (options: { refreshIfActive?: boolean } = {}) => {
-    if (pathname === '/') {
+    if (pathname === APP_ROUTES.home) {
       if (options.refreshIfActive) refreshActiveHomeTopicTab();
       scrollActivePageToTop('smooth');
       return;
     }
-    navigate('/');
+    navigate(APP_ROUTES.home);
   };
 
   const handleHomeClick = (event: ReactMouseEvent<HTMLButtonElement>) => {
-    if (pathname !== '/') {
+    if (pathname !== APP_ROUTES.home) {
       lastHomeNavTapRef.current = { at: 0, x: 0, y: 0 };
       goHome({ refreshIfActive: false });
       return;
@@ -83,20 +89,20 @@ export default function AppBottomNavigation() {
   const goMessages = () => {
     warmupNavigationIntent('auth');
     requireAuth(() => {
-      if (pathname === '/messages') {
+      if (pathname === APP_ROUTES.messages) {
         scrollActivePageToTop('smooth');
         return;
       }
-      navigate('/messages');
+      navigate(APP_ROUTES.messages);
     });
   };
 
   const goCreate = () => {
-    if (pathname === '/create') return;
+    if (pathname === APP_ROUTES.create) return;
     warmupNavigationIntent('create');
     requireAuth(() => {
       primePostCreateComposerFocus();
-      navigate('/create');
+      navigate(APP_ROUTES.create);
     });
   };
 
@@ -104,21 +110,21 @@ export default function AppBottomNavigation() {
     warmupNavigationIntent('sponsor');
     requireAuth(() => {
       clearSignupRewardBadge();
-      if (pathname === '/sponsor') {
+      if (pathname === APP_ROUTES.sponsor) {
         scrollActivePageToTop('smooth');
         return;
       }
-      navigate('/sponsor');
+      navigate(APP_ROUTES.sponsor);
     });
   };
 
   const goProfile = () => {
     warmupNavigationIntent('profile');
-    if (pathname === '/profile') {
+    if (pathname === APP_ROUTES.profile) {
       scrollActivePageToTop('smooth');
       return;
     }
-    navigate('/profile');
+    navigate(APP_ROUTES.profile);
   };
 
   const { guarded: guardedGoCreate } = useInteractionGuard(goCreate, {
@@ -151,11 +157,11 @@ export default function AppBottomNavigation() {
   return (
     <nav className="app-bottom-nav" aria-label="底部导航">
       <div className="ui-floating-tabbar app-bottom-nav-inner">
-        <button type="button" className="app-bottom-nav-item" data-state={pathname === '/' ? 'active' : 'idle'} aria-current={pathname === '/' ? 'page' : undefined} aria-label="首页" title="首页" {...homePressHandlers}>
+        <button type="button" className="app-bottom-nav-item" data-state={pathname === APP_ROUTES.home ? 'active' : 'idle'} aria-current={pathname === APP_ROUTES.home ? 'page' : undefined} aria-label="首页" title="首页" {...homePressHandlers}>
           <span className="app-bottom-nav-icon-shell" aria-hidden="true"><House className="app-bottom-nav-icon" /></span>
           <span className="app-bottom-nav-label">首页</span>
         </button>
-        <button type="button" className="app-bottom-nav-item app-bottom-nav-item--messages" data-state={pathname === '/messages' ? 'active' : 'idle'} aria-current={pathname === '/messages' ? 'page' : undefined} aria-label="消息" title="消息" {...messagesPressHandlers}>
+        <button type="button" className="app-bottom-nav-item app-bottom-nav-item--messages" data-state={pathname === APP_ROUTES.messages ? 'active' : 'idle'} aria-current={pathname === APP_ROUTES.messages ? 'page' : undefined} aria-label="消息" title="消息" {...messagesPressHandlers}>
           <span className="app-bottom-nav-icon-shell" aria-hidden="true"><Bell className="app-bottom-nav-icon" /></span>
           <span className="app-bottom-nav-label">消息</span>
         </button>
@@ -163,14 +169,14 @@ export default function AppBottomNavigation() {
           <span className="app-bottom-nav-icon-shell" aria-hidden="true"><CirclePlus className="app-bottom-nav-icon" /></span>
           <span className="app-bottom-nav-label">发推</span>
         </button>
-        <button type="button" className="app-bottom-nav-item app-bottom-nav-item--sponsor" data-state={pathname === '/sponsor' ? 'active' : 'idle'} aria-current={pathname === '/sponsor' ? 'page' : undefined} aria-label="买曝光" title="买曝光" {...sponsorPressHandlers}>
+        <button type="button" className="app-bottom-nav-item app-bottom-nav-item--sponsor" data-state={pathname === APP_ROUTES.sponsor ? 'active' : 'idle'} aria-current={pathname === APP_ROUTES.sponsor ? 'page' : undefined} aria-label="买曝光" title="买曝光" {...sponsorPressHandlers}>
           <span className="app-bottom-nav-icon-shell" aria-hidden="true">
             <TrendingUp className="app-bottom-nav-icon" />
             {signupRewardBadgePoints > 0 ? <span className="app-bottom-nav-reward-badge">+{signupRewardBadgePoints}</span> : null}
           </span>
           <span className="app-bottom-nav-label">买曝光</span>
         </button>
-        <button type="button" className="app-bottom-nav-item app-bottom-nav-item--profile" data-state={pathname === '/profile' ? 'active' : 'idle'} aria-current={pathname === '/profile' ? 'page' : undefined} aria-label="我的" title="我的" {...profilePressHandlers}>
+        <button type="button" className="app-bottom-nav-item app-bottom-nav-item--profile" data-state={pathname === APP_ROUTES.profile ? 'active' : 'idle'} aria-current={pathname === APP_ROUTES.profile ? 'page' : undefined} aria-label="我的" title="我的" {...profilePressHandlers}>
           <span className="app-bottom-nav-icon-shell app-bottom-nav-avatar-shell" data-tui-plus={profileIsTuiPlus ? 'true' : undefined} aria-hidden="true">
             {user ? (
               <AvatarImage src={user.photoUrl || ''} name={profileName} id={user.id} alt={profileName} className="app-bottom-nav-avatar" variant="thumb" />

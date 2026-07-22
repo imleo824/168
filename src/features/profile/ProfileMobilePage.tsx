@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { APP_ROUTES } from "@/app/routePaths";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import PageHeader from '@/ui/PageHeader';
@@ -511,7 +512,7 @@ export default function ProfileMobile() {
   }, [fetchNextFans, hasMoreFans, isFetchingNextFans]);
   const openRelationUser = useCallback((targetUserId: string) => {
     if (!targetUserId) return;
-    navigate(user?.id === targetUserId ? '/profile' : `/user/${targetUserId}`);
+    navigate(user?.id === targetUserId ? APP_ROUTES.profile : `/user/${targetUserId}`);
   }, [navigate, user?.id]);
 
   const { guarded: guardedStatusChange } = useInteractionGuard(handleStatusChange, 520);
@@ -543,7 +544,7 @@ export default function ProfileMobile() {
         <SEO title="登录推推" description="登录推推，管理您发布的圈内分类信息、资源和服务。" noindex />
         <PageHeader title="" titleAs="div" showBack={false} titleAlign="center" className="profile-modern-topbar" />
         <PageContentShell as="main" className="ui-auth-required-wrap ui-app-page-main">
-          <ProfileAuthRequiredState onAction={() => requireAuth(() => navigate("/profile"))} />
+          <ProfileAuthRequiredState onAction={() => requireAuth(() => navigate(APP_ROUTES.profile))} />
         </PageContentShell>
       </AppPage>
     );
@@ -702,7 +703,7 @@ export default function ProfileMobile() {
         onLogout={() => {
           setIsSecurityOpen(false);
           logout();
-          navigate('/');
+          navigate(APP_ROUTES.home);
         }}
       />
     </AppPage>

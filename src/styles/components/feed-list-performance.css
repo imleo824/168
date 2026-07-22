@@ -3,11 +3,11 @@
 @layer utilities {
   .post-feed-list-panel .feed-list-item {
     content-visibility: auto;
-    contain-intrinsic-size: 1px 320px;
+    contain-intrinsic-size: var(--ui-feed-list-item-intrinsic-inline-size) var(--ui-feed-list-item-intrinsic-size);
   }
 
   .post-feed-list-panel .feed-list-item--media {
-    contain-intrinsic-size: 1px 520px;
+    contain-intrinsic-size: var(--ui-feed-list-item-intrinsic-inline-size) var(--ui-feed-list-item-media-intrinsic-size);
   }
 
   .post-feed-list-panel .feed-list-item:nth-child(-n + 2) {

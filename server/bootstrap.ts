@@ -865,6 +865,25 @@ registerAccountRoutes(app, {
   getFeedBadgeCounts,
 });
 
+registerPostCreateRoutes(app, {
+  POST_ID_PATTERN,
+  POST_CREATED_CHAT_QUOTE_SELECT,
+  normalizeExternalLocation,
+  derivePostLocation,
+  normalizeTelegramContactHandle,
+  normalizeBooleanInput,
+  normalizeShowContactInput,
+  canonicalizePersistentUploadedImageUrl,
+  resolveQuotablePostMeta,
+  adjustPostQuoteCount,
+  publishPostCreatedToChat,
+  markContentDataChanged,
+  isDatabaseUnavailableError,
+  isDatabaseSchemaDriftError,
+  sendDatabaseUnavailable,
+  sendDatabaseSchemaDrift,
+});
+
 registerPostRoutes(app, {
   publicReadLimiter,
   authMiddleware,
@@ -1006,25 +1025,6 @@ registerSeoFallbackRoutes(app, {
   buildPostSharePreviewCandidates,
   fetchSocialPreviewImage,
   sendShareFallbackImage,
-});
-
-registerPostCreateRoutes(app, {
-  POST_ID_PATTERN,
-  POST_CREATED_CHAT_QUOTE_SELECT,
-  normalizeExternalLocation,
-  derivePostLocation,
-  normalizeTelegramContactHandle,
-  normalizeBooleanInput,
-  normalizeShowContactInput,
-  canonicalizePersistentUploadedImageUrl,
-  resolveQuotablePostMeta,
-  adjustPostQuoteCount,
-  publishPostCreatedToChat,
-  markContentDataChanged,
-  isDatabaseUnavailableError,
-  isDatabaseSchemaDriftError,
-  sendDatabaseUnavailable,
-  sendDatabaseSchemaDrift,
 });
 
 registerPostTelegramSyncRoutes(app, {

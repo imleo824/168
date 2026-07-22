@@ -72,7 +72,7 @@ const getRechargeStatusMeta = (item: any) => {
     return { label: '已过期', className: 'admin-tone-neutral', active: false };
   }
   if (status === 'BELOW_MINIMUM') {
-    return { label: '低于最低入账', className: 'bg-orange-50 text-orange-600', active: false };
+    return { label: '低于最低入账', className: 'admin-tone-below-minimum', active: false };
   }
   if (status === 'CANCELLED') {
     return { label: '已取消', className: 'admin-tone-neutral', active: false };
@@ -173,7 +173,7 @@ export function AdminDesktopDataTable({
                          <tr><td colSpan={tableColumnCount} className="admin-table-state-cell">数据加载中...</td></tr>
                       ) : listError ? (
                          <tr>
-                           <td colSpan={tableColumnCount} className="text-center py-20 text-rose-500 font-bold">
+                           <td colSpan={tableColumnCount} className="admin-table-state-cell admin-table-state-cell--danger">
                              <div>{listError}</div>
                           <button
                             type="button"
@@ -188,7 +188,7 @@ export function AdminDesktopDataTable({
                          <tr><td colSpan={tableColumnCount} className="admin-table-state-cell">暂无相关记录</td></tr>
                       ) : (
                         dataList.map((item) => (
-                          <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
+                          <tr key={item.id} className="admin-table-row-interactive transition-colors">
                             {activeTab === 'content' ? (
                               <>
                                 <td className="px-6 py-4">
@@ -219,7 +219,7 @@ export function AdminDesktopDataTable({
                                           className={`pressable admin-table-action admin-table-action--compact ${
                                             editingPostDraftCategoryId === (item.category?.id || '')
                                               ? 'admin-tone-neutral'
-                                              : 'bg-gray-900 text-white'
+                                              : 'admin-primary-action'
                                           }`}
                                         >
                                           {processingAdminActionId === item.id ? '处理中' : '保存'}
@@ -247,7 +247,7 @@ export function AdminDesktopDataTable({
                                     </div>
                                   )}
                                 </td>
-                                <td className="px-6 py-4 text-xs font-bold text-gray-900">{item.user?.displayName}</td>
+                                <td className="px-6 py-4 admin-text-strong-xs">{item.user?.displayName}</td>
                                 <td className="px-6 py-4">
                                   <span className="admin-table-meta admin-table-meta--mono admin-table-meta--break">{item.source || '-'}</span>
                                 </td>
@@ -383,10 +383,10 @@ export function AdminDesktopDataTable({
                                     </button>
                                   </div>
                                   {isAdHomePromotion(item) && editingPromotionId === item.id ? (
-                                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                                    <div className="admin-dialog-overlay admin-modal-scrim-soft">
                                       <div className="admin-editor-panel">
                                         <div className="admin-editor-panel-title">编辑广告核心信息</div>
-                                        <div className="grid gap-2">
+                                        <div className="admin-editor-field-stack">
                                           <input
                                             className="admin-form-control"
                                             value={editingPromotionTargetUrl}
@@ -406,13 +406,13 @@ export function AdminDesktopDataTable({
                                             placeholder="移动端广告图片地址"
                                           />
                                         </div>
-                                        <div className="mt-4 grid grid-cols-2 gap-2">
+                                        <div className="admin-editor-action-grid">
                                           <button
                                             type="button"
                                             onClick={() => updatePromotion(item)}
                                             disabled={processingAdminActionId === item.id}
                                             className={`pressable admin-table-action admin-table-action--block ${
-                                              processingAdminActionId === item.id ? 'bg-gray-900 text-white/50' : 'bg-gray-900 text-white'
+                                              processingAdminActionId === item.id ? 'admin-primary-action admin-primary-action--muted' : 'admin-primary-action'
                                             }`}
                                           >
                                             {processingAdminActionId === item.id ? '处理中' : '保存'}
@@ -531,7 +531,7 @@ export function AdminDesktopDataTable({
                                   <span className="admin-text-value-sm">{item.usdtAmount}</span>
                                 </td>
                                 <td className="px-6 py-4">
-                                  <span className="text-sm font-black text-emerald-600">{getAdminRechargeDisplayPoints(item)}</span>
+                                  <span className="admin-text-value-sm admin-value-success">{getAdminRechargeDisplayPoints(item)}</span>
                                 </td>
                                 <td className="px-6 py-4">
                                   {(() => {
@@ -638,7 +638,7 @@ export function AdminDesktopDataTable({
                                 <td className="px-6 py-4 align-top">
                                   <span className={`admin-status-badge ${
                                     item.authorType === 'BOT'
-                                      ? 'bg-indigo-50 text-indigo-600'
+                                      ? 'admin-tone-bot'
                                       : item.authorType === 'SYSTEM'
                                         ? 'admin-tone-warning'
                                         : 'admin-tone-success'
@@ -727,14 +727,14 @@ export function AdminDesktopDataTable({
                                 </td>
                                 <td className="px-6 py-4">
                                    <div className="flex flex-col">
-                                      <span className="text-xs font-bold text-gray-700">
+                                      <span className="admin-text-strong-xs">
                                         {getTransactionTypeLabel(item)}
                                       </span>
                                       <span className="admin-table-meta">{item.description}</span>
                                    </div>
                                 </td>
                                 <td className="px-6 py-4">
-                                   <span className={`text-sm font-black ${item.amount > 0 ? 'text-emerald-600' : 'text-rose-500'}`}>
+                                   <span className={`admin-text-value-sm ${item.amount > 0 ? 'admin-value-success' : 'admin-value-danger'}`}>
                                       {item.amount > 0 ? `+${item.amount}` : item.amount}
                                    </span>
                                 </td>

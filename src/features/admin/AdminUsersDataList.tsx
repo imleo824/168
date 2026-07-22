@@ -97,7 +97,7 @@ export function AdminUsersDataList({
               {dataList.map((item) => {
                 const member = getMemberStatusMeta(item);
                 return (
-                  <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
+                  <tr key={item.id} className="admin-table-row-interactive transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-2">
                         <AvatarImage

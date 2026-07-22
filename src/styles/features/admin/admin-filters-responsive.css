@@ -9,7 +9,7 @@
     display: grid;
     gap: var(--ui-admin-filter-gap);
     border-bottom: var(--ui-border-width-hairline) solid var(--ui-surface-muted);
-    background: color-mix(in srgb, var(--ui-surface-muted) 70%, var(--ui-color-white));
+    background: var(--ui-admin-filter-bar-surface);
     padding: var(--ui-admin-filter-panel-padding);
     backdrop-filter: var(--ui-glass-blur-md);
     -webkit-backdrop-filter: var(--ui-glass-blur-md);
@@ -209,7 +209,7 @@
     display: none;
     gap: var(--ui-space-3);
     min-width: 0;
-    background: color-mix(in srgb, var(--ui-surface-muted) 64%, var(--ui-color-white));
+    background: var(--ui-admin-mobile-list-surface);
     padding: var(--ui-space-3);
   }
 

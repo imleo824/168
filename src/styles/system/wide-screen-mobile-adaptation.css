@@ -7,7 +7,9 @@
 @layer utilities {
   .app-shell[data-route-surface='user'] {
     --app-mobile-canvas-target-width: calc(var(--ui-space-8) * 12 + var(--ui-space-2) + var(--ui-space-half));
-    --app-mobile-canvas-width: 100vw;
+    --app-mobile-canvas-width: var(--ui-viewport-width);
+    --app-shell-viewport-width: var(--ui-viewport-width);
+    --app-shell-viewport-height: var(--app-layout-vh);
     --app-desktop-sidebar-width: calc(var(--ui-space-8) * 7 + var(--ui-space-4));
     --app-desktop-feed-main-width: calc(var(--ui-space-8) * 21 + var(--ui-space-4));
     --app-desktop-reading-main-width: var(--app-desktop-feed-main-width);
@@ -16,6 +18,7 @@
       (var(--ui-app-shell-desktop-padding-x) * 2)
     );
     --app-desktop-conversation-main-width: calc(var(--ui-space-8) * 26 + var(--ui-space-2));
+    --app-desktop-conversation-frame-padding: var(--ui-space-2);
     --app-desktop-profile-main-width: calc(var(--ui-space-8) * 27 + var(--ui-space-4));
     --app-desktop-compose-main-width: calc(var(--ui-space-8) * 28 + var(--ui-space-4));
     --app-desktop-workspace-main-width: calc(var(--ui-space-8) * 29 + var(--ui-space-4));
@@ -26,7 +29,6 @@
     --app-desktop-shell-gap: var(--ui-space-6);
     --app-desktop-shell-padding-x: var(--ui-space-6);
     --app-desktop-shell-padding-y: var(--ui-space-5);
-    --app-desktop-conversation-frame-padding: var(--ui-space-2);
     --app-desktop-frame-width: calc(
       var(--app-desktop-sidebar-width) +
       var(--app-desktop-workspace-main-width) +
@@ -36,7 +38,7 @@
     --app-adaptive-scale: 1;
     --app-adaptive-scale-max: 1.28;
     --app-adaptive-scale-wide: 1.32;
-    --app-adaptive-visual-width: 100vw;
+    --app-adaptive-visual-width: var(--app-shell-viewport-width);
     --app-adaptive-canvas-border: var(--ui-border-none);
     --app-adaptive-canvas-shadow: var(--ui-shadow-none);
     --app-adaptive-page-bg: var(--ui-surface-card);
@@ -93,7 +95,7 @@
   .app-shell[data-route-surface='admin'] .app-shell-main {
     width: 100%;
     max-width: var(--ui-max-width-none);
-    min-height: 100svh;
+    min-height: var(--app-shell-viewport-height, var(--app-layout-vh));
     margin: var(--ui-space-none);
     overflow: visible;
     border: var(--ui-border-none);
@@ -108,7 +110,7 @@
 
   .app-shell[data-route-surface='user'] .app-shell-main {
     width: 100%;
-    min-height: 100svh;
+    min-height: var(--app-shell-viewport-height);
     margin-inline: auto;
     background: var(--ui-surface-page);
   }
@@ -121,7 +123,7 @@
   @media (min-width: 768px) and (max-width: 1023px) {
     .app-shell[data-route-surface='user'] {
       --app-mobile-canvas-width: var(--app-mobile-canvas-target-width);
-      --app-adaptive-scale: min(var(--app-adaptive-scale-max), calc((100vw - var(--ui-space-8)) / var(--app-mobile-canvas-target-width)));
+      --app-adaptive-scale: min(var(--app-adaptive-scale-max), calc((var(--app-shell-viewport-width) - var(--ui-space-8)) / var(--app-mobile-canvas-target-width)));
       --app-adaptive-visual-width: calc(var(--app-mobile-canvas-width) * var(--app-adaptive-scale));
       --app-adaptive-canvas-border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
       --app-adaptive-canvas-shadow: 0 var(--ui-space-6) calc(var(--ui-space-8) * 2 + var(--ui-space-4)) color-mix(in srgb, var(--ui-color-black) 10%, transparent);
@@ -129,7 +131,7 @@
         radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--ui-brand) 8%, transparent), transparent 32%),
         var(--ui-surface-page);
       display: flex;
-      min-height: 100svh;
+      min-height: var(--app-shell-viewport-height);
       justify-content: center;
       overflow-x: hidden;
       background: var(--app-adaptive-page-bg);
@@ -139,7 +141,7 @@
       position: relative;
       width: var(--app-mobile-canvas-width);
       max-width: var(--app-mobile-canvas-width);
-      min-height: calc(100svh / var(--app-adaptive-scale));
+      min-height: calc(var(--app-shell-viewport-height) / var(--app-adaptive-scale));
       flex: 0 0 var(--app-mobile-canvas-width);
       border-inline: var(--app-adaptive-canvas-border);
       background: var(--ui-surface-page);
@@ -166,13 +168,14 @@
     .app-shell[data-route-surface='user'] {
       display: grid;
       width: 100%;
-      min-height: 100svh;
+      min-height: var(--app-shell-viewport-height);
       --app-desktop-balance-spacer-width: var(--ui-space-none);
       --app-desktop-shell-active-width: min(
         var(--app-desktop-frame-width),
-        calc(100vw - (var(--app-desktop-shell-padding-x) * 2))
+        calc(var(--app-shell-viewport-width) - (var(--app-desktop-shell-padding-x) * 2))
       );
-      --app-desktop-shell-left: calc((100vw - var(--app-desktop-shell-active-width)) / 2);
+      --app-desktop-shell-left: calc((var(--app-shell-viewport-width) - var(--app-desktop-shell-active-width)) / 2);
+      --app-desktop-shell-content-height: calc(var(--app-shell-viewport-height) - (var(--app-desktop-shell-padding-y) * 2));
       --app-desktop-main-side-gap-total: var(--app-desktop-shell-gap);
       --app-desktop-context-side-gap-total: calc(var(--app-desktop-shell-gap) * 2);
       --app-desktop-context-active-width: min(
@@ -207,16 +210,15 @@
       gap: var(--app-desktop-shell-gap);
       align-items: start;
       justify-content: center;
-      overflow-x: hidden;
+      height: var(--app-shell-viewport-height);
+      min-height: var(--app-shell-viewport-height);
+      overflow: hidden;
       padding: var(--app-desktop-shell-padding-y) var(--app-desktop-shell-padding-x);
       background: var(--ui-surface-page);
     }
 
     .app-shell[data-route-surface='user'][data-desktop-surface='feed'] {
-      height: 100svh;
-      min-height: 100svh;
       align-items: stretch;
-      overflow: hidden;
     }
 
     .app-shell[data-route-surface='user'] > .ui-layer-header {
@@ -268,8 +270,7 @@
         calc(var(--app-desktop-main-active-width) - (var(--ui-app-shell-desktop-padding-x) * 2))
       );
       --app-desktop-main-content-height: calc(
-        100svh -
-        (var(--app-desktop-shell-padding-y) * 2) -
+        var(--app-desktop-shell-content-height) -
         (var(--ui-border-width-hairline) * 2) -
         var(--ui-app-shell-desktop-padding-y) -
         var(--ui-bottom-nav-page-bottom-space)
@@ -280,37 +281,39 @@
       position: relative;
       width: 100%;
       max-width: var(--ui-max-width-none);
-      min-height: calc(100svh - (var(--app-desktop-shell-padding-y) * 2));
+      height: var(--app-desktop-shell-content-height);
+      min-height: var(--ui-space-none);
+      max-height: var(--app-desktop-shell-content-height);
       flex: initial;
-      overflow: visible;
+      overflow-x: hidden;
+      overflow-y: auto;
+      overscroll-behavior: contain;
       border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
       border-radius: var(--ui-radius-2xl);
       background: var(--ui-surface-page);
       box-shadow: var(--ui-shadow-card);
       transform: none;
       transform-origin: initial;
+      -webkit-overflow-scrolling: touch;
     }
 
     .app-shell[data-route-surface='user'][data-desktop-surface='feed'] .app-shell-main {
-      height: calc(100svh - (var(--app-desktop-shell-padding-y) * 2));
-      min-height: 0;
       overflow: hidden;
     }
 
-    .app-shell[data-route-surface='user']:not([data-desktop-surface='conversation']) .app-shell-main > :is(.ui-app-page, .ui-page, .surface-page) {
+    .app-shell[data-route-surface='user'][data-desktop-surface='conversation'] .app-shell-main {
+      padding: var(--app-desktop-conversation-frame-padding);
+    }
+
+    .app-shell[data-route-surface='user'] .app-shell-main > :is(.ui-app-page, .ui-page, .surface-page) {
       min-height: var(--app-desktop-main-content-height);
       max-height: var(--ui-max-height-none);
     }
 
-    .app-shell[data-route-surface='user']:not([data-desktop-surface='conversation']) .app-shell-main > :is(.ui-app-page, .ui-page, .surface-page) > .ui-topbar {
+    .app-shell[data-route-surface='user'] .app-shell-main > :is(.ui-app-page, .ui-page, .surface-page) > .ui-topbar {
       width: 100%;
       max-width: var(--app-desktop-page-content-width);
       margin-inline: auto;
-    }
-
-    .app-shell[data-route-surface='user'][data-desktop-surface='conversation'] .app-shell-main {
-      overflow: hidden;
-      padding: var(--app-desktop-conversation-frame-padding);
     }
 
     .app-shell[data-route-surface='user'] .app-bottom-nav {
@@ -323,7 +326,7 @@
       top: var(--app-desktop-shell-padding-y);
       display: flex;
       min-width: var(--ui-space-none);
-      max-height: calc(100svh - (var(--app-desktop-shell-padding-y) * 2));
+      max-height: var(--app-desktop-shell-content-height);
       flex-direction: column;
       gap: var(--ui-space-4);
     }
@@ -331,7 +334,7 @@
     .app-desktop-sidebar {
       width: 100%;
       align-self: stretch;
-      top: var(--ui-space-none);
+      top: var(--app-desktop-shell-padding-y);
     }
 
     .app-shell[data-route-surface='user']:not([data-desktop-surface='feed']) .app-desktop-context-rail {
@@ -355,7 +358,7 @@
       gap: var(--ui-space-3);
       padding: var(--ui-space-4);
       color: var(--ui-text-strong);
-      text-decoration: none;
+      text-decoration: var(--ui-text-decoration-none);
     }
 
     .app-desktop-brand-mark {
@@ -407,7 +410,7 @@
       font-size: var(--ui-text-sm);
       font-weight: var(--ui-font-weight-strong);
       line-height: var(--ui-line-tight);
-      text-decoration: none;
+      text-decoration: var(--ui-text-decoration-none);
       transition:
         background-color var(--ui-duration-base) var(--ease-standard),
         border-color var(--ui-duration-base) var(--ease-standard),
@@ -491,7 +494,7 @@
       font-weight: var(--ui-font-weight-strong);
       line-height: var(--ui-line-tight);
       text-align: center;
-      text-decoration: none;
+      text-decoration: var(--ui-text-decoration-none);
       transition:
         background-color var(--ui-duration-base) var(--ease-standard),
         border-color var(--ui-duration-base) var(--ease-standard),
@@ -515,14 +518,16 @@
   @media (min-width: 1024px) and (max-width: 1179px) {
     .app-shell[data-route-surface='user'] {
       --app-desktop-balance-spacer-width: var(--ui-space-none);
+      --app-desktop-main-width: var(--app-desktop-workspace-main-width);
       --app-desktop-main-side-gap-total: var(--app-desktop-shell-gap);
       grid-template-columns:
         minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
         minmax(0, var(--app-desktop-main-active-width));
-      justify-content: start;
+      justify-content: center;
     }
 
     .app-shell[data-route-surface='user'][data-desktop-surface='feed'] {
+      --app-desktop-main-width: var(--app-desktop-workspace-main-width);
       --app-desktop-main-side-gap-total: var(--app-desktop-shell-gap);
       grid-template-columns:
         minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
@@ -551,7 +556,7 @@
     .app-shell[data-route-surface='user'] .app-shell-main {
       width: 100%;
       max-width: var(--ui-max-width-none);
-      min-height: 100svh;
+      min-height: var(--app-shell-viewport-height);
       margin-inline: var(--ui-space-none);
       border-inline: var(--ui-border-none);
       box-shadow: var(--ui-shadow-none);

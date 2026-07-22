@@ -32,9 +32,6 @@ export async function registerPasswordAccount(options: {
       throw Object.assign(new Error('这个账号已被使用，请换一个'), { statusCode: 400 });
     }
 
-    if (inviteCode) {
-    }
-
     const passwordHash = await bcrypt.hash(password, 10);
     return prisma.$transaction(async (tx) => {
       const configuredReward = Number(signupRewardPoints);

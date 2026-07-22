@@ -4,7 +4,7 @@
   .promote-mobile-page .promote-picker-sheet,
   .promote-picker-sheet {
     width: 100%;
-    max-width: min(100%, var(--ui-home-desktop-feed-width));
+    max-width: min(100%, var(--ui-promote-page-content-max));
     max-height: min(
       calc(var(--ui-promote-picker-sheet-max-height) - env(safe-area-inset-top)),
       calc(var(--ui-visual-viewport-height) - env(safe-area-inset-top))

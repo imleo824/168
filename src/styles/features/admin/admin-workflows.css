@@ -367,12 +367,12 @@
   .admin-report-metric-card {
     border: var(--ui-border-width-hairline) solid var(--ui-surface-muted);
     border-radius: var(--ui-radius-xl);
-    background: color-mix(in srgb, var(--ui-surface-muted) 40%, var(--ui-color-white));
+    background: var(--ui-admin-report-metric-surface);
     padding: var(--ui-space-3);
   }
 
   .admin-report-metric-card--soft {
-    background: color-mix(in srgb, var(--ui-surface-muted) 30%, var(--ui-color-white));
+    background: var(--ui-admin-report-metric-soft-surface);
   }
 
   .admin-report-chart {
@@ -381,7 +381,7 @@
     height: var(--ui-admin-report-chart-height);
     border: var(--ui-border-width-hairline) solid var(--ui-admin-line);
     border-radius: var(--ui-radius-xl);
-    background: color-mix(in srgb, var(--ui-surface-muted) 30%, transparent);
+    background: var(--ui-admin-report-chart-surface);
   }
 
   .admin-report-kicker {

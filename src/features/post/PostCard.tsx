@@ -2,6 +2,7 @@ import React, { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef, 
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ChevronDown, FlameKindling, Link2, MapPin, Megaphone, MessageCircle, Quote, RadioTower, RefreshCw, Share, ThumbsUp } from 'lucide-react';
 
+import { APP_ROUTES } from '@/app/routePaths';
 import { useAuth } from '@/context/AuthContext';
 import { PostOptionsMenu } from '@/features/post/AnchoredActionMenu';
 import PostMediaGrid from '@/features/post/PostMediaGrid';
@@ -489,7 +490,7 @@ const PostCard = memo(function PostCard({ post: inputPost, isOwner = false, show
   const canOpenProfile = !isAnon && Boolean(authorId);
   const authorTuiPlusActive = Boolean(canOpenProfile && isTuiPlusUserLike(post.user));
   const hasRecentAuthorPost = Boolean(canOpenProfile && post.isAnonymous !== true && post.user?.hasRecentPost);
-  const profileTo = !canOpenProfile ? '#' : currentUser?.id === authorId ? '/profile' : `/user/${authorId}`;
+  const profileTo = !canOpenProfile ? '#' : currentUser?.id === authorId ? APP_ROUTES.profile : `/user/${authorId}`;
   const profileState = canOpenProfile && currentUser?.id !== authorId ? withCurrentBackground(location) : undefined;
   const canShowContact = Boolean(post.showContact !== false && cleanString(post.contact));
   const contactUrl = canShowContact ? getTelegramContactUrl(post.contact || '') : '';
@@ -529,7 +530,7 @@ const PostCard = memo(function PostCard({ post: inputPost, isOwner = false, show
 
   const handleCardClick = useCallback((event: React.MouseEvent<HTMLElement>) => { if (event.defaultPrevented || isNestedInteractiveTarget(event.target, event.currentTarget)) return; openPostDetail(event); }, [openPostDetail]);
   const handleProfileClick = useCallback((event: React.MouseEvent<HTMLAnchorElement>) => { event.stopPropagation(); if (!canOpenProfile) event.preventDefault(); else rememberListReturnPosition(event.currentTarget); }, [canOpenProfile]);
-  const handleAnonymousTryClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => { stopAndPrevent(event); requireAuth(() => { primePostCreateComposerFocus(); navigate('/create', { state: { from: `${location.pathname}${location.search}`, defaultAnonymous: true } }); }); }, [location.pathname, location.search, navigate, requireAuth]);
+  const handleAnonymousTryClick = useCallback((event: React.MouseEvent<HTMLButtonElement>) => { stopAndPrevent(event); requireAuth(() => { primePostCreateComposerFocus(); navigate(APP_ROUTES.create, { state: { from: `${location.pathname}${location.search}`, defaultAnonymous: true } }); }); }, [location.pathname, location.search, navigate, requireAuth]);
   const handleTagClick = useCallback((event: React.MouseEvent, id: string, name: string, type: 'category' | 'location') => { event.stopPropagation(); event.preventDefault(); const cleanId = cleanString(id); const cleanName = cleanString(name); const targetId = type === 'location' ? toLocationCategoryId(cleanName) : cleanId || cleanName; if (!targetId) return; rememberListReturnPosition(event.currentTarget as HTMLElement); navigate(type === 'location' ? `/category/${targetId}?view=location` : `/category/${encodeURIComponent(targetId)}`, { state: withCurrentBackground(location, { name: cleanName || targetId, resultType: type }) }); }, [location, navigate]);
   const handleStructuredMetaClick = useCallback((event: React.MouseEvent, item: PostStructuredMetaItem) => { event.stopPropagation(); event.preventDefault(); const filters = item.filterValues && Object.keys(item.filterValues).length > 0 ? item.filterValues : { [item.key]: item.rawValue ?? item.value }; if (Object.keys(filters).length === 0) return; const params = new URLSearchParams(); params.set('view', 'tag'); params.set('categoryMetaFilters', JSON.stringify(filters)); rememberListReturnPosition(event.currentTarget as HTMLElement); navigate(`/category/search?${params.toString()}`, { state: withCurrentBackground(location, { name: item.value, resultType: 'tag' }) }); }, [location, navigate]);
   const handleToggleLike = useCallback((event: React.MouseEvent) => { stopAndPrevent(event); requireAuth(() => { if (!hasLiked) triggerLikeFeedback(); void likeLock.run(); }); }, [hasLiked, likeLock, requireAuth, triggerLikeFeedback]);

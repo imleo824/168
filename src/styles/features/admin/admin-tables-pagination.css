@@ -12,7 +12,7 @@
 
   .admin-table-head-row {
     border-bottom: var(--ui-border-width-hairline) solid var(--ui-surface-muted);
-    background: color-mix(in srgb, var(--ui-surface-muted) 50%, var(--ui-color-white));
+    background: var(--ui-admin-table-head-surface);
   }
 
   .admin-table-head-cell {

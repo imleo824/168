@@ -11,7 +11,7 @@
     margin-inline: auto;
     padding-inline: var(--ui-page-padding-x);
     padding-top: var(--ui-space-3);
-    padding-bottom: calc(var(--ui-page-bottom-safe) + var(--ui-bottom-nav-height, 0px));
+    padding-bottom: calc(var(--ui-page-bottom-safe) + var(--ui-bottom-nav-height, var(--ui-space-none)));
   }
 
   @media (min-width: 1024px) {
@@ -46,8 +46,8 @@
 
   .messages-read-all-button:hover,
   .messages-read-all-button:active {
-    border-color: color-mix(in srgb, var(--ui-brand) 10%, transparent);
-    background: color-mix(in srgb, var(--ui-brand) 6%, transparent);
+    border-color: var(--ui-messages-read-all-hover-border);
+    background: var(--ui-messages-read-all-hover-surface);
   }
 
   .messages-read-all-button:active {
@@ -83,7 +83,7 @@
     grid-template-columns: auto auto minmax(0, 1fr);
     align-items: center;
     gap: var(--ui-space-3);
-    border: var(--ui-border-width-hairline) solid color-mix(in srgb, var(--ui-social-line-soft) 88%, transparent);
+    border: var(--ui-border-width-hairline) solid var(--ui-messages-card-border);
     border-radius: var(--ui-radius-2xl);
     background: var(--ui-surface-card);
     padding: calc(var(--ui-space-3) + var(--ui-space-half));
@@ -100,13 +100,13 @@
   }
 
   .messages-list-item:hover {
-    border-color: color-mix(in srgb, var(--ui-text-strong) 8%, transparent);
+    border-color: var(--ui-messages-card-hover-border);
     box-shadow: var(--ui-shadow-card-hover);
   }
 
   .messages-list-item[data-read='false'] {
-    border-color: color-mix(in srgb, var(--ui-brand) 13%, transparent);
-    background: color-mix(in srgb, var(--ui-brand) 2%, var(--ui-surface-card));
+    border-color: var(--ui-messages-unread-border);
+    background: var(--ui-messages-unread-surface);
   }
 
   .messages-list-item[data-read='false']::after {
@@ -116,8 +116,8 @@
     width: calc(var(--ui-space-1) + var(--ui-space-half));
     height: calc(var(--ui-space-1) + var(--ui-space-half));
     border-radius: var(--ui-radius-pill);
-    background: color-mix(in srgb, var(--ui-brand) 90%, var(--ui-text-strong));
-    box-shadow: 0 0 0 var(--ui-border-width-hairline) var(--ui-surface-card), 0 0 0 calc(var(--ui-border-width-hairline) * 3) color-mix(in srgb, var(--ui-brand) 8%, transparent);
+    background: var(--ui-messages-unread-dot-surface);
+    box-shadow: var(--ui-messages-unread-dot-shadow);
     content: '';
   }
 
@@ -136,11 +136,9 @@
   }
 
   .messages-avatar-button--system {
-    border: var(--ui-border-width-hairline) solid color-mix(in srgb, var(--ui-brand) 12%, transparent);
-    background:
-      radial-gradient(circle at 28% 18%, color-mix(in srgb, var(--ui-brand) 16%, transparent), transparent 42%),
-      color-mix(in srgb, var(--ui-brand) 7%, var(--ui-surface-muted));
-    color: color-mix(in srgb, var(--ui-brand) 78%, var(--ui-text-secondary));
+    border: var(--ui-border-width-hairline) solid var(--ui-messages-system-avatar-border);
+    background: var(--ui-messages-system-avatar-surface);
+    color: var(--ui-messages-system-avatar-color);
   }
 
   .messages-system-avatar-icon {
@@ -162,8 +160,8 @@
     align-items: center;
     justify-content: center;
     border-radius: var(--ui-radius-pill);
-    background: color-mix(in srgb, var(--ui-brand) 5%, var(--ui-surface-muted));
-    color: color-mix(in srgb, var(--ui-brand) 72%, var(--ui-text-secondary));
+    background: var(--ui-messages-item-icon-surface);
+    color: var(--ui-messages-item-icon-color);
   }
 
   .messages-item-icon svg {
@@ -233,7 +231,7 @@
 
   .notification-settings-card,
   .notification-settings-section {
-    border: var(--ui-border-width-hairline) solid color-mix(in srgb, var(--ui-social-line-soft) 90%, transparent);
+    border: var(--ui-border-width-hairline) solid var(--ui-messages-card-border-strong);
     border-radius: var(--ui-radius-2xl);
     background: var(--ui-surface-card);
     box-shadow: var(--ui-shadow-card);
@@ -299,7 +297,7 @@
 
   .notification-settings-section-heading,
   .notification-settings-item {
-    border-bottom: var(--ui-border-width-hairline) solid color-mix(in srgb, var(--ui-social-line-soft) 88%, transparent);
+    border-bottom: var(--ui-border-width-hairline) solid var(--ui-notification-section-divider);
     padding: var(--ui-space-3) var(--ui-space-4);
   }
 
@@ -336,8 +334,8 @@
     align-items: center;
     justify-content: center;
     border-radius: var(--ui-radius-pill);
-    background: color-mix(in srgb, var(--ui-brand) 6%, var(--ui-surface-muted));
-    color: color-mix(in srgb, var(--ui-brand) 76%, var(--ui-text-secondary));
+    background: var(--ui-notification-item-icon-surface);
+    color: var(--ui-notification-item-icon-color);
   }
 
   .notification-settings-item-icon svg {
@@ -352,9 +350,9 @@
     width: calc(var(--ui-space-8) + var(--ui-space-2));
     height: calc(var(--ui-space-4) + var(--ui-space-half));
     align-items: center;
-    border: var(--ui-border-width-hairline) solid color-mix(in srgb, var(--ui-line-medium) 78%, transparent);
+    border: var(--ui-border-width-hairline) solid var(--ui-notification-switch-border);
     border-radius: var(--ui-radius-pill);
-    background: color-mix(in srgb, var(--ui-surface-muted) 76%, var(--ui-color-white));
+    background: var(--ui-notification-switch-surface);
     padding: var(--ui-space-half);
     transition:
       background-color var(--ui-duration-base) var(--ease-standard),
@@ -367,14 +365,14 @@
     height: var(--ui-space-4);
     border-radius: var(--ui-radius-pill);
     background: var(--ui-color-white);
-    box-shadow: 0 1px 4px rgba(16, 24, 40, 0.12);
+    box-shadow: var(--ui-notification-switch-thumb-shadow);
     transform: translateX(var(--ui-space-none));
     transition: transform var(--ui-duration-slow) var(--ease-standard);
   }
 
   .notification-settings-switch[data-checked='true'] {
-    border-color: color-mix(in srgb, var(--ui-brand) 16%, transparent);
-    background: color-mix(in srgb, var(--ui-brand) 18%, var(--ui-color-white));
+    border-color: var(--ui-notification-switch-checked-border);
+    background: var(--ui-notification-switch-checked-surface);
   }
 
   .notification-settings-switch[data-checked='true'] .notification-settings-switch-thumb {

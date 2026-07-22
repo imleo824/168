@@ -200,7 +200,7 @@ function LineBrandIcon() {
   return (
     <svg className="user-space-plus-brand-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
       <path d="M12 3.2c-5.2 0-9.4 3.4-9.4 7.7 0 3.8 3.3 7 7.8 7.6l.6 2.1c.1.4.6.5.9.2l2.5-2.2c4.1-.8 7-3.8 7-7.6 0-4.4-4.2-7.8-9.4-7.8Z" fill="currentColor" />
-      <path d="M7.2 8.7h1.3v3.8h2.1v1.1H7.2V8.7Zm4 0h1.3v4.9h-1.3V8.7Zm2.2 0h1.2l1.8 2.7V8.7h1.2v4.9h-1.2l-1.8-2.7v2.7h-1.2V8.7Z" fill="var(--ui-surface-card, #fff)" />
+      <path d="M7.2 8.7h1.3v3.8h2.1v1.1H7.2V8.7Zm4 0h1.3v4.9h-1.3V8.7Zm2.2 0h1.2l1.8 2.7V8.7h1.2v4.9h-1.2l-1.8-2.7v2.7h-1.2V8.7Z" fill="var(--ui-surface-card)" />
     </svg>
   );
 }

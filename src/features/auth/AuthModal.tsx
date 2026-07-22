@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { X, Lock, User, ChevronDown, ChevronUp, Gift } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { APP_ROUTES } from '@/app/routePaths';
 import { useAuth } from '@/context/AuthContext';
 import {
   DEFAULT_HOME_TOPIC_TAB_ID,
@@ -147,7 +148,7 @@ export default function AuthModal({ isOpen, onClose, isAuthenticating }: AuthMod
 
   const goToDefaultHomeAfterAuth = useCallback(() => {
     selectDefaultHomeTopicTab();
-    navigate('/', { replace: true });
+    navigate(APP_ROUTES.home, { replace: true });
   }, [navigate]);
 
   const submitPasswordLogin = useCallback(async () => {

@@ -12,6 +12,7 @@ const pushExtraEvents = read('server/services/pwa-push-extra-events.service.ts')
 const publicProfile = read('server/services/public-user-profile.service.ts');
 const profileLinks = read('src/features/profile/UserSpaceTuiPlusLinks.tsx');
 const profileLinkStyles = read('src/styles/features/profile-plus-link-contract.css');
+const featureContractTokens = read('src/styles/tokens/feature-contracts.css');
 const notificationSettings = read('src/pages/NotificationSettings.tsx');
 const tuiPlusPage = read('src/pages/TuiPlusMobile.tsx');
 
@@ -40,7 +41,8 @@ mustHave('Own expired profile link state', profileLinks, "data-tui-plus-state={o
 mustHave('Own expired profile link state', profileLinks, "displayLinksUser?.isTuiPlus === false ? 'expired' : 'active'");
 mustHave('Own expired profile muted style', profileLinkStyles, "data-tui-plus-state='expired'");
 mustHave('Own expired profile muted style', profileLinkStyles, '--profile-plus-link-color: var(--ui-text-muted)');
-mustHave('Own expired profile muted style', profileLinkStyles, 'filter: grayscale(.18)');
+mustHave('Own expired profile muted style', profileLinkStyles, 'filter: var(--ui-profile-plus-expired-filter)');
+mustHave('Own expired profile muted token', featureContractTokens, '--ui-profile-plus-expired-filter: grayscale(0.18)');
 
 mustHave('Notification settings master copy', notificationSettings, '开启后，重要消息会收到系统提醒。');
 mustNotHave('Notification settings old master copy', notificationSettings, '有人关注或评论你时会收到系统提醒');

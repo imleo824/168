@@ -3,6 +3,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { Save } from 'lucide-react';
 import SEO from '@/platform/SEO';
+import { APP_ROUTES } from '@/app/routePaths';
 import { apiFetch } from '@/services/api';
 import { Navigate } from 'react-router-dom';
 
@@ -167,11 +168,11 @@ export default function Admin() {
   }, [fetchAdminConfig]);
 
   if (!user) {
-    return <Navigate to="/" replace />;
+    return <Navigate to={APP_ROUTES.home} replace />;
   }
 
   if (user.role !== 'ADMIN') {
-    return <Navigate to="/" replace />;
+    return <Navigate to={APP_ROUTES.home} replace />;
   }
 
   const currentCursor = cursorStack[pageIndex] || null;
@@ -929,22 +930,22 @@ export default function Admin() {
   };
 
   return (
-    <div className="admin-console-page min-h-screen w-full">
+    <div className="admin-console-page">
       <SEO title="旺财" description="管理员控制台" noindex />
 
-      <div className="flex w-full lg:min-h-screen">
+      <div className="admin-console-layout">
           <AdminSidebar
             activeTab={activeTab}
             onSwitchTab={switchTab}
           />
 
-        <main className="min-w-0 flex-1 px-2 py-3 sm:px-4 lg:px-5 lg:py-4 xl:px-6 2xl:px-8">
+        <main className="admin-console-main">
         <AdminMobileTopBar activeTabMeta={activeTabMeta} />
         <AdminTabStrip activeTab={activeTab} onSwitch={switchTab} />
 
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 lg:py-4">
+        <div className="admin-console-content">
         {activeConfigTab && (
-          <div className="space-y-6 pb-20">
+          <div className="admin-console-stack">
             {!activeSectionConfigTab ? (
               <AdminChatPanel
                 chatConfigDraft={chatConfigDraft}
@@ -994,7 +995,7 @@ export default function Admin() {
                     {configSaveError}
                   </div>
                 )}
-                <div className="flex justify-center pt-8 sm:pt-10">
+                <div className="admin-console-save-row">
                    <button
                       type="button"
                       onClick={handleSaveConfig}

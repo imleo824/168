@@ -82,7 +82,7 @@ export function AdminSystemConfigSections({
       {activeSectionConfigTab === 'ad' ? (
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2 2xl:grid-cols-3">
                   <div className="admin-section-card flex flex-col">
-                    <h3 className="text-sm sm:text-lg font-black flex items-center gap-2 mb-4 sm:mb-6 text-amber-500">
+                    <h3 className="text-sm sm:text-lg font-black flex items-center gap-2 mb-4 sm:mb-6 admin-section-heading--pin">
                       <Pin size={20} /> 列表置顶价格
                     </h3>
                     <div className="space-y-4 sm:space-y-6 flex-1">
@@ -118,7 +118,7 @@ export function AdminSystemConfigSections({
                   </div>
 
                   <div className="admin-section-card flex flex-col">
-                    <h3 className="text-sm sm:text-lg font-black flex items-center gap-2 mb-4 sm:mb-6 text-rose-500">
+                    <h3 className="text-sm sm:text-lg font-black flex items-center gap-2 mb-4 sm:mb-6 admin-section-heading--ad">
                       <Image size={20} /> 首页横幅广告投放
                     </h3>
                     <div className="space-y-4 sm:space-y-6 flex-1">
@@ -141,7 +141,7 @@ export function AdminSystemConfigSections({
                   </div>
 
                   <div className="admin-section-card flex flex-col md:col-span-2 2xl:col-span-3">
-                    <h3 className="text-sm sm:text-lg font-black flex items-center gap-2 mb-4 sm:mb-6 text-gray-900">
+                    <h3 className="text-sm sm:text-lg font-black flex items-center gap-2 mb-4 sm:mb-6 admin-section-heading--default">
                       <Image size={20} /> 发布相关价格
                     </h3>
                     <div className="space-y-4 sm:space-y-6 flex-1">
@@ -221,22 +221,16 @@ export function AdminSystemConfigSections({
                               <button
                                 type="button"
                                 onClick={() => updateConfigValue('telegram_sync_require_image', 'false')}
-                                className={`h-11 rounded-xl border text-sm font-bold transition ${
-                                  !telegramSyncRequireImage
-                                    ? 'border-gray-900 bg-gray-900 text-white'
-                                    : 'border-gray-200 bg-white text-gray-600'
-                                }`}
+                                className="admin-choice-button"
+                                data-state={!telegramSyncRequireImage ? 'selected' : 'idle'}
                               >
                                 不强制
                               </button>
                               <button
                                 type="button"
                                 onClick={() => updateConfigValue('telegram_sync_require_image', 'true')}
-                                className={`h-11 rounded-xl border text-sm font-bold transition ${
-                                  telegramSyncRequireImage
-                                    ? 'border-gray-900 bg-gray-900 text-white'
-                                    : 'border-gray-200 bg-white text-gray-600'
-                                }`}
+                                className="admin-choice-button"
+                                data-state={telegramSyncRequireImage ? 'selected' : 'idle'}
                               >
                                 必须有图
                               </button>
@@ -332,7 +326,7 @@ export function AdminSystemConfigSections({
                           <button
                             type="button"
                             onClick={addLocationPreset}
-                            className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg bg-gray-900 px-3 text-xs font-black text-white transition hover:bg-gray-700"
+                            className="admin-inline-primary-button"
                           >
                             <Plus size={14} />
                             添加国家
@@ -343,7 +337,7 @@ export function AdminSystemConfigSections({
                             <div key={`${preset.country}-${index}`} className="admin-config-card">
                               <div className="mb-3 flex items-center justify-between gap-2">
                                 <div className="flex min-w-0 items-center gap-2">
-                                  <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-gray-100 admin-field-label">
+                                  <span className="admin-index-badge admin-field-label">
                                     {String(index + 1).padStart(2, '0')}
                                   </span>
                                   <div className="min-w-0">
@@ -375,7 +369,7 @@ export function AdminSystemConfigSections({
                                   <button
                                     type="button"
                                     onClick={() => removeLocationPreset(index)}
-                                    className="grid h-8 w-8 place-items-center rounded-lg text-rose-500 transition hover:bg-rose-50"
+                                    className="admin-danger-icon-action"
                                     aria-label="删除"
                                   >
                                     <Trash2 size={14} />
@@ -405,7 +399,7 @@ export function AdminSystemConfigSections({
                             </div>
                           ))}
                         </div>
-                        <div className="mt-3 rounded-lg bg-white px-3 py-2 admin-form-note">
+                        <div className="mt-3 admin-note-panel admin-form-note">
                           当前共 {locationPresets.length} 个国家；保存后发布页地点选择会即时读取。
                         </div>
                       </div>
@@ -426,7 +420,7 @@ export function AdminSystemConfigSections({
                     <button
                     type="button"
                     onClick={addPublishCategory}
-                    className="inline-flex h-9 shrink-0 items-center gap-1.5 rounded-lg bg-gray-900 px-3 text-xs font-black text-white transition hover:bg-gray-700"
+                    className="admin-inline-primary-button"
                     >
                     <Plus size={14} />
                     添加分类
@@ -445,7 +439,7 @@ export function AdminSystemConfigSections({
                     <div key={`${category.name || category.slug || category.id}-${categoryIndex}`} className="admin-config-card sm:p-4">
                     <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                     <div className="flex min-w-0 items-center gap-2">
-                    <span className="grid h-7 w-7 shrink-0 place-items-center rounded-lg bg-gray-100 admin-field-label">
+                    <span className="admin-index-badge admin-field-label">
                     {String(categoryIndex + 1).padStart(2, '0')}
                     </span>
                     <div className="min-w-0">
@@ -477,7 +471,7 @@ export function AdminSystemConfigSections({
                     <button
                     type="button"
                     onClick={() => removePublishCategory(categoryIndex)}
-                    className="grid h-8 w-8 place-items-center rounded-lg text-rose-500 transition hover:bg-rose-50"
+                    className="admin-danger-icon-action"
                     aria-label="删除"
                     >
                     <Trash2 size={14} />
@@ -548,7 +542,7 @@ export function AdminSystemConfigSections({
                     <button
                     type="button"
                     onClick={() => removePublishCategoryField(categoryIndex, fieldIndex)}
-                    className="grid h-7 w-7 place-items-center rounded-lg text-rose-500 transition hover:bg-rose-50"
+                    className="admin-danger-icon-action"
                     aria-label="删除字段"
                     >
                     <Trash2 size={13} />

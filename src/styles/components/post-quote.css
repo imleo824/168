@@ -7,9 +7,9 @@
     display: block;
     width: 100%;
     min-width: 0;
-    border: var(--ui-border-width-hairline) solid color-mix(in srgb, var(--ui-line-subtle) 86%, transparent);
+    border: var(--ui-border-width-hairline) solid var(--ui-quote-preview-border);
     border-radius: var(--ui-radius-lg);
-    background: color-mix(in srgb, var(--ui-quote-preview-surface) 92%, var(--ui-surface-card));
+    background: var(--ui-quote-preview-card-surface);
     padding: var(--ui-space-3);
     color: var(--ui-text-strong);
     text-align: left;
@@ -20,7 +20,7 @@
   }
 
   .quoted-post-preview-card:not(:disabled):hover {
-    border-color: color-mix(in srgb, var(--ui-text-strong) 7%, transparent);
+    border-color: var(--ui-quote-preview-border-hover);
     background: var(--ui-surface-card);
   }
 
@@ -91,7 +91,7 @@
     flex: 0 1 auto;
     min-width: 0;
     overflow: hidden;
-    color: color-mix(in srgb, var(--ui-text-muted) 88%, transparent);
+    color: var(--ui-quote-preview-muted-text);
     font-variant-numeric: tabular-nums;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -133,8 +133,8 @@
     align-self: start;
     overflow: hidden;
     border-radius: var(--ui-radius-md);
-    background: color-mix(in srgb, var(--ui-surface-muted) 86%, var(--ui-color-white));
-    box-shadow: inset 0 0 0 var(--ui-border-width-hairline) color-mix(in srgb, var(--ui-text-strong) 4%, transparent);
+    background: var(--ui-quote-preview-media-surface);
+    box-shadow: var(--ui-quote-preview-media-inset-shadow);
   }
 
   .quoted-post-preview-image {
@@ -177,7 +177,7 @@
     right: var(--ui-space-none);
     width: var(--ui-control-icon-xs);
     height: var(--ui-control-icon-xs);
-    background: color-mix(in srgb, var(--ui-text-muted) 88%, transparent);
+    background: var(--ui-quote-preview-muted-text);
     content: var(--ui-content-empty);
     transform: translateY(-50%);
     -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m2 9 3-3 3 3'/%3E%3Cpath d='M13 18H7a2 2 0 0 1-2-2V6'/%3E%3Cpath d='m22 15-3 3-3-3'/%3E%3Cpath d='M11 6h6a2 2 0 0 1 2 2v10'/%3E%3C/svg%3E");
@@ -191,7 +191,7 @@
   }
 
   .post-quote-sheet {
-    max-height: min(86dvh, calc(var(--ui-space-8) * 18));
+    max-height: min(calc(var(--ui-visual-viewport-height) - var(--ui-space-4)), calc(var(--ui-space-8) * 18));
   }
 
   .post-quote-sheet-body {
@@ -220,7 +220,7 @@
     grid-template-columns: auto minmax(0, 1fr);
     align-items: start;
     gap: var(--ui-space-2);
-    border-top: var(--ui-border-width-hairline) solid color-mix(in srgb, var(--ui-detail-border-soft) 72%, transparent);
+    border-top: var(--ui-border-width-hairline) solid var(--ui-quote-item-border);
     background: var(--ui-surface-transparent);
     padding: calc(var(--ui-space-2) + var(--ui-space-half)) var(--ui-space-none);
     color: var(--ui-text-primary);
@@ -232,7 +232,7 @@
 
   .detail-quote-item:hover {
     color: var(--ui-text-strong);
-    background: color-mix(in srgb, var(--ui-text-strong) 2%, transparent);
+    background: var(--ui-quote-item-hover-surface);
   }
 
   .detail-quote-item-avatar {
@@ -294,7 +294,7 @@
     right: var(--ui-space-none);
     width: var(--ui-control-icon-xs);
     height: var(--ui-control-icon-xs);
-    background: color-mix(in srgb, var(--ui-text-muted) 88%, transparent);
+    background: var(--ui-quote-preview-muted-text);
     content: var(--ui-content-empty);
     transform: translateY(-50%);
     -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m2 9 3-3 3 3'/%3E%3Cpath d='M13 18H7a2 2 0 0 1-2-2V6'/%3E%3Cpath d='m22 15-3 3-3-3'/%3E%3Cpath d='M11 6h6a2 2 0 0 1 2 2v10'/%3E%3C/svg%3E");
@@ -311,7 +311,7 @@
     flex: 0 1 auto;
     min-width: 0;
     overflow: hidden;
-    color: color-mix(in srgb, var(--ui-text-muted) 88%, transparent);
+    color: var(--ui-quote-preview-muted-text);
     font-variant-numeric: tabular-nums;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -334,7 +334,7 @@
 
   .post-quote-sheet-footer {
     padding: var(--ui-social-sheet-footer-padding);
-    border-top: var(--ui-border-width-hairline) solid color-mix(in srgb, var(--ui-line-subtle) 86%, transparent);
+    border-top: var(--ui-border-width-hairline) solid var(--ui-quote-preview-border);
     background: var(--ui-surface-card);
   }
 

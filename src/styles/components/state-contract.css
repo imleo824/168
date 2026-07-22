@@ -191,7 +191,11 @@
     display: flex;
     width: 100%;
     min-width: 0;
-    min-height: min(42svh, calc(var(--ui-space-8) * 8));
+    min-height: clamp(
+      calc(var(--ui-space-8) * 4),
+      calc(var(--ui-visual-viewport-height) - (var(--ui-space-8) * 15)),
+      calc(var(--ui-space-8) * 8)
+    );
     flex-direction: column;
     align-items: center;
     justify-content: center;
@@ -275,7 +279,7 @@
   .ui-page-loading-state {
     min-height: calc(var(--ui-control-lg) + var(--ui-space-8));
     padding-block: var(--ui-secondary-state-padding-y);
-    background: transparent;
+    background: var(--ui-surface-transparent);
   }
 
   .ui-loading-text {

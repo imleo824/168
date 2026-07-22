@@ -27,6 +27,7 @@
     --ui-payment-action-focus-inset-top: var(--ui-space-4);
     --ui-payment-action-focus-inset-bottom: var(--ui-space-6);
     --ui-payment-action-keyboard-avoidance: max(env(safe-area-inset-bottom), var(--ui-keyboard-inset));
+    --ui-payment-action-visual-sheet-max-height: calc(var(--ui-visual-viewport-height) - env(safe-area-inset-top) - var(--ui-space-3));
     --ui-payment-action-stable-sheet-max-height: calc(
       var(--app-layout-vh, var(--app-vh)) -
       env(safe-area-inset-top) -
@@ -39,7 +40,7 @@
     max-width: min(100%, var(--ui-page-narrow));
     min-height: 0;
     max-height: min(
-      var(--ui-promote-payment-sheet-max-height, calc(var(--ui-visual-viewport-height) - env(safe-area-inset-top) - var(--ui-space-3))),
+      var(--ui-promote-payment-sheet-max-height, var(--ui-payment-action-visual-sheet-max-height)),
       var(--ui-payment-action-stable-sheet-max-height)
     );
     flex-direction: column;
@@ -58,7 +59,7 @@
     -webkit-overflow-scrolling: touch;
   }
 
-  :root.mobile-text-entry-active .payment-action-overlay,
+  html.mobile-text-entry-active .payment-action-overlay,
   .payment-action-sheet--keyboard-active .payment-action-overlay {
     inset: var(--ui-inset-none);
     height: auto;
@@ -66,10 +67,10 @@
     padding-block-end: max(env(safe-area-inset-bottom), var(--ui-keyboard-inset));
   }
 
-  :root.mobile-text-entry-active .payment-action-sheet,
+  html.mobile-text-entry-active .payment-action-sheet,
   .payment-action-sheet--keyboard-active {
     max-height: min(
-      var(--ui-promote-payment-sheet-max-height, calc(var(--ui-visual-viewport-height) - env(safe-area-inset-top) - var(--ui-space-3))),
+      var(--ui-promote-payment-sheet-max-height, var(--ui-payment-action-visual-sheet-max-height)),
       var(--ui-payment-action-stable-sheet-max-height)
     );
     scroll-padding-block-end: calc(var(--ui-payment-action-focus-inset-bottom) + var(--ui-payment-action-keyboard-avoidance));
@@ -184,7 +185,7 @@
     transform: translateY(-50%);
     border: var(--ui-border-none);
     border-radius: var(--ui-radius-pill);
-    background: transparent;
+    background: var(--ui-surface-transparent);
     padding: var(--ui-space-half) var(--ui-space-1);
     color: var(--ui-action-link);
     font-size: var(--ui-text-sm);

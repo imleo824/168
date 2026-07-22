@@ -55,6 +55,8 @@ const authRequiredState = read('src/ui/AuthRequiredState.tsx');
 const pageHeader = read('src/ui/PageHeader.tsx');
 const homeTopbar = read('src/features/home/HomeTopbar.tsx');
 const homePage = read('src/pages/Home.tsx');
+const homeFeedFoundationCss = read('src/styles/features/home-feed-foundation.css');
+const wideScreenAdaptationCss = read('src/styles/system/wide-screen-mobile-adaptation.css');
 const homeStructuredFilterPanel = read('src/features/home/HomeStructuredFilterSheetPanel.tsx');
 const brandAbout = read('src/pages/BrandAbout.tsx');
 const notFound = read('src/pages/NotFound.tsx');
@@ -95,6 +97,29 @@ assert(
 );
 
 assert(
+  appShell.includes('const AUTH_REQUIRED_WORKSPACE_PATHS = [') &&
+    appShell.includes('APP_ROUTES.messages') &&
+    appShell.includes('APP_ROUTES.profile') &&
+    appShell.includes('APP_ROUTES.recharge') &&
+    appShell.includes('APP_ROUTES.sponsor') &&
+    appShell.includes('APP_ROUTES.invite') &&
+    appShell.includes('const useAuthRequiredWorkspaceSurface =') &&
+    appShell.includes('!authLoading && !user && isAuthRequiredWorkspacePath(pathname)') &&
+    appShell.includes("useAuthRequiredWorkspaceSurface ? 'workspace' : getDesktopSurfaceKind(pathname)"),
+  'Unauthenticated primary/workspace tabs must share the desktop workspace surface so left-nav taps do not shift the page width.',
+);
+
+assert(
+  appShell.includes('const KNOWN_USER_ROUTE_EXACT_PATHS = [') &&
+    appShell.includes('const KNOWN_USER_ROUTE_PREFIXES = [') &&
+    appShell.includes('|| !isKnownUserRoutePath(pathname)') &&
+    appShell.includes("if (!isKnownUserRoutePath(pathname)) return 'content';") &&
+    !appShell.includes("pathname.startsWith('/profile/') || pathname.startsWith('/user/')") &&
+    notFound.includes('title="这个页面暂时不可用"'),
+  'Unknown user routes must render as page-owned content surfaces without stacked mobile headers or narrow profile/utility widths.',
+);
+
+assert(
   homePageSource.includes('const loadMoreRequestIdRef = useRef(0);') &&
     homePageSource.includes('loadMoreRequestIdRef.current === requestId') &&
     categoryFeed.includes('const requestGenerationRef = useRef(0);') &&
@@ -106,6 +131,64 @@ assert(
   !homeRefresh.includes('scrollHomeFeedToTop();') &&
     homeRefresh.includes('await queryClient.cancelQueries({ queryKey: activeQueryKey });'),
   'Manual refresh must preserve the current reading position when the network request fails.',
+);
+
+assert(
+  homePageSource.includes(`if (isDesktopViewport) {
+      pendingHomeFeedScrollTopRef.current = scrollTop;
+      setIsHomeChromeCollapsed(false);
+      return;
+    }`),
+  'Desktop home feed scroll must keep the top chrome open while only the feed viewport scrolls.',
+);
+
+assert(
+  /\.app-shell\[data-route-surface='user'\]\s*\{[\s\S]*?height:\s*var\(--app-shell-viewport-height\);[\s\S]*?min-height:\s*var\(--app-shell-viewport-height\);[\s\S]*?overflow:\s*hidden;/.test(wideScreenAdaptationCss) &&
+    /\.app-shell\[data-route-surface='user'\] \.app-shell-main\s*\{[\s\S]*?height:\s*var\(--app-desktop-shell-content-height\);[\s\S]*?overflow-y:\s*auto;[\s\S]*?overscroll-behavior:\s*contain;/.test(wideScreenAdaptationCss) &&
+    wideScreenAdaptationCss.includes(`.app-shell[data-route-surface='user'][data-desktop-surface='feed'] .app-shell-main {
+      overflow: hidden;
+    }`) &&
+    wideScreenAdaptationCss.includes('--app-shell-viewport-height: var(--app-layout-vh);') &&
+    wideScreenAdaptationCss.includes('--app-desktop-shell-content-height: calc(var(--app-shell-viewport-height) - (var(--app-desktop-shell-padding-y) * 2));') &&
+    !wideScreenAdaptationCss.includes('100svh') &&
+    !wideScreenAdaptationCss.includes('100vw'),
+  'Desktop feed shell must lock document scrolling to the app frame instead of allowing the whole page to move.',
+);
+
+assert(
+  homeFeedFoundationCss.includes(`.app-shell[data-route-surface='user'][data-desktop-surface='feed'] .home-mobile-shell {
+      --ui-feed-desktop-grid-min-column-width: calc(var(--ui-space-8) * 10);
+      --ui-feed-card-list-gap: var(--ui-space-3);
+      --ui-home-desktop-feed-width: var(--app-desktop-page-content-width);
+      --ui-home-desktop-shell-width: var(--app-desktop-page-content-width);
+      --ui-home-feed-reading-column-width: min(100%, calc(var(--app-desktop-reading-main-width) - (var(--ui-app-shell-desktop-padding-x) * 2)));
+      --ui-social-feed-list-max-width: var(--ui-home-feed-reading-column-width);
+
+      display: flex;
+      height: 100%;
+      min-height: 0;
+      flex-direction: column;
+      overflow: hidden;`) &&
+    homeFeedFoundationCss.includes(`.app-shell[data-route-surface='user'][data-desktop-surface='feed'] .home-scrollaway-chrome,
+    .app-shell[data-route-surface='user'][data-desktop-surface='feed'] .home-topic-tabs-sticky-shell {
+      flex: 0 0 auto;
+    }`) &&
+    homeFeedFoundationCss.includes(`.app-shell[data-route-surface='user'][data-desktop-surface='feed'] .home-mobile-feed-panel [data-feed-scroll-root] {
+      width: 100%;
+      height: 100%;
+      min-height: 0;
+      max-width: var(--ui-max-width-none);
+      overflow-x: hidden;
+      overflow-y: auto;
+      overscroll-behavior: contain;`),
+  'Desktop feed scrolling must belong to the feed scroll root while the topbar and tabs stay outside the scroller.',
+);
+
+assert(
+  homeFeedFoundationCss.includes('column-count: var(--ui-home-feed-column-count);') &&
+    homeFeedFoundationCss.includes('max-width: var(--ui-home-feed-reading-column-width);') &&
+    !homeFeedFoundationCss.includes('column-count: 2;'),
+  'Desktop feed must remain a single centered reading column instead of a two-column masonry layout.',
 );
 
 assert(
@@ -435,6 +518,7 @@ assert(
   messagesPage.includes('useInteractionGuard<[NotificationItem, string]>(openNotification') &&
     messagesPage.includes('useInteractionGuard<[string]>(openActorSpace') &&
     messagesPage.includes('useInteractionGuard(goNotificationSettings') &&
+    messagesPage.includes('navigate(APP_ROUTES.notificationSettings)') &&
     messagesPage.includes('void guardedOpenNotification(item, targetPath)') &&
     messagesPage.includes('void guardedOpenActorSpace(actor.id)') &&
     messagesPage.includes('void guardedGoNotificationSettings()') &&

@@ -35,8 +35,8 @@
   :is(.profile-modern-page, .user-space-page-next) :is(.profile-bio-button, .user-space-bio-mobile, .user-space-bio-desktop) {
     gap: var(--profile-plus-inline-gap);
     min-height: 0;
-    margin: 0;
-    padding: 0;
+    margin: var(--ui-space-none);
+    padding: var(--ui-space-none);
     line-height: var(--ui-line-normal);
   }
 
@@ -52,28 +52,28 @@
   :is(.profile-modern-page, .user-space-page-next) .user-space-plus-links {
     display: grid;
     gap: var(--profile-plus-flow-gap);
-    margin: 0;
-    padding: 0;
+    margin: var(--ui-space-none);
+    padding: var(--ui-space-none);
   }
 
   :is(.profile-modern-page, .user-space-page-next) .user-space-plus-link-list {
     display: grid;
     gap: var(--profile-plus-text-link-gap);
-    margin: 0;
-    padding: 0;
+    margin: var(--ui-space-none);
+    padding: var(--ui-space-none);
   }
 
   :is(.profile-modern-page, .user-space-page-next) .user-space-plus-link-row {
     min-height: var(--profile-plus-link-min-height);
-    margin: 0;
-    padding: 0;
+    margin: var(--ui-space-none);
+    padding: var(--ui-space-none);
     column-gap: var(--profile-plus-inline-gap);
     row-gap: var(--profile-plus-text-link-gap);
     line-height: var(--ui-line-tight);
   }
 
   :is(.profile-modern-page, .user-space-page-next) .user-space-plus-link-row + .user-space-plus-link-row {
-    margin-top: 0;
+    margin-top: var(--ui-space-none);
   }
 
   :is(.profile-modern-page, .user-space-page-next) .user-space-plus-contact-row {
@@ -96,8 +96,8 @@
     min-height: var(--profile-plus-link-min-height);
     align-items: center;
     gap: var(--profile-plus-inline-gap);
-    margin: 0;
-    padding: 0;
+    margin: var(--ui-space-none);
+    padding: var(--ui-space-none);
     line-height: var(--ui-line-tight);
   }
 
@@ -108,8 +108,8 @@
   :is(.profile-modern-page, .user-space-page-next) .user-space-plus-actions {
     display: flex;
     gap: var(--profile-plus-inline-gap);
-    margin: 0;
-    padding: 0;
+    margin: var(--ui-space-none);
+    padding: var(--ui-space-none);
   }
 
   :is(.profile-modern-page, .user-space-page-next) .user-space-plus-action {
@@ -143,7 +143,7 @@
   .tui-plus-x-benefit-item small {
     display: block;
     min-width: 0;
-    margin: 0;
+    margin: var(--ui-space-none);
   }
 
   .tui-plus-x-benefit-item strong {
@@ -182,7 +182,7 @@
 
   .tui-plus-x-section-heading h2,
   .tui-plus-x-section-heading span {
-    margin: 0;
+    margin: var(--ui-space-none);
   }
 
   .tui-plus-x-section-heading h2 {

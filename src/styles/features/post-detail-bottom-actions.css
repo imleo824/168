@@ -16,11 +16,6 @@
   }
 
   .detail-page .detail-bottom-bar {
-    position: fixed;
-    right: var(--ui-space-none);
-    bottom: var(--ui-keyboard-inset);
-    left: var(--ui-space-none);
-    z-index: var(--ui-z-page-header);
     width: 100%;
     border-top: var(--ui-border-width-hairline) solid var(--ui-detail-border-soft);
     background: var(--ui-topbar-surface-detail);
@@ -100,7 +95,7 @@
   .detail-bottom-action--metric {
     pointer-events: none;
     background: var(--ui-surface-transparent);
-    color: color-mix(in srgb, var(--ui-feed-action-heat-color) 78%, var(--ui-text-muted));
+    color: var(--ui-detail-bottom-heat-muted-color);
   }
 
   .detail-bottom-action--heat .feed-action-heat-icon {

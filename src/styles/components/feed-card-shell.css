@@ -215,9 +215,9 @@
     flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-    border: var(--ui-border-width-hairline) solid color-mix(in srgb, var(--ui-brand) 16%, transparent);
+    border: var(--ui-border-width-hairline) solid var(--ui-feed-anonymous-try-border);
     border-radius: var(--ui-radius-pill);
-    background: color-mix(in srgb, var(--ui-brand) 7%, transparent);
+    background: var(--ui-feed-anonymous-try-surface);
     padding: var(--ui-space-none) var(--ui-space-2);
     color: var(--ui-brand-strong);
     font-size: var(--ui-text-2xs);
@@ -228,7 +228,7 @@
 
   .ins-post-card .feed-card-anonymous-try-button:hover,
   .ins-post-card .feed-card-anonymous-try-button:active {
-    background: color-mix(in srgb, var(--ui-brand) 10%, transparent);
+    background: var(--ui-feed-anonymous-try-surface-hover);
     color: var(--ui-brand-strong);
   }
 

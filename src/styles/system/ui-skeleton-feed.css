@@ -260,8 +260,8 @@
   .ui-feed-skeleton-media-block .ui-skeleton-media--feed {
     width: 100%;
     height: 100%;
-    max-height: none;
-    aspect-ratio: auto;
+    max-height: var(--ui-max-height-none);
+    aspect-ratio: var(--ui-aspect-ratio-auto);
     border-radius: inherit;
   }
 

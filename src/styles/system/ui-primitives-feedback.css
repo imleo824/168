@@ -44,10 +44,10 @@
     min-height: var(--ui-control-sm);
     align-items: center;
     justify-content: center;
-    border: var(--ui-border-width-hairline) solid color-mix(in srgb, var(--ui-social-line-soft) 86%, transparent);
+    border: var(--ui-border-width-hairline) solid var(--ui-count-badge-border);
     border-radius: var(--ui-radius-pill);
-    background: color-mix(in srgb, var(--ui-surface-raised) 78%, transparent);
-    color: color-mix(in srgb, var(--ui-text-muted) 90%, transparent);
+    background: var(--ui-count-badge-surface);
+    color: var(--ui-count-badge-text);
     padding-inline: var(--ui-space-3);
     font-size: var(--ui-text-xs);
     font-weight: var(--ui-font-weight-medium);
@@ -69,11 +69,11 @@
   }
 
   .empty-state-card {
-    min-height: auto;
-    border: 0;
-    border-radius: 0;
-    background: transparent;
-    box-shadow: none;
+    min-height: var(--ui-space-none);
+    border: var(--ui-border-none);
+    border-radius: var(--ui-radius-none);
+    background: var(--ui-surface-transparent);
+    box-shadow: var(--ui-shadow-none);
   }
 
   .empty-state-card--compact {
@@ -89,21 +89,21 @@
   }
 
   .empty-state-card .ui-state-icon {
-    background: color-mix(in srgb, var(--ui-brand) 5%, var(--ui-surface-muted));
-    color: color-mix(in srgb, var(--ui-brand) 76%, var(--ui-text-secondary));
-    box-shadow: inset 0 0 0 var(--ui-border-width-hairline) color-mix(in srgb, var(--ui-brand) 7%, transparent);
+    background: var(--ui-state-icon-empty-surface);
+    color: var(--ui-state-icon-empty-text);
+    box-shadow: var(--ui-state-icon-empty-shadow);
   }
 
   .ui-checkout-bar {
-    position: fixed;
-    inset-inline: 0;
-    bottom: var(--ui-keyboard-inset);
-    z-index: var(--ui-z-checkout-bar);
-    border-top: var(--ui-border-width-hairline) solid color-mix(in srgb, var(--ui-social-line-soft) 82%, transparent);
-    background: color-mix(in srgb, var(--ui-topbar-surface-standard) 96%, transparent);
-    box-shadow: var(--ui-social-sheet-shadow);
-    backdrop-filter: var(--ui-glass-blur-md);
-    -webkit-backdrop-filter: var(--ui-glass-blur-md);
+    border-top: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+    background: var(--ui-topbar-surface-standard, var(--ui-glass-white-96));
+    box-shadow: var(--ui-shadow-none);
+    padding: var(--ui-space-none);
+    backdrop-filter: var(--ui-topbar-backdrop-filter, var(--ui-glass-blur-md));
+    -webkit-backdrop-filter: var(--ui-topbar-backdrop-filter, var(--ui-glass-blur-md));
+    backface-visibility: hidden;
+    overflow: visible;
+    pointer-events: auto;
   }
 
   .ui-token-panel-dark {
@@ -136,16 +136,16 @@
   }
 
   .ui-token-qr-card {
-    border: var(--ui-border-width-hairline) solid color-mix(in srgb, var(--ui-social-line-soft) 86%, transparent);
+    border: var(--ui-border-width-hairline) solid var(--ui-token-qr-card-border);
     border-radius: var(--ui-section-card-radius, var(--ui-radius-2xl));
-    background: color-mix(in srgb, var(--ui-surface-card) 96%, var(--ui-surface-page));
+    background: var(--ui-token-qr-card-surface);
     padding: var(--ui-space-3);
-    box-shadow: 0 0 0 var(--ui-border-width-hairline) rgba(255, 255, 255, 0.58), 0 8px 24px rgba(16, 24, 40, 0.026);
+    box-shadow: var(--ui-token-qr-card-shadow);
   }
 
   .ui-amount-option {
     height: var(--ui-control-lg);
-    border: var(--ui-border-width-hairline) solid color-mix(in srgb, var(--ui-social-line-soft) 86%, transparent);
+    border: var(--ui-border-width-hairline) solid var(--ui-amount-option-border);
     border-radius: var(--ui-radius-xl);
     font-size: var(--ui-text-sm);
     font-weight: var(--ui-font-weight-strong);
@@ -160,20 +160,20 @@
   }
 
   .ui-amount-option-active {
-    border-color: color-mix(in srgb, var(--ui-brand) 22%, transparent);
-    background: color-mix(in srgb, var(--ui-brand) 92%, var(--ui-color-white));
+    border-color: var(--ui-amount-option-active-border);
+    background: var(--ui-amount-option-active-surface);
     color: var(--ui-color-white);
-    box-shadow: 0 5px 14px color-mix(in srgb, var(--ui-brand) 12%, transparent);
+    box-shadow: var(--ui-amount-option-active-shadow);
   }
 
   .ui-amount-option-idle {
-    background: color-mix(in srgb, var(--ui-surface-card) 96%, var(--ui-surface-muted));
-    color: color-mix(in srgb, var(--ui-text-secondary) 92%, var(--ui-text-strong));
+    background: var(--ui-amount-option-idle-surface);
+    color: var(--ui-amount-option-idle-text);
   }
 
   .ui-amount-option-idle:hover,
   .ui-amount-option-idle:focus-visible {
-    border-color: color-mix(in srgb, var(--ui-text-strong) 8%, transparent);
+    border-color: var(--ui-amount-option-hover-border);
     background: var(--ui-surface-card);
     color: var(--ui-text-strong);
     outline: var(--ui-outline-none);
@@ -190,8 +190,8 @@
   .ui-input-focus-ring:focus,
   .ui-input-focus-ring:focus-visible {
     outline: var(--ui-outline-none);
-    border-color: color-mix(in srgb, var(--ui-brand) 16%, transparent);
-    box-shadow: 0 0 0 calc(var(--ui-border-width-hairline) * 3) color-mix(in srgb, var(--ui-brand) 8%, transparent);
+    border-color: var(--ui-input-focus-ring-border);
+    box-shadow: var(--ui-input-focus-ring-shadow);
   }
 
   @media (prefers-reduced-motion: reduce) {

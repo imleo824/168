@@ -62,7 +62,8 @@
       --ui-feed-card-list-gap: var(--ui-space-3);
       --ui-home-desktop-feed-width: var(--app-desktop-page-content-width);
       --ui-home-desktop-shell-width: var(--app-desktop-page-content-width);
-      --ui-social-feed-list-max-width: var(--app-desktop-page-content-width);
+      --ui-home-feed-reading-column-width: min(100%, calc(var(--app-desktop-reading-main-width) - (var(--ui-app-shell-desktop-padding-x) * 2)));
+      --ui-social-feed-list-max-width: var(--ui-home-feed-reading-column-width);
 
       display: flex;
       height: 100%;
@@ -117,8 +118,9 @@
 
     .app-shell[data-route-surface='user'][data-desktop-surface='feed'] .post-feed-list-panel {
       display: block;
-      max-width: var(--app-desktop-page-content-width);
-      column-count: 2;
+      max-width: var(--ui-home-feed-reading-column-width);
+      margin-inline: auto;
+      column-count: var(--ui-home-feed-column-count);
       column-gap: var(--ui-feed-card-list-gap);
       padding: var(--ui-space-3);
       background: var(--ui-surface-transparent);
@@ -135,7 +137,7 @@
 
     .app-shell[data-route-surface='user'][data-desktop-surface='feed'] .feed-scroll-content > :not(.post-feed-list-panel) {
       width: 100%;
-      max-width: var(--app-desktop-page-content-width);
+      max-width: var(--ui-home-feed-reading-column-width);
       margin-inline: auto;
     }
   }

@@ -1,5 +1,6 @@
 import { memo, type ComponentProps } from 'react';
 import { Link } from 'react-router-dom';
+import { APP_ROUTES } from '@/app/routePaths';
 import PageHeader from '@/ui/PageHeader';
 import { TopbarOnlineBadge } from '@/ui/TopbarActions';
 
@@ -19,7 +20,7 @@ export const HOME_TOPBAR_TITLE_CLASS_NAME = 'home-topbar-title';
 
 export function HomeBrandLockup() {
   return (
-    <Link className="home-topbar-brand-lockup pressable" to="/about" aria-label="关于推推" title="关于推推">
+    <Link className="home-topbar-brand-lockup pressable" to={APP_ROUTES.about} aria-label="关于推推" title="关于推推">
       <span className="home-topbar-brand-name" aria-label={HOME_TOPBAR_TITLE}>
         <svg
           className="home-topbar-brand-vector"

@@ -3,14 +3,12 @@
 @layer utilities {
   :is(.profile-modern-page, .user-space-page-next) > .ui-topbar,
   :is(.profile-modern-page, .user-space-page-next) .profile-modern-topbar {
-    --ui-profile-topbar-readable-surface: color-mix(in srgb, var(--ui-surface-card-solid) 72%, transparent);
     --ui-profile-topbar-readable-border: color-mix(in srgb, var(--ui-line-hairline) 56%, transparent);
     --ui-profile-topbar-action-visual-size: var(--ui-control-sm);
     --ui-profile-topbar-action-icon-size: var(--ui-control-icon-sm);
     --ui-profile-topbar-action-surface: color-mix(in srgb, var(--ui-surface-card-solid) 58%, transparent);
     --ui-profile-topbar-action-border: color-mix(in srgb, var(--ui-line-hairline) 68%, transparent);
     --ui-profile-topbar-action-hover-surface: color-mix(in srgb, var(--ui-surface-card-solid) 72%, transparent);
-    --ui-topbar-surface-standard: var(--ui-profile-topbar-readable-surface);
     --ui-topbar-text-color: var(--ui-text-strong);
     --ui-topbar-title-color: var(--ui-text-strong);
     --ui-topbar-action-color: var(--ui-text-strong);

@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import EmptyStateCard from '@/ui/EmptyStateCard';
+import { APP_ROUTES } from '@/app/routePaths';
 import { useAuth } from '@/context/AuthContext';
 import { usePushNotification } from '@/hooks/usePushNotification';
 
@@ -70,7 +71,7 @@ export default function PushNotificationSetting() {
             type="button"
             className="messages-read-all-button pressable"
             disabled={!canUse}
-            onClick={() => navigate('/settings/notifications')}
+            onClick={() => navigate(APP_ROUTES.notificationSettings)}
           >
             去开启
           </button>

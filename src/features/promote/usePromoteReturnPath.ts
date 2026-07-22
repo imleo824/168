@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { NavigateFunction } from 'react-router-dom';
 
+import { APP_ROUTES } from '@/app/routePaths';
 import { PROMOTE_RETURN_PATH_KEY, normalizePath } from './promoteBookingUtils';
 
 type UsePromoteReturnPathArgs = {
@@ -16,7 +17,7 @@ export function usePromoteReturnPath({
   routePath,
   stateReturnPath,
 }: UsePromoteReturnPathArgs) {
-  const [returnPath, setReturnPath] = useState('/profile');
+  const [returnPath, setReturnPath] = useState<string>(APP_ROUTES.profile);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -34,7 +35,7 @@ export function usePromoteReturnPath({
       }
 
       if (!nextReturnPath || nextReturnPath === routePath) {
-        nextReturnPath = hasHistory ? '' : '/profile';
+        nextReturnPath = hasHistory ? '' : APP_ROUTES.profile;
       }
 
       setReturnPath(nextReturnPath);
@@ -46,7 +47,7 @@ export function usePromoteReturnPath({
       }
     } catch {
       if (!nextReturnPath) {
-        nextReturnPath = hasHistory ? '' : '/profile';
+        nextReturnPath = hasHistory ? '' : APP_ROUTES.profile;
       }
 
       setReturnPath(nextReturnPath);
@@ -75,7 +76,7 @@ export function usePromoteReturnPath({
       return;
     }
 
-    navigate('/profile', { replace: true });
+    navigate(APP_ROUTES.profile, { replace: true });
   }, [from, navigate, returnPath, routePath]);
 
   return {

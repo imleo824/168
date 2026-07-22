@@ -1,8 +1,6 @@
 @layer utilities {
   .profile-bio-editor-page {
-    background:
-      radial-gradient(circle at 50% calc(var(--ui-space-8) * -1), color-mix(in srgb, var(--ui-brand) 12%, transparent), transparent 34%),
-      var(--ui-surface-page);
+    background: var(--ui-profile-bio-editor-page-surface);
   }
 
   .profile-bio-editor-main {
@@ -28,21 +26,21 @@
 
   .profile-bio-editor-field {
     width: 100%;
-    min-height: 168px;
+    min-height: var(--ui-profile-bio-editor-field-min-height);
     resize: vertical;
-    border: var(--ui-border-width-hairline) solid color-mix(in srgb, var(--ui-brand) 14%, var(--ui-line-subtle));
+    border: var(--ui-border-width-hairline) solid var(--ui-profile-bio-editor-field-border);
     border-radius: var(--ui-radius-xl);
-    background: color-mix(in srgb, var(--ui-surface-card) 88%, var(--ui-surface-page));
+    background: var(--ui-profile-bio-editor-field-surface);
     padding: var(--ui-space-3);
     color: var(--ui-text-primary);
     font-size: var(--ui-text-base);
     line-height: var(--ui-line-relaxed);
-    outline: none;
+    outline: var(--ui-outline-none);
   }
 
   .profile-bio-editor-field:focus {
-    border-color: color-mix(in srgb, var(--ui-brand) 55%, var(--ui-line-subtle));
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--ui-brand) 14%, transparent);
+    border-color: var(--ui-profile-bio-editor-field-focus-border);
+    box-shadow: var(--ui-profile-bio-editor-field-focus-shadow);
   }
 
   .profile-bio-editor-meta {

@@ -544,7 +544,7 @@ export default function TuiPlusLinkEditorMobile() {
           <TuiPlusBenefitPromptDialog
             open
             benefit="profileLinks"
-            onClose={() => navigate('/profile', { replace: true })}
+            onClose={() => navigate(APP_ROUTES.profile, { replace: true })}
             onConfirm={() => navigate(APP_ROUTES.tuiPlus, { replace: true, state: buildTuiPlusBenefitRouteState('profileLinks', currentPath) })}
           />
         </PageContentShell>

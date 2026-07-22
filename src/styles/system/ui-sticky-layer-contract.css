@@ -92,51 +92,6 @@
     -webkit-backdrop-filter: var(--ui-topbar-backdrop-filter);
   }
 
-  :is(.profile-modern-page, .user-space-page-next) > .ui-topbar,
-  :is(.profile-modern-page, .user-space-page-next) .profile-modern-topbar {
-    background: var(--ui-profile-topbar-readable-surface);
-    border-bottom: var(--ui-border-width-hairline) solid var(--ui-profile-topbar-readable-border);
-    box-shadow: var(--ui-social-topbar-shadow);
-    backdrop-filter: var(--ui-glass-blur-md) var(--ui-glass-saturate);
-    -webkit-backdrop-filter: var(--ui-glass-blur-md) var(--ui-glass-saturate);
-  }
-
-  .profile-modern-page .profile-modern-topbar.nav-blur {
-    background: var(--ui-surface-transparent);
-    box-shadow: var(--ui-shadow-none);
-  }
-
-  :is(.profile-modern-page, .user-space-page-next) .ui-topbar {
-    --ui-topbar-surface-standard: var(--ui-color-transparent);
-    background: var(--ui-surface-transparent);
-    box-shadow: var(--ui-topbar-shadow);
-  }
-
-  :is(.profile-modern-page, .user-space-page-next) > .ui-topbar :is(.ui-topbar-back-button, .topbar-icon-button, .ui-icon-button),
-  :is(.profile-modern-page, .user-space-page-next) .profile-modern-topbar :is(.ui-topbar-back-button, .topbar-icon-button, .ui-icon-button) {
-    border: var(--ui-border-none);
-    background: var(--ui-surface-transparent);
-    box-shadow: var(--ui-shadow-none);
-    backdrop-filter: var(--ui-backdrop-filter-none);
-    -webkit-backdrop-filter: var(--ui-backdrop-filter-none);
-  }
-
-  :is(.profile-modern-page, .user-space-page-next) > .ui-topbar :is(.ui-topbar-back-button, .topbar-icon-button, .ui-icon-button) .ui-icon-button-content,
-  :is(.profile-modern-page, .user-space-page-next) .profile-modern-topbar :is(.ui-topbar-back-button, .topbar-icon-button, .ui-icon-button) .ui-icon-button-content {
-    border: var(--ui-border-width-hairline) solid var(--ui-profile-topbar-action-border);
-    background: var(--ui-profile-topbar-action-surface);
-    box-shadow: var(--ui-shadow-none);
-    backdrop-filter: var(--ui-glass-blur-sm) var(--ui-glass-saturate);
-    -webkit-backdrop-filter: var(--ui-glass-blur-sm) var(--ui-glass-saturate);
-  }
-
-  :is(.profile-modern-page, .user-space-page-next) > .ui-topbar :is(.ui-topbar-back-button, .topbar-icon-button, .ui-icon-button):hover .ui-icon-button-content,
-  :is(.profile-modern-page, .user-space-page-next) .profile-modern-topbar :is(.ui-topbar-back-button, .topbar-icon-button, .ui-icon-button):hover .ui-icon-button-content,
-  :is(.profile-modern-page, .user-space-page-next) > .ui-topbar :is(.ui-topbar-back-button, .topbar-icon-button, .ui-icon-button):focus-visible .ui-icon-button-content,
-  :is(.profile-modern-page, .user-space-page-next) .profile-modern-topbar :is(.ui-topbar-back-button, .topbar-icon-button, .ui-icon-button):focus-visible .ui-icon-button-content {
-    background: var(--ui-profile-topbar-action-hover-surface);
-  }
-
   .ui-layer-sticky-tab {
     position: sticky;
     top: var(--ui-sticky-tab-top);

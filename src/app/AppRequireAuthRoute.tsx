@@ -3,29 +3,40 @@ import { useLocation } from 'react-router-dom';
 import { ShieldCheck, UserRound } from 'lucide-react';
 
 import { useAuth } from '@/context/AuthContext';
+import { APP_ROUTES } from '@/app/routePaths';
 import SEO from '@/platform/SEO';
+import AppPage from '@/ui/AppPage';
 import { PageLoader } from '@/ui/PageLoader';
+import PageHeader from '@/ui/PageHeader';
 import PageContentShell from '@/ui/PageContentShell';
 import AuthRequiredState from '@/ui/AuthRequiredState';
 import { writeStoredReferralInvite } from '@/utils/referralInvite';
 import { REFERRAL_INVITE_SOURCES, readReferralInviteCodeFromSearch } from '../../shared/referral';
 
-const AUTH_ROUTE_TITLES: Record<string, string> = {
-  '/create': '登录后发布｜推推',
-  '/messages': '登录后查看消息｜推推',
-  '/sponsor': '登录后进入推广｜推推',
-  '/invite': '登录后邀请好友｜推推',
-  '/invite/records': '登录后查看邀请记录｜推推',
-  '/promote': '登录后推广内容｜推推',
-  '/promotions': '登录后查看推广记录｜推推',
-  '/promotion-effects': '登录后查看效果分析｜推推',
-  '/recharge': '登录后充值积分｜推推',
-  '/transactions': '登录后查看交易记录｜推推',
-  '/settings/notifications': '登录后管理通知｜推推',
+type AuthRouteMeta = {
+  documentTitle: string;
+  pageTitle: string;
+  showBack: boolean;
 };
 
-function getAuthRouteTitle(pathname: string) {
-  return AUTH_ROUTE_TITLES[pathname] || '登录后继续｜推推';
+const AUTH_ROUTE_META: Record<string, AuthRouteMeta> = {
+  [APP_ROUTES.create]: { documentTitle: '登录后发布｜推推', pageTitle: '发布分类信息', showBack: true },
+  [APP_ROUTES.messages]: { documentTitle: '登录后查看消息｜推推', pageTitle: '消息', showBack: false },
+  [APP_ROUTES.sponsor]: { documentTitle: '登录后进入推广｜推推', pageTitle: '买曝光', showBack: false },
+  [APP_ROUTES.invite]: { documentTitle: '登录后邀请好友｜推推', pageTitle: '邀请好友', showBack: true },
+  [APP_ROUTES.inviteRecords]: { documentTitle: '登录后查看邀请记录｜推推', pageTitle: '邀请记录', showBack: true },
+  [APP_ROUTES.promote]: { documentTitle: '登录后推广内容｜推推', pageTitle: '付费推广', showBack: true },
+  [APP_ROUTES.promotions]: { documentTitle: '登录后查看推广记录｜推推', pageTitle: '推广记录', showBack: true },
+  [APP_ROUTES.promotionEffects]: { documentTitle: '登录后查看效果分析｜推推', pageTitle: '效果分析', showBack: true },
+  [APP_ROUTES.recharge]: { documentTitle: '登录后充值积分｜推推', pageTitle: '充值积分', showBack: true },
+  [APP_ROUTES.transactions]: { documentTitle: '登录后查看交易记录｜推推', pageTitle: '交易记录', showBack: true },
+  [APP_ROUTES.tuiPlus]: { documentTitle: '登录后开通推推会员｜推推', pageTitle: '推推会员', showBack: true },
+  [APP_ROUTES.tuiPlusLinkEditor]: { documentTitle: '登录后编辑会员链接｜推推', pageTitle: '会员链接', showBack: true },
+  [APP_ROUTES.notificationSettings]: { documentTitle: '登录后管理通知｜推推', pageTitle: '通知设置', showBack: true },
+};
+
+function getAuthRouteMeta(pathname: string) {
+  return AUTH_ROUTE_META[pathname] || { documentTitle: '登录后继续｜推推', pageTitle: '需要登录', showBack: true };
 }
 
 export default function AppRequireAuthRoute({ children }: { children: ReactNode }) {
@@ -44,14 +55,17 @@ export default function AppRequireAuthRoute({ children }: { children: ReactNode 
 
   if (loading) return <PageLoader />;
   if (!user) {
+    const routeMeta = getAuthRouteMeta(location.pathname);
+
     return (
-      <>
+      <AppPage mobileAddressBarScroll bottomSafe className="auth-required-page surface-page">
         <SEO
-          title={getAuthRouteTitle(location.pathname)}
+          title={routeMeta.documentTitle}
           description="登录推推后继续访问发布、推广、充值和个人记录等账号功能。"
           canonicalPath={location.pathname}
           noindex
         />
+        <PageHeader title={routeMeta.pageTitle} showBack={routeMeta.showBack} titleAlign="center" />
         <PageContentShell as="main" className="ui-auth-required-wrap ui-app-page-main">
           <AuthRequiredState
             titleAs="h1"
@@ -69,7 +83,7 @@ export default function AppRequireAuthRoute({ children }: { children: ReactNode 
             ]}
           />
         </PageContentShell>
-      </>
+      </AppPage>
     );
   }
   return <>{children}</>;
