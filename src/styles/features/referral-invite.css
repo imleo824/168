@@ -95,7 +95,7 @@
     min-width: 0;
     overflow: hidden;
     color: var(--ui-text-strong);
-    font-size: clamp(var(--ui-text-page-title), 8vw, var(--ui-type-display-size));
+    font-size: var(--ui-type-display-size);
     font-weight: var(--ui-font-weight-display);
     line-height: var(--ui-line-tight);
     text-overflow: ellipsis;

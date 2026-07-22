@@ -137,7 +137,7 @@
 
     --ui-font-family-sans: var(--font-sans);
     --ui-font-family-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-    --ui-tracking-tight: -0.01em;
+    --ui-tracking-tight: 0;
     --ui-type-title-size: var(--ui-text-page-title, 1.125rem);
     --ui-font-weight-body: 400;
     --ui-font-weight-medium: 500;
@@ -199,8 +199,8 @@
     --ui-space-half: calc(var(--ui-space-1) / 2);
     --ui-space-quarter: calc(var(--ui-space-1) / 4);
     --ui-tracking-normal: 0;
-    --ui-tracking-wide: 0.02em;
-    --ui-tracking-compact: 0.08em;
+    --ui-tracking-wide: 0;
+    --ui-tracking-compact: 0;
     --ui-text-decoration-none: none;
     --ui-inset-none: 0;
     --ui-opacity-hidden: 0;

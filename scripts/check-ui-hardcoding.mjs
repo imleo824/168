@@ -39,6 +39,9 @@ const CSS_RAW_RESET_RE = /^\s*(?:(?:background|background-color|border-color|bor
 const CSS_RAW_Z_INDEX_RE = /^\s*z-index:\s*-?\d+\s*;/;
 const CSS_RAW_OPACITY_RE = /^\s*opacity:\s*(?:0|1|0?\.\d+|\.\d+)\s*;/;
 const CSS_RAW_COLOR_MIX_RE = /^\s*(?!--)[a-z-]+(?:-[a-z-]+)*\s*:\s*[^;]*color-mix\(/;
+const CSS_VIEWPORT_FONT_SIZE_RE = /^\s*(?:font-size|--[a-zA-Z0-9-_]*(?:font|type|text|title|label|copy|display)[a-zA-Z0-9-_]*size)\s*:\s*[^;]*(?:vw|vh|dvw|dvh|svw|svh|lvw|lvh)/;
+const CSS_NONZERO_TRACKING_TOKEN_RE = /^\s*--[a-zA-Z0-9-_]*(?:tracking|letter-spacing)[a-zA-Z0-9-_]*\s*:(?!\s*(?:0|var\(--ui-tracking-normal\))\s*;)/;
+const CSS_RAW_NONZERO_LETTER_SPACING_RE = /^\s*letter-spacing:(?!\s*(?:0|inherit|var\(--ui-tracking-(?:normal|tight|wide|compact)\)|var\(--ui-letter-spacing-wide\)|var\(--ui-home-topbar-brand-tracking\)|var\(--ui-home-topbar-brand-desktop-tracking\)|var\(--ui-topbar-title-tracking\)|var\(--ui-post-tag-letter-spacing\)|var\(--x-card-readable-letter-spacing\)|var\(--ui-brand-about-title-tracking\)|var\(--ui-post-create-submit-label-tracking\))\s*;)/;
 const CSS_COMPONENT_GLOBAL_LAYER_RE = /^\s*@layer\s+base\b/;
 const CSS_COMPONENT_ROOT_SELECTOR_RE = /^\s*:root\b/;
 const CSS_FEATURE_ROOT_TOKEN_SELECTOR_RE = /^\s*:root\s*\{/;
@@ -205,11 +208,21 @@ for (const file of sourceFiles) {
 
 for (const file of sourceFiles) {
   const rel = relative(ROOT, file);
-  if (isExcluded(rel)) continue;
 
   const lines = readFileSync(file, 'utf8').split(/\r?\n/);
   lines.forEach((line, index) => {
     if (isAllowed(line)) return;
+    if (rel.endsWith('.css') && CSS_VIEWPORT_FONT_SIZE_RE.test(line)) {
+      reportHardcodingDebt(`${rel}:${index + 1}: font sizing must use semantic type tokens, not viewport-relative formulas.`);
+    }
+    if (rel.endsWith('.css') && CSS_NONZERO_TRACKING_TOKEN_RE.test(line)) {
+      reportHardcodingDebt(`${rel}:${index + 1}: letter-spacing tokens must resolve to the zero tracking contract.`);
+    }
+    if (rel.endsWith('.css') && CSS_RAW_NONZERO_LETTER_SPACING_RE.test(line)) {
+      reportHardcodingDebt(`${rel}:${index + 1}: letter-spacing declarations must use the zero tracking contract.`);
+    }
+
+    if (isExcluded(rel)) return;
     if (
       TOKEN_VALUE_RE.test(line) ||
       hasHardcodedArbitraryTailwind(line) ||
@@ -218,7 +231,6 @@ for (const file of sourceFiles) {
     ) {
       reportHardcodingDebt(`${rel}:${index + 1}: ${line.trim()}`);
     }
-
     if (!rel.endsWith('.css')) return;
     if (rel.startsWith('src/styles/components/') && CSS_COMPONENT_GLOBAL_LAYER_RE.test(line)) {
       reportHardcodingDebt(`${rel}:${index + 1}: component CSS must not declare global token layers; move shared tokens to src/styles/tokens or src/styles/system contracts.`);
@@ -337,6 +349,19 @@ assertCssRuleIncludes(
   'topbar compact actions and promotion filters must not shimmer while scrolling.',
 );
 assertIncludes('src/hooks/useMobileAddressBar.ts', 'function shouldUpdateLayoutHeight', 'mobile viewport layout height must be stabilized separately from visual height updates.');
+assertIncludes('src/utils/postCreateFocusBridge.ts', "textarea.className = 'ui-post-create-focus-bridge';", 'post create focus bridge must render through the shared focus bridge contract.');
+assertNotIncludes('src/utils/postCreateFocusBridge.ts', "fontSize: '16px'", 'post create focus bridge must not hard-code mobile input font size.');
+assertNotIncludes('src/utils/postCreateFocusBridge.ts', "zIndex: '2147483647'", 'post create focus bridge must not hard-code top-layer z-index.');
+assertCssRuleIncludes(
+  'src/styles/system/ui-input-focus-stability-contract.css',
+  '.ui-post-create-focus-bridge',
+  [
+    'width: var(--ui-post-create-focus-bridge-size);',
+    'font-size: var(--ui-post-create-focus-bridge-font-size);',
+    'z-index: var(--ui-post-create-focus-bridge-z);',
+  ],
+  'post create focus bridge visual behavior must be owned by the shared CSS contract.',
+);
 assertCssRuleIncludes(
   'src/styles/system/ui-sticky-layer-contract.css',
   '.ui-topbar.nav-blur',
@@ -977,25 +1002,25 @@ for (const label of bottomNavOrder) {
 }
 
 if (violations.length > 0) {
-  const strict = process.env.UI_HARDCODING_STRICT === '1';
-  const label = strict ? 'failed' : 'warning';
+  const relaxed = process.env.UI_HARDCODING_RELAXED === '1';
+  const label = relaxed ? 'warning' : 'failed';
   console.error(`UI contract debt ${label}: ${violations.length} item(s).`);
   console.error(violations.slice(0, 120).join('\n'));
   if (violations.length > 120) {
     console.error(`...and ${violations.length - 120} more`);
   }
-  if (strict) process.exit(1);
+  if (!relaxed) process.exit(1);
 }
 
 if (hardcodingDebt.length > 0) {
-  const strict = process.env.UI_HARDCODING_STRICT === '1';
-  const label = strict ? 'failed' : 'warning';
+  const relaxed = process.env.UI_HARDCODING_RELAXED === '1';
+  const label = relaxed ? 'warning' : 'failed';
   console.error(`UI hardcoding debt ${label}: ${hardcodingDebt.length} item(s).`);
   console.error(hardcodingDebt.slice(0, 120).join('\n'));
   if (hardcodingDebt.length > 120) {
     console.error(`...and ${hardcodingDebt.length - 120} more`);
   }
-  if (strict) process.exit(1);
+  if (!relaxed) process.exit(1);
 }
 
 console.log('UI hardcoding check passed.');

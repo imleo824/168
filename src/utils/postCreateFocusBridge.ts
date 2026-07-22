@@ -53,27 +53,7 @@ function getFocusBridgeTextarea() {
   textarea.setAttribute('aria-hidden', 'true');
   textarea.setAttribute('inputmode', 'text');
   textarea.setAttribute('data-post-create-focus-bridge', 'true');
-  Object.assign(textarea.style, {
-    position: 'fixed',
-    insetInlineStart: '0',
-    insetBlockEnd: '0',
-    width: '1px',
-    height: '1px',
-    minWidth: '1px',
-    minHeight: '1px',
-    opacity: '0.01',
-    pointerEvents: 'none',
-    border: '0',
-    borderRadius: '0',
-    padding: '0',
-    background: 'transparent',
-    color: 'transparent',
-    caretColor: 'transparent',
-    fontSize: '16px',
-    lineHeight: '16px',
-    resize: 'none',
-    zIndex: '2147483647',
-  });
+  textarea.className = 'ui-post-create-focus-bridge';
   document.body.appendChild(textarea);
   return textarea;
 }

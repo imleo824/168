@@ -27,7 +27,7 @@
 
     /* Shared contract aliases used by cross-page system layers. */
     --ui-line-muted: var(--ui-line-soft);
-    --ui-letter-spacing-wide: var(--ui-tracking-wide);
+    --ui-letter-spacing-wide: var(--ui-tracking-normal);
     --ui-border-width-strong: calc(var(--ui-border-width-hairline) * 2);
     --ui-shadow-card-soft: var(--ui-shadow-card);
     --ui-shadow-floating: var(--ui-shadow-panel);
@@ -43,19 +43,24 @@
     --ui-mobile-form-min-font-size: 1rem;
     --ui-mobile-form-font-size: max(var(--ui-mobile-form-min-font-size), var(--ui-type-body-size));
     --ui-mobile-form-line-height: var(--ui-line-normal);
+    --ui-post-create-focus-bridge-size: var(--ui-border-width-hairline);
+    --ui-post-create-focus-bridge-opacity: 0.01;
+    --ui-post-create-focus-bridge-z: var(--ui-z-auth);
+    --ui-post-create-focus-bridge-font-size: var(--ui-mobile-form-min-font-size);
+    --ui-post-create-focus-bridge-line-height: var(--ui-mobile-form-line-height);
 
     /* Secondary topbar text priority. */
     --ui-topbar-surface-base: var(--ui-topbar-surface-standard);
     --ui-secondary-action-max-width: min(38vw, calc(var(--ui-space-8) * 4 + var(--ui-space-5)));
     --ui-secondary-action-max-width-compact: min(34vw, calc(var(--ui-space-8) * 4));
-    --ui-secondary-title-fluid-size: clamp(var(--ui-text-title), 4.35vw, var(--ui-text-page-title));
+    --ui-secondary-title-fluid-size: var(--ui-text-page-title);
     --ui-secondary-title-gap: var(--ui-space-2);
     --ui-secondary-action-min-width: calc(var(--ui-space-8) * 4 + var(--ui-space-5));
     --ui-secondary-action-min-width-compact: calc(var(--ui-space-8) * 4 + var(--ui-space-2));
     --ui-secondary-action-fluid-width: 42%;
     --ui-secondary-action-edge-space: var(--ui-space-3);
     --ui-secondary-action-edge-space-compact: var(--ui-space-2);
-    --ui-secondary-action-label-size: clamp(var(--ui-text-sm), 3.65vw, var(--ui-text-md));
+    --ui-secondary-action-label-size: var(--ui-text-sm);
     --ui-secondary-sheet-max-width: calc(var(--ui-space-8) * 13 + var(--ui-space-1));
 
     /* Shared compact header filter contract. */

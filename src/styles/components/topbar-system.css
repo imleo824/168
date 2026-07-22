@@ -130,7 +130,7 @@
     font-weight: 800;
     font-style: normal;
     font-synthesis: none;
-    letter-spacing: -0.02em;
+    letter-spacing: var(--ui-tracking-normal);
     line-height: var(--ui-home-topbar-brand-line-height);
     text-rendering: geometricPrecision;
     -webkit-font-smoothing: antialiased;

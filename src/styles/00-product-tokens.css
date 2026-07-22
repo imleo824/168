@@ -69,7 +69,7 @@
     --ui-text-body: 1rem;
     --ui-text-title: 1rem;
     --ui-text-page-title: 1.125rem;
-    --ui-type-display-size: clamp(1.75rem, 8vw, 2.125rem);
+    --ui-type-display-size: 1.875rem;
     --ui-type-xl-size: 1.25rem;
     --ui-type-feed-author-size: var(--ui-type-feed-body-size);
     --ui-type-feed-body-size: var(--ui-text-base);
@@ -333,7 +333,7 @@
     --ui-brand-about-keyword-padding: calc(var(--ui-space-1) + var(--ui-space-half) + var(--ui-space-quarter)) var(--ui-space-3);
     --ui-brand-about-title-size: 2rem;
     --ui-brand-about-title-size-desktop: 2.65rem;
-    --ui-brand-about-title-tracking: -0.032em;
+    --ui-brand-about-title-tracking: var(--ui-tracking-normal);
     --ui-brand-about-copy-max-width: 42rem;
     --ui-brand-about-copy-line: 1.9;
     --ui-brand-about-copy-size-desktop: 1.05rem;
