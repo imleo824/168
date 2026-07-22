@@ -3,11 +3,11 @@ import OptimizedImage from '@/ui/OptimizedImage';
 import type { PromotionBooking } from '@/types';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { usePageVisibility } from '@/hooks/usePageVisibility';
+import { UI_HOME_AD_IMAGE_SIZES } from '@/ui/layoutViewport';
 import { normalizeAdTargetUrlForDisplay } from '@/utils/adTargetUrl';
 
 const AUTO_ROTATE_MS = 4600;
 const INTERACTION_PAUSE_MS = 5200;
-const HOME_AD_IMAGE_SIZES = '(max-width: 1023px) 100vw, 1180px';
 
 export default function HomeAdBanner({
   ads,
@@ -198,7 +198,7 @@ export default function HomeAdBanner({
                   loading={index === 0 ? 'eager' : 'lazy'}
                   priority={index === 0}
                   fetchPriority={index === 0 ? 'high' : 'auto'}
-                  sizes={HOME_AD_IMAGE_SIZES}
+                  sizes={UI_HOME_AD_IMAGE_SIZES}
                 />
               </a>
             );

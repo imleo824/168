@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { UI_USER_DESKTOP_MIN_WIDTH, getMaxWidthMediaQuery } from '@/ui/layoutViewport';
 
 function isAdminRoute() {
   if (typeof window === 'undefined') return false;
@@ -11,12 +12,12 @@ function resolveIsMobileForSurface(breakpoint: number) {
   return window.innerWidth < breakpoint;
 }
 
-export function useIsMobile(breakpoint = 1024) {
+export function useIsMobile(breakpoint = UI_USER_DESKTOP_MIN_WIDTH) {
   const [isMobile, setIsMobile] = useState(() => resolveIsMobileForSurface(breakpoint));
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
-    const mediaQuery = window.matchMedia(`(max-width: ${breakpoint - 1}px)`);
+    const mediaQuery = window.matchMedia(getMaxWidthMediaQuery(breakpoint - 1));
     const handleChange = () => setIsMobile(resolveIsMobileForSurface(breakpoint));
 
     handleChange();

@@ -278,7 +278,7 @@
   .referral-rules-overlay {
     position: fixed;
     inset: var(--ui-inset-none);
-    z-index: calc(var(--ui-z-modal) + 1);
+    z-index: var(--ui-referral-rules-overlay-z);
     display: flex;
     align-items: flex-end;
     justify-content: center;

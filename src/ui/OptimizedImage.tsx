@@ -1,5 +1,6 @@
 import type { CSSProperties, ImgHTMLAttributes, ReactEventHandler } from 'react';
 import { memo, useEffect, useMemo, useRef, useState } from 'react';
+import { UI_DEFAULT_IMAGE_SIZES } from '@/ui/layoutViewport';
 import { toOptimizedImageUrl, toPublicStorageObjectUrl, type ImageResizeMode } from '@/utils/image';
 
 type OptimizedImageVariant = 'thumb' | 'medium' | 'large';
@@ -27,12 +28,7 @@ type OptimizedImageProps = Omit<
 };
 
 const FALLBACK_IMG = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
-const OPTIMIZED_IMAGE_MOBILE_QUERY = '(max-width: 768px)';
-const DEFAULT_IMAGE_SIZES: Record<OptimizedImageVariant, string> = {
-  thumb: `${OPTIMIZED_IMAGE_MOBILE_QUERY} 96px, 180px`,
-  medium: `${OPTIMIZED_IMAGE_MOBILE_QUERY} 100vw, 420px`,
-  large: `${OPTIMIZED_IMAGE_MOBILE_QUERY} 100vw, 860px`,
-};
+const DEFAULT_IMAGE_SIZES: Record<OptimizedImageVariant, string> = UI_DEFAULT_IMAGE_SIZES;
 
 function resolveBestSrc(
   src: string,

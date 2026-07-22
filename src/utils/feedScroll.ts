@@ -1,4 +1,8 @@
-const DOCUMENT_SCROLL_MAX_WIDTH_PX = 1023;
+import {
+  UI_USER_MOBILE_MAX_WIDTH,
+  UI_USER_MOBILE_MEDIA_QUERY,
+} from '@/ui/layoutViewport';
+
 const DOCUMENT_SCROLL_SELECTOR = '[data-feed-document-scroll="true"]';
 
 export type FeedScrollMetrics = {
@@ -17,10 +21,10 @@ function matchesDocumentScrollViewport() {
   if (!canUseDom()) return false;
 
   if (typeof window.matchMedia === 'function') {
-    return window.matchMedia(`(max-width: ${DOCUMENT_SCROLL_MAX_WIDTH_PX}px)`).matches;
+    return window.matchMedia(UI_USER_MOBILE_MEDIA_QUERY).matches;
   }
 
-  return window.innerWidth <= DOCUMENT_SCROLL_MAX_WIDTH_PX;
+  return window.innerWidth <= UI_USER_MOBILE_MAX_WIDTH;
 }
 
 export function isDocumentFeedScrollMode(explicitMode?: boolean) {

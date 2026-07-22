@@ -79,7 +79,9 @@ const PAGE_OWNED_HEADER_PREFIXES = [
   APP_ROUTES.create,
   APP_ROUTES.promote,
   APP_ROUTES.promotions,
+  APP_ROUTES.legacyPromoteHistory,
   APP_ROUTES.promotionEffects,
+  APP_ROUTES.legacyPromotionEffects,
   APP_ROUTES.recharge,
   APP_ROUTES.tuiPlus,
   APP_ROUTES.transactions,
@@ -171,7 +173,9 @@ function getDesktopSurfaceKind(pathname: string) {
     pathname === APP_ROUTES.inviteRecords ||
     pathname === APP_ROUTES.promote ||
     pathname === APP_ROUTES.promotions ||
+    pathname === APP_ROUTES.legacyPromoteHistory ||
     pathname === APP_ROUTES.promotionEffects ||
+    pathname === APP_ROUTES.legacyPromotionEffects ||
     pathname === APP_ROUTES.recharge ||
     pathname === APP_ROUTES.transactions ||
     pathname === APP_ROUTES.tuiPlus ||

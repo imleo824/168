@@ -2,9 +2,8 @@ import { memo } from 'react';
 import { Camera } from 'lucide-react';
 
 import OptimizedImage from '@/ui/OptimizedImage';
+import { UI_PROFILE_HEADER_COVER_SIZES } from '@/ui/layoutViewport';
 import { cn } from '@/utils/cn';
-
-const PROFILE_HEADER_COVER_SIZES = '(max-width: 48rem) 100vw, 72rem';
 
 interface ProfileHeaderCoverProps {
   coverUrl?: string | null;
@@ -47,7 +46,7 @@ const ProfileHeaderCover = memo(function ProfileHeaderCover({
             alt=""
             className="profile-header-cover-image"
             variant="large"
-            sizes={PROFILE_HEADER_COVER_SIZES}
+            sizes={UI_PROFILE_HEADER_COVER_SIZES}
             transformResize="cover"
             disableOptimization
             priority
@@ -78,7 +77,7 @@ const ProfileHeaderCover = memo(function ProfileHeaderCover({
           alt=""
           className="profile-header-cover-image"
           variant="large"
-          sizes={PROFILE_HEADER_COVER_SIZES}
+          sizes={UI_PROFILE_HEADER_COVER_SIZES}
           transformResize="cover"
           disableOptimization
           priority

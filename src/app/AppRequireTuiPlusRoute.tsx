@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import { APP_ROUTES } from '@/app/routePaths';
 import { useAuth } from '@/context/AuthContext';
+import AppPage from '@/ui/AppPage';
+import PageHeader from '@/ui/PageHeader';
 import PageContentShell from '@/ui/PageContentShell';
 import { PageLoader } from '@/ui/PageLoader';
 import TuiPlusBenefitPromptDialog from '@/features/tui-plus/TuiPlusBenefitPromptDialog';
@@ -33,18 +35,22 @@ export default function AppRequireTuiPlusRoute({ children, benefit = 'generic' }
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = `${location.pathname}${location.search}`;
+  const fallbackPath = getFallbackFrom(location, benefit);
 
   if (loading) return <PageLoader />;
   if (isTuiPlusActive(user)) return <>{children}</>;
 
   return (
-    <PageContentShell className="ui-auth-required-wrap ui-app-page-main">
-      <TuiPlusBenefitPromptDialog
-        open
-        benefit={benefit}
-        onClose={() => navigate(getFallbackFrom(location, benefit), { replace: true })}
-        onConfirm={() => navigate(APP_ROUTES.tuiPlus, { replace: true, state: buildTuiPlusBenefitRouteState(benefit, currentPath) })}
-      />
-    </PageContentShell>
+    <AppPage mobileAddressBarScroll bottomSafe className="tui-plus-required-page surface-page">
+      <PageHeader title="推推会员" titleAlign="center" onBack={() => navigate(fallbackPath, { replace: true })} />
+      <PageContentShell as="main" className="ui-auth-required-wrap ui-app-page-main">
+        <TuiPlusBenefitPromptDialog
+          open
+          benefit={benefit}
+          onClose={() => navigate(fallbackPath, { replace: true })}
+          onConfirm={() => navigate(APP_ROUTES.tuiPlus, { replace: true, state: buildTuiPlusBenefitRouteState(benefit, currentPath) })}
+        />
+      </PageContentShell>
+    </AppPage>
   );
 }

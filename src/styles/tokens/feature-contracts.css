@@ -504,6 +504,7 @@
     --ui-referral-metric-border: color-mix(in srgb, var(--ui-text-strong) 5%, transparent);
     --ui-referral-available-surface: color-mix(in srgb, var(--ui-surface-card) 78%, transparent);
     --ui-referral-stat-surface: color-mix(in srgb, var(--ui-surface-card) 74%, transparent);
+    --ui-referral-rules-overlay-z: var(--ui-z-dialog);
     --ui-tui-plus-ring-gradient:
       conic-gradient(
         from 35deg,

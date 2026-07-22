@@ -1,6 +1,6 @@
 import { useLayoutEffect } from 'react';
+import { UI_USER_DESKTOP_MIN_WIDTH } from '@/ui/layoutViewport';
 
-const MOBILE_WIDTH = 1024;
 const VISUAL_VIEWPORT_SCROLL_NOISE_PX = 4;
 const LEGACY_ROOT_SCROLL_CLASS_NAMES = [
   'post-create-scroll-shell',
@@ -111,7 +111,7 @@ function updateViewportVariables(options: { layout: boolean; visual: boolean; ke
 
 function isMobileViewport() {
   return (
-    window.innerWidth < MOBILE_WIDTH ||
+    window.innerWidth < UI_USER_DESKTOP_MIN_WIDTH ||
     window.matchMedia('(pointer: coarse)').matches ||
     /Android|iPhone|iPad|iPod|Mobile/i.test(window.navigator.userAgent)
   );
