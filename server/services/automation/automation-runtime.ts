@@ -271,7 +271,7 @@ export function startAutomationRuntime(modules: AutomationRuntimeModule[]): Stop
     void scheduleModule(module, true);
   }
 
-  console.log(`[automation-runtime] started ${registeredModules.length} modules: ${registeredModules.map((module) => module.module).join(', ')}`);
+  console.info(`[automation-runtime] started ${registeredModules.length} modules: ${registeredModules.map((module) => module.module).join(', ')}`);
   return stopAutomationRuntime;
 }
 

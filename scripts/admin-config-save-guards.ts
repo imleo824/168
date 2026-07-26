@@ -5,6 +5,7 @@ import {
   parseFeedRankProfileForSave,
   parseLocationPresetsForSave,
 } from '../server/config.service';
+import { normalizePlatformAiConfig } from '../server/services/platform-ai-config.service';
 
 const validPresets = parseLocationPresetsForSave([
   { country: ' 菲律宾 ', cities: [' 马尼拉 ', '宿务'] },
@@ -58,5 +59,30 @@ for (const [raw, message] of [
     `${message} must be rejected instead of being saved and ignored by the runtime fallback.`,
   );
 }
+
+const clampedPlatformAiConfig = normalizePlatformAiConfig({
+  provider: 'openai-compatible',
+  model: 'gpt-test-model'.repeat(20),
+  baseUrl: 'javascript:alert(1)',
+  timeoutMs: -1,
+  reviewIntervalMinutes: 0,
+});
+
+assert.equal(clampedPlatformAiConfig.provider, 'openai-compatible');
+assert.equal(clampedPlatformAiConfig.baseUrl, 'https://api.openai.com/v1');
+assert.equal(clampedPlatformAiConfig.timeoutMs, 3000, 'platform AI timeout must clamp to the safe lower bound.');
+assert.equal(clampedPlatformAiConfig.reviewIntervalMinutes, 1, 'platform AI review interval must clamp to the safe lower bound.');
+assert.ok(clampedPlatformAiConfig.model.length <= 120, 'platform AI model names must be bounded before persistence.');
+
+const maxClampedPlatformAiConfig = normalizePlatformAiConfig({
+  provider: 'deepseek',
+  baseUrl: 'https://api.deepseek.com/v1////',
+  timeoutMs: 999_999,
+  reviewIntervalMinutes: 999_999,
+});
+
+assert.equal(maxClampedPlatformAiConfig.baseUrl, 'https://api.deepseek.com/v1');
+assert.equal(maxClampedPlatformAiConfig.timeoutMs, 120000, 'platform AI timeout must clamp to the safe upper bound.');
+assert.equal(maxClampedPlatformAiConfig.reviewIntervalMinutes, 1440, 'platform AI review interval must clamp to the safe upper bound.');
 
 console.log('[admin-config-save-guards] passed');

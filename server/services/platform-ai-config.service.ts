@@ -34,6 +34,10 @@ const DEFAULT_PLATFORM_AI_CONFIG: PlatformAiConfig = {
   timeoutMs: 16_000,
   reviewIntervalMinutes: 15,
 };
+const PLATFORM_AI_TIMEOUT_LIMIT = { min: 3_000, max: 120_000, fallback: DEFAULT_PLATFORM_AI_CONFIG.timeoutMs };
+const PLATFORM_AI_REVIEW_INTERVAL_LIMIT = { min: 1, max: 1_440, fallback: DEFAULT_PLATFORM_AI_CONFIG.reviewIntervalMinutes };
+const PLATFORM_AI_MODEL_MAX_LENGTH = 120;
+const PLATFORM_AI_BASE_URL_MAX_LENGTH = 500;
 
 let googleClient: GoogleGenAI | null = null;
 let cachedConfig: { value: PlatformAiRuntimeConfig; expiresAt: number } | null = null;
@@ -42,10 +46,10 @@ function env(name: string) {
   return String(process.env[name] || '').trim();
 }
 
-function int(value: unknown, fallback: number) {
+function clampInt(value: unknown, limit: { min: number; max: number; fallback: number }) {
   const parsed = Number(value);
-  if (!Number.isFinite(parsed)) return fallback;
-  return Math.round(parsed);
+  if (!Number.isFinite(parsed)) return limit.fallback;
+  return Math.min(limit.max, Math.max(limit.min, Math.round(parsed)));
 }
 
 function normalizeProvider(value: unknown): PlatformAiProvider {
@@ -63,6 +67,30 @@ function parseJson(raw: unknown) {
     return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed as Record<string, unknown> : {};
   } catch {
     return {};
+  }
+}
+
+function defaultBaseUrl(provider: PlatformAiProvider) {
+  if (provider === 'deepseek') return 'https://api.deepseek.com/v1';
+  if (provider === 'openai-compatible') return 'https://api.openai.com/v1';
+  return '';
+}
+
+function normalizeModel(raw: unknown, fallback: string) {
+  const model = String(raw || fallback).trim().slice(0, PLATFORM_AI_MODEL_MAX_LENGTH);
+  return model || fallback;
+}
+
+function normalizePlatformAiBaseUrl(raw: unknown, provider: PlatformAiProvider) {
+  const fallback = defaultBaseUrl(provider);
+  const text = String(raw || fallback).trim().slice(0, PLATFORM_AI_BASE_URL_MAX_LENGTH).replace(/\/+$/, '');
+  if (!text) return '';
+  try {
+    const url = new URL(text);
+    if (!['http:', 'https:'].includes(url.protocol)) return fallback;
+    return url.toString().replace(/\/+$/, '');
+  } catch {
+    return fallback;
   }
 }
 
@@ -94,15 +122,15 @@ export function normalizePlatformAiConfig(raw: unknown): PlatformAiConfig {
   const data = parseJson(raw);
   const provider = normalizeProvider(data.provider || env('PLATFORM_AI_PROVIDER') || env('AUTO_AI_PROVIDER'));
   const envModel = env('PLATFORM_AI_MODEL') || env('AUTO_AI_MODEL') || env('CHAT_AI_MODEL') || env('ROBOT_CONTENT_AI_MODEL') || env('GEMINI_MODEL');
-  const model = String(data.model || envModel || (provider === 'deepseek' ? 'deepseek-chat' : provider === 'openai-compatible' ? 'gpt-4o-mini' : DEFAULT_PLATFORM_AI_CONFIG.model)).trim() || DEFAULT_PLATFORM_AI_CONFIG.model;
+  const model = normalizeModel(data.model || envModel, provider === 'deepseek' ? 'deepseek-chat' : provider === 'openai-compatible' ? 'gpt-4o-mini' : DEFAULT_PLATFORM_AI_CONFIG.model);
   const envBaseUrl = env('PLATFORM_AI_BASE_URL') || env('AUTO_AI_BASE_URL') || env('OPENAI_BASE_URL');
-  const baseUrl = String(data.baseUrl || envBaseUrl || (provider === 'deepseek' ? 'https://api.deepseek.com/v1' : provider === 'openai-compatible' ? 'https://api.openai.com/v1' : '')).trim().replace(/\/+$/, '');
+  const baseUrl = normalizePlatformAiBaseUrl(data.baseUrl || envBaseUrl, provider);
   return {
     provider,
     model,
     baseUrl,
-    timeoutMs: int(data.timeoutMs, DEFAULT_PLATFORM_AI_CONFIG.timeoutMs),
-    reviewIntervalMinutes: int(data.reviewIntervalMinutes, DEFAULT_PLATFORM_AI_CONFIG.reviewIntervalMinutes),
+    timeoutMs: clampInt(data.timeoutMs, PLATFORM_AI_TIMEOUT_LIMIT),
+    reviewIntervalMinutes: clampInt(data.reviewIntervalMinutes, PLATFORM_AI_REVIEW_INTERVAL_LIMIT),
   };
 }
 
@@ -197,7 +225,7 @@ export async function generatePlatformAiText(input: {
   const config = await getPlatformAiConfig();
   const apiKey = getApiKey(config.provider);
   if (!apiKey) return { ok: false, text: '', reason: 'platform_ai_key_missing', provider: config.provider, model: config.model };
-  const timeoutMs = input.timeoutMs || config.timeoutMs;
+  const timeoutMs = clampInt(input.timeoutMs ?? config.timeoutMs, PLATFORM_AI_TIMEOUT_LIMIT);
   try {
     if (config.provider === 'google') {
       const contents = [input.system, input.user].filter(Boolean).join('\n\n');

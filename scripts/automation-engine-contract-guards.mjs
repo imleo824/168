@@ -223,6 +223,10 @@ mustNotHave('admin automation logs', adminInteractionPanel, '批量数量');
 
 // AI and deposit scanner contracts stay explicit because automation quality depends on them.
 mustHave('platform AI', platformAi, 'PLATFORM_AI_API_KEY');
+mustHave('platform AI config clamps', platformAi, 'PLATFORM_AI_TIMEOUT_LIMIT');
+mustHave('platform AI config clamps', platformAi, 'PLATFORM_AI_REVIEW_INTERVAL_LIMIT');
+mustHave('platform AI config clamps', platformAi, 'normalizePlatformAiBaseUrl');
+mustHave('platform AI runtime timeout clamp', platformAi, 'clampInt(input.timeoutMs ?? config.timeoutMs, PLATFORM_AI_TIMEOUT_LIMIT)');
 mustHave('platform AI', platformAi, 'jsonMode?: boolean');
 mustHave('platform AI', platformAi, "responseMimeType: 'application/json'");
 mustHave('platform AI', platformAi, "response_format: { type: 'json_object' }");

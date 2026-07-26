@@ -175,7 +175,7 @@ export function createChatBotService(options: { broadcastMessage: BroadcastMessa
   return { handleHumanMessage, startIdleWarmup };
 }
 
-export async function ensureChatAutomationReady() { await ensurePublicChatRoom(); const result = await ensureDefaultChatBots(); if (result.created > 0) console.log(`[chat] Seeded ${result.created} robot users.`); }
+export async function ensureChatAutomationReady() { await ensurePublicChatRoom(); const result = await ensureDefaultChatBots(); if (result.created > 0) console.info(`[chat] Seeded ${result.created} robot users.`); }
 export function startChatMaintenance() {
   let stopped = false;
   let timer: NodeJS.Timeout | null = null;

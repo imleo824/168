@@ -148,7 +148,7 @@ export function startTuiPlusEntitlementMaintenance() {
     void syncExpiredTuiPlusEntitlements()
       .then((result) => {
         if (result.changedSources > 0 || result.changedUsers > 0 || result.changedSubscriptions > 0) {
-          console.log(`[tui-plus] expired ${result.changedUsers} member user(s), expired ${result.changedSubscriptions} subscription(s), stopped ${result.changedSources} member source sync(s).`);
+          console.info(`[tui-plus] expired ${result.changedUsers} member user(s), expired ${result.changedSubscriptions} subscription(s), stopped ${result.changedSources} member source sync(s).`);
         }
       })
       .catch((error) => {

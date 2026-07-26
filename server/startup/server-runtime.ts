@@ -37,7 +37,7 @@ export async function startServerRuntime(app: Express, deps: ServerRuntimeDeps) 
   if (deps.isDbConfigured()) {
     try {
       await ensurePostPublishStorageReady();
-      console.log('[post-publish] Database schema ready.');
+      console.info('[post-publish] Database schema ready.');
     } catch (e) {
       console.warn('[post-publish] Database schema readiness check failed; verify deployed migrations.', e);
     }
@@ -45,7 +45,7 @@ export async function startServerRuntime(app: Express, deps: ServerRuntimeDeps) 
   }
 
   server.listen(deps.port, '0.0.0.0', () => {
-    console.log(`Server listening on http://0.0.0.0:${deps.port} [${process.env.NODE_ENV || 'development'}]`);
+    console.info(`Server listening on http://0.0.0.0:${deps.port} [${process.env.NODE_ENV || 'development'}]`);
   });
   server.requestTimeout = 40_000;
   server.headersTimeout = 35_000;
@@ -64,13 +64,13 @@ export async function startServerRuntime(app: Express, deps: ServerRuntimeDeps) 
   void bootstrapDatabaseRuntime(deps);
 
   process.on('SIGTERM', () => {
-    console.log('SIGTERM received, shutting down gracefully');
+    console.info('SIGTERM received, shutting down gracefully');
     stopTronDepositScanner();
     stopAutomationRuntime();
     stopTuiPlusEntitlementMaintenance();
     stopPublicFeedWarmup();
     server.close(() => {
-      console.log('Server closed');
+      console.info('Server closed');
       deps.prisma.$disconnect().catch(() => {});
       process.exit(0);
     });
@@ -79,7 +79,7 @@ export async function startServerRuntime(app: Express, deps: ServerRuntimeDeps) 
 
 async function bootstrapDatabaseRuntime(deps: ServerRuntimeDeps) {
   if (!deps.isDbConfigured()) {
-    console.log('Database not configured, skipping migrations/seeding.');
+    console.info('Database not configured, skipping migrations/seeding.');
     return;
   }
 
@@ -88,9 +88,9 @@ async function bootstrapDatabaseRuntime(deps: ServerRuntimeDeps) {
   try {
     const seedResult = await deps.seedSuperpowerCategoryPosts(deps.prisma, { useCompletionMarker: true });
     if (seedResult.skipped) {
-      console.log('SuperPower category seed already completed.');
+      console.info('SuperPower category seed already completed.');
     } else {
-      console.log(`SuperPower category seed completed (${seedResult.created} posts).`);
+      console.info(`SuperPower category seed completed (${seedResult.created} posts).`);
     }
   } catch (e) {
     console.warn('SuperPower category seed failed (non-critical):', e);

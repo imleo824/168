@@ -64,7 +64,7 @@ async function recoverChatStorageAvailability(options: { repair?: boolean } = {}
   lastChatStorageProbeAt = now;
   try {
     const ready = options.repair ? await ensureChatSchemaReady() : await hasChatSchemaReady();
-    if (ready) { markChatStorageAvailable(); console.log('[chat] Database tables are available; chat storage resumed.'); return true; }
+    if (ready) { markChatStorageAvailable(); console.info('[chat] Database tables are available; chat storage resumed.'); return true; }
     chatStorageAvailable = false;
   } catch (error) {
     console.warn('[chat] schema recovery failed:', error instanceof Error ? error.message : error);
