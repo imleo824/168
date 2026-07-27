@@ -41,6 +41,8 @@ type CandidatePost = RobotReactionPost & {
   robotLastQuoteAt?: Date | null;
 };
 type ListCommentRunsOptions = { status?: CommentPublishRunStatus; limit?: number; cursor?: string };
+type CommentPublishTrigger = 'MANUAL' | 'SCHEDULED';
+type CommentPublishRunContext = { runId: string; trigger: CommentPublishTrigger };
 
 export interface CommentPublishConfig {
   enabled: boolean;
@@ -80,7 +82,20 @@ const SIGNATURE_DAYS = 14;
 const RECENT_ROBOT_ENGAGEMENT_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 const CANDIDATE_SCAN_LIMIT = 180;
 const RUN_STATUSES = new Set<CommentPublishRunStatus>(['PENDING', 'SUCCEEDED', 'SKIPPED', 'FAILED']);
+const COMMENT_PUBLISH_PHASES = {
+  runStarted: { phase: 'run_started' },
+  runtimeConfigChecked: { phase: 'runtime_config_checked' },
+  lockAcquired: { phase: 'lock_acquired' },
+  configLoaded: { phase: 'config_loaded' },
+  candidatesLoaded: { phase: 'candidates_loaded' },
+  candidateSelected: { phase: 'candidate_selected' },
+  qualityChecked: { phase: 'quality_checked' },
+  signatureChecked: { phase: 'signature_checked' },
+  commentWritten: { phase: 'comment_written' },
+  commentWriteFailed: { phase: 'comment_write_failed' },
+} as const;
 
+function createCommentRunId() { return `comment_run_${randomUUID()}`; }
 function db() { return prisma as any; }
 function parseJson(raw: unknown) { if (!raw) return null; if (typeof raw === 'object' && !Array.isArray(raw)) return raw as Record<string, unknown>; try { const parsed = JSON.parse(String(raw)); return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed as Record<string, unknown> : null; } catch { return null; } }
 function bool(v: unknown, fallback: boolean) { if (typeof v === 'boolean') return v; const s = String(v ?? '').trim().toLowerCase(); if (['true', '1', 'yes', 'on', '启用', '开启'].includes(s)) return true; if (['false', '0', 'no', 'off', '关闭', '停用'].includes(s)) return false; return fallback; }
@@ -138,8 +153,27 @@ export async function updateCommentPublishConfig(config: Partial<CommentPublishC
 }
 export const saveCommentPublishConfig = updateCommentPublishConfig;
 
-async function createRun(input: { postId?: string | null; robotUserId?: string | null; status: CommentPublishRunStatus; reason?: string | null; content?: string | null; commentId?: string | null; contentSignature?: string | null; qualityScore?: number | null }) {
-  const id = `comment_run_${randomUUID()}`;
+async function logCommentPublishPhase(
+  context: CommentPublishRunContext,
+  phase: string,
+  message: string,
+  details: Record<string, unknown> = {},
+) {
+  await logInteractionAutomationEvent({
+    module: 'comment_publish',
+    runId: context.runId,
+    phase,
+    message,
+    status: 'RUNNING',
+    details: {
+      trigger: context.trigger,
+      ...details,
+    },
+  });
+}
+
+async function createRun(input: { id?: string; postId?: string | null; robotUserId?: string | null; status: CommentPublishRunStatus; reason?: string | null; content?: string | null; commentId?: string | null; contentSignature?: string | null; qualityScore?: number | null }) {
+  const id = input.id || createCommentRunId();
   await prisma.$executeRaw(Prisma.sql`INSERT INTO "CommentPublishRun" ("id", "postId", "robotUserId", "status", "reason", "content", "commentId", "contentSignature", "qualityScore", "createdAt", "updatedAt") VALUES (${id}, ${input.postId || null}, ${input.robotUserId || null}, ${input.status}, ${input.reason || null}, ${input.content || null}, ${input.commentId || null}, ${input.contentSignature || null}, ${input.qualityScore ?? null}, NOW(), NOW())`);
   await logInteractionAutomationEvent({
     module: 'comment_publish',
@@ -236,12 +270,16 @@ async function recentContents(limit = 12) {
 async function saveSig(tx: any, signature: string, content: string, postId: string, robotId: string) { await tx.$executeRaw(Prisma.sql`INSERT INTO "RobotContentSignature" ("id", "module", "signature", "content", "postId", "robotUserId", "createdAt") VALUES (${`signature_${randomUUID()}`}, 'comment_publish', ${signature}, ${content}, ${postId}, ${robotId}, NOW())`); }
 function markCommentPublishPostChanged(postId: string) { bumpPublicFeedCacheVersion('comment_publish'); clearPublicFeedResultCache(); PostService.schedulePostRankingRefresh(postId); }
 
-async function publish(c: CommentPublishConfig, post: CandidatePost, robot: RobotUser) {
+async function publish(c: CommentPublishConfig, post: CandidatePost, robot: RobotUser, context?: CommentPublishRunContext) {
+  if (context) await logCommentPublishPhase(context, COMMENT_PUBLISH_PHASES.candidateSelected.phase, '已选择自动评论候选', { postId: post.id, robotUserId: robot.id });
   const reaction = await generateBestRobotReaction({ post, robot, mode: 'comment', recentContents: await recentContents(), allowRuleFallback: false });
-  if (!reaction) { await createRun({ postId: post.id, robotUserId: robot.id, status: 'SKIPPED', reason: 'no_quality_reaction' }); return { status: 'SKIPPED' as const }; }
+  if (!reaction) { await createRun({ id: context?.runId, postId: post.id, robotUserId: robot.id, status: 'SKIPPED', reason: 'no_quality_reaction' }); return { status: 'SKIPPED' as const }; }
   const quality = scoreRobotReaction(post, reaction, 'comment');
-  if (!quality.ok) { await createRun({ postId: post.id, robotUserId: robot.id, status: 'SKIPPED', reason: quality.reason || reaction.reason || 'quality_gate_rejected', content: reaction.content, contentSignature: reaction.signature, qualityScore: quality.score }); return { status: 'SKIPPED' as const }; }
-  if (await recentSig(reaction.signature)) { await createRun({ postId: post.id, robotUserId: robot.id, status: 'SKIPPED', reason: 'content_signature_recently_used', content: reaction.content, contentSignature: reaction.signature, qualityScore: quality.score }); return { status: 'SKIPPED' as const }; }
+  if (context) await logCommentPublishPhase(context, COMMENT_PUBLISH_PHASES.qualityChecked.phase, '自动评论质量已检查', { postId: post.id, robotUserId: robot.id, ok: quality.ok, reason: quality.reason || null, score: quality.score });
+  if (!quality.ok) { await createRun({ id: context?.runId, postId: post.id, robotUserId: robot.id, status: 'SKIPPED', reason: quality.reason || reaction.reason || 'quality_gate_rejected', content: reaction.content, contentSignature: reaction.signature, qualityScore: quality.score }); return { status: 'SKIPPED' as const }; }
+  const signatureRecentlyUsed = await recentSig(reaction.signature);
+  if (context) await logCommentPublishPhase(context, COMMENT_PUBLISH_PHASES.signatureChecked.phase, '自动评论签名已检查', { postId: post.id, robotUserId: robot.id, signatureRecentlyUsed });
+  if (signatureRecentlyUsed) { await createRun({ id: context?.runId, postId: post.id, robotUserId: robot.id, status: 'SKIPPED', reason: 'content_signature_recently_used', content: reaction.content, contentSignature: reaction.signature, qualityScore: quality.score }); return { status: 'SKIPPED' as const }; }
   const commentId = `comment_${randomUUID()}`;
   try {
     await prisma.$transaction(async (tx) => {
@@ -253,39 +291,76 @@ async function publish(c: CommentPublishConfig, post: CandidatePost, robot: Robo
       await saveSig(tx, reaction.signature, reaction.content, post.id, robot.id);
     });
     markCommentPublishPostChanged(post.id);
-    await createRun({ postId: post.id, robotUserId: robot.id, status: 'SUCCEEDED', content: reaction.content, commentId, contentSignature: reaction.signature, qualityScore: quality.score });
+    if (context) await logCommentPublishPhase(context, COMMENT_PUBLISH_PHASES.commentWritten.phase, '自动评论已写入', { postId: post.id, robotUserId: robot.id, commentId });
+    await createRun({ id: context?.runId, postId: post.id, robotUserId: robot.id, status: 'SUCCEEDED', content: reaction.content, commentId, contentSignature: reaction.signature, qualityScore: quality.score });
     return { status: 'SUCCEEDED' as const };
   } catch (error: any) {
     const reason = String(error?.message || 'create_comment_failed').slice(0, 200);
     const skipped = ['robot_post_already_engaged', 'human_engagement_saturated'].includes(reason);
-    await createRun({ postId: post.id, robotUserId: robot.id, status: skipped ? 'SKIPPED' : 'FAILED', reason, content: reaction.content, contentSignature: reaction.signature, qualityScore: quality.score });
+    if (context) await logCommentPublishPhase(context, COMMENT_PUBLISH_PHASES.commentWriteFailed.phase, '自动评论写入失败', { postId: post.id, robotUserId: robot.id, reason, skipped });
+    await createRun({ id: context?.runId, postId: post.id, robotUserId: robot.id, status: skipped ? 'SKIPPED' : 'FAILED', reason, content: reaction.content, contentSignature: reaction.signature, qualityScore: quality.score });
     return { status: skipped ? 'SKIPPED' as const : 'FAILED' as const };
   }
 }
 
-async function runCommentPublishLocked(c: CommentPublishConfig) {
+async function runCommentPublishLocked(c: CommentPublishConfig, context: CommentPublishRunContext) {
+  await logCommentPublishPhase(context, COMMENT_PUBLISH_PHASES.configLoaded.phase, '自动评论配置已加载', { batchSize: c.batchSize, dailyLimit: c.dailyLimit });
   const usedToday = await todayCount();
-  if (c.dailyLimit <= 0 || usedToday >= c.dailyLimit) return { enabled: c.enabled, created: 0, skipped: 0, failed: 0, reason: 'daily_limit_reached' };
+  const runIds: string[] = [];
+  if (c.dailyLimit <= 0 || usedToday >= c.dailyLimit) {
+    await createRun({ id: context.runId, status: 'SKIPPED', reason: 'daily_limit_reached' });
+    return { enabled: c.enabled, created: 0, skipped: 1, failed: 0, reason: 'daily_limit_reached', runId: context.runId, runIds: [context.runId] };
+  }
   const [allRobots, allPosts] = await Promise.all([robots(c), posts(c)]);
-  if (!allRobots.length || !allPosts.length) { const reason = !allRobots.length ? 'no_robot_user' : 'no_quality_candidate_post'; await createRun({ status: 'SKIPPED', reason }); return { enabled: c.enabled, created: 0, skipped: 1, failed: 0, reason }; }
+  await logCommentPublishPhase(context, COMMENT_PUBLISH_PHASES.candidatesLoaded.phase, '自动评论候选已加载', { robotCount: allRobots.length, postCount: allPosts.length });
+  if (!allRobots.length || !allPosts.length) { const reason = !allRobots.length ? 'no_robot_user' : 'no_quality_candidate_post'; await createRun({ id: context.runId, status: 'SKIPPED', reason }); return { enabled: c.enabled, created: 0, skipped: 1, failed: 0, reason, runId: context.runId, runIds: [context.runId] }; }
   let created = 0;
   let skipped = 0;
   let failed = 0;
   const limit = Math.min(c.batchSize, c.dailyLimit - usedToday, allPosts.length);
-  for (let i = 0; i < limit; i += 1) { const post = allPosts[i]; const robot = await pickRobot(post, allRobots); if (!robot) { await createRun({ postId: post.id, status: 'SKIPPED', reason: 'no_robot_without_prior_engagement' }); skipped += 1; continue; } const result = await publish(c, post, robot); if (result.status === 'SUCCEEDED') created += 1; else if (result.status === 'FAILED') failed += 1; else skipped += 1; }
-  return { enabled: c.enabled, created, skipped, failed };
+  for (let i = 0; i < limit; i += 1) {
+    const runContext: CommentPublishRunContext = { runId: i === 0 ? context.runId : createCommentRunId(), trigger: context.trigger };
+    runIds.push(runContext.runId);
+    const post = allPosts[i];
+    const robot = await pickRobot(post, allRobots);
+    if (!robot) {
+      await logCommentPublishPhase(runContext, COMMENT_PUBLISH_PHASES.candidateSelected.phase, '候选帖子没有可用机器人账号', { postId: post.id, reason: 'no_robot_without_prior_engagement' });
+      await createRun({ id: runContext.runId, postId: post.id, status: 'SKIPPED', reason: 'no_robot_without_prior_engagement' });
+      skipped += 1;
+      continue;
+    }
+    const result = await publish(c, post, robot, runContext);
+    if (result.status === 'SUCCEEDED') created += 1;
+    else if (result.status === 'FAILED') failed += 1;
+    else skipped += 1;
+  }
+  if (created === 0 && skipped === 0 && failed === 0) {
+    await createRun({ id: context.runId, status: 'SKIPPED', reason: 'no_available_pair' });
+    return { enabled: c.enabled, created: 0, skipped: 1, failed: 0, reason: 'no_available_pair', runId: context.runId, runIds: [context.runId] };
+  }
+  return { enabled: c.enabled, created, skipped, failed, runId: runIds[0] || context.runId, runIds };
 }
 
-export async function runCommentPublishOnce(inputConfig?: Partial<CommentPublishConfig>, options: { force?: boolean; trigger?: 'MANUAL' | 'SCHEDULED' } = {}) {
+export async function runCommentPublishOnce(inputConfig?: Partial<CommentPublishConfig>, options: { force?: boolean; trigger?: CommentPublishTrigger } = {}) {
+  const runId = createCommentRunId();
+  const trigger = options.trigger || (inputConfig ? 'MANUAL' : 'SCHEDULED');
+  const context: CommentPublishRunContext = { runId, trigger };
+  await logCommentPublishPhase(context, COMMENT_PUBLISH_PHASES.runStarted.phase, '自动评论执行开始', { force: Boolean(options.force) });
   const stored = await getCommentPublishConfig();
   const normalizedInput = inputConfig ? normalize(inputConfig, stored) : stored;
   const c = options.force ? { ...normalizedInput, enabled: true } : normalizedInput;
-  if (!c.enabled) return { enabled: false, created: 0, skipped: 0, failed: 0, reason: 'disabled' };
+  await logCommentPublishPhase(context, COMMENT_PUBLISH_PHASES.runtimeConfigChecked.phase, '自动评论运行配置已检查', { enabled: c.enabled, force: Boolean(options.force) });
+  if (!c.enabled) {
+    await createRun({ id: runId, status: 'SKIPPED', reason: 'disabled' });
+    return { enabled: false, created: 0, skipped: 1, failed: 0, reason: 'disabled', runId, runIds: [runId] };
+  }
   const aiRuntime = await getAutomationAiRuntime('comment', { force: true });
-  if (!aiRuntime.ready) { await createRun({ status: 'SKIPPED', reason: aiRuntime.disabledReason || 'platform_ai_not_ready' }); return { enabled: c.enabled, created: 0, skipped: 1, failed: 0, reason: aiRuntime.disabledReason || 'platform_ai_not_ready', platformAi: aiRuntime }; }
-  const trigger = options.trigger || (inputConfig ? 'MANUAL' : 'SCHEDULED');
-  const taskLock = await withAutomationTaskLock(COMMENT_TASK_LOCK_NAME, { ttlMs: COMMENT_TASK_LOCK_TTL_MS, metadata: { trigger }, force: options.force }, () => runCommentPublishLocked(c));
-  if (!taskLock.acquired) { await createRun({ status: 'SKIPPED', reason: 'another_instance_running' }); return { enabled: c.enabled, created: 0, skipped: 1, failed: 0, reason: 'another_instance_running', lock: taskLock.lock as AutomationTaskLockDetails | null }; }
+  if (!aiRuntime.ready) { await createRun({ id: runId, status: 'SKIPPED', reason: aiRuntime.disabledReason || 'platform_ai_not_ready' }); return { enabled: c.enabled, created: 0, skipped: 1, failed: 0, reason: aiRuntime.disabledReason || 'platform_ai_not_ready', platformAi: aiRuntime, runId, runIds: [runId] }; }
+  const taskLock = await withAutomationTaskLock(COMMENT_TASK_LOCK_NAME, { ttlMs: COMMENT_TASK_LOCK_TTL_MS, metadata: { trigger, runId }, force: options.force }, async () => {
+    await logCommentPublishPhase(context, COMMENT_PUBLISH_PHASES.lockAcquired.phase, '自动评论任务锁已获取');
+    return runCommentPublishLocked(c, context);
+  });
+  if (!taskLock.acquired) { await createRun({ id: runId, status: 'SKIPPED', reason: 'another_instance_running' }); return { enabled: c.enabled, created: 0, skipped: 1, failed: 0, reason: 'another_instance_running', lock: taskLock.lock as AutomationTaskLockDetails | null, runId, runIds: [runId] }; }
   return taskLock.result;
 }
 

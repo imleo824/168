@@ -185,6 +185,13 @@ mustHave('quote publish process log', quote, /phase: 'quality_checked'/);
 mustHave('quote publish process log', quote, /phase: 'post_written'/);
 mustHave('quote publish process log list', quote, /attachInteractionAutomationExecutionEvents\('quote_publish'/);
 mustHave('comment publish process log', comment, /logInteractionAutomationEvent/);
+for (const phase of ['run_started', 'runtime_config_checked', 'lock_acquired', 'config_loaded', 'candidates_loaded', 'candidate_selected', 'quality_checked', 'signature_checked', 'comment_written', 'comment_write_failed']) {
+  mustHave('comment publish process log', comment, new RegExp(`phase: '${phase}'`));
+}
+mustHave('comment publish stable run id', comment, /function createCommentRunId\(\)/);
+mustHave('comment publish stable run id', comment, /createRun\(\{ id: runId,[\s\S]{0,160}status: 'SKIPPED', reason: 'disabled'/);
+mustHave('comment publish stable run id', comment, /createRun\(\{ id: context\.runId,[\s\S]{0,160}reason: 'daily_limit_reached'/);
+mustHave('comment publish stable run id', comment, /createRun\(\{ id: context\.runId,[\s\S]{0,160}reason: 'no_available_pair'/);
 mustHave('comment publish process log list', comment, /attachInteractionAutomationExecutionEvents\('comment_publish'/);
 mustHave('auto like process log', autoLike, /logInteractionAutomationEvent/);
 mustHave('auto like process log', autoLike, /phase: 'candidate_selected'/);
