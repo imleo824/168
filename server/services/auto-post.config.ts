@@ -17,18 +17,22 @@ export const AUTO_POST_CONFIG_TOPICS = ['QUOTE', 'FACT', 'RIDDLE', 'JOKE'] as co
 
 const CONFIG_PREFIX = 'auto_post_';
 const CONFIG_CACHE_TTL_MS = 15_000;
+const LIMITS = {
+  checkIntervalMinutes: { min: 30, max: 720, fallback: 60 },
+  dailyLimit: { min: 0, max: 100, fallback: 12 },
+} as const;
 
 const DEFAULT_TOPIC_CONFIG: AutoPostTopicConfig = {
   enabled: false,
   authorUserId: '',
   categoryId: '',
-  dailyLimit: 12,
+  dailyLimit: LIMITS.dailyLimit.fallback,
 };
 
 export const DEFAULT_AUTO_POST_CONFIG: AutoPostConfig = {
   enabled: false,
   topicConfigs: Object.fromEntries(AUTO_POST_CONFIG_TOPICS.map((topic) => [topic, { ...DEFAULT_TOPIC_CONFIG }])),
-  checkIntervalMinutes: 60,
+  checkIntervalMinutes: LIMITS.checkIntervalMinutes.fallback,
 };
 
 const CONFIG_KEYS: Array<keyof AutoPostConfig> = [
@@ -45,16 +49,16 @@ function toBoolean(value: unknown, fallback: boolean) {
   if (typeof value === 'number') return value > 0;
   if (typeof value === 'string') {
     const normalized = value.trim().toLowerCase();
-    if (['true', '1', 'yes', 'on'].includes(normalized)) return true;
-    if (['false', '0', 'no', 'off'].includes(normalized)) return false;
+    if (['true', '1', 'yes', 'on', 'enabled', '启用', '开启'].includes(normalized)) return true;
+    if (['false', '0', 'no', 'off', 'disabled', '关闭', '停用'].includes(normalized)) return false;
   }
   return fallback;
 }
 
-function toInteger(value: unknown, fallback: number) {
+function clampInteger(value: unknown, limit: { min: number; max: number; fallback: number }) {
   const parsed = Number(value);
-  if (!Number.isFinite(parsed)) return fallback;
-  return Math.round(parsed);
+  if (!Number.isFinite(parsed)) return limit.fallback;
+  return Math.min(limit.max, Math.max(limit.min, Math.round(parsed)));
 }
 
 function toConfigString(value: unknown) {
@@ -74,7 +78,7 @@ function normalizeTopicConfigs(raw: unknown, fallback?: AutoPostConfig['topicCon
       enabled: toBoolean(value.enabled, current.enabled),
       authorUserId: toConfigString(value.authorUserId) || current.authorUserId,
       categoryId: hasOwn(value as Record<string, unknown>, 'categoryId') ? toConfigString(value.categoryId) : current.categoryId,
-      dailyLimit: toInteger(value.dailyLimit, current.dailyLimit),
+      dailyLimit: hasOwn(value as Record<string, unknown>, 'dailyLimit') ? clampInteger(value.dailyLimit, LIMITS.dailyLimit) : current.dailyLimit,
     }];
   }));
 }
@@ -92,7 +96,7 @@ export function normalizeAutoPostConfig(input: Partial<Record<keyof AutoPostConf
   return {
     enabled: toBoolean(input.enabled, DEFAULT_AUTO_POST_CONFIG.enabled),
     topicConfigs,
-    checkIntervalMinutes: toInteger(input.checkIntervalMinutes, DEFAULT_AUTO_POST_CONFIG.checkIntervalMinutes),
+    checkIntervalMinutes: clampInteger(input.checkIntervalMinutes, LIMITS.checkIntervalMinutes),
   } satisfies AutoPostConfig;
 }
 

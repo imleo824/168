@@ -66,8 +66,12 @@ assertIncludes('automation run state migration', runStateConstraintsMigration, '
 assertIncludes('automation run state migration', runStateConstraintsMigration, 'AutoPostRun_topic_check', 'auto post run topic check constraint is required.');
 
 assertIncludes('auto-post.config.ts', config, 'enabled: false', 'auto post must default to disabled.');
-assertIncludes('auto-post.config.ts', config, 'checkIntervalMinutes: 60', 'default interval must be one hour.');
-assertIncludes('auto-post.config.ts', config, 'dailyLimit: 12', 'default daily limit must be 12.');
+assertIncludes('auto-post.config.ts', config, 'checkIntervalMinutes: { min: 30, max: 720, fallback: 60 }', 'default interval must stay one hour with safe bounds.');
+assertIncludes('auto-post.config.ts', config, 'dailyLimit: { min: 0, max: 100, fallback: 12 }', 'default daily limit must stay 12 with safe bounds.');
+assertIncludes('auto-post.config.ts', config, 'checkIntervalMinutes: LIMITS.checkIntervalMinutes.fallback', 'default interval must come from shared limits.');
+assertIncludes('auto-post.config.ts', config, 'dailyLimit: LIMITS.dailyLimit.fallback', 'default daily limit must come from shared limits.');
+assertIncludes('auto-post.config.ts', config, 'clampInteger(value: unknown, limit:', 'numeric config must clamp into backend-supported limits.');
+assertIncludes('auto-post.config.ts', config, 'Math.min(limit.max, Math.max(limit.min, Math.round(parsed)))', 'numeric config clamp must preserve configured min/max bounds.');
 assertNotIncludes('auto-post.config.ts', config, 'legacyAuthorUserId', 'auto post config must not keep legacy global author fallback.');
 assertNotIncludes('auto-post.config.ts', config, 'legacyCategoryId', 'auto post config must not keep legacy global category fallback.');
 assertNotIncludes('auto-post.config.ts', config, 'legacyDailyLimit', 'auto post config must not keep legacy global daily limit fallback.');

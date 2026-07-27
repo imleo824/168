@@ -5,6 +5,7 @@ import {
   parseFeedRankProfileForSave,
   parseLocationPresetsForSave,
 } from '../server/config.service';
+import { normalizeAutoPostConfig } from '../server/services/auto-post.config';
 import { normalizePlatformAiConfig } from '../server/services/platform-ai-config.service';
 
 const validPresets = parseLocationPresetsForSave([
@@ -84,5 +85,37 @@ const maxClampedPlatformAiConfig = normalizePlatformAiConfig({
 assert.equal(maxClampedPlatformAiConfig.baseUrl, 'https://api.deepseek.com/v1');
 assert.equal(maxClampedPlatformAiConfig.timeoutMs, 120000, 'platform AI timeout must clamp to the safe upper bound.');
 assert.equal(maxClampedPlatformAiConfig.reviewIntervalMinutes, 1440, 'platform AI review interval must clamp to the safe upper bound.');
+
+const clampedAutoPostConfig = normalizeAutoPostConfig({
+  enabled: '开启',
+  checkIntervalMinutes: -1,
+  topicConfigs: {
+    QUOTE: {
+      enabled: '开启',
+      authorUserId: ' user_1 ',
+      categoryId: ' category_1 ',
+      dailyLimit: 9999,
+    },
+    FACT: {
+      enabled: '关闭',
+      dailyLimit: -9,
+    },
+  },
+});
+
+assert.equal(clampedAutoPostConfig.enabled, true, 'auto post config must accept Chinese enabled strings.');
+assert.equal(clampedAutoPostConfig.checkIntervalMinutes, 30, 'auto post interval must clamp to the safe lower bound.');
+assert.equal(clampedAutoPostConfig.topicConfigs.QUOTE.enabled, true, 'auto post topic config must accept Chinese enabled strings.');
+assert.equal(clampedAutoPostConfig.topicConfigs.QUOTE.authorUserId, 'user_1');
+assert.equal(clampedAutoPostConfig.topicConfigs.QUOTE.categoryId, 'category_1');
+assert.equal(clampedAutoPostConfig.topicConfigs.QUOTE.dailyLimit, 100, 'auto post topic daily limit must clamp to the safe upper bound.');
+assert.equal(clampedAutoPostConfig.topicConfigs.FACT.enabled, false, 'auto post topic config must accept Chinese disabled strings.');
+assert.equal(clampedAutoPostConfig.topicConfigs.FACT.dailyLimit, 0, 'auto post topic daily limit must clamp to the safe lower bound.');
+
+const maxClampedAutoPostConfig = normalizeAutoPostConfig({
+  checkIntervalMinutes: 9999,
+});
+
+assert.equal(maxClampedAutoPostConfig.checkIntervalMinutes, 720, 'auto post interval must clamp to the safe upper bound.');
 
 console.log('[admin-config-save-guards] passed');
