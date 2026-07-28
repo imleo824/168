@@ -1,12 +1,39 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import process from 'node:process';
 
 import { HttpError } from '../server/http/errors';
 import {
+  parsePublishCategorySchema,
   parseFeedRankProfileForSave,
   parseLocationPresetsForSave,
 } from '../server/config.service';
 import { normalizeAutoPostConfig } from '../server/services/auto-post.config';
 import { normalizePlatformAiConfig } from '../server/services/platform-ai-config.service';
+
+const root = process.cwd();
+function read(file: string) {
+  return fs.readFileSync(path.join(root, file), 'utf8');
+}
+
+const adminConfigRoutesSource = read('server/routes/admin-config.routes.ts');
+
+assert.deepEqual(
+  parsePublishCategorySchema([]),
+  { schema: [] },
+  'publish_category_schema must allow an empty array so admins can clear all extra publish fields.',
+);
+assert.match(
+  adminConfigRoutesSource,
+  /if \(parsed\.schema\.length === 0\) return;/,
+  'admin config save route must allow clearing publish category schema instead of forcing at least one category.',
+);
+assert.doesNotMatch(
+  adminConfigRoutesSource,
+  /至少需要配置一个分类/,
+  'admin config save route must not restore the obsolete non-empty publish category schema requirement.',
+);
 
 const validPresets = parseLocationPresetsForSave([
   { country: ' 菲律宾 ', cities: [' 马尼拉 ', '宿务'] },

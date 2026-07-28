@@ -20,7 +20,7 @@ async function assertPublishCategorySchemaUsesExistingCategories(rawSchema: unkn
   if (rawSchema === undefined) return;
   const parsed = parsePublishCategorySchema(rawSchema);
   if (parsed.parseError) throw new HttpError(parsed.parseError, 400);
-  if (parsed.schema.length === 0) throw new HttpError('发布分类配置错误：至少需要配置一个分类', 400);
+  if (parsed.schema.length === 0) return;
 
   const categories = await prisma.category.findMany({ select: { slug: true } });
   const existingSlugs = new Set(categories.map((category) => normalizePublishCategorySlug(category.slug)));
