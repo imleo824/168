@@ -32,6 +32,8 @@ export type AutoLikeRunResult = {
   skipped: number;
   failed: number;
   reason?: string | null;
+  runId?: string | null;
+  runIds?: string[];
   lastPostId?: string | null;
   lastRobotUserId?: string | null;
   lock?: AutomationTaskLockDetails | null;
@@ -99,6 +101,31 @@ async function createRunRow(input: { trigger: AutoLikeTrigger; status: AutoLikeR
   const id = `auto_like_run_${randomUUID()}`;
   await prisma.$executeRaw(Prisma.sql`INSERT INTO "AutoLikeRun" ("id", "trigger", "status", "postId", "robotUserId", "reason", "createdAt", "finishedAt") VALUES (${id}, ${input.trigger}, ${input.status}, ${input.postId || null}, ${input.robotUserId || null}, ${input.reason || null}, NOW(), NOW())`);
   return id;
+}
+
+async function logAutoLikePhase(input: {
+  runId: string;
+  phase: string;
+  message: string;
+  status?: string | null;
+  reason?: string | null;
+  level?: 'info' | 'warn' | 'error';
+  postId?: string | null;
+  robotUserId?: string | null;
+  details?: Record<string, unknown>;
+}) {
+  await logInteractionAutomationEvent({
+    module: 'auto_like',
+    runId: input.runId,
+    level: input.level,
+    phase: input.phase,
+    message: input.message,
+    status: input.status || null,
+    reason: input.reason || null,
+    postId: input.postId || null,
+    robotUserId: input.robotUserId || null,
+    details: input.details || {},
+  });
 }
 
 function todayRange() { return getPlatformDayRange(); }
@@ -172,18 +199,27 @@ async function recordAndReturn(result: AutoLikeRunResult, status: AutoLikeRunSta
     console.warn('[auto-like] run history write failed:', error?.message || error);
     return null;
   });
-  if (runId) await logInteractionAutomationEvent({
-    module: 'auto_like',
-    runId,
-    level: status === 'FAILED' ? 'error' : 'info',
-    phase: 'run_finished',
-    message: status === 'SUCCEEDED' ? '自动点赞成功' : status === 'SKIPPED' ? '自动点赞跳过' : '自动点赞失败',
-    status,
-    reason: reason ?? result.reason ?? null,
-    postId: result.lastPostId || null,
-    robotUserId: result.lastRobotUserId || null,
-    details: result,
-  });
+  if (runId) {
+    await logAutoLikePhase({
+      runId,
+      phase: 'run_started',
+      message: '自动点赞执行开始',
+      status: 'RUNNING',
+      details: { trigger: result.trigger, enabled: result.enabled },
+    });
+    await logAutoLikePhase({
+      runId,
+      level: status === 'FAILED' ? 'error' : 'info',
+      phase: 'run_finished',
+      message: status === 'SUCCEEDED' ? '自动点赞成功' : status === 'SKIPPED' ? '自动点赞跳过' : '自动点赞失败',
+      status,
+      reason: reason ?? result.reason ?? null,
+      postId: result.lastPostId || null,
+      robotUserId: result.lastRobotUserId || null,
+      details: result,
+    });
+    return { ...result, runId };
+  }
   return result;
 }
 function rememberLatestRun(result: AutoLikeRunResult) { latestRun = { ...result, finishedAt: new Date().toISOString() }; }
@@ -209,7 +245,7 @@ export async function updateAutoLikeConfig(config: Partial<AutoLikeConfig>) {
 
 async function runAutoLikeLocked(config: AutoLikeConfig, enabled: boolean, trigger: AutoLikeTrigger): Promise<AutoLikeRunResult> {
   const today = await countTodayRobotLikes();
-  if (today.likeCount >= config.dailyLimit) return recordAndReturn({ enabled, trigger, liked: 0, boosted: 0, skipped: 0, failed: 0, reason: 'daily_limit_reached' }, 'SKIPPED', 'daily_limit_reached');
+  if (today.likeCount >= config.dailyLimit) return recordAndReturn({ enabled, trigger, liked: 0, boosted: 0, skipped: 1, failed: 0, reason: 'daily_limit_reached' }, 'SKIPPED', 'daily_limit_reached');
   const [robots, rawPosts] = await Promise.all([listRobots(config), listPosts(config)]);
   if (!robots.length || !rawPosts.length) {
     const reason = !robots.length ? 'no_robot_user' : 'no_candidate_post';
@@ -222,6 +258,7 @@ async function runAutoLikeLocked(config: AutoLikeConfig, enabled: boolean, trigg
   for (const robot of robots) robotDailyCounts.set(robot.id, await countRobotDailyLikes(robot.id));
   let liked = 0; let skipped = 0; let failed = 0; let lastPostId: string | null = null; let lastRobotUserId: string | null = null; let lastReason: string | null = null;
   const usedPairs = new Set<string>();
+  const runIds: string[] = [];
   const limit = Math.min(config.batchSize, config.dailyLimit - today.likeCount);
   for (let i = 0; i < limit; i += 1) {
     const pair = pickPair({ posts, robots, robotDailyCounts, usedPairs, config });
@@ -237,8 +274,46 @@ async function runAutoLikeLocked(config: AutoLikeConfig, enabled: boolean, trigg
       return null;
     });
     if (attemptRunId) {
-      await logInteractionAutomationEvent({
-        module: 'auto_like',
+      runIds.push(attemptRunId);
+      await logAutoLikePhase({
+        runId: attemptRunId,
+        phase: 'run_started',
+        message: '自动点赞执行开始',
+        status: 'RUNNING',
+        details: { trigger, enabled },
+      });
+      await logAutoLikePhase({
+        runId: attemptRunId,
+        phase: 'config_loaded',
+        message: '自动点赞配置已读取',
+        status: 'READY',
+        details: {
+          batchSize: config.batchSize,
+          dailyLimit: config.dailyLimit,
+          maxLikesPerPost: config.maxLikesPerPost,
+          maxLikesPerRobotPerDay: config.maxLikesPerRobotPerDay,
+          recentDays: config.recentDays,
+        },
+      });
+      await logAutoLikePhase({
+        runId: attemptRunId,
+        phase: 'lock_acquired',
+        message: '自动点赞任务锁已获取',
+        status: 'RUNNING',
+      });
+      await logAutoLikePhase({
+        runId: attemptRunId,
+        phase: 'candidates_loaded',
+        message: '自动点赞候选已加载',
+        status: 'READY',
+        details: {
+          robotCount: robots.length,
+          rawPostCount: rawPosts.length,
+          candidatePostCount: posts.length,
+          todayLiked: today.likeCount,
+        },
+      });
+      await logAutoLikePhase({
         runId: attemptRunId,
         phase: 'candidate_selected',
         message: '已选择点赞对象和机器人账号',
@@ -247,8 +322,7 @@ async function runAutoLikeLocked(config: AutoLikeConfig, enabled: boolean, trigg
         robotUserId: pair.robot.id,
         details: { trigger, maxLikesPerPost: config.maxLikesPerPost, maxLikesPerRobotPerDay: config.maxLikesPerRobotPerDay },
       });
-      await logInteractionAutomationEvent({
-        module: 'auto_like',
+      await logAutoLikePhase({
         runId: attemptRunId,
         level: attempt.status === 'FAILED' ? 'error' : 'info',
         phase: attempt.status === 'SUCCEEDED' ? 'like_written' : 'like_skipped',
@@ -258,8 +332,7 @@ async function runAutoLikeLocked(config: AutoLikeConfig, enabled: boolean, trigg
         postId: pair.post.id,
         robotUserId: pair.robot.id,
       });
-      await logInteractionAutomationEvent({
-        module: 'auto_like',
+      await logAutoLikePhase({
         runId: attemptRunId,
         level: attempt.status === 'FAILED' ? 'error' : 'info',
         phase: 'run_finished',
@@ -272,9 +345,9 @@ async function runAutoLikeLocked(config: AutoLikeConfig, enabled: boolean, trigg
     }
   }
   const reason = liked > 0 ? 'liked' : lastReason || 'no_available_pair';
-  const result = { enabled, trigger, liked, boosted: liked, skipped, failed, reason, lastPostId, lastRobotUserId };
+  const result = { enabled, trigger, liked, boosted: liked, skipped, failed, reason, runId: runIds[0] || null, runIds, lastPostId, lastRobotUserId };
+  if (liked === 0 && skipped === 0 && failed === 0) return recordAndReturn({ ...result, skipped: 1, reason: 'no_available_pair' }, 'SKIPPED', 'no_available_pair');
   rememberLatestRun(result);
-  if (liked === 0 && skipped === 0 && failed === 0) await createRunRow({ trigger, status: 'SKIPPED', reason: 'no_available_pair' }).catch((error) => console.warn('[auto-like] run history write failed:', error?.message || error));
   return result;
 }
 
@@ -282,7 +355,7 @@ export async function runAutoLikeOnce(options: { trigger?: AutoLikeTrigger; enab
   const trigger = options.trigger || 'MANUAL';
   const config = await getAutoLikeConfig();
   const enabled = options.enabled === true || options.force === true ? true : Boolean(config.enabled);
-  if (!enabled) return recordAndReturn({ enabled: false, trigger, liked: 0, boosted: 0, skipped: 0, failed: 0, reason: 'disabled' }, 'SKIPPED', 'disabled');
+  if (!enabled) return recordAndReturn({ enabled: false, trigger, liked: 0, boosted: 0, skipped: 1, failed: 0, reason: 'disabled' }, 'SKIPPED', 'disabled');
   const taskLock = await withAutomationTaskLock(AUTO_LIKE_TASK_LOCK_NAME, { ttlMs: AUTO_LIKE_TASK_LOCK_TTL_MS, metadata: { trigger }, force: options.force }, () => runAutoLikeLocked(config, enabled, trigger));
   if (!taskLock.acquired) return recordAndReturn({ enabled, trigger, liked: 0, boosted: 0, skipped: 1, failed: 0, reason: 'another_instance_running', lock: taskLock.lock }, 'SKIPPED', 'another_instance_running');
   return taskLock.result;

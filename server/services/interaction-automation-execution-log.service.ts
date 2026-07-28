@@ -226,12 +226,27 @@ export async function getInteractionAutomationExecutionEvents(module: Interactio
   return text.split('\n').map((line) => line.trim()).filter(Boolean).map(parseLine).filter(Boolean) as InteractionAutomationExecutionEvent[];
 }
 
+function mergeInteractionAutomationEvents(
+  fileEvents: InteractionAutomationExecutionEvent[],
+  fallbackEvents: InteractionAutomationExecutionEvent[],
+) {
+  if (!fileEvents.length) return fallbackEvents;
+  const phases = new Set(fileEvents.map((event) => event.phase));
+  const merged = [...fileEvents];
+  const fallbackStarted = fallbackEvents.find((event) => event.phase === 'run_started');
+  const fallbackFinished = [...fallbackEvents].reverse().find((event) => event.phase === 'run_finished');
+  if (fallbackStarted && !phases.has('run_started')) merged.unshift(fallbackStarted);
+  if (fallbackFinished && !phases.has('run_finished')) merged.push(fallbackFinished);
+  return merged;
+}
+
 export async function attachInteractionAutomationExecutionEvents<T extends { id?: string | null }>(module: InteractionAutomationModule, runs: T[]) {
   return Promise.all(runs.map(async (run) => {
     const fileEvents = run.id ? await getInteractionAutomationExecutionEvents(module, String(run.id)) : [];
+    const fallbackEvents = buildInteractionAutomationFallbackEvents(module, run);
     return {
       ...run,
-      processEvents: fileEvents.length ? fileEvents : buildInteractionAutomationFallbackEvents(module, run),
+      processEvents: mergeInteractionAutomationEvents(fileEvents, fallbackEvents),
     };
   }));
 }

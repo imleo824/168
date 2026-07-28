@@ -157,7 +157,8 @@ mustHave('interaction execution log', interactionExecutionLog, /logInteractionAu
 mustHave('interaction execution log', interactionExecutionLog, /attachInteractionAutomationExecutionEvents/);
 mustHave('interaction execution log fallback', interactionExecutionLog, /buildInteractionAutomationFallbackEvents/);
 mustHave('interaction execution log fallback', interactionExecutionLog, /databaseFallback/);
-mustHave('interaction execution log fallback', interactionExecutionLog, /fileEvents\.length \? fileEvents : buildInteractionAutomationFallbackEvents/);
+mustHave('interaction execution log fallback', interactionExecutionLog, /mergeInteractionAutomationEvents/);
+mustHave('interaction execution log fallback', interactionExecutionLog, /processEvents: mergeInteractionAutomationEvents\(fileEvents, fallbackEvents\)/);
 mustHave('interaction execution log', interactionExecutionLog, /\[redacted\]/);
 mustHave('package scripts', packageScripts, /interaction-automation-log-fallback-guards/);
 
@@ -197,6 +198,9 @@ mustHave('comment publish stable run id', comment, /createRun\(\{ id: context\.r
 mustHave('comment publish stable run id', comment, /createRun\(\{ id: context\.runId,[\s\S]{0,160}reason: 'no_available_pair'/);
 mustHave('comment publish process log list', comment, /attachInteractionAutomationExecutionEvents\('comment_publish'/);
 mustHave('auto like process log', autoLike, /logInteractionAutomationEvent/);
+for (const phase of ['run_started', 'config_loaded', 'lock_acquired', 'candidates_loaded', 'candidate_selected']) {
+  mustHave('auto like process log', autoLike, new RegExp(`phase: '${phase}'`));
+}
 mustHave('auto like process log', autoLike, /phase: 'candidate_selected'/);
 mustHave('auto like process log', autoLike, /like_written/);
 mustHave('auto like process log list', autoLike, /attachInteractionAutomationExecutionEvents\('auto_like'/);

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {
   attachInteractionAutomationExecutionEvents,
   buildInteractionAutomationFallbackEvents,
+  logInteractionAutomationEvent,
 } from '../server/services/interaction-automation-execution-log.service';
 
 const runId = `interaction_log_fallback_guard_${Date.now()}`;
@@ -29,5 +30,29 @@ const [attached] = await attachInteractionAutomationExecutionEvents('comment_pub
 assert.ok(Array.isArray((attached as any).processEvents), 'run list attachment must always expose processEvents.');
 assert.equal((attached as any).processEvents.length, 2, 'missing filesystem logs must fall back to database process events.');
 assert.equal((attached as any).processEvents[1].reason, 'disabled', 'attached fallback events must preserve the terminal reason.');
+
+const partialRunId = `interaction_log_partial_guard_${Date.now()}`;
+const partialRun = {
+  id: partialRunId,
+  status: 'FAILED',
+  error: 'like_failed',
+  createdAt: new Date('2026-01-02T03:05:05.000Z'),
+  finishedAt: new Date('2026-01-02T03:05:06.000Z'),
+};
+await logInteractionAutomationEvent({
+  module: 'auto_like',
+  runId: partialRunId,
+  phase: 'run_finished',
+  message: '自动点赞失败',
+  status: 'FAILED',
+  reason: 'like_failed',
+});
+const [partialAttached] = await attachInteractionAutomationExecutionEvents('auto_like', [partialRun]);
+assert.deepEqual(
+  (partialAttached as any).processEvents.map((event: any) => event.phase),
+  ['run_started', 'run_finished'],
+  'partial filesystem logs must be completed with database fallback start events.',
+);
+assert.equal((partialAttached as any).processEvents[1].reason, 'like_failed', 'real filesystem finish reason must be preserved when start is backfilled.');
 
 console.log('[interaction-automation-log-fallback-guards] passed');

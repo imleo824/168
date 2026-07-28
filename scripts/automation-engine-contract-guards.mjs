@@ -218,6 +218,9 @@ mustHave('quote execution logs', quote, "module: 'quote_publish'");
 mustHave('quote execution logs', quote, "phase: 'quality_checked'");
 mustHave('comment execution logs', comment, "module: 'comment_publish'");
 mustHave('auto like execution logs', autoLike, "module: 'auto_like'");
+for (const phase of ['run_started', 'config_loaded', 'lock_acquired', 'candidates_loaded', 'candidate_selected', 'run_finished']) {
+  mustHave('auto like execution logs', autoLike, `phase: '${phase}'`);
+}
 mustNotHave('admin automation logs', adminInteractionPanel, '原始明细');
 mustNotHave('admin automation logs', adminInteractionPanel, '批量数量');
 
