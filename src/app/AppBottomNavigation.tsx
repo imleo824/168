@@ -6,7 +6,7 @@ import AvatarImage from '@/ui/AvatarImage';
 import { useAuth } from '@/context/AuthContext';
 import { useInstantPress } from '@/hooks/useInstantPress';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
-import { primePostCreateComposerFocus } from '@/utils/postCreateFocusBridge';
+import { primePostCreateComposerFocus } from '@/utils/postCreateFocusPrime';
 import { clearSignupRewardBadge, readSignupRewardBadgePoints, SIGNUP_REWARD_BADGE_EVENT } from '@/utils/signupRewardBadge';
 import { warmupNavigationIntent } from '@/utils/routeWarmups';
 import { APP_ROUTES } from '@/app/routePaths';

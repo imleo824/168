@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { lazy, Suspense, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Camera, ChevronRight, Crown, Edit2, MessageCircle } from 'lucide-react';
 
@@ -9,7 +9,6 @@ import EmptyStateCard from '@/ui/EmptyStateCard';
 import LinkifiedText from '@/ui/LinkifiedText';
 import ListLoadMoreState from '@/ui/ListLoadMoreState';
 import { PageLoadingState } from '@/ui/LoadingState';
-import PostFeedList from '@/features/feed/PostFeedList';
 import UserSpaceTuiPlusLinks from '@/features/profile/UserSpaceTuiPlusLinks';
 import { isTuiPlusActive } from '@/features/tui-plus/tuiPlusBenefits';
 import { formatRelativeTime } from '@/utils/time';
@@ -17,6 +16,8 @@ import type { MyCommentItem } from '@/services/api';
 
 import ProfileHeaderCover from './ProfileHeaderCover';
 import { getProfileRelationName, getProfileRelationUsername } from './profileMobileUtils';
+
+const LazyPostFeedList = lazy(() => import('@/features/feed/PostFeedList'));
 
 export type ProfileTabType = 'POSTS' | 'COMMENTS' | 'QUOTES' | 'LIKED' | 'FOLLOWING' | 'FANS';
 
@@ -359,11 +360,21 @@ export function ProfileListSection({
 }) {
   const commonProps = { onStatusChange, onDelete, onTelegramSync, telegramChannelUrl };
   const renderLoading = (text: string) => loadingFallback || <PageLoadingState text={text} className="profile-tab-loading" />;
+  const renderPostFeed = (postsToRender: any[], extraProps = {}) => (
+    <Suspense fallback={renderLoading('正在加载内容')}>
+      <LazyPostFeedList
+        posts={postsToRender}
+        enableRecommendationControls={false}
+        {...commonProps}
+        {...extraProps}
+      />
+    </Suspense>
+  );
 
   if (activeTab === 'POSTS') {
     if (postsLoading) return <>{renderLoading('正在加载发布')}</>;
     if (posts.length === 0) return <EmptyStateCard title="还没有发布内容" />;
-    return <PostFeedList posts={posts} enableRecommendationControls={false} {...commonProps} />;
+    return renderPostFeed(posts);
   }
 
   if (activeTab === 'COMMENTS') {
@@ -373,13 +384,13 @@ export function ProfileListSection({
   if (activeTab === 'QUOTES') {
     if (quotePostsLoading) return <>{renderLoading('正在加载引用')}</>;
     if (quotePosts.length === 0) return <EmptyStateCard title="暂无引用内容" />;
-    return <PostFeedList posts={quotePosts} enableRecommendationControls={false} {...commonProps} />;
+    return renderPostFeed(quotePosts);
   }
 
   if (activeTab === 'LIKED') {
     if (likedLoading) return <>{renderLoading('正在加载点赞')}</>;
     if (likedPosts.length === 0) return <EmptyStateCard title="暂无点赞内容" />;
-    return <PostFeedList posts={likedPosts} enableRecommendationControls={false} />;
+    return renderPostFeed(likedPosts, { onStatusChange: undefined, onDelete: undefined, onTelegramSync: undefined, telegramChannelUrl: undefined });
   }
 
   if (activeTab === 'FOLLOWING') {

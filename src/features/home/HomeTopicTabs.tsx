@@ -3,7 +3,7 @@ import { ChevronDown } from 'lucide-react';
 import { useInstantPress } from '@/hooks/useInstantPress';
 import type { Category, CategoryMetaFeedFilters } from '@/types';
 import type { HomeFeedKind, MainTabId } from './homeTypes';
-import type { HomeStructuredFilterFieldItem } from './HomeStructuredFilterSheet';
+import type { HomeStructuredFilterFieldItem } from './homeStructuredFilterUtils';
 
 export type HomeTopicTabId = string;
 export type HomeTopicTabsBootstrapState = 'loading' | 'ready';

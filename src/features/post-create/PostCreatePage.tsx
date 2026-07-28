@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { APP_ROUTES } from '@/app/routePaths';
 import { useAuth } from '@/context/AuthContext';
-import { useConfig } from '@/hooks/useData';
+import { useConfig } from '@/hooks/useDataConfig';
 import { useAsyncFlow } from '@/hooks/useAsyncFlow';
 import SEO from '@/platform/SEO';
 import ActionButton from '@/ui/ActionButton';
@@ -13,14 +13,13 @@ import PageContentShell from '@/ui/PageContentShell';
 import PageHeader from '@/ui/PageHeader';
 import { PageLoader } from '@/ui/PageLoader';
 import { apiFetch, getPost } from '@/services/api';
-import TuiPlusBenefitPromptDialog from '@/features/tui-plus/TuiPlusBenefitPromptDialog';
 import {
   buildTuiPlusBenefitRouteState,
   isTuiPlusActive,
   type TuiPlusBenefitKey,
 } from '@/features/tui-plus/tuiPlusBenefits';
 import { formatTelegramContactDisplay, normalizeTelegramContactHandle } from '@/utils/contact';
-import { focusPostCreateComposer } from '@/utils/postCreateFocusBridge';
+import { focusPostCreateComposer } from '@/utils/postCreateFocusRestore';
 import type { QuotePostPreview } from '@/types';
 
 import {
@@ -50,17 +49,6 @@ import {
   type PostCreateFormState,
   type PostCreateToolSummary,
 } from './postCreatePageSections';
-import {
-  PostCreateCategoryMetaSheet,
-  PostCreateCategoryPickerSheet,
-  PostCreateCategorySelectSheet,
-  PostCreateContactEditorDialog,
-  PostCreateLocationPickerSheet,
-  PostCreatePrivacySettingsSheet,
-  PostCreatePromoteChoiceSheet,
-  PostCreateTelegramSettingsSheet,
-} from './postCreateSheets';
-
 const INITIAL_FORM: PostCreateFormState = {
   content: '',
   contact: '',
@@ -78,6 +66,33 @@ const POST_CREATE_IMAGE_MAX_COUNT = 9;
 const POST_CREATE_COMPOSER_FOCUS_MAX_ATTEMPTS = 18;
 const POST_CREATE_COMPOSER_FOCUS_RETRY_MS = 45;
 const POST_CREATE_QUOTE_ID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const LazyTuiPlusBenefitPromptDialog = lazy(() => import('@/features/tui-plus/TuiPlusBenefitPromptDialog'));
+const loadPostCreatePickerSheets = () => import('./postCreatePickerSheets');
+const loadPostCreateSettingsSheets = () => import('./postCreateSettingsSheets');
+const LazyPostCreateCategoryMetaSheet = lazy(() =>
+  loadPostCreatePickerSheets().then((module) => ({ default: module.PostCreateCategoryMetaSheet })),
+);
+const LazyPostCreateCategoryPickerSheet = lazy(() =>
+  loadPostCreatePickerSheets().then((module) => ({ default: module.PostCreateCategoryPickerSheet })),
+);
+const LazyPostCreateCategorySelectSheet = lazy(() =>
+  loadPostCreatePickerSheets().then((module) => ({ default: module.PostCreateCategorySelectSheet })),
+);
+const LazyPostCreateLocationPickerSheet = lazy(() =>
+  loadPostCreatePickerSheets().then((module) => ({ default: module.PostCreateLocationPickerSheet })),
+);
+const LazyPostCreateContactEditorDialog = lazy(() =>
+  loadPostCreateSettingsSheets().then((module) => ({ default: module.PostCreateContactEditorDialog })),
+);
+const LazyPostCreatePrivacySettingsSheet = lazy(() =>
+  loadPostCreateSettingsSheets().then((module) => ({ default: module.PostCreatePrivacySettingsSheet })),
+);
+const LazyPostCreatePromoteChoiceSheet = lazy(() =>
+  loadPostCreateSettingsSheets().then((module) => ({ default: module.PostCreatePromoteChoiceSheet })),
+);
+const LazyPostCreateTelegramSettingsSheet = lazy(() =>
+  loadPostCreateSettingsSheets().then((module) => ({ default: module.PostCreateTelegramSettingsSheet })),
+);
 
 type PostCreateProps = {
   defaultAnonymous?: boolean;
@@ -389,6 +404,7 @@ export default function PostCreate({
         locationPresetValueSet,
       );
       if (metaValidation.errors.length > 0) {
+        void loadPostCreatePickerSheets();
         setCategoryDraftId(form.categoryId);
         setCategoryMetaErrors(metaValidation.fieldErrors);
         setCategoryMetaDraft(form.categoryMeta);
@@ -468,6 +484,7 @@ export default function PostCreate({
         void queryClient.invalidateQueries({ queryKey: ['notifications', 'feed-counts'] });
 
         if (form.categoryId) {
+          void loadPostCreateSettingsSheets();
           setIsPromoteChoiceOpen(true);
           return;
         }
@@ -501,6 +518,12 @@ export default function PostCreate({
   const isSubmitBusy = isSubmitting || (isQuoteMode && isQuoteLoading);
   const submitLabel = isSubmitting ? '发表中' : isQuoteMode && isQuoteLoading ? '载入中' : '发表';
   const submitDisabled = isSubmitBusy || isUploadingImages || !hasResolvedContent || (isQuoteMode && !quoteIsReady);
+  const warmPostCreatePickerSheets = useCallback(() => {
+    void loadPostCreatePickerSheets();
+  }, []);
+  const warmPostCreateSettingsSheets = useCallback(() => {
+    void loadPostCreateSettingsSheets();
+  }, []);
 
   useEffect(() => {
     if (loading || !user?.id || isPublishingLocked) return undefined;
@@ -549,11 +572,12 @@ export default function PostCreate({
   }, [publishCategories, publishCategorySchemas]);
 
   const handleOpenCategory = useCallback(() => {
+    warmPostCreatePickerSheets();
     setCategoryDraftId(form.categoryId);
     setCategoryMetaDraft(form.categoryMeta);
     setCategoryMetaErrors({});
     setIsCategoryPickerOpen(true);
-  }, [form.categoryId, form.categoryMeta]);
+  }, [form.categoryId, form.categoryMeta, warmPostCreatePickerSheets]);
 
   const handleCloseCategoryPicker = useCallback(() => {
     setIsCategoryPickerOpen(false);
@@ -598,11 +622,12 @@ export default function PostCreate({
 
   const handleOpenCategoryMeta = useCallback(() => {
     if (!form.categoryId || selectedCategoryFields.length === 0) return;
+    warmPostCreatePickerSheets();
     setCategoryDraftId(form.categoryId);
     setCategoryMetaDraft(form.categoryMeta);
     setCategoryMetaErrors(categoryMetaValidation.fieldErrors);
     setIsCategoryMetaOpen(true);
-  }, [categoryMetaValidation.fieldErrors, form.categoryId, form.categoryMeta, selectedCategoryFields.length]);
+  }, [categoryMetaValidation.fieldErrors, form.categoryId, form.categoryMeta, selectedCategoryFields.length, warmPostCreatePickerSheets]);
 
   const handleCloseCategoryMeta = useCallback(() => {
     setCategoryMetaLocationField(null);
@@ -640,6 +665,7 @@ export default function PostCreate({
   }, [hasInvalidEditingContact, normalizedEditingContact, patchForm]);
 
   const handleOpenContactEditor = useCallback(async () => {
+    warmPostCreateSettingsSheets();
     if (isCheckingContactEligibility) return;
     if (!isRobotUser && !isTuiPlusContactUnlimited) {
       setIsCheckingContactEligibility(true);
@@ -664,7 +690,7 @@ export default function PostCreate({
     setEditContact(customContact);
     setIsTelegramSettingsOpen(false);
     setIsEditingContact(true);
-  }, [customContact, isCheckingContactEligibility, isRobotUser, isTuiPlusContactUnlimited, showToast]);
+  }, [customContact, isCheckingContactEligibility, isRobotUser, isTuiPlusContactUnlimited, showToast, warmPostCreateSettingsSheets]);
 
   const handleToggleContactButton = useCallback(() => {
     if (form.showContactButton) {
@@ -767,124 +793,179 @@ export default function PostCreate({
           onPromotionLinkChange={handlePromotionLinkChange}
           onOpenCategory={handleOpenCategory}
           onOpenCategoryMeta={handleOpenCategoryMeta}
-          onOpenLocation={() => setIsLocationEditorOpen(true)}
-          onOpenPrivacy={() => setIsPrivacySettingsOpen(true)}
-          onOpenTelegram={() => setIsTelegramSettingsOpen(true)}
+          onOpenLocation={() => {
+            warmPostCreatePickerSheets();
+            setIsLocationEditorOpen(true);
+          }}
+          onOpenPrivacy={() => {
+            warmPostCreateSettingsSheets();
+            setIsPrivacySettingsOpen(true);
+          }}
+          onOpenTelegram={() => {
+            warmPostCreateSettingsSheets();
+            setIsTelegramSettingsOpen(true);
+          }}
         />
       </PageContentShell>
 
-      <PostCreateCategoryPickerSheet
-        open={isCategoryPickerOpen}
-        categories={publishCategories}
-        selectedCategoryId={categoryDraftId}
-        onClose={handleCloseCategoryPicker}
-        onClear={handleClearCategory}
-        onSelect={handleSelectCategory}
-        onSave={handleSaveCategory}
-      />
+      {isCategoryPickerOpen ? (
+        <Suspense fallback={null}>
+          <LazyPostCreateCategoryPickerSheet
+            open={isCategoryPickerOpen}
+            categories={publishCategories}
+            selectedCategoryId={categoryDraftId}
+            onClose={handleCloseCategoryPicker}
+            onClear={handleClearCategory}
+            onSelect={handleSelectCategory}
+            onSave={handleSaveCategory}
+          />
+        </Suspense>
+      ) : null}
 
-      <PostCreateCategoryMetaSheet
-        open={isCategoryMetaOpen}
-        categoryLabel={categoryDraftLabel}
-        fields={categoryDraftFields}
-        values={categoryMetaDraft}
-        firstErrorKey={Object.keys(categoryMetaErrors)[0] || ''}
-        onClose={handleCloseCategoryMeta}
-        onChange={handleChangeCategoryMetaDraft}
-        onOpenLocation={(key, label) => setCategoryMetaLocationField({ key, label })}
-        onOpenSelect={(key, label, options) => setCategoryMetaSelectField({ key, label, options })}
-        onSave={handleSaveCategoryMeta}
-        saveDisabled={false}
-      />
+      {isCategoryMetaOpen ? (
+        <Suspense fallback={null}>
+          <LazyPostCreateCategoryMetaSheet
+            open={isCategoryMetaOpen}
+            categoryLabel={categoryDraftLabel}
+            fields={categoryDraftFields}
+            values={categoryMetaDraft}
+            firstErrorKey={Object.keys(categoryMetaErrors)[0] || ''}
+            onClose={handleCloseCategoryMeta}
+            onChange={handleChangeCategoryMetaDraft}
+            onOpenLocation={(key, label) => {
+              warmPostCreatePickerSheets();
+              setCategoryMetaLocationField({ key, label });
+            }}
+            onOpenSelect={(key, label, options) => {
+              warmPostCreatePickerSheets();
+              setCategoryMetaSelectField({ key, label, options });
+            }}
+            onSave={handleSaveCategoryMeta}
+            saveDisabled={false}
+          />
+        </Suspense>
+      ) : null}
 
-      <PostCreateLocationPickerSheet
-        open={Boolean(categoryMetaLocationField)}
-        title={categoryMetaLocationField ? `选择${categoryMetaLocationField.label}` : '选择地点'}
-        ariaLabel={categoryMetaLocationField ? `选择${categoryMetaLocationField.label}` : '选择地点'}
-        selectedValue={categoryMetaLocationField ? categoryMetaDraft[categoryMetaLocationField.key] || '' : ''}
-        options={locationOptions}
-        onClose={() => setCategoryMetaLocationField(null)}
-        onClear={() => {
-          if (categoryMetaLocationField) handleChangeCategoryMetaDraft(categoryMetaLocationField.key, '');
-          setCategoryMetaLocationField(null);
-        }}
-        onSelect={(value) => {
-          if (categoryMetaLocationField) handleChangeCategoryMetaDraft(categoryMetaLocationField.key, value);
-          setCategoryMetaLocationField(null);
-        }}
-      />
+      {categoryMetaLocationField ? (
+        <Suspense fallback={null}>
+          <LazyPostCreateLocationPickerSheet
+            open={Boolean(categoryMetaLocationField)}
+            title={`选择${categoryMetaLocationField.label}`}
+            ariaLabel={`选择${categoryMetaLocationField.label}`}
+            selectedValue={categoryMetaDraft[categoryMetaLocationField.key] || ''}
+            options={locationOptions}
+            onClose={() => setCategoryMetaLocationField(null)}
+            onClear={() => {
+              handleChangeCategoryMetaDraft(categoryMetaLocationField.key, '');
+              setCategoryMetaLocationField(null);
+            }}
+            onSelect={(value) => {
+              handleChangeCategoryMetaDraft(categoryMetaLocationField.key, value);
+              setCategoryMetaLocationField(null);
+            }}
+          />
+        </Suspense>
+      ) : null}
 
-      <PostCreateCategorySelectSheet
-        open={Boolean(categoryMetaSelectField)}
-        title={categoryMetaSelectField ? `选择${categoryMetaSelectField.label}` : '选择选项'}
-        ariaLabel={categoryMetaSelectField ? `选择${categoryMetaSelectField.label}` : '选择选项'}
-        options={categoryMetaSelectField?.options || []}
-        selectedValue={categoryMetaSelectField ? categoryMetaDraft[categoryMetaSelectField.key] || '' : ''}
-        onClose={() => setCategoryMetaSelectField(null)}
-        onSelect={(value) => {
-          if (categoryMetaSelectField) handleChangeCategoryMetaDraft(categoryMetaSelectField.key, value);
-          setCategoryMetaSelectField(null);
-        }}
-      />
+      {categoryMetaSelectField ? (
+        <Suspense fallback={null}>
+          <LazyPostCreateCategorySelectSheet
+            open={Boolean(categoryMetaSelectField)}
+            title={`选择${categoryMetaSelectField.label}`}
+            ariaLabel={`选择${categoryMetaSelectField.label}`}
+            options={categoryMetaSelectField.options}
+            selectedValue={categoryMetaDraft[categoryMetaSelectField.key] || ''}
+            onClose={() => setCategoryMetaSelectField(null)}
+            onSelect={(value) => {
+              handleChangeCategoryMetaDraft(categoryMetaSelectField.key, value);
+              setCategoryMetaSelectField(null);
+            }}
+          />
+        </Suspense>
+      ) : null}
 
-      <PostCreateLocationPickerSheet
-        open={isLocationEditorOpen}
-        title="选择地点"
-        ariaLabel="选择地点"
-        selectedValue={form.location}
-        options={locationOptions}
-        onClose={() => setIsLocationEditorOpen(false)}
-        onClear={() => {
-          patchForm('location', '');
-          setIsLocationEditorOpen(false);
-        }}
-        onSelect={(value) => {
-          patchForm('location', value);
-          setIsLocationEditorOpen(false);
-        }}
-      />
+      {isLocationEditorOpen ? (
+        <Suspense fallback={null}>
+          <LazyPostCreateLocationPickerSheet
+            open={isLocationEditorOpen}
+            title="选择地点"
+            ariaLabel="选择地点"
+            selectedValue={form.location}
+            options={locationOptions}
+            onClose={() => setIsLocationEditorOpen(false)}
+            onClear={() => {
+              patchForm('location', '');
+              setIsLocationEditorOpen(false);
+            }}
+            onSelect={(value) => {
+              patchForm('location', value);
+              setIsLocationEditorOpen(false);
+            }}
+          />
+        </Suspense>
+      ) : null}
 
-      <PostCreatePrivacySettingsSheet
-        open={isPrivacySettingsOpen}
-        isPublicPublish={!form.isAnonymous}
-        onClose={() => setIsPrivacySettingsOpen(false)}
-        onTogglePublicPublish={() => patchForm('isAnonymous', !form.isAnonymous)}
-      />
+      {isPrivacySettingsOpen ? (
+        <Suspense fallback={null}>
+          <LazyPostCreatePrivacySettingsSheet
+            open={isPrivacySettingsOpen}
+            isPublicPublish={!form.isAnonymous}
+            onClose={() => setIsPrivacySettingsOpen(false)}
+            onTogglePublicPublish={() => patchForm('isAnonymous', !form.isAnonymous)}
+          />
+        </Suspense>
+      ) : null}
 
-      <PostCreateTelegramSettingsSheet
-        open={isTelegramSettingsOpen}
-        isRobotUser={isRobotUser}
-        showContactButton={form.showContactButton}
-        customContact={customContact}
-        contactDisplay={contactDisplay}
-        isTuiPlusContactUnlimited={isTuiPlusContactUnlimited}
-        onClose={() => setIsTelegramSettingsOpen(false)}
-        onToggleContactButton={handleToggleContactButton}
-        onOpenContactEditor={() => void handleOpenContactEditor()}
-      />
+      {isTelegramSettingsOpen ? (
+        <Suspense fallback={null}>
+          <LazyPostCreateTelegramSettingsSheet
+            open={isTelegramSettingsOpen}
+            isRobotUser={isRobotUser}
+            showContactButton={form.showContactButton}
+            customContact={customContact}
+            contactDisplay={contactDisplay}
+            isTuiPlusContactUnlimited={isTuiPlusContactUnlimited}
+            onClose={() => setIsTelegramSettingsOpen(false)}
+            onToggleContactButton={handleToggleContactButton}
+            onOpenContactEditor={() => void handleOpenContactEditor()}
+          />
+        </Suspense>
+      ) : null}
 
-      <PostCreateContactEditorDialog
-        open={isEditingContact}
-        editContact={editContact}
-        hasInvalidEditingContact={hasInvalidEditingContact}
-        isSavingContact={false}
-        onEditContactChange={setEditContact}
-        onClose={() => setIsEditingContact(false)}
-        onSave={handleSaveContact}
-      />
+      {isEditingContact ? (
+        <Suspense fallback={null}>
+          <LazyPostCreateContactEditorDialog
+            open={isEditingContact}
+            editContact={editContact}
+            hasInvalidEditingContact={hasInvalidEditingContact}
+            isSavingContact={false}
+            onEditContactChange={setEditContact}
+            onClose={() => setIsEditingContact(false)}
+            onSave={handleSaveContact}
+          />
+        </Suspense>
+      ) : null}
 
-      <PostCreatePromoteChoiceSheet
-        open={isPromoteChoiceOpen}
-        onSkip={handleSkipPromote}
-        onGoPromote={handleGoPromote}
-      />
+      {isPromoteChoiceOpen ? (
+        <Suspense fallback={null}>
+          <LazyPostCreatePromoteChoiceSheet
+            open={isPromoteChoiceOpen}
+            onSkip={handleSkipPromote}
+            onGoPromote={handleGoPromote}
+          />
+        </Suspense>
+      ) : null}
 
-      <TuiPlusBenefitPromptDialog
-        open={Boolean(tuiPlusPromptBenefit)}
-        benefit={tuiPlusPromptBenefit || 'postContact'}
-        onClose={handleCloseTuiPlusPrompt}
-        onConfirm={handleConfirmTuiPlusPrompt}
-      />
+      {tuiPlusPromptBenefit ? (
+        <Suspense fallback={<PageLoader />}>
+          <LazyTuiPlusBenefitPromptDialog
+            open
+            benefit={tuiPlusPromptBenefit}
+            onClose={handleCloseTuiPlusPrompt}
+            onConfirm={handleConfirmTuiPlusPrompt}
+          />
+        </Suspense>
+      ) : null}
 
       {isPublishingLocked ? <PostCreatePublishingLock /> : null}
     </AppPage>

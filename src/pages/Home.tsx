@@ -24,18 +24,16 @@ import {
   findHomeStructuredFilterSchema,
   getHomeStructuredFilterScope,
   sanitizeHomeStructuredFilters,
-} from '@/features/home/HomeStructuredFilterSheet';
+} from '@/features/home/homeStructuredFilterUtils';
 import { getHomeShellClassName } from '@/features/home/homeLayout';
 import { useOnlinePresence } from '@/features/home/OnlinePresenceContext';
-import {
-  useHomeBootstrap,
-  useHomeNotificationSummary,
-} from '@/hooks/useData';
+import { useHomeBootstrap } from '@/hooks/useDataConfig';
+import { useHomeNotificationSummary } from '@/hooks/useHomeNotificationSummary';
 import { useAuth } from '@/context/AuthContext';
 import { useIsDesktopViewport } from '@/hooks/useIsDesktopViewport';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useFeedExposureViews } from '@/hooks/useFeedExposureViews';
-import { useListReturnScroll } from '@/utils/listReturnScroll';
+import ListReturnScrollRestorer from '@/utils/ListReturnScrollRestorer';
 import { getActiveScrollIntent, hasBlockingScrollIntent, runWithScrollIntent } from '@/utils/scrollIntent';
 import { registerHomeFeedScrollRoot, scrollHomeFeedToTop } from '@/features/home/homeStorage';
 import type { Category, CategoryMetaFeedFilters } from '@/types';
@@ -49,7 +47,7 @@ import {
 import {
   findCategoryMetaSchema,
   normalizePublishCategorySchema,
-} from '@/features/post-create/postCreateCategoryMeta';
+} from '@/features/category/categoryMetaSchema';
 
 const LOAD_MORE_WATCHDOG_MS = 12_000;
 const HOME_CHROME_COLLAPSE_ENTER_PX = 72;
@@ -480,20 +478,9 @@ export default function Home() {
     }
   }, [activeFeedIdentity]);
 
-  const visiblePostIds = useMemo(
-    () => renderedFeedPosts.map((post) => post.id),
-    [renderedFeedPosts],
-  );
-
   useFeedExposureViews(
-    visiblePostIds,
+    renderedFeedPosts,
     !showInitialLoading && renderedFeedPosts.length > 0,
-  );
-
-  useListReturnScroll(
-    listReturnScope,
-    !showInitialLoading && !shouldLockHomeChromeOpen,
-    renderedFeedPosts.length,
   );
 
   const handleBrowseAll = useCallback(() => {
@@ -610,6 +597,11 @@ export default function Home() {
         <h2>新闻快讯、招聘求职、资源合作、房屋租赁、证件护照信息聚合</h2>
         <h3>实时更新的分类生活信息平台，支持发布、浏览与快速互动</h3>
       </section>
+      <ListReturnScrollRestorer
+        scope={listReturnScope}
+        ready={!showInitialLoading && !shouldLockHomeChromeOpen}
+        restoreVersion={renderedFeedPosts.length}
+      />
 
       <main className={homeShellClassName}>
         <HomeChrome

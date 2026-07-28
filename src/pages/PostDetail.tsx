@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 
 import { APP_ROUTES } from '@/app/routePaths';
-import { usePost } from '@/hooks/useData';
+import { usePost } from '@/hooks/useDataPosts';
 import LegacyPostDetail from '@/pages/PostDetailLegacy';
 
 const TUI_PLUS_AUTO_POST_SOURCE_PREFIX = 'TUI_PLUS_AUTO_POST';

@@ -1,12 +1,12 @@
 import { useEffect, useMemo } from 'react';
 import { useInfiniteQuery, useQueryClient, type InfiniteData, type QueryKey } from '@tanstack/react-query';
-import { getHomeFeedPage } from '@/services/api';
+import { getHomeFeedPage } from '@/services/homeStartupApi';
 import { getHomeFirstScreen } from '@/services/homeFirstScreenApi';
 import type { CategoryMetaFeedFilters, Post } from '@/types';
 import type { FeedQueryResult } from '@/types/homeFeed';
 import type { HomeFeedKind } from '@/features/home/homeTypes';
 import { readHomeFeedSnapshot, writeHomeFeedSnapshot, type HomeFeedSnapshotParams } from '@/features/home/homeFeedSnapshotCache';
-import { stableHomeFeedParamsKey } from '@/features/home/homeFeedCacheKey';
+import { stableHomeFeedParams } from '@/features/home/homeFeedCacheKey';
 import { stabilizeHomeBootstrapReferenceData, writeHomeBootstrapSnapshot } from '@/features/home/homeBootstrapSnapshotCache';
 
 const HOME_FEED_PAGE_SIZE = 10;
@@ -86,18 +86,18 @@ export function useHomeFeedQueries({
   viewerId = null,
 }: UseHomeFeedQueriesOptions): UseHomeFeedQueriesResult {
   const queryClient = useQueryClient();
-  const homeFeedRequestParamsKey = useMemo(
-    () => stableHomeFeedParamsKey({
+  const homeFeedRequestParams = useMemo<HomeFeedSnapshotParams>(
+    () => stableHomeFeedParams({
       feed: feedKind,
       categorySlug: feedKind === 'category' ? categorySlug : '',
       categoryMetaScope,
       categoryMetaFilters,
-    }),
+    }) as HomeFeedSnapshotParams,
     [categoryMetaFilters, categoryMetaScope, categorySlug, feedKind],
   );
-  const homeFeedRequestParams = useMemo<HomeFeedSnapshotParams>(
-    () => JSON.parse(homeFeedRequestParamsKey) as HomeFeedSnapshotParams,
-    [homeFeedRequestParamsKey],
+  const homeFeedRequestParamsKey = useMemo(
+    () => JSON.stringify(homeFeedRequestParams),
+    [homeFeedRequestParams],
   );
 
   const homeFeedQueryKey = useMemo<QueryKey>(

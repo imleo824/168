@@ -15,6 +15,8 @@ import PageHeader from '@/ui/PageHeader';
 import { InlineSpinner, LoadingBlock } from '@/ui/LoadingState';
 import { TUI_PLUS_BENEFIT_ITEMS } from '../../shared/tuiPlusBenefits.mjs';
 
+import '@/features/tui-plus/TuiPlusRoute.css';
+
 const fallbackStatus: TuiPlusStatusPayload = {
   active: false,
   status: 'NONE',

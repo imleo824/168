@@ -14,7 +14,6 @@ import {
 } from "@/utils/feedScroll";
 import type { FeedPost } from "@/features/post/PostCard";
 import { FeedScrollShell, type FeedScrollContentState } from "./FeedScrollShell";
-import PostFeedList from './PostFeedList';
 import {
   EmptyState,
   ErrorState,
@@ -23,6 +22,8 @@ import {
   PullRefreshIndicator,
   RefreshingState,
 } from './FeedViewportStates';
+
+const LazyPostFeedList = React.lazy(() => import('./PostFeedList'));
 
 const PULL_REFRESH_TRIGGER_PX = 64;
 const PULL_REFRESH_MAX_PX = 120;
@@ -564,11 +565,13 @@ export default function FeedViewport({
           ) : null)}
 
         {validPosts.length > 0 ? (
-          <PostFeedList
-            posts={validPosts}
-            hideCategoryTag={hideCategoryTag}
-            enableRecommendationControls={enableRecommendationControls}
-          />
+          <React.Suspense fallback={<LoadingState />}>
+            <LazyPostFeedList
+              posts={validPosts}
+              hideCategoryTag={hideCategoryTag}
+              enableRecommendationControls={enableRecommendationControls}
+            />
+          </React.Suspense>
         ) : null}
 
         {validPosts.length > 0 && !isRefreshing && (

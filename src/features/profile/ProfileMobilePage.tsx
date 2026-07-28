@@ -1,14 +1,16 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { lazy, Suspense, useState, useEffect, useCallback, useMemo } from "react";
 import { APP_ROUTES } from "@/app/routePaths";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
 import PageHeader from '@/ui/PageHeader';
-import { useConfig, usePosts, useFollowingUsers, useFans, useLikes, useMyComments, useUser } from "@/hooks/useData";
+import { useConfig } from "@/hooks/useDataConfig";
+import { useLikes, useMyComments, usePosts } from "@/hooks/useDataPosts";
+import { useFans, useFollowingUsers, useUser } from "@/hooks/useDataSocial";
 import SEO from "@/platform/SEO";
 import { apiFetch, updatePaymentPassword, updatePostPublished, deletePost, syncPostToTelegram } from "@/services/api";
 import { useQueryClient } from "@tanstack/react-query";
 import { useScrollLock } from "@/utils/scrollLock";
-import { useListReturnScroll } from "@/utils/listReturnScroll";
+import ListReturnScrollRestorer from "@/utils/ListReturnScrollRestorer";
 import { normalizeTelegramContactHandle } from "@/utils/contact";
 import { useInteractionGuard } from "@/hooks/useInteractionGuard";
 import {
@@ -17,7 +19,7 @@ import {
 } from "@/utils/accountCredentials";
 import {
   ACCEPTED_IMAGE_TYPES,
-} from "@/features/upload/imageUploadPipeline";
+} from "@/features/upload/imageUploadConfig";
 import SegmentTabs from "@/ui/SegmentTabs";
 import AppPage from '@/ui/AppPage';
 import PageContentShell from '@/ui/PageContentShell';
@@ -28,8 +30,7 @@ import {
   validatePasswordChange,
 } from "@/features/profile/profileHelpers";
 
-import ProfileEditDialogs from './ProfileEditDialogs';
-import ProfileSecuritySheet from './ProfileSecuritySheet';
+import { subscribeProfileSettingsOpen } from './profileSettingsIntent';
 import { useProfileMediaUploads } from './useProfileMediaUploads';
 import {
   ProfileAuthRequiredState,
@@ -37,6 +38,9 @@ import {
   ProfileListSection,
   type ProfileTabType,
 } from './profilePageSections';
+
+const LazyProfileEditDialogs = lazy(() => import('./ProfileEditDialogs'));
+const LazyProfileSecuritySheet = lazy(() => import('./ProfileSecuritySheet'));
 
 export default function ProfileMobile() {
   const { user: authUser, requireAuth, logout, refreshUser, patchUser, showToast } = useAuth();
@@ -229,16 +233,17 @@ export default function ProfileMobile() {
     }
   }, [activeTab]);
 
-  useListReturnScroll(listReturnScope, activeListReady, `${activeTab}:${activeListVersion}`);
-
   const profileTabLoading = <PageLoadingState text="正在加载" className="profile-tab-loading" />;
+
+  useEffect(() => subscribeProfileSettingsOpen(() => setIsSecurityOpen(true)), []);
 
   useEffect(() => {
     if (!isSecurityOpen) return;
     setEditDisplayName(user?.displayName || "");
   }, [isSecurityOpen, user?.displayName]);
 
-  const anyModalOpen = isEditingLoginAccount || isEditingContact || isEditingPassword || isEditingPaymentPassword || isSecurityOpen || isEditingDisplayName;
+  const isEditDialogOpen = isEditingLoginAccount || isEditingContact || isEditingPassword || isEditingPaymentPassword || isEditingDisplayName;
+  const anyModalOpen = isEditDialogOpen || isSecurityOpen;
   useScrollLock(anyModalOpen, {
     fixed: true,
     allowTouchMove: (target) => {
@@ -552,6 +557,11 @@ export default function ProfileMobile() {
 
   return (
     <AppPage mobileAddressBarScroll bottomSafe className="profile-modern-page surface-page">
+      <ListReturnScrollRestorer
+        scope={listReturnScope}
+        ready={activeListReady}
+        restoreVersion={`${activeTab}:${activeListVersion}`}
+      />
       <SEO title="我的个人中心｜推推" description="管理您在推推发布的圈内信息、资源、积分和账号资料。" noindex />
       <PageHeader
         title=""
@@ -576,50 +586,54 @@ export default function ProfileMobile() {
         disabled={isAvatarUpdating}
       />
 
-      <ProfileEditDialogs
-        user={user}
-        isEditingLoginAccount={isEditingLoginAccount}
-        editLoginAccount={editLoginAccount}
-        isSavingLoginAccount={isSavingLoginAccount}
-        onEditLoginAccount={setEditLoginAccount}
-        onLoginAccountOpenChange={setIsEditingLoginAccount}
-        onSaveLoginAccount={guardedSaveLoginAccount}
-        isEditingDisplayName={isEditingDisplayName}
-        editDisplayName={editDisplayName}
-        isSavingProfile={isSavingProfile}
-        onEditDisplayName={setEditDisplayName}
-        onDisplayNameOpenChange={setIsEditingDisplayName}
-        onSaveProfile={guardedSaveProfile}
-        isEditingContact={isEditingContact}
-        editContact={editContact}
-        hasTypedContactInput={hasTypedContactInput}
-        hasInvalidEditingContact={hasInvalidEditingContact}
-        isSavingContact={isSavingContact}
-        onEditContact={setEditContact}
-        onContactOpenChange={setIsEditingContact}
-        onSaveContact={guardedSaveContact}
-        isEditingPassword={isEditingPassword}
-        oldPassword={oldPassword}
-        editPassword={editPassword}
-        confirmPassword={confirmPassword}
-        isSavingPassword={isSavingPassword}
-        canSavePassword={canSavePassword}
-        onEditOldPassword={setOldPassword}
-        onEditPassword={setEditPassword}
-        onEditConfirmPassword={setConfirmPassword}
-        onPasswordOpenChange={setIsEditingPassword}
-        onSavePassword={guardedSavePassword}
-        isEditingPaymentPassword={isEditingPaymentPassword}
-        oldPaymentPassword={oldPaymentPassword}
-        editPaymentPassword={editPaymentPassword}
-        confirmPaymentPassword={confirmPaymentPassword}
-        isSavingPaymentPassword={isSavingPaymentPassword}
-        onEditOldPaymentPassword={setOldPaymentPassword}
-        onEditPaymentPassword={setEditPaymentPassword}
-        onEditConfirmPaymentPassword={setConfirmPaymentPassword}
-        onPaymentPasswordOpenChange={setIsEditingPaymentPassword}
-        onSavePaymentPassword={guardedSavePaymentPassword}
-      />
+      {isEditDialogOpen ? (
+        <Suspense fallback={null}>
+          <LazyProfileEditDialogs
+            user={user}
+            isEditingLoginAccount={isEditingLoginAccount}
+            editLoginAccount={editLoginAccount}
+            isSavingLoginAccount={isSavingLoginAccount}
+            onEditLoginAccount={setEditLoginAccount}
+            onLoginAccountOpenChange={setIsEditingLoginAccount}
+            onSaveLoginAccount={guardedSaveLoginAccount}
+            isEditingDisplayName={isEditingDisplayName}
+            editDisplayName={editDisplayName}
+            isSavingProfile={isSavingProfile}
+            onEditDisplayName={setEditDisplayName}
+            onDisplayNameOpenChange={setIsEditingDisplayName}
+            onSaveProfile={guardedSaveProfile}
+            isEditingContact={isEditingContact}
+            editContact={editContact}
+            hasTypedContactInput={hasTypedContactInput}
+            hasInvalidEditingContact={hasInvalidEditingContact}
+            isSavingContact={isSavingContact}
+            onEditContact={setEditContact}
+            onContactOpenChange={setIsEditingContact}
+            onSaveContact={guardedSaveContact}
+            isEditingPassword={isEditingPassword}
+            oldPassword={oldPassword}
+            editPassword={editPassword}
+            confirmPassword={confirmPassword}
+            isSavingPassword={isSavingPassword}
+            canSavePassword={canSavePassword}
+            onEditOldPassword={setOldPassword}
+            onEditPassword={setEditPassword}
+            onEditConfirmPassword={setConfirmPassword}
+            onPasswordOpenChange={setIsEditingPassword}
+            onSavePassword={guardedSavePassword}
+            isEditingPaymentPassword={isEditingPaymentPassword}
+            oldPaymentPassword={oldPaymentPassword}
+            editPaymentPassword={editPaymentPassword}
+            confirmPaymentPassword={confirmPaymentPassword}
+            isSavingPaymentPassword={isSavingPaymentPassword}
+            onEditOldPaymentPassword={setOldPaymentPassword}
+            onEditPaymentPassword={setEditPaymentPassword}
+            onEditConfirmPaymentPassword={setConfirmPaymentPassword}
+            onPaymentPasswordOpenChange={setIsEditingPaymentPassword}
+            onSavePaymentPassword={guardedSavePaymentPassword}
+          />
+        </Suspense>
+      ) : null}
 
       <PageContentShell as="main" variant="fluid" className="profile-modern-main ui-app-page-main">
         <ProfileIdentitySection
@@ -675,37 +689,41 @@ export default function ProfileMobile() {
           onOpenUser={(targetUserId) => void guardedOpenRelationUser(targetUserId)}
         />
       </PageContentShell>
-      <ProfileSecuritySheet
-        open={isSecurityOpen}
-        user={user}
-        avatarUrl={avatarUrl}
-        isAvatarUpdating={isAvatarUpdating}
-        avatarInputRef={avatarInputRef}
-        onClose={() => setIsSecurityOpen(false)}
-        onEditDisplayName={setEditDisplayName}
-        onOpenDisplayNameEditor={() => setIsEditingDisplayName(true)}
-        onEditLoginAccount={setEditLoginAccount}
-        onOpenLoginAccountEditor={() => setIsEditingLoginAccount(true)}
-        onResetPasswordFields={() => {
-          setOldPassword('');
-          setEditPassword('');
-          setConfirmPassword('');
-        }}
-        onOpenPasswordEditor={() => setIsEditingPassword(true)}
-        onResetPaymentPasswordFields={() => {
-          setOldPaymentPassword('');
-          setEditPaymentPassword('');
-          setConfirmPaymentPassword('');
-        }}
-        onOpenPaymentPasswordEditor={() => setIsEditingPaymentPassword(true)}
-        onEditContact={setEditContact}
-        onOpenContactEditor={() => setIsEditingContact(true)}
-        onLogout={() => {
-          setIsSecurityOpen(false);
-          logout();
-          navigate(APP_ROUTES.home);
-        }}
-      />
+      {isSecurityOpen ? (
+        <Suspense fallback={null}>
+          <LazyProfileSecuritySheet
+            open={isSecurityOpen}
+            user={user}
+            avatarUrl={avatarUrl}
+            isAvatarUpdating={isAvatarUpdating}
+            avatarInputRef={avatarInputRef}
+            onClose={() => setIsSecurityOpen(false)}
+            onEditDisplayName={setEditDisplayName}
+            onOpenDisplayNameEditor={() => setIsEditingDisplayName(true)}
+            onEditLoginAccount={setEditLoginAccount}
+            onOpenLoginAccountEditor={() => setIsEditingLoginAccount(true)}
+            onResetPasswordFields={() => {
+              setOldPassword('');
+              setEditPassword('');
+              setConfirmPassword('');
+            }}
+            onOpenPasswordEditor={() => setIsEditingPassword(true)}
+            onResetPaymentPasswordFields={() => {
+              setOldPaymentPassword('');
+              setEditPaymentPassword('');
+              setConfirmPaymentPassword('');
+            }}
+            onOpenPaymentPasswordEditor={() => setIsEditingPaymentPassword(true)}
+            onEditContact={setEditContact}
+            onOpenContactEditor={() => setIsEditingContact(true)}
+            onLogout={() => {
+              setIsSecurityOpen(false);
+              logout();
+              navigate(APP_ROUTES.home);
+            }}
+          />
+        </Suspense>
+      ) : null}
     </AppPage>
   );
 }

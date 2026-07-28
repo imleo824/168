@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { ArrowLeft, Check, MapPin } from 'lucide-react';
-import { useConfig } from '@/hooks/useData';
+import { useConfig } from '@/hooks/useDataConfig';
 import ActionButton from '@/ui/ActionButton';
 import type { PublishCategoryMetaConfig } from '@/types';
 import {

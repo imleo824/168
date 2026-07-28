@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
-import * as api from '@/services/api';
+import { useCallback, useEffect, useRef } from 'react';
+import { recordPostViews } from '@/services/homeStartupApi';
 import {
   FEED_SCOPE_SELECTOR,
   getActiveRouteOverlay,
@@ -19,6 +19,7 @@ type ExposureViewEvent = {
   dwellMs?: number;
   quickSkip?: boolean;
 };
+type FeedExposurePostLike = string | number | { id?: unknown } | null | undefined;
 
 function getExposureScope() {
   const activeOverlay = getActiveRouteOverlay();
@@ -39,12 +40,21 @@ function capSeenSetSize(set: Set<string>) {
   }
 }
 
-function toPostIdKey(postIds: string[]) {
-  return postIds.filter(Boolean).join('|');
+function getPostId(item: FeedExposurePostLike) {
+  if (typeof item === 'string' || typeof item === 'number') return String(item).trim();
+  return String(item?.id ?? '').trim();
 }
 
-export function useFeedExposureViews(postIds: string[], enabled = true) {
-  const postIdKey = useMemo(() => toPostIdKey(postIds), [postIds]);
+function toActivePostIdSet(postItems: FeedExposurePostLike[]) {
+  const ids = new Set<string>();
+  for (const item of postItems) {
+    const postId = getPostId(item);
+    if (postId) ids.add(postId);
+  }
+  return ids;
+}
+
+export function useFeedExposureViews(postItems: FeedExposurePostLike[], enabled = true) {
   const activePostIdsRef = useRef<Set<string>>(new Set());
   const seenRef = useRef<Set<string>>(new Set());
   const pendingRef = useRef<Map<string, ExposureViewEvent>>(new Map());
@@ -64,7 +74,7 @@ export function useFeedExposureViews(postIds: string[], enabled = true) {
     events.forEach((event) => pendingRef.current.delete(event.postId));
     if (!events.length) return;
 
-    api.recordPostViews(events.map((event) => event.postId), events).catch(ignoreExposureError);
+    recordPostViews(events.map((event) => event.postId), events).catch(ignoreExposureError);
     if (pendingRef.current.size > 0) {
       flushTimerRef.current = setTimeout(flush, EXPOSURE_FLUSH_DELAY_MS);
     }
@@ -180,7 +190,7 @@ export function useFeedExposureViews(postIds: string[], enabled = true) {
   }, [enabled, flush]);
 
   useEffect(() => {
-    activePostIdsRef.current = new Set(postIdKey.split('|').filter(Boolean));
+    activePostIdsRef.current = toActivePostIdSet(postItems);
     const observer = observerRef.current;
     if (!enabled || !observer || activePostIdsRef.current.size === 0) {
       observedElementsRef.current.forEach((_element, postId) => stopObservingPost(postId));
@@ -205,5 +215,5 @@ export function useFeedExposureViews(postIds: string[], enabled = true) {
       observedElementsRef.current.set(postId, element);
       observer.observe(element);
     });
-  }, [enabled, postIdKey, stopObservingPost]);
+  }, [enabled, postItems, stopObservingPost]);
 }

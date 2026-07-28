@@ -89,6 +89,12 @@
     box-shadow: var(--ui-shadow-none);
   }
 
+  .post-create-page .post-create-image-upload-placeholder {
+    position: relative;
+    overflow: hidden;
+    background: var(--ui-skeleton-media-surface);
+  }
+
   .post-create-page .image-upload--field .image-upload-add:hover,
   .post-create-page .image-upload--field .image-upload-add:focus-visible,
   .post-create-page .image-upload--field .image-upload-add.is-active {

@@ -1,4 +1,4 @@
-import { apiFetch, ApiError } from './api';
+import { apiFetch, ApiError } from './apiCore';
 import type { CategoryMetaFeedFilters, HomeBootstrap, Post } from '@/types';
 
 export type HomeFirstScreenFeedPage = {

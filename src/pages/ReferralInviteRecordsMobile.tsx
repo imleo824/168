@@ -25,6 +25,8 @@ import {
   type ReferralRecordTab,
 } from '@/features/sponsor/referralInviteTabs';
 
+import '@/features/sponsor/ReferralRoute.css';
+
 const REFERRAL_RECORD_PAGE_LIMIT = 100;
 
 function tabTitle(tab: ReferralRecordTab) {

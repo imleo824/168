@@ -26,7 +26,7 @@ export default function TuiPlusBenefitPromptDialog({
       onClose={onClose}
       className="tui-plus-benefit-prompt-dialog"
       footer={(
-        <div className="post-create-dialog-actions">
+        <div className="tui-plus-benefit-prompt-actions">
           <ActionButton type="button" variant="muted" size="sm" onClick={onClose}>
             {copy.cancelLabel}
           </ActionButton>
@@ -36,8 +36,8 @@ export default function TuiPlusBenefitPromptDialog({
         </div>
       )}
     >
-      <div className="post-create-stable-focus" data-post-create-stable-focus="true">
-        <p className="post-create-option-hint">
+      <div className="tui-plus-benefit-prompt-detail">
+        <p className="tui-plus-benefit-prompt-copy">
           <Crown aria-hidden="true" />
           <span>{copy.detail}</span>
         </p>

@@ -18,6 +18,8 @@ import { useAuth } from '@/context/AuthContext';
 import PushNotificationSetting from '@/features/notifications/PushNotificationSetting';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 
+import '@/features/notifications/NotificationsRoute.css';
+
 type NotificationType = 'LIKE' | 'COMMENT' | 'QUOTE' | 'FOLLOW' | 'SYSTEM' | 'RECHARGE' | 'PROMOTION';
 type NotificationFilter = 'ALL' | NotificationType;
 

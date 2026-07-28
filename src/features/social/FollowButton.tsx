@@ -9,6 +9,28 @@ const LazyFollowButtonPanel = lazy(() =>
 
 export type FollowButtonProps = FollowButtonPanelProps;
 
+function FollowButtonLoadingPlaceholder({
+  className = '',
+  size = 'md',
+}: Pick<FollowButtonProps, 'className' | 'size'>) {
+  const baseClass = size === 'sm'
+    ? 'pressable ui-compact-action feed-follow-button--compact'
+    : 'pressable ui-action tap-target';
+
+  return (
+    <span
+      aria-hidden="true"
+      data-follow-pending="false"
+      data-follow-state="idle"
+      className={`${baseClass} feed-follow-button feed-follow-button--placeholder ${className}`.trim()}
+    >
+      <span className="feed-follow-button-inner">
+        <span className="feed-follow-button-text">关注</span>
+      </span>
+    </span>
+  );
+}
+
 export function FollowButton(props: FollowButtonProps) {
   const { user } = useAuth();
   const isSelf = !!user?.id && user.id === props.userId;
@@ -16,7 +38,7 @@ export function FollowButton(props: FollowButtonProps) {
   if (!props.userId || isSelf) return null;
 
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<FollowButtonLoadingPlaceholder className={props.className} size={props.size} />}>
       <LazyFollowButtonPanel {...props} />
     </Suspense>
   );

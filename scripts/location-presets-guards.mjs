@@ -43,7 +43,7 @@ const postCreateLocationSource = fs.readFileSync(path.join(root, 'src/features/p
 const categoryMetaServiceSource = fs.readFileSync(path.join(root, 'server/services/category-meta.service.ts'), 'utf8');
 const adminConfigSchemaSource = fs.readFileSync(path.join(root, 'src/features/admin/adminConfigSchema.ts'), 'utf8');
 const postCreatePageSource = fs.readFileSync(path.join(root, 'src/features/post-create/PostCreatePage.tsx'), 'utf8');
-const postCreateCategoryMetaSource = fs.readFileSync(path.join(root, 'src/features/post-create/postCreateCategoryMeta.ts'), 'utf8');
+const categoryMetaSchemaSource = fs.readFileSync(path.join(root, 'src/features/category/categoryMetaSchema.ts'), 'utf8');
 const useDataConfigSource = fs.readFileSync(path.join(root, 'src/hooks/useDataConfig.ts'), 'utf8');
 
 assert.doesNotMatch(
@@ -257,12 +257,12 @@ assert.match(
   'Post create must always refetch public config so newly saved publish category fields become available.',
 );
 assert.match(
-  postCreateCategoryMetaSource,
+  categoryMetaSchemaSource,
   /isSameCategoryRef\(item\.id,\s*categoryId\)[\s\S]*isSameCategoryRef\(item\.slug,\s*categoryId\)[\s\S]*isSameCategoryRef\(item\.name,\s*categoryId\)/,
   'Post create category schema matching must accept id, slug, and name refs from public categories.',
 );
 assert.match(
-  postCreateCategoryMetaSource,
+  categoryMetaSchemaSource,
   /\[schema\.categorySlug,\s*schema\.slug,\s*schema\.id,\s*schema\.name\][\s\S]*isSameCategoryRef\(ref,\s*selectedCategory\.slug\)[\s\S]*isSameCategoryRef\(ref,\s*selectedCategory\.id\)/,
   'Post create category schema matching must compare all saved schema refs against selected category refs.',
 );

@@ -33,6 +33,12 @@
     flex-shrink: 0;
   }
 
+  .feed-follow-button--placeholder {
+    visibility: hidden;
+    pointer-events: none;
+    transition: none;
+  }
+
   .feed-follow-button:active {
     transform: scale(var(--ui-motion-press-scale));
   }

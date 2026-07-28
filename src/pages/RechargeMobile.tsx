@@ -16,6 +16,8 @@ import PageContentShell from '@/ui/PageContentShell';
 import { APP_ROUTES } from '@/app/routePaths';
 import { useAuth } from '@/context/AuthContext';
 
+import '@/features/recharge/RechargeRoute.css';
+
 type DepositInfo = {
   address: string;
   autoCredit?: boolean;

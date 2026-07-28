@@ -10,12 +10,12 @@ import ListLoadMoreState from '@/ui/ListLoadMoreState';
 import AvatarImage from '@/ui/AvatarImage';
 import { useAuth } from '@/context/AuthContext';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
-import { usePostQuotes } from '@/hooks/useData';
+import { usePostQuotes } from '@/hooks/useDataPosts';
 import { withCurrentBackground } from '@/utils/navigationState';
 import { rememberListReturnPosition } from '@/utils/listReturnScroll';
 import { resolveVisiblePostText } from '@/utils/postDisplayText';
 import { formatRelativeTime } from '@/utils/time';
-import { markPostCreateComposerFocusIntent, primePostCreateComposerFocus } from '@/utils/postCreateFocusBridge';
+import { markPostCreateComposerFocusIntent, primePostCreateComposerFocus } from '@/utils/postCreateFocusPrime';
 import {
   dispatchPostSheetOpen,
   subscribePostSheetOpen,

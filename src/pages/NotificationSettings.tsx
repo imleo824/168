@@ -19,6 +19,8 @@ import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import { usePushNotification } from '@/hooks/usePushNotification';
 import type { NotificationPreference } from '@/services/pushNotification';
 
+import '@/features/notifications/NotificationsRoute.css';
+
 type PreferenceKey = keyof Pick<
   NotificationPreference,
   'commentEnabled' | 'followEnabled' | 'quoteEnabled' | 'likeEnabled' | 'systemEnabled' | 'rechargeEnabled' | 'promotionEnabled'

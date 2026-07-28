@@ -1,10 +1,9 @@
-import { useCallback, useEffect, useState, type RefObject } from 'react';
+import { useCallback, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
 import { CheckCircle2, ShieldCheck, X } from 'lucide-react';
 import AvatarImage from '@/ui/AvatarImage';
 import SettingRow from '@/ui/SettingRow';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
-import { subscribeProfileSettingsOpen } from './profileSettingsIntent';
 
 type ProfileSecuritySheetProps = {
   open: boolean;
@@ -58,18 +57,11 @@ export default function ProfileSecuritySheet({
   onOpenPaymentPasswordEditor,
   onLogout,
 }: ProfileSecuritySheetProps) {
-  const [isIntentOpen, setIsIntentOpen] = useState(false);
-  const isOpen = open || isIntentOpen;
-
-  useEffect(() => subscribeProfileSettingsOpen(() => setIsIntentOpen(true)), []);
-
   const closeSheet = useCallback(() => {
-    setIsIntentOpen(false);
     onClose();
   }, [onClose]);
 
   const handleLogout = useCallback(() => {
-    setIsIntentOpen(false);
     onLogout();
   }, [onLogout]);
   const handleAvatarClick = useCallback(() => {
@@ -111,7 +103,7 @@ export default function ProfileSecuritySheet({
     mode: 'drop',
   });
 
-  if (!isOpen) return null;
+  if (!open) return null;
 
   const sheet = (
     <div className="profile-security-overlay">

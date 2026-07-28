@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -12,9 +12,10 @@ import AppPage from '@/ui/AppPage';
 import PageContentShell from '@/ui/PageContentShell';
 import PageHeader from '@/ui/PageHeader';
 import { InlineSpinner, LoadingBlock } from '@/ui/LoadingState';
-import TuiPlusBenefitPromptDialog from '@/features/tui-plus/TuiPlusBenefitPromptDialog';
 import { buildTuiPlusBenefitRouteState } from '@/features/tui-plus/tuiPlusBenefits';
 import { parseResponseError } from '@/features/profile/profileHelpers';
+
+import '@/features/tui-plus/TuiPlusRoute.css';
 
 type LinkTarget = 'contact' | 'website' | 'channel';
 type ContactKind = 'telegram' | 'whatsapp' | 'line';
@@ -40,6 +41,8 @@ type TargetCopy = {
   endpoint: string;
   payloadKey: 'contacts' | 'websites' | 'channels';
 };
+
+const LazyTuiPlusBenefitPromptDialog = lazy(() => import('@/features/tui-plus/TuiPlusBenefitPromptDialog'));
 
 type ContactMethod = {
   kind: ContactKind;
@@ -541,12 +544,14 @@ export default function TuiPlusLinkEditorMobile() {
         <SEO title="添加链接｜Tui Plus" noindex />
         <PageHeader title="添加链接" showBack titleAlign="center" />
         <PageContentShell as="main" className="ui-auth-required-wrap ui-app-page-main">
-          <TuiPlusBenefitPromptDialog
-            open
-            benefit="profileLinks"
-            onClose={() => navigate(APP_ROUTES.profile, { replace: true })}
-            onConfirm={() => navigate(APP_ROUTES.tuiPlus, { replace: true, state: buildTuiPlusBenefitRouteState('profileLinks', currentPath) })}
-          />
+          <Suspense fallback={<LoadingBlock text="正在加载会员权益" />}>
+            <LazyTuiPlusBenefitPromptDialog
+              open
+              benefit="profileLinks"
+              onClose={() => navigate(APP_ROUTES.profile, { replace: true })}
+              onConfirm={() => navigate(APP_ROUTES.tuiPlus, { replace: true, state: buildTuiPlusBenefitRouteState('profileLinks', currentPath) })}
+            />
+          </Suspense>
         </PageContentShell>
       </AppPage>
     );

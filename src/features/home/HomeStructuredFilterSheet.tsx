@@ -6,20 +6,6 @@ import type {
 } from '@/types';
 import type { HomeTopicTabId } from './HomeTopicTabs';
 
-export type {
-  HomeStructuredFilterFieldItem,
-  HomeStructuredFilterSummaryItem,
-} from './homeStructuredFilterUtils';
-
-export {
-  buildHomeStructuredFilterFieldItems,
-  buildHomeStructuredFilterSummaryItems,
-  countCategoryMetaFeedFilters,
-  findHomeStructuredFilterSchema,
-  getHomeStructuredFilterScope,
-  sanitizeHomeStructuredFilters,
-} from './homeStructuredFilterUtils';
-
 export interface HomeStructuredFilterSheetProps {
   open: boolean;
   tabId: HomeTopicTabId;

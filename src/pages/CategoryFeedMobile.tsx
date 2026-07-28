@@ -9,17 +9,18 @@ import React, {
 import { useParams, useSearchParams, useLocation } from 'react-router-dom';
 import { Check, Sparkles } from 'lucide-react';
 
-import { useInfinitePosts, useCategories, useJoinTopic, useTopicJoinStatus } from '@/hooks/useData';
+import { useCategories } from '@/hooks/useDataConfig';
+import { useInfinitePosts } from '@/hooks/useDataPosts';
+import { useJoinTopic, useTopicJoinStatus } from '@/hooks/useDataSocial';
 import { useAuth } from '@/context/AuthContext';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import SEO from '@/platform/SEO';
 import { buildCategorySeo } from '@/platform/brand';
 import PageHeader from '@/ui/PageHeader';
-import PostFeedList from '@/features/feed/PostFeedList';
 import { parseLocationCategoryId } from '@/utils/postPresentation';
 import { useIsMobile } from '@/hooks/useIsMobile';
 import { useFeedExposureViews } from '@/hooks/useFeedExposureViews';
-import { useListReturnScroll } from '@/utils/listReturnScroll';
+import ListReturnScrollRestorer from '@/utils/ListReturnScrollRestorer';
 import { RefreshHint, StateBlock } from '@/ui/LoadingState';
 import ListLoadMoreState from '@/ui/ListLoadMoreState';
 import ActionButton, { ActionLink } from '@/ui/ActionButton';
@@ -30,10 +31,13 @@ import { APP_ROUTES } from '@/app/routePaths';
 import { HomeFeedSkeleton } from '@/ui/Skeleton';
 import type { CategoryMetaFeedFilters } from '@/types';
 
+import '@/features/category/CategoryFeedRoute.css';
+
 const DEFAULT_FALLBACK_TITLE = '动态广场';
 const SHORT_LIST_AUTO_LOAD_MIN_ITEMS = 4;
 const LOAD_MORE_ROOT_MARGIN_PX = 1000;
 const LOAD_MORE_SCROLL_THRESHOLD = 900;
+const LazyPostFeedList = React.lazy(() => import('@/features/feed/PostFeedList'));
 
 function formatRootMarginPx(value: number) {
   return `${value}px`;
@@ -402,10 +406,8 @@ export default function CategoryFeedMobile() {
     resetError();
   }, [categoryId, categoryMetaScopeParam, country, hasMetaFilters, query, viewMode, unifiedTag, resetError]);
 
-  const postIds = useMemo(() => posts.map((p) => p.id), [posts]);
   const canRestoreListPosition = posts.length >= SHORT_LIST_AUTO_LOAD_MIN_ITEMS || Boolean(postsQuery.hasNextPage);
-  useFeedExposureViews(postIds, !isInitialLoading && posts.length > 0);
-  useListReturnScroll(listReturnScope, !isInitialLoading && canRestoreListPosition, posts.length);
+  useFeedExposureViews(posts, !isInitialLoading && posts.length > 0);
 
   const pageSeo = categorySeo;
 
@@ -456,6 +458,11 @@ export default function CategoryFeedMobile() {
 
   return (
     <AppPage mobileAddressBarScroll className={isMobile ? 'category-feed-page category-feed-page--mobile' : 'category-feed-page category-feed-page--desktop'}>
+      <ListReturnScrollRestorer
+        scope={listReturnScope}
+        ready={!isInitialLoading && canRestoreListPosition}
+        restoreVersion={posts.length}
+      />
       <SEO
         title={pageSeo.title}
         description={pageSeo.description}
@@ -486,7 +493,7 @@ export default function CategoryFeedMobile() {
         ) : undefined}
       />
 
-      <PageContentShell variant="fluid" className={`category-feed-content-shell ${isMobile ? 'category-feed-shell--mobile' : 'category-feed-shell--desktop'} ui-app-page-main`}>
+      <PageContentShell as="main" variant="fluid" className={`category-feed-content-shell ${isMobile ? 'category-feed-shell--mobile' : 'category-feed-shell--desktop'} ui-app-page-main`}>
         {isInitialLoading ? (
           <LoadingState />
         ) : isInitialError ? (
@@ -502,7 +509,9 @@ export default function CategoryFeedMobile() {
         ) : (
           <>
             {isRefreshingExisting ? <div className="category-feed-refresh-row"><RefreshHint text="正在更新" /></div> : null}
-            <PostFeedList posts={posts} enableRecommendationControls />
+            <React.Suspense fallback={<LoadingState />}>
+              <LazyPostFeedList posts={posts} enableRecommendationControls />
+            </React.Suspense>
             <div ref={sentinelRef}>
               <ListLoadMoreState
                 error={loadMoreError}

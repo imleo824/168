@@ -1,0 +1,11 @@
+/* Tui Plus route-only stylesheet.
+ * Imported by the lazy Tui Plus routes so ordinary feed/home startup does not
+ * download membership checkout, plan-card, and link-editor presentation.
+ */
+
+@import "../../styles/features/tui-plus-page.css";
+@import "../../styles/features/tui-plus-mobile.css";
+@import "../../styles/features/tui-plus-visual.css";
+@import "../../styles/features/tui-plus-checkout.css";
+@import "../../styles/features/tui-plus-request-fixes.css";
+@import "../../styles/features/tui-plus-premium-layout.css";

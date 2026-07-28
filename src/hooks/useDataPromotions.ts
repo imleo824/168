@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 
-import * as api from '@/services/api';
+import { getChatAds, getMyPromotions } from '@/services/api';
 
 const LIST_GC_TIME = 1000 * 60 * 25;
 const PROMOTION_STALE_TIME = 1000 * 15;
@@ -8,7 +8,7 @@ const PROMOTION_STALE_TIME = 1000 * 15;
 export function useMyPromotions(enabled: boolean = true) {
   return useQuery({
     queryKey: ['promotions', 'mine'],
-    queryFn: api.getMyPromotions,
+    queryFn: getMyPromotions,
     enabled,
     staleTime: PROMOTION_STALE_TIME,
   });
@@ -17,7 +17,7 @@ export function useMyPromotions(enabled: boolean = true) {
 export function useChatAds(enabled: boolean = true) {
   return useQuery({
     queryKey: ['promotions', 'chat-ads'],
-    queryFn: ({ signal }) => api.getChatAds({ signal }),
+    queryFn: ({ signal }) => getChatAds({ signal }),
     enabled,
     staleTime: PROMOTION_STALE_TIME,
     gcTime: LIST_GC_TIME,

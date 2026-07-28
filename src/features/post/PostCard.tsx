@@ -15,7 +15,8 @@ import { useDelayedHoverAction } from '@/hooks/useDelayedHoverAction';
 import { useActionLock } from '@/hooks/useActionLock';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import { useLikeFeedback } from '@/hooks/useLikeFeedback';
-import { useConfig, usePostStats, usePrefetchPost } from '@/hooks/useData';
+import { useConfig } from '@/hooks/useDataConfig';
+import { usePostStats, usePrefetchPost } from '@/hooks/useDataPosts';
 import AvatarImage from '@/ui/AvatarImage';
 import TelegramContactIconButton from '@/ui/TelegramContactIconButton';
 import { FollowButton } from '@/features/social/FollowButton';
@@ -32,7 +33,7 @@ import { buildPostStructuredMetaItems, isPostStructuredLocationMeta, type PostSt
 import { getPostMetaChipClass, LOCATION_TAG_CHIP_CLASS, NORMAL_TAG_CHIP_CLASS, POST_TAG_ROW_CLASS, resolvePostMetaChipKind } from '@/utils/postTagStyles';
 import { rememberListReturnPosition } from '@/utils/listReturnScroll';
 import { resolveVisiblePostText } from '@/utils/postDisplayText';
-import { primePostCreateComposerFocus } from '@/utils/postCreateFocusBridge';
+import { primePostCreateComposerFocus } from '@/utils/postCreateFocusPrime';
 import { formatRelativeTime } from '@/utils/time';
 
 const ImageLightbox = React.lazy(() => import('@/ui/ImageLightbox'));
@@ -40,8 +41,16 @@ const ImageLightbox = React.lazy(() => import('@/ui/ImageLightbox'));
 const ANONYMOUS_USER_ID = 'anonymous';
 const CONTENT_WITH_MEDIA_CLAMP_LINES = 4;
 const CONTENT_TEXT_ONLY_CLAMP_LINES = 6;
+const CONTENT_OVERFLOW_MEASURE_MIN_CHARS_PER_LINE = 18;
 const POST_DETAIL_PREFETCH_DELAY = 120;
 const POST_PROMOTION_LINK_META_KEY = '__postPromotionLink';
+
+const FEED_CONTENT_WITH_MEDIA_STYLE = {
+  '--x-card-content-clamp-lines': CONTENT_WITH_MEDIA_CLAMP_LINES,
+} as CSSProperties;
+const FEED_CONTENT_TEXT_ONLY_STYLE = {
+  '--x-card-content-clamp-lines': CONTENT_TEXT_ONLY_CLAMP_LINES,
+} as CSSProperties;
 
 type ExpandedContentStatus = 'idle' | 'loading' | 'loaded' | 'error';
 type PostPromotionLink = { title: string; url: string };
@@ -180,6 +189,14 @@ function cleanString(value: unknown): string {
 function cleanDisplayName(value: unknown): string {
   const displayName = cleanString(value).replace(/^@+/, '').trim();
   return displayName || '未知用户';
+}
+
+function mayOverflowClampedText(text: string, clampLines: number) {
+  const normalized = text.trim();
+  if (!normalized) return false;
+  const lineBreakCount = (normalized.match(/\n/g) || []).length;
+  if (lineBreakCount >= clampLines) return true;
+  return normalized.replace(/\s+/g, '').length > clampLines * CONTENT_OVERFLOW_MEASURE_MIN_CHARS_PER_LINE;
 }
 
 function isTuiPlusUserLike(user: any) {
@@ -400,8 +417,10 @@ const PostCard = memo(function PostCard({ post: inputPost, isOwner = false, show
   const navigate = useNavigate();
   const location = useLocation();
   const prefetchPost = usePrefetchPost();
-  const { data: config } = useConfig();
   const { requireAuth, user: currentUser, showToast } = useAuth();
+  const canShowTelegramSync = Boolean(isOwner && showStatus && onTelegramSync);
+  const canShowPromoteAction = Boolean(isOwner && showStatus);
+  const { data: config } = useConfig(canShowTelegramSync);
   const postId = cleanString(post.id);
   const isPublished = post.isPublished !== false;
   const isFeedPreview = post.isFeedPreview === true;
@@ -438,7 +457,12 @@ const PostCard = memo(function PostCard({ post: inputPost, isOwner = false, show
   const displayText = isContentExpanded && expandedContent ? expandedContent : previewDisplayText;
   const contentClampLines = hasMedia ? CONTENT_WITH_MEDIA_CLAMP_LINES : CONTENT_TEXT_ONLY_CLAMP_LINES;
   const shouldShowMore = isContentOverflowing || isContentExpanded || isFeedPreview;
-  const contentStyle = { '--x-card-content-clamp-lines': contentClampLines } as CSSProperties;
+  const shouldMeasureContentOverflow =
+    !isContentExpanded &&
+    !isFeedPreview &&
+    Boolean(displayText) &&
+    mayOverflowClampedText(displayText, contentClampLines);
+  const contentStyle = hasMedia ? FEED_CONTENT_WITH_MEDIA_STYLE : FEED_CONTENT_TEXT_ONLY_STYLE;
 
   const ensureExpandedContent = useCallback(() => {
     if (!postId || !isFeedPreview || expandedContent || expandedContentStatus === 'loading') return;
@@ -457,21 +481,25 @@ const PostCard = memo(function PostCard({ post: inputPost, isOwner = false, show
   }, [expandedContent, expandedContentStatus, isFeedPreview, postId, previewDisplayText]);
 
   useLayoutEffect(() => {
-    if (isContentExpanded) return;
+    if (!shouldMeasureContentOverflow) {
+      setIsContentOverflowing((current) => (current ? false : current));
+      return;
+    }
     const element = contentRef.current;
     if (!element) {
-      setIsContentOverflowing(false);
+      setIsContentOverflowing((current) => (current ? false : current));
       return;
     }
     const measure = () => {
-      setIsContentOverflowing(element.scrollHeight > element.clientHeight + 1);
+      const next = element.scrollHeight > element.clientHeight + 1;
+      setIsContentOverflowing((current) => (current === next ? current : next));
     };
     measure();
     if (typeof ResizeObserver === 'undefined') return;
     const observer = new ResizeObserver(measure);
     observer.observe(element);
     return () => observer.disconnect();
-  }, [displayText, contentClampLines, isContentExpanded]);
+  }, [displayText, shouldMeasureContentOverflow]);
 
   const handleToggleContentExpanded = useCallback((event: React.MouseEvent<HTMLButtonElement>) => {
     stopAndPrevent(event);
@@ -520,8 +548,6 @@ const PostCard = memo(function PostCard({ post: inputPost, isOwner = false, show
   const telegramSyncPrice = currentUserTuiPlusActive ? 0 : baseTelegramSyncPrice;
   const currentPoints = Number.isFinite(Number(currentUser?.points)) ? Math.max(0, Math.floor(Number(currentUser?.points))) : 0;
   const canAffordTelegramSync = telegramSyncPrice === 0 || currentPoints >= telegramSyncPrice;
-  const canShowTelegramSync = Boolean(isOwner && showStatus && onTelegramSync);
-  const canShowPromoteAction = Boolean(isOwner && showStatus);
   const resolvedPost = useMemo(() => ({ ...post, viewCount, commentCount: localCommentCount }), [post, viewCount, localCommentCount]);
   const openPostDetail = useCallback((event?: React.MouseEvent<HTMLElement>) => { if (!postId) return; if (event) rememberListReturnPosition(event.currentTarget); prefetchPost(postId); navigate(`/post/${postId}`, { state: withCurrentBackground(location) }); }, [location, navigate, postId, prefetchPost]);
   const { schedule: schedulePrefetch, cancel: cancelPrefetch } = useDelayedHoverAction(() => { if (postId) prefetchPost(postId); }, POST_DETAIL_PREFETCH_DELAY);
@@ -608,7 +634,7 @@ const PostCard = memo(function PostCard({ post: inputPost, isOwner = false, show
                 {canShowContact ? (
                   <TelegramContactIconButton onClick={handleContactClick} variant="compactText" className="feed-card-inline-contact" ariaLabel="联系发布人" title={contactUrl || '联系发布人'} />
                 ) : null}
-                {canOpenProfile ? <FollowButton userId={authorId} size="sm" className="feed-card-inline-follow" /> : null}
+                {canOpenProfile ? <FollowButton userId={authorId} size="sm" className="feed-card-inline-follow" hideWhenFollowing={false} /> : null}
                 <PostOptionsMenu postId={postId} authorId={authorId} authorName={userDisplayName} recommendationEnabled={enableRecommendationControls} onOpenStateChange={setIsOptionsMenuOpen} ownerOptions={ownerMenuOptions} />
               </div>
             </div>

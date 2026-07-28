@@ -1,7 +1,11 @@
 import { useEffect, useMemo } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
-import * as api from '@/services/api';
+import {
+  getCategories,
+  getConfigs,
+  getHomeBootstrap,
+} from '@/services/homeStartupApi';
 import {
   readHomeBootstrapSnapshot,
   stabilizeHomeBootstrapReferenceData,
@@ -25,15 +29,22 @@ export function useConfig(
   enabled: boolean = true,
   options: { alwaysFresh?: boolean } = {},
 ) {
-  const bootstrapSnapshot = useMemo(() => readHomeBootstrapSnapshot(), []);
+  const isHomeShell = isHomeShellPath();
+  const shouldEnableQuery = enabled && !isHomeShell;
+  const canUseBootstrapSnapshot = shouldEnableQuery && !options.alwaysFresh;
+  const bootstrapSnapshot = useMemo(
+    () => (canUseBootstrapSnapshot ? readHomeBootstrapSnapshot() : undefined),
+    [canUseBootstrapSnapshot],
+  );
+
   return useQuery({
     queryKey: ['config'],
-    queryFn: api.getConfigs,
+    queryFn: getConfigs,
     staleTime: options.alwaysFresh ? 0 : CONFIG_STALE_TIME,
     gcTime: LIST_GC_TIME,
     initialData: options.alwaysFresh ? undefined : bootstrapSnapshot?.data?.config,
     initialDataUpdatedAt: options.alwaysFresh ? undefined : bootstrapSnapshot?.updatedAt,
-    enabled: enabled && !isHomeShellPath(),
+    enabled: shouldEnableQuery,
     refetchOnMount: options.alwaysFresh ? 'always' : false,
     refetchOnWindowFocus: options.alwaysFresh,
     refetchOnReconnect: options.alwaysFresh,
@@ -45,7 +56,7 @@ export function useCategories() {
 
   return useQuery({
     queryKey: ['categories'],
-    queryFn: api.getCategories,
+    queryFn: getCategories,
     staleTime: CATEGORY_STALE_TIME,
     gcTime: 1000 * 60 * 10,
     refetchOnMount: true,
@@ -56,17 +67,20 @@ export function useCategories() {
   });
 }
 
-export function useHomeBootstrap() {
+export function useHomeBootstrap(enabled: boolean = true) {
   const queryClient = useQueryClient();
-  const bootstrapSnapshot = useMemo(() => readHomeBootstrapSnapshot(), []);
+  const bootstrapSnapshot = useMemo(
+    () => (enabled ? readHomeBootstrapSnapshot() : undefined),
+    [enabled],
+  );
   const query = useQuery({
     queryKey: ['home', 'bootstrap'],
-    queryFn: api.getHomeBootstrap,
+    queryFn: getHomeBootstrap,
     staleTime: HOME_BOOTSTRAP_STALE_TIME,
     gcTime: LIST_GC_TIME,
     initialData: bootstrapSnapshot?.data,
     initialDataUpdatedAt: bootstrapSnapshot?.updatedAt,
-    enabled: true,
+    enabled,
     refetchOnMount: 'always',
     refetchOnReconnect: true,
     refetchOnWindowFocus: false,

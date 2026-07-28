@@ -1,0 +1,6 @@
+/* Post create route-only stylesheet.
+ * Imported by the lazy create route so ordinary feed/home startup does not
+ * download composer, picker, and publishing-state presentation CSS.
+ */
+
+@import "../../styles/features/create-promote.css";

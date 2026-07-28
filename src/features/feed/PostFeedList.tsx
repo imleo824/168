@@ -39,15 +39,29 @@ function getPostKey(post: FeedListPostLike, index: number) {
 
 function getItemStyle(index: number) {
   if (index >= FEED_INITIAL_ANIMATED_ITEM_COUNT) return undefined;
-  return { '--feed-list-item-index': index } as FeedListItemStyle;
+  return FEED_LIST_ITEM_STYLES[index];
 }
 
 function hasFeedPostMedia(post: FeedListPostLike) {
   return Array.isArray(post.images) && post.images.length > 0;
 }
 
-function getFeedIdentity(posts: FeedListPostLike[]) {
-  return posts.map((post, index) => getPostKey(post, index)).join('|');
+const FEED_LIST_ITEM_STYLES = Array.from(
+  { length: FEED_INITIAL_ANIMATED_ITEM_COUNT },
+  (_, index) => ({ '--feed-list-item-index': index }) as FeedListItemStyle,
+);
+
+function getFeedRenderSignature(posts: FeedListPostLike[]) {
+  const length = posts.length;
+  if (length === 0) return 'empty';
+  const headCount = Math.min(length, FEED_INITIAL_RENDERED_ITEM_COUNT);
+  let head = '';
+  for (let index = 0; index < headCount; index += 1) {
+    head += `${index === 0 ? '' : '|'}${getPostKey(posts[index], index)}`;
+  }
+  const penultimate = length > 2 ? getPostKey(posts[length - 2], length - 2) : '';
+  const last = length > 1 ? getPostKey(posts[length - 1], length - 1) : '';
+  return `${length}:${head}:${penultimate}:${last}`;
 }
 
 function scheduleDeferredMount(callback: () => void) {
@@ -78,7 +92,7 @@ export default function PostFeedList<TPost extends FeedListPostLike>({
   const hasOwnerCallbacks = Boolean(onStatusChange || onDelete || onTelegramSync);
   const effectiveIsOwner = isOwner ?? hasOwnerCallbacks;
   const effectiveShowStatus = showStatus ?? hasOwnerCallbacks;
-  const feedIdentity = useMemo(() => getFeedIdentity(posts), [posts]);
+  const feedRenderSignature = useMemo(() => getFeedRenderSignature(posts), [posts]);
   const shouldDeferTail = posts.length > FEED_INITIAL_RENDERED_ITEM_COUNT;
   const [tailMounted, setTailMounted] = useState(!shouldDeferTail);
 
@@ -90,9 +104,12 @@ export default function PostFeedList<TPost extends FeedListPostLike>({
 
     setTailMounted(false);
     return scheduleDeferredMount(() => setTailMounted(true)) || undefined;
-  }, [feedIdentity, shouldDeferTail]);
+  }, [feedRenderSignature, shouldDeferTail]);
 
-  const visiblePosts = tailMounted ? posts : posts.slice(0, FEED_INITIAL_RENDERED_ITEM_COUNT);
+  const visiblePosts = useMemo(
+    () => (tailMounted ? posts : posts.slice(0, FEED_INITIAL_RENDERED_ITEM_COUNT)),
+    [posts, tailMounted],
+  );
 
   return (
     <div className={cn('post-feed-list-panel', className)}>

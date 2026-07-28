@@ -2,6 +2,8 @@ import { useLocation } from 'react-router-dom';
 
 import PostCreatePage from '@/features/post-create/PostCreatePage';
 
+import '@/features/post-create/PostCreateRoute.css';
+
 type PostCreateState = {
   defaultAnonymous?: boolean;
 };

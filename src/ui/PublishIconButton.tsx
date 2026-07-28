@@ -2,7 +2,7 @@ import { Plus } from 'lucide-react';
 import { memo, type MouseEvent } from 'react';
 import { cn } from '@/utils/cn';
 import { useInstantPress } from '@/hooks/useInstantPress';
-import { POST_CREATE_FOCUS_TRIGGER_ATTR } from '@/utils/postCreateFocusBridge';
+import { POST_CREATE_FOCUS_TRIGGER_ATTR } from '@/utils/postCreateFocusCore';
 
 interface PublishIconButtonProps {
   onClick?: (event: MouseEvent<HTMLButtonElement>) => void;

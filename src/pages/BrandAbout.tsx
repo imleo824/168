@@ -5,6 +5,7 @@ import PageContentShell from '@/ui/PageContentShell';
 import { ActionLink } from '@/ui/ActionButton';
 import { APP_ROUTES } from '@/app/routePaths';
 import SEO from '@/platform/SEO';
+import '@/features/brand/BrandAboutRoute.css';
 import {
   HOME_FAQ,
   HOME_LONG_DESCRIPTION,

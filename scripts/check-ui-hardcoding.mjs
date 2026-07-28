@@ -352,6 +352,8 @@ assertIncludes('src/hooks/useMobileAddressBar.ts', 'function shouldUpdateLayoutH
 assertIncludes('src/app/AppRequireTuiPlusRoute.tsx', '<AppPage mobileAddressBarScroll bottomSafe className="tui-plus-required-page surface-page">', 'Tui Plus route guard must render through the shared page shell.');
 assertIncludes('src/app/AppRequireTuiPlusRoute.tsx', '<PageHeader title="推推会员" titleAlign="center"', 'Tui Plus route guard must own a stable page topbar behind its prompt dialog.');
 assertIncludes('src/app/AppRequireTuiPlusRoute.tsx', '<PageContentShell as="main" className="ui-auth-required-wrap ui-app-page-main">', 'Tui Plus route guard main content must use the shared page content shell.');
+assertIncludes('src/app/AppRequireTuiPlusRoute.tsx', '<LazyTuiPlusBenefitPromptDialog', 'Tui Plus route guard prompt must be lazy-loaded so route protection does not inflate the main bundle.');
+assertNotIncludes('src/app/AppRequireTuiPlusRoute.tsx', "import TuiPlusBenefitPromptDialog from '@/features/tui-plus/TuiPlusBenefitPromptDialog';", 'Tui Plus route guard must not statically import prompt dialog UI into the main route shell.');
 assertNotIncludes('src/app/AppRequireTuiPlusRoute.tsx', '<PageContentShell className="ui-auth-required-wrap ui-app-page-main">', 'Tui Plus route guard must not bypass AppPage/PageHeader with a bare content shell.');
 assertIncludes('src/app/AppShell.tsx', 'APP_ROUTES.legacyPromoteHistory,\n  APP_ROUTES.promotionEffects,', 'legacy promote history route must keep the workspace shell before redirect.');
 assertIncludes('src/app/AppShell.tsx', 'pathname === APP_ROUTES.legacyPromoteHistory ||\n    pathname === APP_ROUTES.promotionEffects', 'legacy promote history route must resolve to the workspace desktop surface before redirect.');
@@ -376,9 +378,9 @@ assertNotIncludes('src/ui/OptimizedImage.tsx', "OPTIMIZED_IMAGE_MOBILE_QUERY = '
 assertNotIncludes('src/features/feed/HomeAdBanner.tsx', "HOME_AD_IMAGE_SIZES = '(max-width: 1023px) 100vw, 1180px'", 'home ad image sizes must not hard-code the user viewport breakpoint.');
 assertNotIncludes('src/features/profile/ProfileHeaderCover.tsx', "PROFILE_HEADER_COVER_SIZES = '(max-width: 48rem) 100vw, 72rem'", 'profile cover image sizes must not own a separate media query.');
 assertNotIncludes('src/styles/features/referral-invite.css', 'z-index: calc(var(--ui-z-modal) + 1);', 'referral rules overlay must not add ad hoc modal layer math.');
-assertIncludes('src/utils/postCreateFocusBridge.ts', "textarea.className = 'ui-post-create-focus-bridge';", 'post create focus bridge must render through the shared focus bridge contract.');
-assertNotIncludes('src/utils/postCreateFocusBridge.ts', "fontSize: '16px'", 'post create focus bridge must not hard-code mobile input font size.');
-assertNotIncludes('src/utils/postCreateFocusBridge.ts', "zIndex: '2147483647'", 'post create focus bridge must not hard-code top-layer z-index.');
+assertIncludes('src/utils/postCreateFocusPrime.ts', "textarea.className = 'ui-post-create-focus-bridge';", 'post create focus bridge must render through the shared focus bridge contract.');
+assertNotIncludes('src/utils/postCreateFocusPrime.ts', "fontSize: '16px'", 'post create focus bridge must not hard-code mobile input font size.');
+assertNotIncludes('src/utils/postCreateFocusPrime.ts', "zIndex: '2147483647'", 'post create focus bridge must not hard-code top-layer z-index.');
 assertCssRuleIncludes(
   'src/styles/system/ui-input-focus-stability-contract.css',
   '.ui-post-create-focus-bridge',
@@ -692,12 +694,14 @@ assertIncludes('src/styles/features/referral-invite.css', '--ui-referral-page-co
 assertIncludes('src/styles/features/referral-invite.css', '.referral-page-content {\n      grid-template-columns:', 'desktop referral invite overview and share cards must use a two-column layout.');
 assertIncludes('src/styles/features/referral-invite.css', '.referral-record-list {\n      width: 100%;\n      max-width: var(--app-desktop-page-content-width);', 'desktop referral records must not remain constrained to the narrow mobile record list width.');
 assertIncludes('src/styles/features/referral-invite.css', 'grid-template-columns: repeat(2, minmax(0, 1fr));', 'desktop referral records must use a multi-column list.');
+assertIncludes('src/pages/BrandAbout.tsx', "import '@/features/brand/BrandAboutRoute.css';", 'about page CSS must load with the lazy about route.');
+assertIncludes('src/features/brand/BrandAboutRoute.css', '@import "../../styles/features/brand.css";', 'about route CSS facade must own brand.css.');
 assertIncludes('src/styles/features/brand.css', "data-desktop-surface='content'] .brand-about-main", 'desktop about page content must align to the shared framed content width.');
 assertIncludes('src/styles/features/brand.css', '.brand-about-main {\n      display: grid;\n      grid-template-columns: repeat(2, minmax(0, 1fr));', 'desktop about page sections must use a multi-column content layout.');
 assertIncludes('src/styles/system/record-card-contract.css', '--ui-record-list-content-max: var(--app-desktop-page-content-width);', 'desktop record pages must align lists to the shared framed workspace content width.');
 assertIncludes('src/styles/system/ui-primitives-auth.css', '--ui-auth-required-wrap-max: var(--app-desktop-page-content-width);', 'desktop auth-required states must align to the shared framed page content width.');
 assertIncludes('src/styles/system/ui-primitives-auth.css', 'max-width: var(--ui-auth-required-wrap-max);', 'desktop auth-required states must override the default narrow content shell max width.');
-assertIncludes('src/styles/features/tui-plus.css', '--ui-tui-plus-content-max: var(--app-desktop-page-content-width);', 'desktop Tui Plus content and CTA must align to the shared framed workspace content width.');
+assertIncludes('src/styles/features/tui-plus-page.css', '--ui-tui-plus-content-max: var(--app-desktop-page-content-width);', 'desktop Tui Plus content and CTA must align to the shared framed workspace content width.');
 assertIncludes('src/styles/features/messages.css', '--ui-message-settings-content-max: var(--app-desktop-page-content-width);', 'desktop message and settings content must align to the shared framed content width.');
 assertIncludes('src/styles/features/promote-layout-shell.css', '--ui-promote-page-content-max: var(--app-desktop-page-content-width);', 'desktop promote content must align to the shared framed workspace content width.');
 assertIncludes('src/styles/features/promote-layout-checkout-bar.css', 'max-width: min(100%, var(--ui-promote-page-content-max));', 'desktop promote checkout content must align to the promote workspace width.');
@@ -825,7 +829,7 @@ assertIncludes('src/features/feed/PostFeedList.tsx', 'post-feed-list-panel', 'sh
 assertIncludes('src/features/feed/PostFeedList.tsx', "@/features/post/PostCard", 'shared post feed list must import the single PostCard implementation directly.');
 assertNotIncludes('src/features/feed/PostFeedList.tsx', 'XPostCard', 'PostFeedList must not use the removed XPostCard compatibility alias.');
 assertNotIncludes('src/features/feed/DouyinFeed.tsx', 'XPostCard', 'mobile home feed must not import the removed XPostCard compatibility alias.');
-assertIncludes('src/features/feed/FeedViewport.tsx', '<PostFeedList', 'mobile home feed must use the shared post feed list.');
+assertIncludes('src/features/feed/FeedViewport.tsx', '<LazyPostFeedList', 'mobile home feed must use the lazily loaded shared post feed list.');
 assertIncludes('src/features/home/HomeFeedContent.tsx', '<FeedViewport', 'desktop home feed must use the shared feed viewport.');
 assertNotIncludes('src/features/home/HomeFeedContent.tsx', 'HomeDesktopFeedSuspenseFallback', 'home feed must not restore a desktop-only suspense fallback.');
 assertNotIncludes('src/features/home/HomeFeedSkeletons.tsx', 'home-desktop-feed-shell', 'desktop home skeleton must not add a second feed width shell.');
@@ -833,9 +837,9 @@ assertNotIncludes('src/styles/features/home-feed-foundation.css', 'home-desktop-
 assertNotIncludes('src/styles/features/home-topic-tabs.css', 'home-desktop-feed-shell', 'home feed CSS must not restore the old skeleton width shell.');
 assertNotIncludes('src/styles/features/home-topic-tabs-shell.css', 'home-desktop-feed-shell', 'home feed CSS must not restore the old skeleton width shell.');
 assertNotIncludes('src/styles/features/home-structured-filters.css', 'home-desktop-feed-shell', 'home feed CSS must not restore the old skeleton width shell.');
-assertIncludes('src/pages/CategoryFeedMobile.tsx', '<PostFeedList', 'category feed must use the shared post feed list.');
-assertIncludes('src/pages/UserSpace.tsx', '<PostFeedList', 'user-space feed must use the shared post feed list.');
-assertIncludes('src/features/profile/profilePageSections.tsx', '<PostFeedList', 'profile post tabs must use the shared post feed list.');
+assertIncludes('src/pages/CategoryFeedMobile.tsx', '<LazyPostFeedList', 'category feed must use the lazily loaded shared post feed list.');
+assertIncludes('src/pages/UserSpace.tsx', '<LazyPostFeedList', 'user-space feed must use the lazily loaded shared post feed list.');
+assertIncludes('src/features/profile/profilePageSections.tsx', '<LazyPostFeedList', 'profile post tabs must use the lazily loaded shared post feed list.');
 assertIncludes('src/features/profile/profilePageSections.tsx', 'profile-relation-list-shell', 'profile relation lists must use their own shell instead of the post feed shell.');
 assertIncludes('src/features/profile/ProfileMobilePage.tsx', '<PageHeader\n        title=""\n        showBack={false}\n        titleAlign="center"', 'profile page topbar must reserve chrome without rendering the 我的 title.');
 assertNotIncludes('src/features/profile/ProfileMobilePage.tsx', 'title={user.displayName || "我的"}', 'profile topbar must not use the nickname as the page title.');
@@ -917,12 +921,12 @@ assertIncludes('src/features/sponsor/SponsorMobilePage.tsx', 'sponsor-workbench'
 assertIncludes('src/features/sponsor/SponsorMobilePage.tsx', 'ui-page-tabs-section ui-layer-sticky-tab', 'sponsor center records must render through the shared sticky tabs.');
 assertIncludes('src/features/sponsor/SponsorMobilePage.tsx', '效果分析', 'sponsor record tabs must expose the promotion effect analysis tab.');
 assertIncludes('src/features/sponsor/SponsorMobilePage.tsx', '交易记录', 'sponsor ledger tab must be labeled as transaction records.');
-assertIncludes('src/features/sponsor/SponsorMobilePage.tsx', 'PromotionEffectStatsRow', 'sponsor promotion records must show the shared promotion effect metrics row.');
+assertIncludes('src/features/sponsor/SponsorMobilePage.tsx', 'LazyPromotionEffectStatsRow', 'sponsor promotion records must show the shared promotion effect metrics row without bundling inactive sponsor tabs.');
 assertIncludes('src/features/sponsor/SponsorMobilePage.tsx', 'getMyPromotionEffects', 'sponsor effect analysis tab must fetch date-filtered promotion effects.');
 assertIncludes('src/features/sponsor/SponsorMobilePage.tsx', 'SPONSOR_EFFECT_PREVIEW_DAYS = 5', 'sponsor effect analysis preview must only show five recent days.');
 assertIncludes('src/features/sponsor/SponsorMobilePage.tsx', '查看更多效果分析', 'sponsor effect analysis preview must link to the full history page.');
-assertIncludes('src/features/sponsor/SponsorMobilePage.tsx', '<LedgerRecordCard', 'sponsor transaction previews must use the shared full-page ledger card.');
-assertIncludes('src/features/sponsor/SponsorMobilePage.tsx', '<PromotionRecordCard', 'sponsor promotion previews must use the shared full-page promotion card.');
+assertIncludes('src/features/sponsor/SponsorMobilePage.tsx', '<LazyLedgerRecordCard', 'sponsor transaction previews must use the shared full-page ledger card without bundling inactive sponsor tabs.');
+assertIncludes('src/features/sponsor/SponsorMobilePage.tsx', '<LazyPromotionRecordCard', 'sponsor promotion previews must use the shared full-page promotion card without bundling inactive sponsor tabs.');
 assertNotIncludes('src/features/sponsor/SponsorMobilePage.tsx', 'sponsor-effect-filter', 'sponsor effect analysis preview must not expose date filters.');
 assertNotIncludes('src/features/sponsor/SponsorMobilePage.tsx', '每日汇总', 'sponsor effect analysis preview must not render redundant daily summary copy.');
 assertNotIncludes('src/features/sponsor/SponsorMobilePage.tsx', 'sponsor-preview-row', 'sponsor preview records must not restore a bespoke row structure.');

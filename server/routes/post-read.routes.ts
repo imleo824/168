@@ -5,6 +5,12 @@ import { catchAsync } from '../middlewares/error';
 import { setListCacheHeaders, setNoStore, setPrivateCache, setPublicCache } from '../http-cache';
 import prisma, { isDbConfigured } from '../db';
 import { PostService } from '../post.service';
+import { measurePostRouteStep } from '../modules/post';
+import {
+  getPublicPostDetailCache,
+  getPublicPostDetailCacheKey,
+  setPublicPostDetailCache,
+} from '../public-post-detail-cache';
 
 type PaginationParams = {
   limit: number;
@@ -159,11 +165,25 @@ export function registerPostReadRoutes(app: Express, deps: PostReadRoutesDeps) {
       }
       const currentUserId = deps.getCurrentUserId(req);
       const currentUserRole = currentUserId ? req.user?.role : undefined;
-      const post = await PostService.getPost(req.params.id, currentUserId, currentUserRole);
+      const publicCacheKey = getPublicPostDetailCacheKey(req, req.params.id, currentUserId);
+      const cachedPost = getPublicPostDetailCache(publicCacheKey);
+      if (cachedPost) {
+        setListCacheHeaders(res, currentUserId, 20);
+        res.setHeader('X-Post-Detail-Cache', cachedPost.cacheState);
+        return res.type('application/json').send(cachedPost.body);
+      }
+
+      const post = await measurePostRouteStep({
+        name: 'posts.detail',
+        requestId: req.requestId,
+        postId: req.params.id,
+      }, () => PostService.getPost(req.params.id, currentUserId, currentUserRole));
       if (!post) return res.status(404).json({ error: 'Post not found' });
 
       const finalPost = PostService.maskContact(post, currentUserId, currentUserRole);
+      setPublicPostDetailCache(publicCacheKey, finalPost);
       setListCacheHeaders(res, currentUserId, 20);
+      res.setHeader('X-Post-Detail-Cache', publicCacheKey ? 'MISS' : 'BYPASS');
       res.json(finalPost);
     } catch (error) {
       if (deps.isDatabaseUnavailableError(error)) {

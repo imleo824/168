@@ -6,12 +6,11 @@ import { Bell, CirclePlus, House, Info, ShieldCheck, TrendingUp, UserRound } fro
 
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import Home from '@/pages/Home';
-import { useMobileAddressBar } from '@/hooks/useMobileAddressBar';
 import { useIsDesktopViewport } from '@/hooks/useIsDesktopViewport';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import { useScrollLock } from '@/utils/scrollLock';
-import { primePostCreateComposerFocus } from '@/utils/postCreateFocusBridge';
-import * as api from '@/services/api';
+import { primePostCreateComposerFocus } from '@/utils/postCreateFocusPrime';
+import { ApiError } from '@/services/apiCore';
 import PageHeader from '@/ui/PageHeader';
 import ProfileIconButton from '@/ui/ProfileIconButton';
 import PublishIconButton from '@/ui/PublishIconButton';
@@ -33,9 +32,10 @@ import { isTuiPlusActive } from '@/features/tui-plus/tuiPlusBenefits';
 import { useHomeOnlineCount } from '@/features/home/useHomeOnlineCount';
 import { formatOptionalOnlineCount } from '@/features/home/onlinePresence';
 import { OnlinePresenceProvider } from '@/features/home/OnlinePresenceContext';
-import { useHomeBootstrap } from '@/hooks/useData';
+import { useConfig, useHomeBootstrap } from '@/hooks/useDataConfig';
 
 const AuthModal = lazy(() => import('@/features/auth/AuthModal'));
+const MobileAddressBarController = lazy(() => import('@/app/MobileAddressBarController'));
 const Recharge = lazy(() => import('@/pages/RechargeMobile'));
 const Profile = lazy(() => import('@/pages/ProfileMobile'));
 const ProfileBioEditor = lazy(() => import('@/pages/ProfileBioEditorMobile'));
@@ -202,7 +202,7 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: (failureCount, error) => {
-        if (error instanceof api.ApiError) {
+        if (error instanceof ApiError) {
           if (error.status < 500) return false;
           return failureCount < 1;
         }
@@ -407,21 +407,23 @@ function AppLayout() {
   const { user, loading: authLoading } = useAuth();
   const location = useLocation();
   const pathname = location.pathname;
-  const { data: homeBootstrap } = useHomeBootstrap();
-  const onlineConfig = homeBootstrap?.config;
+  const isHomePath = pathname === APP_ROUTES.home;
+  const isAdminRoute = pathname.startsWith('/168wc');
+  const routeSurface = isAdminRoute ? 'admin' : 'user';
+  const isUserSurface = routeSurface === 'user';
+  const { data: homeBootstrap } = useHomeBootstrap(isUserSurface && isHomePath);
+  const { data: routeConfig } = useConfig(isUserSurface && !isHomePath);
+  const onlineConfig = isUserSurface ? (isHomePath ? homeBootstrap?.config : routeConfig) : undefined;
   const onlineCount = useHomeOnlineCount({
     min: onlineConfig?.online_users_min,
     max: onlineConfig?.online_users_max,
-    enabled: Boolean(onlineConfig),
+    enabled: isUserSurface && Boolean(onlineConfig),
   });
   const onlineCountText = formatOptionalOnlineCount(onlineCount);
   const onlinePresenceValue = useMemo(
     () => ({ onlineCount, onlineCountText }),
     [onlineCount, onlineCountText],
   );
-  const isAdminRoute = pathname.startsWith('/168wc');
-  const routeSurface = isAdminRoute ? 'admin' : 'user';
-  const isUserSurface = routeSurface === 'user';
   const useAuthRequiredWorkspaceSurface =
     isUserSurface && !authLoading && !user && isAuthRequiredWorkspacePath(pathname);
   const desktopSurfaceKind = isUserSurface
@@ -429,7 +431,6 @@ function AppLayout() {
     : 'admin';
   const isDesktopViewport = useIsDesktopViewport();
 
-  useMobileAddressBar(pathname);
   useBrowserPushResync(user?.id);
   useHomeBootstrapPrefetch(pathname === APP_ROUTES.home);
   usePostCreateFocusIntentCapture(Boolean(user));
@@ -446,6 +447,11 @@ function AppLayout() {
 
   return (
     <OnlinePresenceProvider value={onlinePresenceValue}>
+      {!isDesktopViewport ? (
+        <Suspense fallback={null}>
+          <MobileAddressBarController pathname={pathname} />
+        </Suspense>
+      ) : null}
       <div
         className={appClassName}
         data-route-surface={routeSurface}

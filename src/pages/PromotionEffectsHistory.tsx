@@ -18,6 +18,8 @@ import PromotionEffectStatsRow from '@/features/promote/PromotionEffectStatsRow'
 import { hasAnyPromotionEffectStats } from '@/features/promote/promotionDisplayUtils';
 import { dateKeyToLocalDate, getPlatformDateKey } from '@/features/promote/promoteBookingUtils';
 
+import '@/features/promote/PromoteRoute.css';
+
 type PromotionEffectsHistoryRouteState = {
   from?: string;
 };

@@ -8,8 +8,10 @@ import {
   usePostStats,
   useRecordShare,
   useRecordView,
+} from '@/hooks/useDataPosts';
+import {
   useFollowStatus,
-} from '@/hooks/useData';
+} from '@/hooks/useDataSocial';
 import { useAuth } from '@/context/AuthContext';
 import SEO from '@/platform/SEO';
 import { buildPostSeo } from '@/platform/brand';
@@ -74,6 +76,8 @@ import {
   normalizeAuthorId,
   resolveDetailSourceText,
 } from '@/features/post-detail/postDetailLegacyUtils';
+
+import '@/features/post-detail/PostDetailRoute.css';
 
 const ImageLightbox = lazy(() => import('@/ui/ImageLightbox'));
 

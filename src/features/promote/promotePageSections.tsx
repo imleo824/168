@@ -1,8 +1,7 @@
-import { type ReactNode } from 'react';
+import { lazy, Suspense, type ReactNode } from 'react';
 import { format } from 'date-fns';
 import { ChevronRight, Pin } from 'lucide-react';
 
-import ImageUpload from '@/features/upload/ImageUpload';
 import OptimizedImage from '@/ui/OptimizedImage';
 import { InlineSpinner } from '@/ui/LoadingState';
 import { resolveAdTargetUrlInput } from '@/utils/adTargetUrl';
@@ -16,6 +15,8 @@ import {
   toDateKey,
   type PromotionTypeId,
 } from './promoteBookingUtils';
+
+const LazyImageUpload = lazy(() => import('@/features/upload/ImageUpload'));
 
 export type PromotionTypeChoice = {
   id: PromotionTypeId;
@@ -317,13 +318,15 @@ export function PromoteAdCreativeSection({
             电脑端广告图 · 建议 1920×480，文字居中，避免贴边
           </span>
 
-          <ImageUpload
-            onImagesChange={(urls) => onAdFormChange((prev) => ({ ...prev, desktopImageUrl: urls[0] || '' }))}
-            maxCount={1}
-            defaultImages={adForm.desktopImageUrl ? [adForm.desktopImageUrl] : []}
-            tileClassName="ad-upload-tile ad-upload-tile--desktop"
-            purpose="ad-desktop"
-          />
+          <Suspense fallback={<PromoteAdImageUploadFallback variant="desktop" />}>
+            <LazyImageUpload
+              onImagesChange={(urls) => onAdFormChange((prev) => ({ ...prev, desktopImageUrl: urls[0] || '' }))}
+              maxCount={1}
+              defaultImages={adForm.desktopImageUrl ? [adForm.desktopImageUrl] : []}
+              tileClassName="ad-upload-tile ad-upload-tile--desktop"
+              purpose="ad-desktop"
+            />
+          </Suspense>
         </div>
 
         <div className="promote-ad-field">
@@ -331,13 +334,15 @@ export function PromoteAdCreativeSection({
             移动端广告图 · 建议 1080×360，重点信息放中间
           </span>
 
-          <ImageUpload
-            onImagesChange={(urls) => onAdFormChange((prev) => ({ ...prev, mobileImageUrl: urls[0] || '' }))}
-            maxCount={1}
-            defaultImages={adForm.mobileImageUrl ? [adForm.mobileImageUrl] : []}
-            tileClassName="ad-upload-tile ad-upload-tile--mobile"
-            purpose="ad-mobile"
-          />
+          <Suspense fallback={<PromoteAdImageUploadFallback variant="mobile" />}>
+            <LazyImageUpload
+              onImagesChange={(urls) => onAdFormChange((prev) => ({ ...prev, mobileImageUrl: urls[0] || '' }))}
+              maxCount={1}
+              defaultImages={adForm.mobileImageUrl ? [adForm.mobileImageUrl] : []}
+              tileClassName="ad-upload-tile ad-upload-tile--mobile"
+              purpose="ad-mobile"
+            />
+          </Suspense>
         </div>
 
         <div className="promote-ad-field">
@@ -374,6 +379,18 @@ export function PromoteAdCreativeSection({
         </div>
       </div>
     </section>
+  );
+}
+
+function PromoteAdImageUploadFallback({ variant }: { variant: 'desktop' | 'mobile' }) {
+  return (
+    <div className="image-upload image-upload--field promote-ad-upload-fallback" aria-hidden="true">
+      <div className="image-upload-grid" data-grid-layout="single">
+        <div className={`image-upload-add ad-upload-tile ad-upload-tile--${variant} promote-ad-upload-placeholder`}>
+          <span className="ui-skeleton-shimmer" />
+        </div>
+      </div>
+    </div>
   );
 }
 

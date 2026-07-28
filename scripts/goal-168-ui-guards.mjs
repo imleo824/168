@@ -11,7 +11,6 @@ function read(relativePath) {
   const source = fs.readFileSync(path.join(root, relativePath), 'utf8');
   const extraOwnersByFacade = {
     'src/App.tsx': ['src/app/AppShell.tsx'],
-    'src/features/home/HomeStructuredFilterSheet.tsx': ['src/features/home/homeStructuredFilterUtils.ts'],
     'src/features/promote/PromoteMobilePage.tsx': ['src/features/promote/promotePageSections.tsx'],
     'src/features/post-create/PostCreatePage.tsx': ['src/features/post-create/postCreatePageSections.tsx'],
     'src/features/post/AnchoredActionMenu.tsx': ['src/features/post/AnchoredActionMenuPanel.tsx'],
@@ -109,14 +108,15 @@ assertIncludes('src/features/profile/ProfileMobilePage.tsx', '...COVER_UPLOAD_RE
 assertIncludes('src/features/sponsor/SponsorMobilePage.tsx', '效果分析', 'sponsor record tabs must include effect analysis.');
 assertIncludes('src/features/sponsor/SponsorMobilePage.tsx', 'getMyPromotionEffects', 'sponsor effect analysis must use the dedicated promotion effects API.');
 assertIncludes('src/features/sponsor/SponsorMobilePage.tsx', 'SPONSOR_EFFECT_PREVIEW_DAYS = 5', 'sponsor effect preview must default to the latest five days.');
-assertIncludes('src/features/sponsor/SponsorMobilePage.tsx', '<PromotionEffectStatsRow stats={item.metrics} className="sponsor-row-effect-stats" />', 'sponsor effect preview must render daily metrics rows.');
+assertIncludes('src/features/sponsor/SponsorMobilePage.tsx', '<LazyPromotionEffectStatsRow stats={item.metrics} className="sponsor-row-effect-stats" />', 'sponsor effect preview must render daily metrics rows without bundling inactive sponsor tabs.');
 assertIncludes('src/features/sponsor/SponsorMobilePage.tsx', '查看更多效果分析', 'sponsor effect preview must link to the full effect history.');
-assertIncludes('src/features/sponsor/SponsorMobilePage.tsx', '<LedgerRecordCard', 'sponsor transaction preview must reuse the shared ledger record card.');
-assertIncludes('src/features/sponsor/SponsorMobilePage.tsx', '<PromotionRecordCard', 'sponsor promotion preview must reuse the shared promotion record card.');
+assertIncludes('src/features/sponsor/SponsorMobilePage.tsx', '<LazyLedgerRecordCard', 'sponsor transaction preview must reuse the shared ledger record card without static route bundling.');
+assertIncludes('src/features/sponsor/SponsorMobilePage.tsx', '<LazyPromotionRecordCard', 'sponsor promotion preview must reuse the shared promotion record card without static route bundling.');
 assertNotIncludes('src/features/sponsor/SponsorMobilePage.tsx', 'sponsor-effect-filter', 'sponsor effect preview must not expose date filters.');
 assertNotIncludes('src/features/sponsor/SponsorMobilePage.tsx', 'sponsor-preview-row', 'sponsor previews must not render a second bespoke row structure.');
-assertIncludes('src/pages/TransactionHistoryMobile.tsx', '<LedgerRecordCard', 'transaction history must render the shared ledger record card.');
-assertIncludes('src/pages/PromoteHistory.tsx', '<PromotionRecordCard', 'promotion history must render the shared promotion record card.');
+assertIncludes('src/pages/TransactionHistoryMobile.tsx', '<LazyLedgerRecordCard', 'transaction history must render the shared ledger record card without static route bundling.');
+assertNotIncludes('src/pages/TransactionHistoryMobile.tsx', "import LedgerRecordCard from '@/features/records/LedgerRecordCard';", 'transaction history must not pull the shared ledger card into loading, error, or empty states.');
+assertIncludes('src/pages/PromoteHistory.tsx', '<LazyPromotionRecordCard', 'promotion history must render the shared promotion record card without pulling it into empty/loading states.');
 assertIncludes('src/features/promote/PromotionRecordCard.tsx', '<PromotionEffectStatsRow stats={effectStats} className="record-effect-stats" />', 'promotion record cards must show the shared effect metrics row.');
 assertIncludes('src/app/routePaths.ts', "promotionEffects: '/promotion-effects'", 'promotion effect history canonical route must be registered.');
 assertIncludes('src/app/routePaths.ts', "legacyPromotionEffects: '/promote/effects'", 'promotion effect history legacy route must be preserved.');
@@ -155,12 +155,14 @@ assertIncludes('src/styles/features/referral-invite.css', '--ui-referral-page-co
 assertIncludes('src/styles/features/referral-invite.css', '.referral-page-content {\n      grid-template-columns:', 'desktop referral invite overview and share cards must use a two-column layout.');
 assertIncludes('src/styles/features/referral-invite.css', '.referral-record-list {\n      width: 100%;\n      max-width: var(--app-desktop-page-content-width);', 'desktop referral records must not remain constrained to the narrow mobile record list width.');
 assertIncludes('src/styles/features/referral-invite.css', 'grid-template-columns: repeat(2, minmax(0, 1fr));', 'desktop referral records must use a multi-column list.');
+assertIncludes('src/pages/BrandAbout.tsx', "import '@/features/brand/BrandAboutRoute.css';", 'about page CSS must load with the lazy about route.');
+assertIncludes('src/features/brand/BrandAboutRoute.css', '@import "../../styles/features/brand.css";', 'about route CSS facade must own brand.css.');
 assertIncludes('src/styles/features/brand.css', "data-desktop-surface='content'] .brand-about-main", 'desktop about page content must align to the framed content width.');
 assertIncludes('src/styles/features/brand.css', '.brand-about-main {\n      display: grid;\n      grid-template-columns: repeat(2, minmax(0, 1fr));', 'desktop about page sections must use a multi-column content layout.');
 assertIncludes('src/styles/system/record-card-contract.css', '--ui-record-list-content-max: var(--app-desktop-page-content-width);', 'desktop record pages must align lists to the framed workspace content width.');
 assertIncludes('src/styles/system/ui-primitives-auth.css', '--ui-auth-required-wrap-max: var(--app-desktop-page-content-width);', 'desktop auth-required states must align to the framed page content width.');
 assertIncludes('src/styles/system/ui-primitives-auth.css', 'max-width: var(--ui-auth-required-wrap-max);', 'desktop auth-required states must override the default narrow content shell max width.');
-assertIncludes('src/styles/features/tui-plus.css', '--ui-tui-plus-content-max: var(--app-desktop-page-content-width);', 'desktop Tui Plus content and CTA must align to the framed workspace content width.');
+assertIncludes('src/styles/features/tui-plus-page.css', '--ui-tui-plus-content-max: var(--app-desktop-page-content-width);', 'desktop Tui Plus content and CTA must align to the framed workspace content width.');
 assertIncludes('src/styles/system/secondary-page-actions.css', 'z-index: var(--ui-z-page-header);', 'secondary fixed action bars must own their shared layer level.');
 assertIncludes('src/styles/system/secondary-page-actions.css', 'transform: var(--ui-transform-none);', 'secondary fixed action bars must not force compositor transforms.');
 assertIncludes('src/styles/system/secondary-page-actions.css', 'contain: var(--ui-contain-none);', 'secondary fixed action bars must not create containment contexts that destabilize fixed chrome.');
@@ -254,7 +256,7 @@ assertIncludes('src/styles/features/home-topic-tabs-shell.css', 'padding: 0;', '
 assertIncludes('src/styles/features/home-topic-tabs-shell.css', 'var(--ui-topbar-edge-padding-x, var(--ui-page-padding-x))', 'home tab shell must align with the shared page/topbar edge.');
 assertIncludes('src/features/home/HomeTopicTabs.tsx', 'centerHomeTopicTabIfNeeded', 'home topic tabs must center the selected tab with the shared visibility algorithm.');
 assertNotIncludes('src/features/home/HomeTopicTabs.tsx', "inline: 'nearest'", 'home topic tabs must not rely on nearest scrollIntoView after selection.');
-assertIncludes('src/features/home/HomeStructuredFilterSheet.tsx', 'findCategoryMetaSchema(selectedCategory.id, schemas, categories)', 'home structured filters must reuse the publish category schema matcher.');
+assertIncludes('src/features/home/homeStructuredFilterUtils.ts', 'findCategoryMetaSchema(selectedCategory.id, schemas, categories)', 'home structured filters must reuse the publish category schema matcher.');
 assertIncludes('src/pages/Home.tsx', 'findHomeStructuredFilterSchema(activeHomeTopicTabId, publishCategorySchemas, homeTopicCategories)', 'home page must pass normalized schemas and categories into structured filter matching.');
 
 assertNotIncludes('src/features/feed/HomeAdBanner.tsx', 'aspect-[3/1]', 'home ad visual ratio must be owned by CSS, not utility classes.');

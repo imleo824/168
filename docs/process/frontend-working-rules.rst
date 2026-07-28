@@ -112,7 +112,28 @@ they strengthen the shared architecture.
      facade.
    - A CSS file must have exactly one parent import.
    - TS/TSX files must not import CSS directly except ``src/main.tsx`` importing
-     ``./index.css``.
+     ``./index.css``. Low-frequency route-owned bundles may add a narrow,
+     guarded exception when this keeps heavy page CSS out of the global first
+     paint path. Current exceptions are:
+     ``src/features/admin/AdminPage.tsx`` importing ``./AdminDesktop.css``;
+     ``src/pages/TuiPlusMobile.tsx`` and
+     ``src/pages/TuiPlusLinkEditorMobile.tsx`` importing
+     ``@/features/tui-plus/TuiPlusRoute.css``;
+     category feed importing ``@/features/category/CategoryFeedRoute.css``;
+     post detail importing ``@/features/post-detail/PostDetailRoute.css``;
+     message/notification routes importing
+     ``@/features/notifications/NotificationsRoute.css``;
+     profile/user-space routes importing
+     ``@/features/profile/ProfileRoute.css``;
+     profile bio editor importing
+     ``@/features/profile/ProfileBioEditorRoute.css``;
+     post create importing
+     ``@/features/post-create/PostCreateRoute.css``;
+     promote workspace routes importing
+     ``@/features/promote/PromoteRoute.css`` or ``./PromoteRoute.css``;
+     sponsor/referral routes importing
+     ``@/features/sponsor/ReferralRoute.css`` or ``./SponsorRoute.css``;
+     and recharge importing ``@/features/recharge/RechargeRoute.css``.
 
 6. New patterns must come with enforcement.
 

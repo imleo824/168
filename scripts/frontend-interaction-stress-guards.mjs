@@ -46,11 +46,17 @@ const profileDialog = read('src/features/profile/ProfileDialog.tsx');
 const postDetailInteractions = read('src/features/post-detail/PostDetailInteractionsSection.tsx');
 const postCreatePage = read('src/features/post-create/PostCreatePage.tsx');
 const postCreatePageSections = read('src/features/post-create/postCreatePageSections.tsx');
+const postCreatePickerSheets = read('src/features/post-create/postCreatePickerSheets.tsx');
+const postCreateSettingsSheets = read('src/features/post-create/postCreateSettingsSheets.tsx');
 const postCreateFocusBridge = read('src/utils/postCreateFocusBridge.ts');
+const postCreateFocusCore = read('src/utils/postCreateFocusCore.ts');
+const postCreateFocusPrime = read('src/utils/postCreateFocusPrime.ts');
+const postCreateFocusRestore = read('src/utils/postCreateFocusRestore.ts');
 const publishIconButton = read('src/ui/PublishIconButton.tsx');
 const bottomNavigation = read('src/app/AppBottomNavigation.tsx');
 const appShell = read('src/app/AppShell.tsx');
 const authRoute = read('src/app/AppRequireAuthRoute.tsx');
+const appRequireTuiPlusRoute = read('src/app/AppRequireTuiPlusRoute.tsx');
 const authRequiredState = read('src/ui/AuthRequiredState.tsx');
 const pageHeader = read('src/ui/PageHeader.tsx');
 const homeTopbar = read('src/features/home/HomeTopbar.tsx');
@@ -64,13 +70,16 @@ const homeRefresh = read('src/hooks/useHomeRefresh.ts');
 const listLoadMoreState = read('src/ui/ListLoadMoreState.tsx');
 const postDetail = read('src/pages/PostDetailLegacy.tsx');
 const postCard = read('src/features/post/PostCard.tsx');
+const followButton = read('src/features/social/FollowButton.tsx');
 const anchoredActionMenuPanel = read('src/features/post/AnchoredActionMenuPanel.tsx');
 const categoryFeed = read('src/pages/CategoryFeedMobile.tsx');
 const homePageSource = read('src/pages/Home.tsx');
 const sponsorPage = read('src/features/sponsor/SponsorMobilePage.tsx');
 const profileRoute = read('src/pages/ProfileMobile.tsx');
 const profileMobilePage = read('src/features/profile/ProfileMobilePage.tsx');
+const profilePageSections = read('src/features/profile/profilePageSections.tsx');
 const profileSecuritySheet = read('src/features/profile/ProfileSecuritySheet.tsx');
+const profileMediaUploads = read('src/features/profile/useProfileMediaUploads.ts');
 const messagesPage = read('src/pages/MessagesMobile.tsx');
 const messagesStyles = read('src/styles/features/messages.css');
 const tuiPlusLinkEditor = read('src/pages/TuiPlusLinkEditorMobile.tsx');
@@ -78,13 +87,23 @@ const profileBioEditor = read('src/pages/ProfileBioEditorMobile.tsx');
 const notificationSettings = read('src/pages/NotificationSettings.tsx');
 const rechargePage = read('src/pages/RechargeMobile.tsx');
 const referralInvitePageContent = read('src/features/sponsor/ReferralInvitePageContent.tsx');
+const referralInviteSheets = read('src/features/sponsor/ReferralInviteSheets.tsx');
+const referralRulesSheet = read('src/features/sponsor/ReferralRulesSheet.tsx');
 const transactionHistoryPage = read('src/pages/TransactionHistoryMobile.tsx');
 const referralInviteRecordsPage = read('src/pages/ReferralInviteRecordsMobile.tsx');
 const promotionEffectsHistoryPage = read('src/pages/PromotionEffectsHistory.tsx');
 const userSpacePage = read('src/pages/UserSpace.tsx');
 const userSpaceTuiPlusLinks = read('src/features/profile/UserSpaceTuiPlusLinks.tsx');
 const promoteHistoryPage = read('src/pages/PromoteHistory.tsx');
+const promoteMobilePage = read('src/features/promote/PromoteMobilePage.tsx');
+const promoteComponents = read('src/features/promote/promoteComponents.tsx');
+const promotePageSections = read('src/features/promote/promotePageSections.tsx');
+const promotePostPickerSheet = read('src/features/promote/PromotePostPickerSheet.tsx');
+const promotePaymentSheet = read('src/features/promote/PromotePaymentSheet.tsx');
 const skeleton = read('src/ui/Skeleton.tsx');
+const postFeedList = read('src/features/feed/PostFeedList.tsx');
+const feedExposureViews = read('src/hooks/useFeedExposureViews.ts');
+const feedViewport = read('src/features/feed/FeedViewport.tsx');
 
 assert(
   /<div\s+className="app-main app-shell-main"/.test(appShell) &&
@@ -125,6 +144,240 @@ assert(
     categoryFeed.includes('const requestGenerationRef = useRef(0);') &&
     categoryFeed.includes('requestGenerationRef.current === requestGeneration'),
   'Old load-more requests must not release locks or leak errors into a newly selected feed.',
+);
+
+assert(
+  feedViewport.includes("const LazyPostFeedList = React.lazy(() => import('./PostFeedList'));") &&
+    !feedViewport.includes("import PostFeedList from './PostFeedList';") &&
+    feedViewport.includes('<React.Suspense fallback={<LoadingState />}>') &&
+    feedViewport.includes('<LazyPostFeedList'),
+  'Feed viewport must defer the heavy post-card list until real posts exist, while preserving a stable loading fallback.',
+);
+
+assert(
+  categoryFeed.includes("const LazyPostFeedList = React.lazy(() => import('@/features/feed/PostFeedList'));") &&
+    categoryFeed.includes('<React.Suspense fallback={<LoadingState />}>') &&
+    categoryFeed.includes('<LazyPostFeedList posts={posts} enableRecommendationControls />') &&
+    !categoryFeed.includes("import PostFeedList from '@/features/feed/PostFeedList';"),
+  'Category feeds must lazy-load the shared post list only after posts exist so loading/error/empty category states stay lightweight.',
+);
+
+assert(
+  userSpacePage.includes("const LazyPostFeedList = lazy(() => import('@/features/feed/PostFeedList'));") &&
+    userSpacePage.includes('<Suspense fallback={<HomeFeedSkeleton count={3} className="user-space-post-list-skeleton" />}>') &&
+    userSpacePage.includes('<LazyPostFeedList posts={posts} enableRecommendationControls={currentUser?.id !== safeId} />') &&
+    !userSpacePage.includes('import PostFeedList from "@/features/feed/PostFeedList";'),
+  'User-space pages must lazy-load the post list only for non-empty post sections.',
+);
+
+assert(
+  profilePageSections.includes("const LazyPostFeedList = lazy(() => import('@/features/feed/PostFeedList'));") &&
+    profilePageSections.includes('const renderPostFeed = (postsToRender: any[], extraProps = {}) => (') &&
+    profilePageSections.includes('<Suspense fallback={renderLoading(\'正在加载内容\')}>') &&
+    profilePageSections.includes('<LazyPostFeedList') &&
+    !profilePageSections.includes("import PostFeedList from '@/features/feed/PostFeedList';"),
+  'Profile post tabs must lazy-load the shared post list without forcing comments, following, or fans tabs to load the post-card tree.',
+);
+
+assert(
+  profileMobilePage.includes("const LazyProfileEditDialogs = lazy(() => import('./ProfileEditDialogs'));") &&
+    profileMobilePage.includes("const LazyProfileSecuritySheet = lazy(() => import('./ProfileSecuritySheet'));") &&
+    profileMobilePage.includes('subscribeProfileSettingsOpen(() => setIsSecurityOpen(true))') &&
+    profileMobilePage.includes('const isEditDialogOpen = isEditingLoginAccount || isEditingContact || isEditingPassword || isEditingPaymentPassword || isEditingDisplayName;') &&
+    profileMobilePage.includes('<LazyProfileEditDialogs') &&
+    profileMobilePage.includes('<LazyProfileSecuritySheet') &&
+    !profileMobilePage.includes("import ProfileEditDialogs from './ProfileEditDialogs';") &&
+    !profileMobilePage.includes("import ProfileSecuritySheet from './ProfileSecuritySheet';"),
+  'Profile page must lazy-load edit dialogs and security sheet while keeping the topbar settings intent wired at the route shell.',
+);
+
+assert(
+  profileMobilePage.includes('ACCEPTED_IMAGE_TYPES') &&
+    profileMobilePage.includes("} from \"@/features/upload/imageUploadConfig\";") &&
+    profileMediaUploads.includes("} from '@/features/upload/imageUploadConfig';") &&
+    profileMediaUploads.includes("const { uploadImageFile } = await import('@/features/upload/imageUploadPipeline');") &&
+    profileMediaUploads.includes("purpose: 'avatar'") &&
+    profileMediaUploads.includes("purpose: 'cover'") &&
+    !profileMobilePage.includes('@/features/upload/imageUploadPipeline') &&
+    !profileMediaUploads.includes("} from '@/features/upload/imageUploadPipeline';"),
+  'Profile avatar and cover uploads must keep file validation lightweight and load the image pipeline only after the user selects a file.',
+);
+
+assert(
+  sponsorPage.includes("const LazyLedgerRecordCard = lazy(() => import('@/features/records/LedgerRecordCard'));") &&
+    sponsorPage.includes("const LazyPromotionEffectStatsRow = lazy(() => import('@/features/promote/PromotionEffectStatsRow'));") &&
+    sponsorPage.includes("const LazyPromotionRecordCard = lazy(() => import('@/features/promote/PromotionRecordCard'));") &&
+    sponsorPage.includes("const LazyTuiPlusBenefitPromptDialog = lazy(() => import('@/features/tui-plus/TuiPlusBenefitPromptDialog'));") &&
+    sponsorPage.includes('<LazyPromotionEffectStatsRow stats={item.metrics} className="sponsor-row-effect-stats" />') &&
+    sponsorPage.includes('<LazyPromotionRecordCard') &&
+    sponsorPage.includes('<LazyLedgerRecordCard') &&
+    sponsorPage.includes('isTuiPlusPromptOpen ? (\n        <Suspense fallback={null}>') &&
+    sponsorPage.includes('<LazyTuiPlusBenefitPromptDialog') &&
+    !sponsorPage.includes("import LedgerRecordCard from '@/features/records/LedgerRecordCard';") &&
+    !sponsorPage.includes("import PromotionEffectStatsRow from '@/features/promote/PromotionEffectStatsRow';") &&
+    !sponsorPage.includes("import PromotionRecordCard from '@/features/promote/PromotionRecordCard';") &&
+    !sponsorPage.includes("import TuiPlusBenefitPromptDialog from '@/features/tui-plus/TuiPlusBenefitPromptDialog';"),
+  'Sponsor center must lazy-load inactive record tabs and the Tui Plus prompt instead of bundling every preview card into the default tab.',
+);
+
+assert(
+  transactionHistoryPage.includes("const LazyLedgerRecordCard = lazy(() => import('@/features/records/LedgerRecordCard'));") &&
+    transactionHistoryPage.includes('<Suspense fallback={<PageLoadingState text="正在加载交易记录" className="record-state-block" />}>') &&
+    transactionHistoryPage.includes('<LazyLedgerRecordCard') &&
+    !transactionHistoryPage.includes("import LedgerRecordCard from '@/features/records/LedgerRecordCard';"),
+  'Transaction history must defer ledger cards until records exist so loading, error, empty, and filter transitions stay lightweight.',
+);
+
+assert(
+  promoteHistoryPage.includes("const LazyImageUpload = lazy(() => import('@/features/upload/ImageUpload'));") &&
+    promoteHistoryPage.includes("const LazyPromotionRecordCard = lazy(() => import('@/features/promote/PromotionRecordCard'));") &&
+    promoteHistoryPage.includes('<LazyImageUpload') &&
+    promoteHistoryPage.includes('<LazyPromotionRecordCard') &&
+    !promoteHistoryPage.includes("import ImageUpload from '@/features/upload/ImageUpload';") &&
+    !promoteHistoryPage.includes("import PromotionRecordCard from '@/features/promote/PromotionRecordCard';"),
+  'Promotion history must defer upload tooling to edit mode and defer promotion cards to non-empty record states.',
+);
+
+assert(
+  promotePageSections.includes("const LazyImageUpload = lazy(() => import('@/features/upload/ImageUpload'));") &&
+    promotePageSections.includes('<Suspense fallback={<PromoteAdImageUploadFallback variant="desktop" />}>') &&
+    promotePageSections.includes('<Suspense fallback={<PromoteAdImageUploadFallback variant="mobile" />}>') &&
+    promotePageSections.includes('function PromoteAdImageUploadFallback') &&
+    promotePageSections.includes('promote-ad-upload-placeholder') &&
+    !promotePageSections.includes("import ImageUpload from '@/features/upload/ImageUpload';"),
+  'Promote ad creative must reserve upload geometry while lazy-loading image upload tooling outside the route startup path.',
+);
+
+assert(
+  promoteMobilePage.includes("const loadPromotePostPickerSheet = () => import('./PromotePostPickerSheet');") &&
+    promoteMobilePage.includes("const loadPromotePaymentSheet = () => import('./PromotePaymentSheet');") &&
+    promoteMobilePage.includes('const LazyPromotePostPickerSheet = lazy(loadPromotePostPickerSheet);') &&
+    promoteMobilePage.includes('const LazyPromotePaymentSheet = lazy(loadPromotePaymentSheet);') &&
+    promoteMobilePage.includes('void loadPromotePostPickerSheet();') &&
+    promoteMobilePage.includes('void loadPromotePaymentSheet();') &&
+    promoteMobilePage.includes('<LazyPromotePostPickerSheet') &&
+    promoteMobilePage.includes('<LazyPromotePaymentSheet') &&
+    promoteComponents.includes('onWarmPaymentSheet?: () => void;') &&
+    promoteComponents.includes('onPointerEnter={onWarmPaymentSheet}') &&
+    !promoteMobilePage.includes('PromotePaymentSheet,\n  PromotePostPickerSheet') &&
+    !promoteComponents.includes('PaymentActionSheet') &&
+    !promoteComponents.includes('BottomSheet') &&
+    promotePostPickerSheet.includes("import BottomSheet from '@/ui/BottomSheet';") &&
+    promotePaymentSheet.includes("} from '@/ui/PaymentActionSheet';"),
+  'Promote payment and post picker sheets must remain lazy-loaded with warmups so ordinary booking-page browsing stays responsive.',
+);
+
+assert(
+  appRequireTuiPlusRoute.includes("const LazyTuiPlusBenefitPromptDialog = lazy(() => import('@/features/tui-plus/TuiPlusBenefitPromptDialog'));") &&
+    appRequireTuiPlusRoute.includes('<Suspense fallback={<PageLoader />}>') &&
+    appRequireTuiPlusRoute.includes('<LazyTuiPlusBenefitPromptDialog') &&
+    !appRequireTuiPlusRoute.includes("import TuiPlusBenefitPromptDialog from '@/features/tui-plus/TuiPlusBenefitPromptDialog';"),
+  'Tui Plus route guard must lazy-load prompt UI so global route protection does not inflate ordinary page startup.',
+);
+
+assert(
+  postCreatePage.includes("const LazyTuiPlusBenefitPromptDialog = lazy(() => import('@/features/tui-plus/TuiPlusBenefitPromptDialog'));") &&
+    postCreatePage.includes('<LazyTuiPlusBenefitPromptDialog') &&
+    !postCreatePage.includes("import TuiPlusBenefitPromptDialog from '@/features/tui-plus/TuiPlusBenefitPromptDialog';") &&
+    postCreatePageSections.includes("const LazyTuiPlusBenefitPromptDialog = lazy(() => import('@/features/tui-plus/TuiPlusBenefitPromptDialog'));") &&
+    postCreatePageSections.includes('<LazyTuiPlusBenefitPromptDialog') &&
+    !postCreatePageSections.includes("import TuiPlusBenefitPromptDialog from '@/features/tui-plus/TuiPlusBenefitPromptDialog';") &&
+    tuiPlusLinkEditor.includes("const LazyTuiPlusBenefitPromptDialog = lazy(() => import('@/features/tui-plus/TuiPlusBenefitPromptDialog'));") &&
+    tuiPlusLinkEditor.includes('<LazyTuiPlusBenefitPromptDialog') &&
+    !tuiPlusLinkEditor.includes("import TuiPlusBenefitPromptDialog from '@/features/tui-plus/TuiPlusBenefitPromptDialog';"),
+  'Post create and Tui Plus link editing flows must defer Tui Plus prompt UI until the prompt is actually shown.',
+);
+
+assert(
+  postCreatePage.includes("const loadPostCreatePickerSheets = () => import('./postCreatePickerSheets');") &&
+    postCreatePage.includes("const loadPostCreateSettingsSheets = () => import('./postCreateSettingsSheets');") &&
+    postCreatePage.includes('const LazyPostCreateCategoryMetaSheet = lazy') &&
+    postCreatePage.includes('const LazyPostCreateCategoryPickerSheet = lazy') &&
+    postCreatePage.includes('const LazyPostCreateCategorySelectSheet = lazy') &&
+    postCreatePage.includes('const LazyPostCreateLocationPickerSheet = lazy') &&
+    postCreatePage.includes('const LazyPostCreateContactEditorDialog = lazy') &&
+    postCreatePage.includes('const LazyPostCreatePrivacySettingsSheet = lazy') &&
+    postCreatePage.includes('const LazyPostCreatePromoteChoiceSheet = lazy') &&
+    postCreatePage.includes('const LazyPostCreateTelegramSettingsSheet = lazy') &&
+    postCreatePage.includes('const warmPostCreatePickerSheets = useCallback(() => {') &&
+    postCreatePage.includes('const warmPostCreateSettingsSheets = useCallback(() => {') &&
+    postCreatePage.includes('void loadPostCreatePickerSheets();') &&
+    postCreatePage.includes('void loadPostCreateSettingsSheets();') &&
+    postCreatePage.includes('<LazyPostCreateCategoryPickerSheet') &&
+    postCreatePage.includes('<LazyPostCreateCategoryMetaSheet') &&
+    postCreatePage.includes('<LazyPostCreateLocationPickerSheet') &&
+    postCreatePage.includes('<LazyPostCreatePrivacySettingsSheet') &&
+    postCreatePage.includes('<LazyPostCreateTelegramSettingsSheet') &&
+    postCreatePage.includes('<LazyPostCreateContactEditorDialog') &&
+    postCreatePage.includes('<LazyPostCreatePromoteChoiceSheet') &&
+    !postCreatePage.includes("} from './postCreateSheets';") &&
+    !postCreatePage.includes("from './postCreatePickerSheets'") &&
+    !postCreatePage.includes("from './postCreateSettingsSheets'") &&
+    postCreatePickerSheets.includes('export function PostCreateCategoryPickerSheet') &&
+    postCreatePickerSheets.includes('export function PostCreateCategoryMetaSheet') &&
+    postCreateSettingsSheets.includes("import BottomSheet from '@/ui/BottomSheet';") &&
+    postCreateSettingsSheets.includes('export function PostCreatePromoteChoiceSheet'),
+  'Post create picker and settings sheets must remain lazy-loaded with warmups so ordinary composer typing stays responsive.',
+);
+
+assert(
+  postCreatePageSections.includes("const LazyImageUpload = lazy(() => import('@/features/upload/ImageUpload'));") &&
+    postCreatePageSections.includes('<Suspense fallback={<PostCreateImageUploadFallback />}>') &&
+    postCreatePageSections.includes('<LazyImageUpload') &&
+    postCreatePageSections.includes('function PostCreateImageUploadFallback()') &&
+    !postCreatePageSections.includes("import ImageUpload from '@/features/upload/ImageUpload';"),
+  'Post create composer must reserve upload geometry while lazy-loading upload tooling outside the initial editor chunk.',
+);
+
+assert(
+  postFeedList.includes('const FEED_LIST_ITEM_STYLES = Array.from') &&
+    postFeedList.includes('function getFeedRenderSignature(posts: FeedListPostLike[])') &&
+    postFeedList.includes('const headCount = Math.min(length, FEED_INITIAL_RENDERED_ITEM_COUNT);') &&
+    postFeedList.includes('index < headCount') &&
+    postFeedList.includes('const penultimate = length > 2 ? getPostKey(posts[length - 2], length - 2)') &&
+    postFeedList.includes('const visiblePosts = useMemo(') &&
+    !postFeedList.includes('.map((post, index) => getPostKey(post, index)).join') &&
+    !postFeedList.includes('function getFeedIdentity'),
+  'Feed list deferred-tail rendering must use a bounded render signature and stable item styles instead of rebuilding an all-post id string every render.',
+);
+
+assert(
+  feedExposureViews.includes('type FeedExposurePostLike = string | number | { id?: unknown } | null | undefined;') &&
+    feedExposureViews.includes('function toActivePostIdSet(postItems: FeedExposurePostLike[])') &&
+    feedExposureViews.includes('activePostIdsRef.current = toActivePostIdSet(postItems);') &&
+    homePageSource.includes('useFeedExposureViews(\n    renderedFeedPosts,') &&
+    categoryFeed.includes('useFeedExposureViews(posts, !isInitialLoading && posts.length > 0);') &&
+    !feedExposureViews.includes('.filter(Boolean).join') &&
+    !feedExposureViews.includes(".split('|')") &&
+    !homePageSource.includes('const visiblePostIds = useMemo') &&
+    !categoryFeed.includes('const postIds = useMemo'),
+  'Feed exposure tracking must derive active post ids in one structured pass instead of mapping posts through a joined string key.',
+);
+
+assert(
+  followButton.includes('function FollowButtonLoadingPlaceholder') &&
+    followButton.includes('feed-follow-button--placeholder') &&
+    followButton.includes('fallback={<FollowButtonLoadingPlaceholder') &&
+    !followButton.includes('fallback={null}'),
+  'Feed follow lazy loading should reserve a stable author-action slot instead of rendering a null fallback.',
+);
+
+assert(
+  postCard.includes('hideWhenFollowing={false}'),
+  'Feed card follow action should keep a stable in-row control when follow status resolves.',
+);
+
+assert(
+  postCard.includes('const FEED_CONTENT_WITH_MEDIA_STYLE =') &&
+    postCard.includes('const FEED_CONTENT_TEXT_ONLY_STYLE =') &&
+    postCard.includes('function mayOverflowClampedText(text: string, clampLines: number)') &&
+    postCard.includes('const shouldMeasureContentOverflow =') &&
+    postCard.includes('mayOverflowClampedText(displayText, contentClampLines)') &&
+    postCard.includes('if (!shouldMeasureContentOverflow)') &&
+    postCard.includes('new ResizeObserver(measure)') &&
+    postCard.includes('setIsContentOverflowing((current) => (current === next ? current : next))') &&
+    !postCard.includes("const contentStyle = { '--x-card-content-clamp-lines': contentClampLines }"),
+  'Feed cards should skip layout overflow measurement for obviously short text and reuse clamp style objects across renders.',
 );
 
 assert(
@@ -385,10 +638,13 @@ assert(
 );
 
 assert(
-  postCreateFocusBridge.includes('export const POST_CREATE_FOCUS_TRIGGER_ATTR') &&
-    postCreateFocusBridge.includes('export function markPostCreateComposerFocusIntent()') &&
-    postCreateFocusBridge.includes('export function primePostCreateComposerFocus()') &&
-    postCreateFocusBridge.includes('installPostCreateFocusIntentCapture'),
+  postCreateFocusCore.includes('export const POST_CREATE_FOCUS_TRIGGER_ATTR') &&
+    postCreateFocusPrime.includes('export function markPostCreateComposerFocusIntent()') &&
+    postCreateFocusPrime.includes('export function primePostCreateComposerFocus()') &&
+    postCreateFocusPrime.includes('installPostCreateFocusIntentCapture') &&
+    postCreateFocusRestore.includes('export function focusPostCreateComposer') &&
+    postCreateFocusBridge.includes("from './postCreateFocusPrime'") &&
+    postCreateFocusBridge.includes("from './postCreateFocusRestore'"),
   'Create focus bridge must preserve click intent across route changes and multiple create entry points.',
 );
 
@@ -591,6 +847,31 @@ assert(
 );
 
 assert(
+  referralInvitePageContent.includes("const loadReferralRulesSheet = () => import('./ReferralRulesSheet');") &&
+    referralInvitePageContent.includes("const loadReferralInviteSheets = () => import('./ReferralInviteSheets');") &&
+    referralInvitePageContent.includes('const LazyReferralRulesSheet = lazy(loadReferralRulesSheet);') &&
+    referralInvitePageContent.includes('module.ReferralConvertSheet') &&
+    referralInvitePageContent.includes('module.ReferralWithdrawSheet') &&
+    referralInvitePageContent.includes('const warmReferralInviteSheets = () => { void loadReferralInviteSheets(); };') &&
+    referralInvitePageContent.includes('onPointerEnter={warmReferralInviteSheets}') &&
+    referralInvitePageContent.includes('<LazyReferralRulesSheet') &&
+    referralInvitePageContent.includes('<LazyReferralConvertSheet') &&
+    referralInvitePageContent.includes('<LazyReferralWithdrawSheet') &&
+    !referralInvitePageContent.includes("} from './ReferralInviteSheets';") &&
+    !referralInvitePageContent.includes("from './ReferralRulesSheet'") &&
+    !referralInvitePageContent.includes('PaymentActionSheet') &&
+    !referralInvitePageContent.includes('createPortal') &&
+    referralInviteSheets.includes("} from '@/ui/PaymentActionSheet';") &&
+    referralInviteSheets.includes('export function ReferralConvertSheet') &&
+    referralInviteSheets.includes('export function ReferralWithdrawSheet') &&
+    !referralInviteSheets.includes('ReferralRulesSheet') &&
+    referralRulesSheet.includes("import { createPortal } from 'react-dom';") &&
+    referralRulesSheet.includes('export default function ReferralRulesSheet') &&
+    !referralRulesSheet.includes('PaymentActionSheet'),
+  'Referral invite rules and payment sheets must remain lazy-loaded with payment-sheet warmups so ordinary invite-page browsing stays lightweight.',
+);
+
+assert(
   transactionHistoryPage.includes('useInteractionGuard(fetchNextPage') &&
     transactionHistoryPage.includes('useInteractionGuard(refetchCurrentPage') &&
     transactionHistoryPage.includes('const loadMoreBusy = isFetchingNextPage || fetchNextPageGuardPending;') &&
@@ -639,6 +920,13 @@ assert(
     !userSpacePage.includes('onRetry={requestMorePosts}') &&
     !userSpacePage.includes('onLoadMore={requestMorePosts}'),
   'User space profile, posts retry, and load-more actions must use guarded handlers instead of direct query calls.',
+);
+
+assert(
+  userSpacePage.includes("} from '@/features/upload/imageUploadConfig';") &&
+    userSpacePage.includes("await import('@/features/upload/imageUploadPipeline')") &&
+    !userSpacePage.includes("} from '@/features/upload/imageUploadPipeline';"),
+  'User space should defer the heavy image upload pipeline until the owner selects a cover image.',
 );
 
 assert(

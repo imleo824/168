@@ -5,7 +5,7 @@
 import { useCallback, useRef, type MutableRefObject } from 'react';
 import type { QueryKey } from '@tanstack/react-query';
 import { useAuth } from '@/context/AuthContext';
-import { getHomeFeedPage } from '@/services/api';
+import { getHomeFeedPage } from '@/services/homeStartupApi';
 import type { HomeFeedKind, MainTabId, RefreshState, RefreshUiSource } from '@/features/home/homeTypes';
 import type { CategoryMetaFeedFilters } from '@/types';
 

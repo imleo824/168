@@ -1,0 +1,5 @@
+/* Route-owned post detail styles.
+   These are intentionally kept out of global first-paint CSS. */
+
+@import "../../styles/features/post-detail.css";
+@import "../../styles/features/post-detail-metadata.css";

@@ -1,0 +1,4 @@
+/* Route-owned category/tag feed styles.
+   These are intentionally kept out of global first-paint CSS. */
+
+@import "../../styles/features/category-feed.css";

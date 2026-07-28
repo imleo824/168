@@ -1,22 +1,30 @@
 import {
   memo,
+  lazy,
+  Suspense,
   useCallback,
   useEffect,
   useMemo,
   useState,
-  type ComponentProps,
 } from 'react';
-import HomeAdBanner from '@/features/feed/HomeAdBanner';
-import type { Category, CategoryMetaFeedFilters, LocationPresetConfig, PublishCategoryMetaConfig } from '@/types';
+import type {
+  Category,
+  CategoryMetaFeedFilters,
+  LocationPresetConfig,
+  PromotionBooking,
+  PublishCategoryMetaConfig,
+} from '@/types';
 import { formatOptionalOnlineCount } from '@/features/home/onlinePresence';
 import { HomeTopbar } from '@/features/home/HomeTopbar';
 import { HomeTopicTabs, type HomeTopicTabId, type HomeTopicTabsBootstrapState } from './HomeTopicTabs';
-import { HomeStructuredFilterSheet, type HomeStructuredFilterFieldItem } from './HomeStructuredFilterSheet';
+import { HomeStructuredFilterSheet } from './HomeStructuredFilterSheet';
+import type { HomeStructuredFilterFieldItem } from './homeStructuredFilterUtils';
 import type { HomeVisualState } from './homeTypes';
-import { useHomeBootstrap } from '@/hooks/useData';
+
+const LazyHomeAdBanner = lazy(() => import('@/features/feed/HomeAdBanner'));
 
 interface HomeChromeProps {
-  homeAds: ComponentProps<typeof HomeAdBanner>['ads'];
+  homeAds: PromotionBooking[];
   hasHomeAdBanner: boolean;
   categories: Category[];
   activeHomeTopicTabId: HomeTopicTabId;
@@ -50,9 +58,6 @@ export const HomeChrome = memo(function HomeChrome({
   onHomeTopicTabSelect,
   onHomeTopicCategoryMetaFilterApply,
 }: HomeChromeProps) {
-  const { data: homeBootstrap } = useHomeBootstrap();
-  const fallbackCategories = homeBootstrap?.categories || [];
-  const displayCategories = categories.length > 0 ? categories : fallbackCategories;
   const [isTopicFilterOpen, setIsTopicFilterOpen] = useState(false);
   const [topicFilterFocusFieldKey, setTopicFilterFocusFieldKey] = useState('');
   const handleOpenTopicFilterAtField = useCallback((fieldKey: string) => {
@@ -70,8 +75,8 @@ export const HomeChrome = memo(function HomeChrome({
   }, [activeHomeTopicFilterSchema]);
   const onlineCountText = formatOptionalOnlineCount(onlineCount);
   const topicTabsBootstrapState = useMemo<HomeTopicTabsBootstrapState>(
-    () => visualState === 'skeleton' && displayCategories.length === 0 ? 'loading' : 'ready',
-    [displayCategories.length, visualState],
+    () => visualState === 'skeleton' && categories.length === 0 ? 'loading' : 'ready',
+    [categories.length, visualState],
   );
 
   return (
@@ -81,14 +86,16 @@ export const HomeChrome = memo(function HomeChrome({
           <HomeTopbar onlineCountText={onlineCountText} />
 
           {hasHomeAdBanner ? (
-            <HomeAdBanner ads={homeAds} compact />
+            <Suspense fallback={null}>
+              <LazyHomeAdBanner ads={homeAds} compact />
+            </Suspense>
           ) : null}
         </div>
       </div>
 
       <div className="home-topic-tabs-sticky-shell ui-layer-sticky-tab">
         <HomeTopicTabs
-          categories={displayCategories}
+          categories={categories}
           activeTabId={activeHomeTopicTabId}
           loadingTabId={loadingHomeTopicTabId}
           bootstrapState={topicTabsBootstrapState}

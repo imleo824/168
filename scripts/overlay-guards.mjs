@@ -50,6 +50,35 @@ const indexCss = read('src/index.css');
 const systemCoreLayerCss = read('src/styles/layers/system-core.css');
 const componentsLayerCss = read('src/styles/layers/components.css');
 const featuresLayerCss = read('src/styles/layers/features.css');
+const brandAboutRouteCss = read('src/features/brand/BrandAboutRoute.css');
+const brandAboutPage = read('src/pages/BrandAbout.tsx');
+const tuiPlusRouteCss = read('src/features/tui-plus/TuiPlusRoute.css');
+const adminPage = read('src/features/admin/AdminPage.tsx');
+const categoryFeedRouteCss = read('src/features/category/CategoryFeedRoute.css');
+const categoryFeedPage = read('src/pages/CategoryFeedMobile.tsx');
+const postDetailRouteCss = read('src/features/post-detail/PostDetailRoute.css');
+const postDetailLegacyPage = read('src/pages/PostDetailLegacy.tsx');
+const notificationsRouteCss = read('src/features/notifications/NotificationsRoute.css');
+const messagesPage = read('src/pages/MessagesMobile.tsx');
+const notificationSettingsPage = read('src/pages/NotificationSettings.tsx');
+const profileRouteCss = read('src/features/profile/ProfileRoute.css');
+const profileBioEditorRouteCss = read('src/features/profile/ProfileBioEditorRoute.css');
+const profilePage = read('src/pages/ProfileMobile.tsx');
+const userSpacePage = read('src/pages/UserSpace.tsx');
+const profileBioEditorPage = read('src/pages/ProfileBioEditorMobile.tsx');
+const postCreateRouteCss = read('src/features/post-create/PostCreateRoute.css');
+const postCreateRoutePage = read('src/pages/PostCreate.tsx');
+const promoteRouteCss = read('src/features/promote/PromoteRoute.css');
+const sponsorRouteCss = read('src/features/sponsor/SponsorRoute.css');
+const referralRouteCss = read('src/features/sponsor/ReferralRoute.css');
+const rechargeRouteCss = read('src/features/recharge/RechargeRoute.css');
+const promotePage = read('src/features/promote/PromoteMobilePage.tsx');
+const promoteHistoryPage = read('src/pages/PromoteHistory.tsx');
+const promotionEffectsHistoryPage = read('src/pages/PromotionEffectsHistory.tsx');
+const sponsorPage = read('src/features/sponsor/SponsorMobilePage.tsx');
+const referralInvitePage = read('src/pages/ReferralInviteMobile.tsx');
+const referralInviteRecordsPage = read('src/pages/ReferralInviteRecordsMobile.tsx');
+const rechargePage = read('src/pages/RechargeMobile.tsx');
 const contractsLayerCss = read('src/styles/layers/contracts.css');
 const mobileViewportContractCss = read('src/styles/system/mobile-viewport-contract.css');
 const overlayCss = read('src/styles/utilities/mobile-overlay-stability.css');
@@ -86,6 +115,7 @@ const feedScrollShellCss = read('src/styles/system/feed-scroll-shell.css');
 const feedScrollUtils = read('src/utils/feedScroll.ts');
 const scrollLock = read('src/utils/scrollLock.ts');
 const listReturnScroll = read('src/utils/listReturnScroll.ts');
+const listReturnScrollRestore = read('src/utils/listReturnScrollRestore.ts');
 const homeFeatureCss = read('src/styles/features/home.css');
 const homeLayout = read('src/features/home/homeLayout.ts');
 const homeMobileLayoutCss = read('src/styles/features/home-mobile-layout.css');
@@ -125,18 +155,19 @@ assert(
 
 assert(
   listReturnScroll.includes('function getActiveDetailOverlay()') &&
-    listReturnScroll.includes('/^\\/post(?:\\/|$)/.test(window.location.pathname)') &&
-    listReturnScroll.includes('function getVisibleListReturnTargets()') &&
-    listReturnScroll.includes('!isInsideElement(activeDetailOverlay, element)') &&
+    listReturnScrollRestore.includes('function getActiveDetailOverlay()') &&
+    listReturnScrollRestore.includes('/^\\/post(?:\\/|$)/.test(window.location.pathname)') &&
+    listReturnScrollRestore.includes('function getVisibleListReturnTargets()') &&
+    listReturnScrollRestore.includes('!isInsideElement(activeDetailOverlay, element)') &&
     listReturnScroll.includes('if (isInsideElement(activeDetailOverlay, element)) continue;') &&
     listReturnScroll.includes('activeOverlay && !activeDetailOverlay'),
   'List return scroll must ignore route-overlay and nested targets while a post detail overlay is active, so detail scroll cannot overwrite the saved list position.',
 );
 
 assert(
-  (listReturnScroll.match(/getVisibleElements\(LIST_SCROLL_ROOT_SELECTOR\)/g) || []).length === 1 &&
-    listReturnScroll.includes('getVisibleListReturnTargets().forEach((element) =>') &&
-    listReturnScroll.includes('...getVisibleListReturnTargets().map((element) => element.scrollTop || 0)'),
+  (listReturnScrollRestore.match(/getVisibleElements\(LIST_SCROLL_ROOT_SELECTOR\)/g) || []).length === 1 &&
+    listReturnScrollRestore.includes('getVisibleListReturnTargets().forEach((element) =>') &&
+    listReturnScrollRestore.includes('...getVisibleListReturnTargets().map((element) => element.scrollTop || 0)'),
   'List return restore must write and measure only filtered list targets, not raw route-overlay targets.',
 );
 
@@ -262,29 +293,117 @@ assert(
 
 assert(
   importsInOrder(featuresLayerCss, [
-    '../features/brand.css',
-    '../features/settings.css',
-    '../../features/admin/AdminDesktop.css',
     '../features/home.css',
     '../features/home-feed.css',
-    '../features/category-feed.css',
-    '../features/messages.css',
-    '../features/post-detail.css',
-    '../features/post-detail-metadata.css',
-    '../features/profile.css',
-    '../features/user-space-next.css',
-    '../features/recharge.css',
-    '../features/sponsor.css',
-    '../features/referral-invite.css',
-    '../features/create-promote.css',
-    '../features/promote-page-foundation.css',
-    '../features/promote-page-keyboard.css',
-    '../features/promote-layout.css',
-    '../features/promote-history.css',
-    '../features/promotion-effects-history.css',
-    '../features/promote-history-edit.css',
   ]),
-  'Route feature CSS must be registered through src/styles/layers/features.css.',
+  'Shared route feature CSS must be registered through src/styles/layers/features.css.',
+);
+
+assert(
+  brandAboutPage.includes("import '@/features/brand/BrandAboutRoute.css';") &&
+    brandAboutRouteCss.includes('@import "../../styles/features/brand.css";') &&
+    !featuresLayerCss.includes('../features/brand.css'),
+  'About page CSS must be loaded by the lazy about route, not by the global feature layer.',
+);
+
+assert(
+  adminPage.includes("import './AdminDesktop.css';") &&
+    !featuresLayerCss.includes('../../features/admin/AdminDesktop.css'),
+  'Admin console CSS must be loaded by the lazy admin route, not by the global feature layer.',
+);
+
+assert(
+  categoryFeedPage.includes("import '@/features/category/CategoryFeedRoute.css';") &&
+    categoryFeedRouteCss.includes('@import "../../styles/features/category-feed.css";') &&
+    !featuresLayerCss.includes('../features/category-feed.css'),
+  'Category feed CSS must be loaded by the lazy category route, not by the global feature layer.',
+);
+
+assert(
+  postDetailLegacyPage.includes("import '@/features/post-detail/PostDetailRoute.css';") &&
+    postDetailRouteCss.includes('@import "../../styles/features/post-detail.css";') &&
+    postDetailRouteCss.includes('@import "../../styles/features/post-detail-metadata.css";') &&
+    !featuresLayerCss.includes('../features/post-detail.css') &&
+    !featuresLayerCss.includes('../features/post-detail-metadata.css'),
+  'Post detail CSS must be loaded by the lazy detail route, not by the global feature layer.',
+);
+
+assert(
+  messagesPage.includes("import '@/features/notifications/NotificationsRoute.css';") &&
+    notificationSettingsPage.includes("import '@/features/notifications/NotificationsRoute.css';") &&
+    notificationsRouteCss.includes('@import "../../styles/features/messages.css";') &&
+    !featuresLayerCss.includes('../features/messages.css'),
+  'Notification/message CSS must be loaded by lazy notification routes, not by the global feature layer.',
+);
+
+assert(
+  profilePage.includes("import '@/features/profile/ProfileRoute.css';") &&
+    userSpacePage.includes("import '@/features/profile/ProfileRoute.css';") &&
+    profileRouteCss.includes('@import "../../styles/features/settings.css";') &&
+    profileRouteCss.includes('@import "../../styles/features/profile.css";') &&
+    profileRouteCss.includes('@import "../../styles/features/user-space-next.css";') &&
+    profileRouteCss.includes('@import "../../styles/features/profile-membership-performance.css";') &&
+    profileRouteCss.includes('@import "../../styles/features/profile-plus-visual.css";') &&
+    profileRouteCss.includes('@import "../../styles/features/profile-plus-link-contract.css";') &&
+    profileBioEditorPage.includes("import '@/features/profile/ProfileBioEditorRoute.css';") &&
+    profileBioEditorRouteCss.includes('@import "../../styles/features/profile-bio-editor.css";') &&
+    !featuresLayerCss.includes('../features/settings.css') &&
+    !featuresLayerCss.includes('../features/profile.css') &&
+    !featuresLayerCss.includes('../features/profile-bio-editor.css') &&
+    !featuresLayerCss.includes('../features/user-space-next.css') &&
+    !featuresLayerCss.includes('../features/profile-membership-performance.css') &&
+    !featuresLayerCss.includes('../features/profile-plus-visual.css') &&
+    !featuresLayerCss.includes('../features/profile-plus-link-contract.css'),
+  'Profile and user-space CSS must be loaded by lazy profile routes, not by the global feature layer.',
+);
+
+assert(
+  postCreateRoutePage.includes("import '@/features/post-create/PostCreateRoute.css';") &&
+    postCreateRouteCss.includes('@import "../../styles/features/create-promote.css";') &&
+    !featuresLayerCss.includes('../features/create-promote.css'),
+  'Post create CSS must be loaded by the lazy create route, not by the global feature layer.',
+);
+
+assert(
+  tuiPlusRouteCss.includes('@import "../../styles/features/tui-plus-page.css";') &&
+    !featuresLayerCss.includes('../features/tui-plus-page.css'),
+  'Tui Plus membership page CSS must be loaded by the lazy Tui Plus route, not by the global feature layer.',
+);
+
+assert(
+  promotePage.includes("import './PromoteRoute.css';") &&
+    promoteHistoryPage.includes("import '@/features/promote/PromoteRoute.css';") &&
+    promotionEffectsHistoryPage.includes("import '@/features/promote/PromoteRoute.css';") &&
+    promoteRouteCss.includes('@import "../../styles/features/promote-page-foundation.css";') &&
+    promoteRouteCss.includes('@import "../../styles/features/promote-layout.css";') &&
+    !featuresLayerCss.includes('../features/promote-page-foundation.css') &&
+    !featuresLayerCss.includes('../features/promote-layout.css') &&
+    !featuresLayerCss.includes('../features/promote-history.css') &&
+    !featuresLayerCss.includes('../features/promotion-effects-history.css') &&
+    !featuresLayerCss.includes('../features/promote-history-edit.css'),
+  'Promote workspace CSS must be loaded by the lazy promote routes, not by the global feature layer.',
+);
+
+assert(
+  sponsorPage.includes("import './SponsorRoute.css';") &&
+    sponsorRouteCss.includes('@import "../../styles/features/sponsor.css";') &&
+    !featuresLayerCss.includes('../features/sponsor.css'),
+  'Sponsor center CSS must be loaded by the lazy sponsor route, not by the global feature layer.',
+);
+
+assert(
+  referralInvitePage.includes("import '@/features/sponsor/ReferralRoute.css';") &&
+    referralInviteRecordsPage.includes("import '@/features/sponsor/ReferralRoute.css';") &&
+    referralRouteCss.includes('@import "../../styles/features/referral-invite.css";') &&
+    !featuresLayerCss.includes('../features/referral-invite.css'),
+  'Referral invite CSS must be loaded by the lazy referral routes, not by the global feature layer.',
+);
+
+assert(
+  rechargePage.includes("import '@/features/recharge/RechargeRoute.css';") &&
+    rechargeRouteCss.includes('@import "../../styles/features/recharge.css";') &&
+    !featuresLayerCss.includes('../features/recharge.css'),
+  'Recharge CSS must be loaded by the lazy recharge route, not by the global feature layer.',
 );
 
 assert(
@@ -324,9 +443,39 @@ for (const file of walk('src', (entry) => /\.(tsx|ts)$/.test(entry))) {
     continue;
   }
 
+  const routeOwnedCssImport = new Map([
+    ['src/features/admin/AdminPage.tsx', './AdminDesktop.css'],
+    ['src/pages/TuiPlusMobile.tsx', '@/features/tui-plus/TuiPlusRoute.css'],
+    ['src/pages/TuiPlusLinkEditorMobile.tsx', '@/features/tui-plus/TuiPlusRoute.css'],
+    ['src/pages/CategoryFeedMobile.tsx', '@/features/category/CategoryFeedRoute.css'],
+    ['src/pages/PostDetailLegacy.tsx', '@/features/post-detail/PostDetailRoute.css'],
+    ['src/pages/MessagesMobile.tsx', '@/features/notifications/NotificationsRoute.css'],
+    ['src/pages/NotificationSettings.tsx', '@/features/notifications/NotificationsRoute.css'],
+    ['src/pages/ProfileMobile.tsx', '@/features/profile/ProfileRoute.css'],
+    ['src/pages/UserSpace.tsx', '@/features/profile/ProfileRoute.css'],
+    ['src/pages/ProfileBioEditorMobile.tsx', '@/features/profile/ProfileBioEditorRoute.css'],
+    ['src/pages/PostCreate.tsx', '@/features/post-create/PostCreateRoute.css'],
+    ['src/features/promote/PromoteMobilePage.tsx', './PromoteRoute.css'],
+    ['src/pages/PromoteHistory.tsx', '@/features/promote/PromoteRoute.css'],
+    ['src/pages/PromotionEffectsHistory.tsx', '@/features/promote/PromoteRoute.css'],
+    ['src/features/sponsor/SponsorMobilePage.tsx', './SponsorRoute.css'],
+    ['src/pages/ReferralInviteMobile.tsx', '@/features/sponsor/ReferralRoute.css'],
+    ['src/pages/ReferralInviteRecordsMobile.tsx', '@/features/sponsor/ReferralRoute.css'],
+    ['src/pages/RechargeMobile.tsx', '@/features/recharge/RechargeRoute.css'],
+    ['src/pages/BrandAbout.tsx', '@/features/brand/BrandAboutRoute.css'],
+  ]);
+  const allowedRouteOwnedCss = routeOwnedCssImport.get(file);
+  if (allowedRouteOwnedCss) {
+    assert(
+      imports.length === 1 && imports[0] === allowedRouteOwnedCss,
+      `${file} may only import the lazy route-owned ${allowedRouteOwnedCss}.`,
+    );
+    continue;
+  }
+
   assert(
     imports.length === 0,
-    `${file} must not import CSS directly; use src/index.css layer facades instead.`,
+    `${file} must not import CSS directly; use src/index.css layer facades or an explicitly guarded route-owned CSS exception instead.`,
   );
 }
 
@@ -422,6 +571,8 @@ assert(
   !homeFeatureCss.includes('home-mobile-addressbar.css') &&
     homeLayout.includes('home-document-scroll-shell') &&
     homeMobileFirstPaintCss.includes('.home-mobile-shell.home-document-scroll-shell') &&
+    homeMobileFirstPaintCss.includes('.home-mobile-feed-panel [data-feed-frame]') &&
+    homeMobileFirstPaintCss.includes('min-width: 0;') &&
     homeMobileFirstPaintCss.includes('.home-mobile-shell.home-document-scroll-shell .home-mobile-feed-panel [data-feed-scroll-root]') &&
     !/body\.mobile-addressbar-enabled\s+\./.test(homeMobileFirstPaintCss) &&
     homeMobileLayoutCss.includes('.home-mobile-shell .ui-topbar-inner') &&

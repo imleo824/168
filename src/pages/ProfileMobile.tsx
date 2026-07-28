@@ -6,6 +6,8 @@ import TopbarIconButton from '@/ui/TopbarIconButton';
 import ProfileMobilePage from '@/features/profile/ProfileMobilePage';
 import { requestProfileSettingsOpen } from '@/features/profile/profileSettingsIntent';
 
+import '@/features/profile/ProfileRoute.css';
+
 export default function ProfileMobileRoute() {
   const { user } = useAuth();
   const { guarded: guardedOpenProfileSettings } = useInteractionGuard(requestProfileSettingsOpen, {

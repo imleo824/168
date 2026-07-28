@@ -1,5 +1,4 @@
-import { useMemo, useState } from 'react';
-import { createPortal } from 'react-dom';
+import { lazy, Suspense, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Copy } from 'lucide-react';
@@ -32,11 +31,6 @@ import {
   WithdrawalRow,
 } from './ReferralInviteRecordRows';
 import {
-  ReferralConvertSheet,
-  ReferralRulesSheet,
-  ReferralWithdrawSheet,
-} from './ReferralInviteSheets';
-import {
   buildInviteLink,
   formatMoney,
   formatRate,
@@ -54,6 +48,15 @@ type ReferralInvitePageContentProps = {
 };
 
 const REFERRAL_RECORD_PREVIEW_LIMIT = 4;
+const loadReferralRulesSheet = () => import('./ReferralRulesSheet');
+const loadReferralInviteSheets = () => import('./ReferralInviteSheets');
+const LazyReferralRulesSheet = lazy(loadReferralRulesSheet);
+const LazyReferralConvertSheet = lazy(() =>
+  loadReferralInviteSheets().then((module) => ({ default: module.ReferralConvertSheet })),
+);
+const LazyReferralWithdrawSheet = lazy(() =>
+  loadReferralInviteSheets().then((module) => ({ default: module.ReferralWithdrawSheet })),
+);
 
 export default function ReferralInvitePageContent({ isRulesOpen, onCloseRules }: ReferralInvitePageContentProps) {
   const navigate = useNavigate();
@@ -103,8 +106,10 @@ export default function ReferralInvitePageContent({ isRulesOpen, onCloseRules }:
   const baseConversionBusy = convertMutation.isPending;
 
   function resetWithdrawInputs() { setWithdrawAmount(''); setWithdrawAddress(''); setPaymentPassword(''); setNewPaymentPassword(''); setConfirmPaymentPassword(''); setPaymentError(''); setPaymentPasswordSetupDone(false); }
-  const openWithdrawSheet = () => { if (!summary || summary.availableCommission <= 0) return showToast('暂无可提现返佣', 'info'); if (summary.availableCommission < summary.settings.minWithdrawAmount) return showToast(`最低提现 ${formatMoney(summary.settings.minWithdrawAmount)}U，当前可提现 ${formatMoney(summary.availableCommission)}U`, 'info'); setPaymentError(''); setWithdrawAmount(''); setIsWithdrawSheetOpen(true); };
-  const openConvertSheet = () => { if (!summary || summary.availableCommission <= 0) return showToast('暂无可转换返佣', 'info'); setConvertError(''); setConvertAmount(''); setIsConvertSheetOpen(true); };
+  const warmReferralRulesSheet = () => { void loadReferralRulesSheet(); };
+  const warmReferralInviteSheets = () => { void loadReferralInviteSheets(); };
+  const openWithdrawSheet = () => { warmReferralInviteSheets(); if (!summary || summary.availableCommission <= 0) return showToast('暂无可提现返佣', 'info'); if (summary.availableCommission < summary.settings.minWithdrawAmount) return showToast(`最低提现 ${formatMoney(summary.settings.minWithdrawAmount)}U，当前可提现 ${formatMoney(summary.availableCommission)}U`, 'info'); setPaymentError(''); setWithdrawAmount(''); setIsWithdrawSheetOpen(true); };
+  const openConvertSheet = () => { warmReferralInviteSheets(); if (!summary || summary.availableCommission <= 0) return showToast('暂无可转换返佣', 'info'); setConvertError(''); setConvertAmount(''); setIsConvertSheetOpen(true); };
   const closeWithdrawSheet = () => { if (baseWithdrawalBusy) return; setIsWithdrawSheetOpen(false); resetWithdrawInputs(); };
   const closeConvertSheet = () => { if (baseConversionBusy) return; setIsConvertSheetOpen(false); setConvertAmount(''); setConvertError(''); };
   const goFullRecords = (tab: ReferralRecordTab) => { navigate(`${APP_ROUTES.inviteRecords}?tab=${tab}`, { state: { from: APP_ROUTES.invite } }); };
@@ -211,8 +216,8 @@ export default function ReferralInvitePageContent({ isRulesOpen, onCloseRules }:
             <strong className="referral-available-amount"><MoneyValue value={summary.availableCommission} /></strong>
           </div>
           <div className="referral-available-actions">
-            <ActionButton type="button" variant="brand" size="sm" disabled={summary.availableCommission <= 0 || withdrawalBusy} onClick={openWithdrawSheet}>去提现</ActionButton>
-            <ActionButton type="button" variant="muted" size="sm" disabled={summary.availableCommission <= 0 || conversionBusy} onClick={openConvertSheet}>换积分</ActionButton>
+            <ActionButton type="button" variant="brand" size="sm" disabled={summary.availableCommission <= 0 || withdrawalBusy} onPointerEnter={warmReferralInviteSheets} onFocus={warmReferralInviteSheets} onClick={openWithdrawSheet}>去提现</ActionButton>
+            <ActionButton type="button" variant="muted" size="sm" disabled={summary.availableCommission <= 0 || conversionBusy} onPointerEnter={warmReferralInviteSheets} onFocus={warmReferralInviteSheets} onClick={openConvertSheet}>换积分</ActionButton>
           </div>
         </div>
         <HeroStats summary={summary} />
@@ -239,9 +244,23 @@ export default function ReferralInvitePageContent({ isRulesOpen, onCloseRules }:
         </div>
       </section>
 
-      {isRulesOpen && typeof document !== 'undefined' ? createPortal(<ReferralRulesSheet summary={summary} onClose={onCloseRules} />, document.body) : null}
-      <ReferralConvertSheet open={isConvertSheetOpen} summary={summary} amount={convertAmount} error={convertError} isBusy={conversionBusy} canSubmit={canSubmitConversion} previewPoints={previewConvertPoints} onAmountChange={(value) => { setConvertAmount(value); if (convertError) setConvertError(''); }} onClose={closeConvertSheet} onConfirm={() => void guardedConfirmConversion()} />
-      <ReferralWithdrawSheet open={isWithdrawSheetOpen} summary={summary} amount={withdrawAmount} address={withdrawAddress} paymentPassword={paymentPassword} newPaymentPassword={newPaymentPassword} confirmPaymentPassword={confirmPaymentPassword} paymentError={paymentError} isBusy={withdrawalBusy} isSavingPaymentPassword={isSavingPaymentPassword} needsPaymentPasswordSetup={needsPaymentPasswordSetup} canSubmit={canSubmitWithdrawal} onAmountChange={(value) => { setWithdrawAmount(value); if (paymentError) setPaymentError(''); }} onAddressChange={(value) => { setWithdrawAddress(value); if (paymentError) setPaymentError(''); }} onPaymentPasswordChange={(value) => { setPaymentPassword(value); if (paymentError) setPaymentError(''); }} onNewPaymentPasswordChange={(value) => { setNewPaymentPassword(value); if (paymentError) setPaymentError(''); }} onConfirmPaymentPasswordChange={(value) => { setConfirmPaymentPassword(value); if (paymentError) setPaymentError(''); }} onClose={closeWithdrawSheet} onConfirm={() => void guardedConfirmWithdrawal()} />
+      {isRulesOpen ? (
+        <Suspense fallback={null}>
+          <LazyReferralRulesSheet summary={summary} onClose={onCloseRules} />
+        </Suspense>
+      ) : null}
+
+      {isConvertSheetOpen ? (
+        <Suspense fallback={null}>
+          <LazyReferralConvertSheet open={isConvertSheetOpen} summary={summary} amount={convertAmount} error={convertError} isBusy={conversionBusy} canSubmit={canSubmitConversion} previewPoints={previewConvertPoints} onAmountChange={(value) => { setConvertAmount(value); if (convertError) setConvertError(''); }} onClose={closeConvertSheet} onConfirm={() => void guardedConfirmConversion()} />
+        </Suspense>
+      ) : null}
+
+      {isWithdrawSheetOpen ? (
+        <Suspense fallback={null}>
+          <LazyReferralWithdrawSheet open={isWithdrawSheetOpen} summary={summary} amount={withdrawAmount} address={withdrawAddress} paymentPassword={paymentPassword} newPaymentPassword={newPaymentPassword} confirmPaymentPassword={confirmPaymentPassword} paymentError={paymentError} isBusy={withdrawalBusy} isSavingPaymentPassword={isSavingPaymentPassword} needsPaymentPasswordSetup={needsPaymentPasswordSetup} canSubmit={canSubmitWithdrawal} onAmountChange={(value) => { setWithdrawAmount(value); if (paymentError) setPaymentError(''); }} onAddressChange={(value) => { setWithdrawAddress(value); if (paymentError) setPaymentError(''); }} onPaymentPasswordChange={(value) => { setPaymentPassword(value); if (paymentError) setPaymentError(''); }} onNewPaymentPasswordChange={(value) => { setNewPaymentPassword(value); if (paymentError) setPaymentError(''); }} onConfirmPaymentPasswordChange={(value) => { setConfirmPaymentPassword(value); if (paymentError) setPaymentError(''); }} onClose={closeWithdrawSheet} onConfirm={() => void guardedConfirmWithdrawal()} />
+        </Suspense>
+      ) : null}
     </div>
   );
 }

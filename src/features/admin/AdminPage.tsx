@@ -7,6 +7,8 @@ import { APP_ROUTES } from '@/app/routePaths';
 import { apiFetch } from '@/services/api';
 import { Navigate } from 'react-router-dom';
 
+import './AdminDesktop.css';
+
 import type {
   OpsMetrics,
   OpsReport,

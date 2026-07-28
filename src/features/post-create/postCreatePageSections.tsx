@@ -1,18 +1,17 @@
-import { useCallback, useMemo, useState } from 'react';
+import { lazy, Suspense, useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Hash, Link as LinkIcon, LockKeyhole, MapPin, Send, Zap } from 'lucide-react';
 
 import { APP_ROUTES } from '@/app/routePaths';
 import { useAuth } from '@/context/AuthContext';
-import ImageUpload from '@/features/upload/ImageUpload';
 import QuotedPostPreviewCard from '@/features/post/QuotedPostPreviewCard';
-import TuiPlusBenefitPromptDialog from '@/features/tui-plus/TuiPlusBenefitPromptDialog';
 import { buildTuiPlusBenefitRouteState, isTuiPlusActive } from '@/features/tui-plus/tuiPlusBenefits';
 import AuthRequiredState from '@/ui/AuthRequiredState';
 import ActionButton from '@/ui/ActionButton';
 import AppPage from '@/ui/AppPage';
 import PageContentShell from '@/ui/PageContentShell';
 import PageHeader from '@/ui/PageHeader';
+import { PageLoader } from '@/ui/PageLoader';
 import { useInstantPress } from '@/hooks/useInstantPress';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import type { QuotePostPreview } from '@/types';
@@ -24,6 +23,9 @@ import {
 
 import { POST_CONTENT_MAX_LENGTH } from './postCreateConstants';
 import type { PostCreateLocationOption } from './postCreateLocation';
+
+const LazyTuiPlusBenefitPromptDialog = lazy(() => import('@/features/tui-plus/TuiPlusBenefitPromptDialog'));
+const LazyImageUpload = lazy(() => import('@/features/upload/ImageUpload'));
 
 export interface PostCreateFormState {
   content: string;
@@ -205,16 +207,18 @@ export function PostCreateComposerSection({
               onChange={(event) => onContentChange(event.target.value.slice(0, POST_CONTENT_MAX_LENGTH))}
             />
 
-            <ImageUpload
-              onImagesChange={onImagesChange}
-              onUploadingChange={onUploadingImagesChange}
-              maxCount={imageMaxCount}
-              defaultImages={isQuoteMode ? [] : form.images}
-              layout="field"
-              tileClassName="post-create-image-preview-tile"
-              disabled={isQuoteMode || isPublishingLocked}
-              disabledReason={isQuoteMode ? '引用发布暂不添加图片' : '发布中暂不可添加图片'}
-            />
+            <Suspense fallback={<PostCreateImageUploadFallback />}>
+              <LazyImageUpload
+                onImagesChange={onImagesChange}
+                onUploadingChange={onUploadingImagesChange}
+                maxCount={imageMaxCount}
+                defaultImages={isQuoteMode ? [] : form.images}
+                layout="field"
+                tileClassName="post-create-image-preview-tile"
+                disabled={isQuoteMode || isPublishingLocked}
+                disabledReason={isQuoteMode ? '引用发布暂不添加图片' : '发布中暂不可添加图片'}
+              />
+            </Suspense>
 
             <div className="post-create-tool-row" aria-label="发布工具">
               <button type="button" className="post-create-tool-button post-create-category-tool-button" data-tool="category" data-state={toolSummary.category.state} aria-label={categoryActionLabel} title={categoryActionLabel} disabled={isPublishingLocked} {...categoryPressHandlers}>
@@ -275,8 +279,24 @@ export function PostCreateComposerSection({
         </AppPage>
       ) : null}
 
-      <TuiPlusBenefitPromptDialog open={isLinkPromptOpen} benefit="postPromotionLink" onClose={() => setIsLinkPromptOpen(false)} onConfirm={() => navigate(APP_ROUTES.tuiPlus, { state: buildTuiPlusBenefitRouteState('postPromotionLink', APP_ROUTES.create) })} />
+      {isLinkPromptOpen ? (
+        <Suspense fallback={<PageLoader />}>
+          <LazyTuiPlusBenefitPromptDialog open benefit="postPromotionLink" onClose={() => setIsLinkPromptOpen(false)} onConfirm={() => navigate(APP_ROUTES.tuiPlus, { state: buildTuiPlusBenefitRouteState('postPromotionLink', APP_ROUTES.create) })} />
+        </Suspense>
+      ) : null}
     </>
+  );
+}
+
+function PostCreateImageUploadFallback() {
+  return (
+    <div className="image-upload image-upload--field post-create-image-upload-fallback" aria-hidden="true">
+      <div className="image-upload-grid">
+        <div className="image-upload-add post-create-image-preview-tile post-create-image-upload-placeholder">
+          <span className="ui-skeleton-shimmer" />
+        </div>
+      </div>
+    </div>
   );
 }
 

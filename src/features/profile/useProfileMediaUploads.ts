@@ -5,8 +5,7 @@ import {
   COVER_UPLOAD_RETRY_OPTIONS,
   getImageValidationError,
   normalizeImageUploadError,
-  uploadImageFile,
-} from '@/features/upload/imageUploadPipeline';
+} from '@/features/upload/imageUploadConfig';
 import {
   clearObjectUrl,
   normalizePersistentImageUrl,
@@ -126,6 +125,7 @@ export function useProfileMediaUploads({
     setAvatarPreviewUrl(nextLocalPreview);
     setIsUploadingAvatar(true);
     try {
+      const { uploadImageFile } = await import('@/features/upload/imageUploadPipeline');
       const finalPhotoUrl = await uploadImageFile(file, { purpose: 'avatar' });
       if (sessionId !== avatarUploadTokenRef.current) return;
       const normalizedPhotoUrl = normalizePersistentImageUrl(finalPhotoUrl || '');
@@ -212,6 +212,7 @@ export function useProfileMediaUploads({
     setIsUploadingCover(true);
 
     try {
+      const { uploadImageFile } = await import('@/features/upload/imageUploadPipeline');
       const finalCoverUrl = await uploadImageFile(file, {
         purpose: 'cover',
         ...COVER_UPLOAD_RETRY_OPTIONS,

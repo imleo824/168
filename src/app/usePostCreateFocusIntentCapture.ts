@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-import { installPostCreateFocusIntentCapture } from '@/utils/postCreateFocusBridge';
+import { installPostCreateFocusIntentCapture } from '@/utils/postCreateFocusPrime';
 
 export function usePostCreateFocusIntentCapture(enabled: boolean) {
   useEffect(() => {

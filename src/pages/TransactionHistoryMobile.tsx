@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { lazy, Suspense, useMemo } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { getRechargeOrdersPage, getTransactionsPage } from '@/services/api';
@@ -11,9 +11,8 @@ import {
   buildLedgerRecords,
   type UnifiedLedgerRecord,
 } from '@/features/records/ledgerDisplay';
-import LedgerRecordCard from '@/features/records/LedgerRecordCard';
 import { useAuth } from '@/context/AuthContext';
-import { useConfig } from '@/hooks/useData';
+import { useConfig } from '@/hooks/useDataConfig';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import AppPage from '@/ui/AppPage';
 import PageHeader from '@/ui/PageHeader';
@@ -58,6 +57,8 @@ const RECHARGE_STATUS_FILTER_OPTIONS: Array<{ value: RechargeStatusFilter; label
   { value: 'CREDITED', label: '已到账' },
   { value: 'NOT_CREDITED', label: '未到账' },
 ];
+
+const LazyLedgerRecordCard = lazy(() => import('@/features/records/LedgerRecordCard'));
 
 function normalizeRechargeStatusFilter(value: string | null): RechargeStatusFilter {
   const normalized = (value || '').toUpperCase();
@@ -253,14 +254,16 @@ export default function TransactionHistoryMobile() {
           ) : (
             <div className="record-list">
               {unifiedRecords.length > 0 ? (
-                unifiedRecords.map((record) => (
-                  <LedgerRecordCard
-                    key={`${record.kind}-${record.id}`}
-                    record={record}
-                    pointsPerUsdt={pointsPerUsdt}
-                    onCopyRecordId={handleCopyRecordId}
-                  />
-                ))
+                <Suspense fallback={<PageLoadingState text="正在加载交易记录" className="record-state-block" />}>
+                  {unifiedRecords.map((record) => (
+                    <LazyLedgerRecordCard
+                      key={`${record.kind}-${record.id}`}
+                      record={record}
+                      pointsPerUsdt={pointsPerUsdt}
+                      onCopyRecordId={handleCopyRecordId}
+                    />
+                  ))}
+                </Suspense>
               ) : (
                 <EmptyStateCard title="暂无记录" className="record-empty-state" />
               )}

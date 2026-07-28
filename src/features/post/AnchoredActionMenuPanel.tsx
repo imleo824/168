@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 
 import { useAuth } from '@/context/AuthContext';
-import { useBlockUser, useReducePostRecommendation } from '@/hooks/useData';
+import { useBlockUser, useReducePostRecommendation } from '@/hooks/useDataPosts';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import { cn } from '@/utils/cn';
 import type { PostOptionsMenuProps } from './AnchoredActionMenu';

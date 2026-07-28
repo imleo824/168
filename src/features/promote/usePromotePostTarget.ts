@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type Dispatch, type SetStateAction } from 'react';
 
-import { usePost, usePosts } from '@/hooks/useData';
+import { usePost, usePosts } from '@/hooks/useDataPosts';
 
 import type { PromotionTypeId } from './promoteBookingUtils';
 

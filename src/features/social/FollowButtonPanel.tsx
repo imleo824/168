@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useRef } from 'react';
 
 import { useAuth } from '@/context/AuthContext';
 import { useActionLock } from '@/hooks/useActionLock';
-import { useFollowStatus, useFollowUser } from '@/hooks/useData';
+import { useFollowStatus, useFollowUser } from '@/hooks/useDataSocial';
 
 export interface FollowButtonPanelProps {
   userId: string;

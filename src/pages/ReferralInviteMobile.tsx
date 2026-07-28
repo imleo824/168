@@ -8,6 +8,8 @@ import PageContentShell from '@/ui/PageContentShell';
 import TopbarIconButton from '@/ui/TopbarIconButton';
 import ReferralInvitePageContent from '@/features/sponsor/ReferralInvitePageContent';
 
+import '@/features/sponsor/ReferralRoute.css';
+
 export default function ReferralInviteMobile() {
   const [isRulesOpen, setIsRulesOpen] = useState(false);
 

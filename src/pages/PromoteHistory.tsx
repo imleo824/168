@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { lazy, Suspense, useCallback, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 import { Pencil, Pin, Save } from 'lucide-react';
@@ -9,11 +9,9 @@ import AuthRequiredState from '@/ui/AuthRequiredState';
 import PageHeader from '@/ui/PageHeader';
 import HeaderSelectAction from '@/ui/HeaderSelectAction';
 import ActionButton from '@/ui/ActionButton';
-import ImageUpload from '@/features/upload/ImageUpload';
 import RecordIdRow from '@/features/records/RecordIdRow';
-import PromotionRecordCard from '@/features/promote/PromotionRecordCard';
 import { useAuth } from '@/context/AuthContext';
-import { useMyPromotions } from '@/hooks/useData';
+import { useMyPromotions } from '@/hooks/useDataPromotions';
 import { useFocusScrollStabilizer } from '@/hooks/useFocusScrollStabilizer';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import { resolveAdTargetUrlInput } from '@/utils/adTargetUrl';
@@ -33,7 +31,11 @@ import {
   type PromotionStatusFilter,
 } from '@/features/promote/promotionDisplayUtils';
 
+import '@/features/promote/PromoteRoute.css';
+
 const PROMOTION_RECORDS_TITLE = '推广记录';
+const LazyImageUpload = lazy(() => import('@/features/upload/ImageUpload'));
+const LazyPromotionRecordCard = lazy(() => import('@/features/promote/PromotionRecordCard'));
 
 type PromoteHistoryRouteState = {
   from?: string;
@@ -286,29 +288,31 @@ export default function PromoteHistory() {
             <SurfaceSectionCard className="promote-history-edit-card">
               <section className="promote-history-edit-section" aria-labelledby="promote-history-edit-images-title">
                 <h2 id="promote-history-edit-images-title" className="promote-history-edit-section-title">广告图片</h2>
-                <div key={`${editingGroup.key}-desktop`} className="promote-history-field">
-                  <span className="promote-history-label">电脑端广告图</span>
-                  <span className="promote-history-help">建议 1920×480 或 1440×360</span>
-                  <ImageUpload
-                    onImagesChange={(urls) => setEditForm((prev) => ({ ...prev, desktopImageUrl: urls[0] || '' }))}
-                    maxCount={1}
-                    defaultImages={editForm.desktopImageUrl ? [editForm.desktopImageUrl] : []}
-                    tileClassName="ad-upload-tile ad-upload-tile--desktop"
-                    purpose="ad-desktop"
-                  />
-                </div>
+                <Suspense fallback={<PageLoadingState text="正在加载上传组件" className="record-state-block" />}>
+                  <div key={`${editingGroup.key}-desktop`} className="promote-history-field">
+                    <span className="promote-history-label">电脑端广告图</span>
+                    <span className="promote-history-help">建议 1920×480 或 1440×360</span>
+                    <LazyImageUpload
+                      onImagesChange={(urls) => setEditForm((prev) => ({ ...prev, desktopImageUrl: urls[0] || '' }))}
+                      maxCount={1}
+                      defaultImages={editForm.desktopImageUrl ? [editForm.desktopImageUrl] : []}
+                      tileClassName="ad-upload-tile ad-upload-tile--desktop"
+                      purpose="ad-desktop"
+                    />
+                  </div>
 
-                <div key={`${editingGroup.key}-mobile`} className="promote-history-field">
-                  <span className="promote-history-label">移动端广告图</span>
-                  <span className="promote-history-help">建议 1080×360 或 750×250</span>
-                  <ImageUpload
-                    onImagesChange={(urls) => setEditForm((prev) => ({ ...prev, mobileImageUrl: urls[0] || '' }))}
-                    maxCount={1}
-                    defaultImages={editForm.mobileImageUrl ? [editForm.mobileImageUrl] : []}
-                    tileClassName="ad-upload-tile ad-upload-tile--mobile"
-                    purpose="ad-mobile"
-                  />
-                </div>
+                  <div key={`${editingGroup.key}-mobile`} className="promote-history-field">
+                    <span className="promote-history-label">移动端广告图</span>
+                    <span className="promote-history-help">建议 1080×360 或 750×250</span>
+                    <LazyImageUpload
+                      onImagesChange={(urls) => setEditForm((prev) => ({ ...prev, mobileImageUrl: urls[0] || '' }))}
+                      maxCount={1}
+                      defaultImages={editForm.mobileImageUrl ? [editForm.mobileImageUrl] : []}
+                      tileClassName="ad-upload-tile ad-upload-tile--mobile"
+                      purpose="ad-mobile"
+                    />
+                  </div>
+                </Suspense>
               </section>
 
               <section className="promote-history-edit-section" aria-labelledby="promote-history-edit-target-title">
@@ -357,16 +361,18 @@ export default function PromoteHistory() {
             className="record-state-block"
           />
         ) : visibleGroups.length > 0 ? (
-          <div className="record-list">
-            {visibleGroups.map((group) => (
-              <PromotionRecordCard
-                key={group.key}
-                group={group}
-                onCopyRecordId={handleCopyPromotionRecordId}
-                onEdit={startEdit}
-              />
-            ))}
-          </div>
+          <Suspense fallback={<PageLoadingState text="正在加载推广记录" className="record-state-block" />}>
+            <div className="record-list">
+              {visibleGroups.map((group) => (
+                <LazyPromotionRecordCard
+                  key={group.key}
+                  group={group}
+                  onCopyRecordId={handleCopyPromotionRecordId}
+                  onEdit={startEdit}
+                />
+              ))}
+            </div>
+          </Suspense>
         ) : (
           <EmptyStateCard
             title="暂无推广记录"

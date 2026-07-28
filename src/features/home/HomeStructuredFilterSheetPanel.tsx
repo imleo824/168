@@ -9,23 +9,25 @@ import type {
 } from '@/types';
 import type { HomeTopicTabId } from './HomeTopicTabs';
 import {
-  HOUSING_PRICE_RANGE_OPTIONS,
-  areRangesEqual,
   getFieldKey,
   getFieldLabel,
+  getVisibleHomeStructuredFilterFields,
+  isLocationField,
+  normalizeText,
+} from './homeStructuredFilterUtils';
+import {
+  HOUSING_PRICE_RANGE_OPTIONS,
+  areRangesEqual,
   getLocationSelectedCountry,
   getRangeDraft,
-  getVisibleHomeStructuredFilterFields,
   isHousingPriceFilterField,
-  isLocationField,
   isSingleMinimumNumberFilterField,
   normalizeDraftFilters,
   normalizeLocationGroups,
-  normalizeText,
   setMinimumNumberDraft,
   setRangeDraft,
   type DraftFilters,
-} from './homeStructuredFilterUtils';
+} from './homeStructuredFilterDraftUtils';
 
 interface HomeStructuredFilterSheetPanelProps {
   open: boolean;

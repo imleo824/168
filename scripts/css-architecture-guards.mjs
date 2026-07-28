@@ -311,7 +311,7 @@ const requiredCssArchitectureContract = [
   ],
   [
     'TS/TSX files must not import CSS directly except ``src/main.tsx`` importing',
-    'frontend working rules must keep CSS imports centralized.',
+    'frontend working rules must keep CSS imports centralized with the documented route-owned exception.',
   ],
   [
     'Passing current tests is not enough if the change creates an unguarded',
@@ -1787,11 +1787,251 @@ for (const file of walk('src', (entry) => /\.(tsx|ts)$/.test(entry))) {
     continue;
   }
 
+  const routeOwnedCssImport = new Map([
+    ['src/features/admin/AdminPage.tsx', './AdminDesktop.css'],
+    ['src/pages/TuiPlusMobile.tsx', '@/features/tui-plus/TuiPlusRoute.css'],
+    ['src/pages/TuiPlusLinkEditorMobile.tsx', '@/features/tui-plus/TuiPlusRoute.css'],
+    ['src/pages/CategoryFeedMobile.tsx', '@/features/category/CategoryFeedRoute.css'],
+    ['src/pages/PostDetailLegacy.tsx', '@/features/post-detail/PostDetailRoute.css'],
+    ['src/pages/MessagesMobile.tsx', '@/features/notifications/NotificationsRoute.css'],
+    ['src/pages/NotificationSettings.tsx', '@/features/notifications/NotificationsRoute.css'],
+    ['src/pages/ProfileMobile.tsx', '@/features/profile/ProfileRoute.css'],
+    ['src/pages/UserSpace.tsx', '@/features/profile/ProfileRoute.css'],
+    ['src/pages/ProfileBioEditorMobile.tsx', '@/features/profile/ProfileBioEditorRoute.css'],
+    ['src/pages/PostCreate.tsx', '@/features/post-create/PostCreateRoute.css'],
+    ['src/features/promote/PromoteMobilePage.tsx', './PromoteRoute.css'],
+    ['src/pages/PromoteHistory.tsx', '@/features/promote/PromoteRoute.css'],
+    ['src/pages/PromotionEffectsHistory.tsx', '@/features/promote/PromoteRoute.css'],
+    ['src/features/sponsor/SponsorMobilePage.tsx', './SponsorRoute.css'],
+    ['src/pages/ReferralInviteMobile.tsx', '@/features/sponsor/ReferralRoute.css'],
+    ['src/pages/ReferralInviteRecordsMobile.tsx', '@/features/sponsor/ReferralRoute.css'],
+    ['src/pages/RechargeMobile.tsx', '@/features/recharge/RechargeRoute.css'],
+    ['src/pages/BrandAbout.tsx', '@/features/brand/BrandAboutRoute.css'],
+  ]);
+  const allowedRouteOwnedCss = routeOwnedCssImport.get(file);
+  if (allowedRouteOwnedCss) {
+    const invalid = stylesheetImports.filter((target) => target !== allowedRouteOwnedCss);
+    if (invalid.length > 0 || stylesheetImports.length !== 1) {
+      failures.push(`${file} may only import route-owned ${allowedRouteOwnedCss}, found ${stylesheetImports.join(', ') || 'none'}`);
+    }
+    continue;
+  }
+
   if (stylesheetImports.length > 0) {
     failures.push(
       `${file} must not import CSS directly; add it to a stable src/styles/layers/*.css entry instead.`,
     );
   }
+}
+
+const globalFeaturesLayerSource = read('src/styles/layers/features.css');
+const brandAboutRouteSource = read('src/features/brand/BrandAboutRoute.css');
+const brandAboutSource = read('src/pages/BrandAbout.tsx');
+const adminRouteSource = read('src/features/admin/AdminPage.tsx');
+const tuiPlusRouteSource = read('src/features/tui-plus/TuiPlusRoute.css');
+const tuiPlusPageSource = read('src/pages/TuiPlusMobile.tsx');
+const tuiPlusLinkEditorSource = read('src/pages/TuiPlusLinkEditorMobile.tsx');
+const categoryFeedRouteSource = read('src/features/category/CategoryFeedRoute.css');
+const categoryFeedPageSource = read('src/pages/CategoryFeedMobile.tsx');
+const postDetailRouteSource = read('src/features/post-detail/PostDetailRoute.css');
+const postDetailLegacySource = read('src/pages/PostDetailLegacy.tsx');
+const notificationsRouteSource = read('src/features/notifications/NotificationsRoute.css');
+const messagesPageSource = read('src/pages/MessagesMobile.tsx');
+const notificationSettingsSource = read('src/pages/NotificationSettings.tsx');
+const profileRouteSource = read('src/features/profile/ProfileRoute.css');
+const profileBioEditorRouteSource = read('src/features/profile/ProfileBioEditorRoute.css');
+const profilePageSource = read('src/pages/ProfileMobile.tsx');
+const userSpacePageSource = read('src/pages/UserSpace.tsx');
+const profileBioEditorPageSource = read('src/pages/ProfileBioEditorMobile.tsx');
+const postCreateRouteSource = read('src/features/post-create/PostCreateRoute.css');
+const postCreateRoutePageSource = read('src/pages/PostCreate.tsx');
+const promoteRouteSource = read('src/features/promote/PromoteRoute.css');
+const sponsorRouteSource = read('src/features/sponsor/SponsorRoute.css');
+const referralRouteSource = read('src/features/sponsor/ReferralRoute.css');
+const rechargeRouteSource = read('src/features/recharge/RechargeRoute.css');
+const promotePageSource = read('src/features/promote/PromoteMobilePage.tsx');
+const promoteHistorySource = read('src/pages/PromoteHistory.tsx');
+const promotionEffectsHistorySource = read('src/pages/PromotionEffectsHistory.tsx');
+const sponsorPageSource = read('src/features/sponsor/SponsorMobilePage.tsx');
+const referralInviteSource = read('src/pages/ReferralInviteMobile.tsx');
+const referralInviteRecordsSource = read('src/pages/ReferralInviteRecordsMobile.tsx');
+const rechargePageSource = read('src/pages/RechargeMobile.tsx');
+if (globalFeaturesLayerSource.includes('../../features/admin/AdminDesktop.css')) {
+  failures.push('src/styles/layers/features.css must not import admin route CSS; AdminDesktop.css belongs to the lazy admin route chunk.');
+}
+if (!adminRouteSource.includes("import './AdminDesktop.css';")) {
+  failures.push('src/features/admin/AdminPage.tsx must import ./AdminDesktop.css so admin CSS loads with the lazy admin route.');
+}
+for (const routeOnlyTuiPlusCss of [
+  '../features/tui-plus-page.css',
+  '../features/tui-plus-mobile.css',
+  '../features/tui-plus-visual.css',
+  '../features/tui-plus-checkout.css',
+  '../features/tui-plus-request-fixes.css',
+  '../features/tui-plus-premium-layout.css',
+]) {
+  if (globalFeaturesLayerSource.includes(routeOnlyTuiPlusCss)) {
+    failures.push(`src/styles/layers/features.css must not import route-only Tui Plus CSS ${routeOnlyTuiPlusCss}; load it from TuiPlusRoute.css.`);
+  }
+}
+for (const routeOnlyTuiPlusCss of [
+  '../../styles/features/tui-plus-page.css',
+  '../../styles/features/tui-plus-mobile.css',
+  '../../styles/features/tui-plus-visual.css',
+  '../../styles/features/tui-plus-checkout.css',
+  '../../styles/features/tui-plus-request-fixes.css',
+  '../../styles/features/tui-plus-premium-layout.css',
+]) {
+  if (!tuiPlusRouteSource.includes(`@import "${routeOnlyTuiPlusCss}";`)) {
+    failures.push(`src/features/tui-plus/TuiPlusRoute.css must import ${routeOnlyTuiPlusCss}.`);
+  }
+}
+if (!tuiPlusPageSource.includes("import '@/features/tui-plus/TuiPlusRoute.css';")) {
+  failures.push('src/pages/TuiPlusMobile.tsx must import TuiPlusRoute.css so membership page CSS loads with the lazy route.');
+}
+if (!tuiPlusLinkEditorSource.includes("import '@/features/tui-plus/TuiPlusRoute.css';")) {
+  failures.push('src/pages/TuiPlusLinkEditorMobile.tsx must import TuiPlusRoute.css so link editor CSS loads with the lazy route.');
+}
+if (!categoryFeedRouteSource.includes('@import "../../styles/features/category-feed.css";')) {
+  failures.push('src/features/category/CategoryFeedRoute.css must import category-feed.css.');
+}
+if (!categoryFeedPageSource.includes("import '@/features/category/CategoryFeedRoute.css';")) {
+  failures.push('src/pages/CategoryFeedMobile.tsx must import CategoryFeedRoute.css so category feed CSS loads with the lazy route.');
+}
+for (const routeOnlyWorkspaceCss of [
+  '../features/category-feed.css',
+  '../features/post-detail.css',
+  '../features/post-detail-metadata.css',
+  '../features/messages.css',
+  '../features/settings.css',
+  '../features/profile.css',
+  '../features/profile-bio-editor.css',
+  '../features/user-space-next.css',
+  '../features/profile-membership-performance.css',
+  '../features/profile-plus-visual.css',
+  '../features/profile-plus-link-contract.css',
+  '../features/create-promote.css',
+  '../features/create-promote-foundation.css',
+  '../features/create-promote-submit.css',
+  '../features/create-promote-keyboard.css',
+  '../features/create-promote-post.css',
+  '../features/create-promote-post-editor.css',
+  '../features/create-promote-post-settings.css',
+  '../features/create-promote-post-picker.css',
+  '../features/create-promote-post-details.css',
+  '../features/create-promote-post-media-grid.css',
+  '../features/create-promote-responsive.css',
+  '../features/create-promote-state.css',
+  '../features/recharge.css',
+  '../features/sponsor.css',
+  '../features/referral-invite.css',
+  '../features/promote-page-foundation.css',
+  '../features/promote-page-keyboard.css',
+  '../features/promote-layout.css',
+  '../features/promote-history.css',
+  '../features/promotion-effects-history.css',
+  '../features/promote-history-edit.css',
+  '../features/brand.css',
+]) {
+  if (globalFeaturesLayerSource.includes(routeOnlyWorkspaceCss)) {
+    failures.push(`src/styles/layers/features.css must not import route-only workspace CSS ${routeOnlyWorkspaceCss}; load it from a guarded route CSS facade.`);
+  }
+}
+if (!brandAboutRouteSource.includes('@import "../../styles/features/brand.css";')) {
+  failures.push('src/features/brand/BrandAboutRoute.css must import brand.css.');
+}
+if (!brandAboutSource.includes("import '@/features/brand/BrandAboutRoute.css';")) {
+  failures.push('src/pages/BrandAbout.tsx must import BrandAboutRoute.css so about CSS loads with the lazy route.');
+}
+if (!postDetailRouteSource.includes('@import "../../styles/features/post-detail.css";')) {
+  failures.push('src/features/post-detail/PostDetailRoute.css must import post-detail.css.');
+}
+if (!postDetailRouteSource.includes('@import "../../styles/features/post-detail-metadata.css";')) {
+  failures.push('src/features/post-detail/PostDetailRoute.css must import post-detail-metadata.css.');
+}
+if (!postDetailLegacySource.includes("import '@/features/post-detail/PostDetailRoute.css';")) {
+  failures.push('src/pages/PostDetailLegacy.tsx must import PostDetailRoute.css so detail CSS loads with the lazy route.');
+}
+if (!notificationsRouteSource.includes('@import "../../styles/features/messages.css";')) {
+  failures.push('src/features/notifications/NotificationsRoute.css must import messages.css.');
+}
+if (!messagesPageSource.includes("import '@/features/notifications/NotificationsRoute.css';")) {
+  failures.push('src/pages/MessagesMobile.tsx must import NotificationsRoute.css so message CSS loads with the lazy route.');
+}
+if (!notificationSettingsSource.includes("import '@/features/notifications/NotificationsRoute.css';")) {
+  failures.push('src/pages/NotificationSettings.tsx must import NotificationsRoute.css so notification settings CSS loads with the lazy route.');
+}
+for (const routeOnlyProfileCss of [
+  '../../styles/features/settings.css',
+  '../../styles/features/profile.css',
+  '../../styles/features/user-space-next.css',
+  '../../styles/features/profile-membership-performance.css',
+  '../../styles/features/profile-plus-visual.css',
+  '../../styles/features/profile-plus-link-contract.css',
+]) {
+  if (!profileRouteSource.includes(`@import "${routeOnlyProfileCss}";`)) {
+    failures.push(`src/features/profile/ProfileRoute.css must import ${routeOnlyProfileCss}.`);
+  }
+}
+if (!profileBioEditorRouteSource.includes('@import "../../styles/features/profile-bio-editor.css";')) {
+  failures.push('src/features/profile/ProfileBioEditorRoute.css must import profile-bio-editor.css.');
+}
+if (!profilePageSource.includes("import '@/features/profile/ProfileRoute.css';")) {
+  failures.push('src/pages/ProfileMobile.tsx must import ProfileRoute.css so profile CSS loads with the lazy route.');
+}
+if (!userSpacePageSource.includes("import '@/features/profile/ProfileRoute.css';")) {
+  failures.push('src/pages/UserSpace.tsx must import ProfileRoute.css so user-space CSS loads with the lazy route.');
+}
+if (!profileBioEditorPageSource.includes("import '@/features/profile/ProfileBioEditorRoute.css';")) {
+  failures.push('src/pages/ProfileBioEditorMobile.tsx must import ProfileBioEditorRoute.css so profile editor CSS loads with the lazy route.');
+}
+if (!postCreateRouteSource.includes('@import "../../styles/features/create-promote.css";')) {
+  failures.push('src/features/post-create/PostCreateRoute.css must import create-promote.css.');
+}
+if (!postCreateRoutePageSource.includes("import '@/features/post-create/PostCreateRoute.css';")) {
+  failures.push('src/pages/PostCreate.tsx must import PostCreateRoute.css so create CSS loads with the lazy route.');
+}
+for (const routeOnlyPromoteCss of [
+  '../../styles/features/promote-page-foundation.css',
+  '../../styles/features/promote-page-keyboard.css',
+  '../../styles/features/promote-layout.css',
+  '../../styles/features/promote-history.css',
+  '../../styles/features/promotion-effects-history.css',
+  '../../styles/features/promote-history-edit.css',
+]) {
+  if (!promoteRouteSource.includes(`@import "${routeOnlyPromoteCss}";`)) {
+    failures.push(`src/features/promote/PromoteRoute.css must import ${routeOnlyPromoteCss}.`);
+  }
+}
+if (!sponsorRouteSource.includes('@import "../../styles/features/sponsor.css";')) {
+  failures.push('src/features/sponsor/SponsorRoute.css must import sponsor.css.');
+}
+if (!referralRouteSource.includes('@import "../../styles/features/referral-invite.css";')) {
+  failures.push('src/features/sponsor/ReferralRoute.css must import referral-invite.css.');
+}
+if (!rechargeRouteSource.includes('@import "../../styles/features/recharge.css";')) {
+  failures.push('src/features/recharge/RechargeRoute.css must import recharge.css.');
+}
+if (!promotePageSource.includes("import './PromoteRoute.css';")) {
+  failures.push('src/features/promote/PromoteMobilePage.tsx must import PromoteRoute.css so promote workspace CSS loads with the lazy route.');
+}
+if (!promoteHistorySource.includes("import '@/features/promote/PromoteRoute.css';")) {
+  failures.push('src/pages/PromoteHistory.tsx must import PromoteRoute.css so promotion record CSS loads with the lazy route.');
+}
+if (!promotionEffectsHistorySource.includes("import '@/features/promote/PromoteRoute.css';")) {
+  failures.push('src/pages/PromotionEffectsHistory.tsx must import PromoteRoute.css so promotion effect CSS loads with the lazy route.');
+}
+if (!sponsorPageSource.includes("import './SponsorRoute.css';")) {
+  failures.push('src/features/sponsor/SponsorMobilePage.tsx must import SponsorRoute.css so sponsor center CSS loads with the lazy route.');
+}
+if (!referralInviteSource.includes("import '@/features/sponsor/ReferralRoute.css';")) {
+  failures.push('src/pages/ReferralInviteMobile.tsx must import ReferralRoute.css so referral invite CSS loads with the lazy route.');
+}
+if (!referralInviteRecordsSource.includes("import '@/features/sponsor/ReferralRoute.css';")) {
+  failures.push('src/pages/ReferralInviteRecordsMobile.tsx must import ReferralRoute.css so referral records CSS loads with the lazy route.');
+}
+if (!rechargePageSource.includes("import '@/features/recharge/RechargeRoute.css';")) {
+  failures.push('src/pages/RechargeMobile.tsx must import RechargeRoute.css so recharge CSS loads with the lazy route.');
 }
 
 for (const file of walk('src/styles', (entry) => entry.endsWith('.css'))) {

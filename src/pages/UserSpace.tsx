@@ -1,18 +1,18 @@
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type Ref } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type Ref } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useInfinitePosts, useUser, useFollowStatus } from "@/hooks/useData";
+import { useInfinitePosts } from "@/hooks/useDataPosts";
+import { useFollowStatus, useUser } from "@/hooks/useDataSocial";
 import { useAuth } from "@/context/AuthContext";
 import { useInteractionGuard } from "@/hooks/useInteractionGuard";
 import PageHeader from '@/ui/PageHeader';
-import PostFeedList from "@/features/feed/PostFeedList";
 import SEO from "@/platform/SEO";
 import { FollowButton } from "@/features/social/FollowButton";
 import { StateBlock } from "@/ui/LoadingState";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { HomeFeedSkeleton, UserSpaceSkeleton } from "@/ui/Skeleton";
 import AvatarImage from "@/ui/AvatarImage";
-import { useListReturnScroll } from "@/utils/listReturnScroll";
+import ListReturnScrollRestorer from "@/utils/ListReturnScrollRestorer";
 import ListLoadMoreState from "@/ui/ListLoadMoreState";
 import AppPage from '@/ui/AppPage';
 import PageContentShell from '@/ui/PageContentShell';
@@ -31,14 +31,17 @@ import {
   COVER_UPLOAD_RETRY_OPTIONS,
   getImageValidationError,
   normalizeImageUploadError,
-  uploadImageFile,
-} from '@/features/upload/imageUploadPipeline';
+} from '@/features/upload/imageUploadConfig';
 import {
   clearObjectUrl,
   normalizePersistentImageUrl,
   parseResponseError,
   warmImageUrl,
 } from '@/features/profile/profileHelpers';
+
+import '@/features/profile/ProfileRoute.css';
+
+const LazyPostFeedList = lazy(() => import('@/features/feed/PostFeedList'));
 
 function UserSpaceHeader({
   safeId,
@@ -415,6 +418,7 @@ export default function UserSpace() {
     setIsUploadingCover(true);
 
     try {
+      const { uploadImageFile } = await import('@/features/upload/imageUploadPipeline');
       const finalCoverUrl = await uploadImageFile(file, {
         purpose: 'cover',
         ...COVER_UPLOAD_RETRY_OPTIONS,
@@ -549,8 +553,6 @@ export default function UserSpace() {
     };
   }, [shouldEnableStickyFollow]);
 
-  useListReturnScroll(listReturnScope, !isLoading, posts.length);
-
   const stickyFollowButton = shouldEnableStickyFollow && showStickyFollow ? <FollowButton userId={safeId} size="sm" /> : undefined;
   const userErrorMessage = userLoadError instanceof Error ? userLoadError.message : '';
   const isNotFoundError = /(^|\D)404(\D|$)|不存在|not found/i.test(userErrorMessage);
@@ -620,13 +622,16 @@ export default function UserSpace() {
     <StateBlock title="暂无内容" tone="empty" compact className="user-space-state-block" />
   ) : (
     <div className={isMobile ? 'user-space-posts-mobile-wrap' : 'user-space-posts-desktop-wrap'}>
-      <PostFeedList posts={posts} enableRecommendationControls={currentUser?.id !== safeId} />
+      <Suspense fallback={<HomeFeedSkeleton count={3} className="user-space-post-list-skeleton" />}>
+        <LazyPostFeedList posts={posts} enableRecommendationControls={currentUser?.id !== safeId} />
+      </Suspense>
       <ListLoadMoreState error={postsLoadMoreError} loading={loadMoreBusy} hasMore={hasMorePosts} onRetry={() => void guardedRequestMorePosts()} onLoadMore={() => void guardedRequestMorePosts()} loadingText="正在加载更多" doneText="已经到底啦" />
     </div>
   );
 
   return (
     <AppPage className={`user-space-page user-space-page-next ${isMobile ? 'user-space-page-mobile' : 'user-space-page-desktop ui-page-card-shell'}`}>
+      <ListReturnScrollRestorer scope={listReturnScope} ready={!isLoading} restoreVersion={posts.length} />
       <PageHeader title="个人空间" titleAlign="center" right={stickyFollowButton} isTitleLoading={isTitleLoading} />
       <SEO
         title={resolvedUserName ? `${resolvedUserName}的空间｜推推` : '个人空间｜推推'}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -7,8 +7,8 @@ import SEO from '@/platform/SEO';
 import AppPage from '@/ui/AppPage';
 import PageHeader from '@/ui/PageHeader';
 import { useAuth } from '@/context/AuthContext';
-import { useCategories, useConfig } from '@/hooks/useData';
-import { primePostCreateComposerFocus } from '@/utils/postCreateFocusBridge';
+import { useCategories, useConfig } from '@/hooks/useDataConfig';
+import { primePostCreateComposerFocus } from '@/utils/postCreateFocusPrime';
 import { useFocusScrollStabilizer } from '@/hooks/useFocusScrollStabilizer';
 import { useScrollLock } from '@/utils/scrollLock';
 import { resolveAdTargetUrlInput } from '@/utils/adTargetUrl';
@@ -16,11 +16,7 @@ import { useAsyncFlow } from '@/hooks/useAsyncFlow';
 import { bookPromotionBatch, updatePaymentPassword } from '@/services/api';
 import PageContentShell from '@/ui/PageContentShell';
 import { syncPromotionVisibilityAfterBooking } from '@/features/promote/promotionCache';
-import {
-  PromoteCheckoutBar,
-  PromotePaymentSheet,
-  PromotePostPickerSheet,
-} from './promoteComponents';
+import { PromoteCheckoutBar } from './promoteComponents';
 import { PromoteAuthRequiredPage } from './PromoteAuthRequiredPage';
 import {
   PromoteAdCreativeSection,
@@ -37,6 +33,8 @@ import { usePromotePricing } from './usePromotePricing';
 import { usePromoteReturnPath } from './usePromoteReturnPath';
 import { usePromoteSlots } from './usePromoteSlots';
 
+import './PromoteRoute.css';
+
 import {
   DAILY_SLOT_INDEX,
   resolvePromotionType,
@@ -45,6 +43,11 @@ import {
   normalizePromotionPrice,
   type PromotionTypeId,
 } from './promoteBookingUtils';
+
+const loadPromotePostPickerSheet = () => import('./PromotePostPickerSheet');
+const loadPromotePaymentSheet = () => import('./PromotePaymentSheet');
+const LazyPromotePostPickerSheet = lazy(loadPromotePostPickerSheet);
+const LazyPromotePaymentSheet = lazy(loadPromotePaymentSheet);
 
 export default function PromoteMobile() {
   const navigate = useNavigate();
@@ -256,6 +259,15 @@ export default function PromoteMobile() {
       />
     );
   }, [handleSelectPromotablePost, selectedPostId]);
+
+  const openPostPickerWithWarmup = useCallback(() => {
+    void loadPromotePostPickerSheet();
+    openPostPicker();
+  }, [openPostPicker]);
+
+  const warmPaymentSheet = useCallback(() => {
+    void loadPromotePaymentSheet();
+  }, []);
 
   const bookingBreakdown = useMemo(() => {
     const details = Array.from<string>(selectedDateKeys)
@@ -570,6 +582,7 @@ export default function PromoteMobile() {
   };
 
   const handleBookClick = () => {
+    warmPaymentSheet();
     requireAuth(() => {
       void openPaymentSheetAfterValidation();
     });
@@ -694,7 +707,7 @@ export default function PromoteMobile() {
             isVerifyingSelectedPost={isVerifyingSelectedPost}
             isLoadingPromotablePosts={isLoadingPromotablePosts}
             promotablePostsCount={promotablePosts.length}
-            onOpenPostPicker={openPostPicker}
+            onOpenPostPicker={openPostPickerWithWarmup}
             renderPromotablePostCard={renderPromotablePostCard}
           />
         ) : (
@@ -742,51 +755,60 @@ export default function PromoteMobile() {
         bookingButtonLabel={bookingButtonLabel}
         isBooking={isBooking}
         isConfirmingAvailability={isConfirmingAvailability}
+        onWarmPaymentSheet={warmPaymentSheet}
       />
 
-      <PromotePostPickerSheet
-        open={isPostPickerOpen}
-        onClose={() => setIsPostPickerOpen(false)}
-        isLoadingPromotablePosts={isLoadingPromotablePosts}
-        orderedPromotablePosts={orderedPromotablePosts}
-        renderPromotablePostCard={renderPromotablePostCard}
-        onCreatePost={handleCreatePost}
-      />
+      {isPostPickerOpen ? (
+        <Suspense fallback={null}>
+          <LazyPromotePostPickerSheet
+            open={isPostPickerOpen}
+            onClose={() => setIsPostPickerOpen(false)}
+            isLoadingPromotablePosts={isLoadingPromotablePosts}
+            orderedPromotablePosts={orderedPromotablePosts}
+            renderPromotablePostCard={renderPromotablePostCard}
+            onCreatePost={handleCreatePost}
+          />
+        </Suspense>
+      ) : null}
 
-      <PromotePaymentSheet
-        open={isBookingModalOpen}
-        onClose={closeBookingModal}
-        isPaymentBusy={isPaymentBusy}
-        paymentPanelTitle={paymentPanelTitle}
-        paymentPanelDescription={paymentPanelDescription}
-        selectedType={selectedType}
-        bookingDays={bookingBreakdown.totalUnits}
-        totalPrice={totalPrice}
-        needsPaymentPasswordSetup={needsPaymentPasswordSetup}
-        newPaymentPassword={newPaymentPassword}
-        confirmPaymentPassword={confirmPaymentPassword}
-        normalizedNewPaymentPassword={normalizedNewPaymentPassword}
-        normalizedConfirmPaymentPassword={normalizedConfirmPaymentPassword}
-        paymentPassword={paymentPassword}
-        paymentPasswordSetupDone={paymentPasswordSetupDone}
-        paymentError={paymentError}
-        canSubmitBooking={canSubmitBooking}
-        confirmPaymentButtonLabel={confirmPaymentButtonLabel}
-        paymentBusyLabel={paymentBusyLabel}
-        onNewPaymentPasswordChange={(value) => {
-          setNewPaymentPassword(value);
-          if (paymentError) setPaymentError('');
-        }}
-        onConfirmPaymentPasswordChange={(value) => {
-          setConfirmPaymentPassword(value);
-          if (paymentError) setPaymentError('');
-        }}
-        onPaymentPasswordChange={(value) => {
-          setPaymentPassword(value);
-          if (paymentError) setPaymentError('');
-        }}
-        onConfirmBooking={handleConfirmBooking}
-      />
+      {isBookingModalOpen ? (
+        <Suspense fallback={null}>
+          <LazyPromotePaymentSheet
+            open={isBookingModalOpen}
+            onClose={closeBookingModal}
+            isPaymentBusy={isPaymentBusy}
+            paymentPanelTitle={paymentPanelTitle}
+            paymentPanelDescription={paymentPanelDescription}
+            selectedType={selectedType}
+            bookingDays={bookingBreakdown.totalUnits}
+            totalPrice={totalPrice}
+            needsPaymentPasswordSetup={needsPaymentPasswordSetup}
+            newPaymentPassword={newPaymentPassword}
+            confirmPaymentPassword={confirmPaymentPassword}
+            normalizedNewPaymentPassword={normalizedNewPaymentPassword}
+            normalizedConfirmPaymentPassword={normalizedConfirmPaymentPassword}
+            paymentPassword={paymentPassword}
+            paymentPasswordSetupDone={paymentPasswordSetupDone}
+            paymentError={paymentError}
+            canSubmitBooking={canSubmitBooking}
+            confirmPaymentButtonLabel={confirmPaymentButtonLabel}
+            paymentBusyLabel={paymentBusyLabel}
+            onNewPaymentPasswordChange={(value) => {
+              setNewPaymentPassword(value);
+              if (paymentError) setPaymentError('');
+            }}
+            onConfirmPaymentPasswordChange={(value) => {
+              setConfirmPaymentPassword(value);
+              if (paymentError) setPaymentError('');
+            }}
+            onPaymentPasswordChange={(value) => {
+              setPaymentPassword(value);
+              if (paymentError) setPaymentError('');
+            }}
+            onConfirmBooking={handleConfirmBooking}
+          />
+        </Suspense>
+      ) : null}
 
     </AppPage>
   );

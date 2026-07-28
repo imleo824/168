@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { lazy, Suspense, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import {
@@ -21,15 +21,11 @@ import SurfaceSectionCard from '@/ui/SurfaceSectionCard';
 import RecordMoreLink from '@/ui/RecordMoreLink';
 import { Skeleton } from '@/ui/Skeleton';
 import { useAuth } from '@/context/AuthContext';
-import { useConfig } from '@/hooks/useData';
+import { useConfig } from '@/hooks/useDataConfig';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import { getMyPromotionEffects, getMyPromotions, getRechargeOrdersPage, getTransactionsPage } from '@/services/api';
-import LedgerRecordCard from '@/features/records/LedgerRecordCard';
 import { buildLedgerRecords } from '@/features/records/ledgerDisplay';
-import PromotionEffectStatsRow from '@/features/promote/PromotionEffectStatsRow';
-import PromotionRecordCard from '@/features/promote/PromotionRecordCard';
 import ReferralInviteBanner from '@/features/sponsor/ReferralInviteBanner';
-import TuiPlusBenefitPromptDialog from '@/features/tui-plus/TuiPlusBenefitPromptDialog';
 import { buildTuiPlusBenefitRouteState, isTuiPlusActive } from '@/features/tui-plus/tuiPlusBenefits';
 import {
   groupPromotionBookings,
@@ -40,11 +36,17 @@ import {
   getPlatformDateKey,
 } from '@/features/promote/promoteBookingUtils';
 
+import './SponsorRoute.css';
+
 type SponsorRecordTab = 'effects' | 'ledger' | 'promotions';
 
 const SPONSOR_PREVIEW_STALE_TIME = 1000 * 30;
 const SPONSOR_PREVIEW_LIMIT = 4;
 const SPONSOR_EFFECT_PREVIEW_DAYS = 5;
+const LazyLedgerRecordCard = lazy(() => import('@/features/records/LedgerRecordCard'));
+const LazyPromotionEffectStatsRow = lazy(() => import('@/features/promote/PromotionEffectStatsRow'));
+const LazyPromotionRecordCard = lazy(() => import('@/features/promote/PromotionRecordCard'));
+const LazyTuiPlusBenefitPromptDialog = lazy(() => import('@/features/tui-plus/TuiPlusBenefitPromptDialog'));
 const DEFAULT_RECORD_TAB: SponsorRecordTab = 'effects';
 const SPONSOR_NAV_GUARD = {
   policy: 'critical' as const,
@@ -257,16 +259,16 @@ export default function SponsorMobilePage() {
               {promotionEffectsQuery.isLoading || isAuthLoading ? <PageLoadingState text="正在加载曝光效果" className="sponsor-state-block" /> : promotionEffectsQuery.isError ? (
                 <StateBlock title="曝光效果加载失败" description="网络恢复后可重新查看曝光效果。" tone="error" compact className="sponsor-state-block" action={retryRecordsAction} />
               ) : promotionEffectsQuery.data && hasEffectTotals ? (
-                <>
+                <Suspense fallback={<PageLoadingState text="正在加载曝光效果" className="sponsor-state-block" />}>
                   <div className="record-list sponsor-record-list sponsor-effect-list" aria-label={`最近${SPONSOR_EFFECT_PREVIEW_DAYS}天曝光效果`}>
                     {visibleEffectDailyItems.map((item) => (
                       <SurfaceSectionCard key={item.date} as="article" compact className="record-card promotion-effects-day-card sponsor-effect-card">
-                        <div className="record-card-row"><div className="record-card-main"><p className="record-title record-card-line record-card-line--title">{item.date}</p><PromotionEffectStatsRow stats={item.metrics} className="sponsor-row-effect-stats" /></div></div>
+                        <div className="record-card-row"><div className="record-card-main"><p className="record-title record-card-line record-card-line--title">{item.date}</p><LazyPromotionEffectStatsRow stats={item.metrics} className="sponsor-row-effect-stats" /></div></div>
                       </SurfaceSectionCard>
                     ))}
                   </div>
                   <RecordMoreLink label="查看更多效果分析" onClick={() => void guardedGoPromotionEffects()} />
-                </>
+                </Suspense>
               ) : <EmptyStateCard title="暂无曝光效果" description={`最近${SPONSOR_EFFECT_PREVIEW_DAYS}天还没有曝光数据。`} compact className="sponsor-empty-state" />}
             </div>
           ) : activeRecordTab === 'promotions' ? (
@@ -274,10 +276,10 @@ export default function SponsorMobilePage() {
               {promotionsQuery.isLoading || isAuthLoading ? <PageLoadingState text="正在加载曝光记录" className="sponsor-state-block" /> : promotionsQuery.isError ? (
                 <StateBlock title="曝光记录加载失败" description="网络恢复后可重新查看投放记录。" tone="error" compact className="sponsor-state-block" action={retryRecordsAction} />
               ) : recentPromotionGroups.length > 0 ? (
-                <>
-                  <div className="record-list sponsor-record-list">{recentPromotionGroups.map((group) => <PromotionRecordCard key={group.key} group={group} onCopyRecordId={handleCopyRecordId} />)}</div>
+                <Suspense fallback={<PageLoadingState text="正在加载曝光记录" className="sponsor-state-block" />}>
+                  <div className="record-list sponsor-record-list">{recentPromotionGroups.map((group) => <LazyPromotionRecordCard key={group.key} group={group} onCopyRecordId={handleCopyRecordId} />)}</div>
                   {hasMorePromotionGroups ? <RecordMoreLink label="查看更多曝光记录" onClick={() => void guardedGoPromoteHistory()} /> : null}
-                </>
+                </Suspense>
               ) : <EmptyStateCard title="暂无曝光记录" description="买曝光后会在这里展示。" compact className="sponsor-empty-state" action={<ActionButton type="button" variant="muted" size="sm" onClick={() => void guardedGoPromote()}>买曝光</ActionButton>} />}
             </div>
           ) : (
@@ -285,22 +287,26 @@ export default function SponsorMobilePage() {
               {recordsLoading || isAuthLoading ? <PageLoadingState text="正在加载积分记录" className="sponsor-state-block" /> : recordsError ? (
                 <StateBlock title="积分记录加载失败" description="网络恢复后可重新查看充积分和消费记录。" tone="error" compact className="sponsor-state-block" action={retryRecordsAction} />
               ) : visibleLedgerRecords.length > 0 ? (
-                <>
-                  <div className="record-list sponsor-record-list">{visibleLedgerRecords.map((record) => <LedgerRecordCard key={`${record.kind}-${record.id}`} record={record} pointsPerUsdt={pointsPerUsdt} onCopyRecordId={handleCopyRecordId} />)}</div>
+                <Suspense fallback={<PageLoadingState text="正在加载积分记录" className="sponsor-state-block" />}>
+                  <div className="record-list sponsor-record-list">{visibleLedgerRecords.map((record) => <LazyLedgerRecordCard key={`${record.kind}-${record.id}`} record={record} pointsPerUsdt={pointsPerUsdt} onCopyRecordId={handleCopyRecordId} />)}</div>
                   {hasMoreLedgerRecords ? <RecordMoreLink label="查看更多交易记录" onClick={() => void guardedGoTransactions()} /> : null}
-                </>
+                </Suspense>
               ) : <EmptyStateCard title="暂无积分记录" description="充积分到账或买曝光消费后会在这里展示。" compact className="sponsor-empty-state" action={<ActionButton type="button" variant="muted" size="sm" onClick={() => void guardedGoRecharge()}>充积分</ActionButton>} />}
             </div>
           )}
         </section>
       </PageContentShell>
 
-      <TuiPlusBenefitPromptDialog
-        open={isTuiPlusPromptOpen}
-        benefit="promotionBooking"
-        onClose={closeTuiPlusPrompt}
-        onConfirm={confirmTuiPlusPrompt}
-      />
+      {isTuiPlusPromptOpen ? (
+        <Suspense fallback={null}>
+          <LazyTuiPlusBenefitPromptDialog
+            open={isTuiPlusPromptOpen}
+            benefit="promotionBooking"
+            onClose={closeTuiPlusPrompt}
+            onConfirm={confirmTuiPlusPrompt}
+          />
+        </Suspense>
+      ) : null}
     </AppPage>
   );
 }

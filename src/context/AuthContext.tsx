@@ -3,7 +3,7 @@ import { User } from '@/types';
 import { AlertCircle, CheckCircle, Info } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { safeLocalStorage } from '@/utils/storage';
-import { apiFetch } from '@/services/api';
+import { apiFetch } from '@/services/apiCore';
 import { publishSignupRewardBadge } from '@/utils/signupRewardBadge';
 import { type ReferralInviteSource } from '../../shared/referral';
 

@@ -2,7 +2,7 @@ import { memo, useCallback, useMemo } from 'react';
 
 import DetailCommentItem from '@/features/post-detail/DetailCommentItem';
 import { DetailQuoteItem } from '@/features/post-detail/PostDetailLegacySections';
-import { usePostQuotes } from '@/hooks/useData';
+import { usePostQuotes } from '@/hooks/useDataPosts';
 import { usePostComments, type PostComment } from '@/features/post/usePostComments';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import ListLoadMoreState from '@/ui/ListLoadMoreState';

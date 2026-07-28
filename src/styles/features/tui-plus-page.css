@@ -1,0 +1,98 @@
+/* Tui Plus membership page shell details not shared with other routes. */
+
+@layer utilities {
+  .tui-plus-topbar-title-node {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ui-space-1);
+    color: inherit;
+    line-height: var(--ui-line-tight);
+  }
+
+  .tui-plus-topbar-title-node svg {
+    width: var(--ui-control-icon-sm);
+    height: var(--ui-control-icon-sm);
+    color: var(--ui-brand-strong);
+    stroke-width: var(--ui-icon-stroke);
+  }
+
+  .tui-plus-loading {
+    min-height: calc(var(--ui-control-lg) * 3);
+    justify-content: center;
+  }
+
+  .tui-plus-channel-form {
+    display: grid;
+    gap: var(--ui-space-2);
+  }
+
+  .tui-plus-channel-form input {
+    width: 100%;
+    min-height: var(--ui-control-lg);
+    border: var(--ui-border-width-hairline) solid var(--ui-line-subtle);
+    border-radius: var(--ui-radius-xl);
+    background: var(--ui-surface-card);
+    color: var(--ui-text-primary);
+    font-size: var(--ui-text-sm);
+    padding: var(--ui-space-2) var(--ui-space-3);
+  }
+
+  .tui-plus-channel-form input:disabled { opacity: 0.52; }
+
+  .tui-plus-channel-list {
+    display: grid;
+    gap: var(--ui-space-2);
+  }
+
+  .tui-plus-channel-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ui-space-3);
+    border-top: var(--ui-border-width-hairline) solid var(--ui-line-subtle);
+    color: var(--ui-text-primary);
+    font-size: var(--ui-text-sm);
+    padding-top: var(--ui-space-2);
+  }
+
+  .tui-plus-channel-item span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .tui-plus-channel-item em {
+    flex: 0 0 auto;
+    color: var(--ui-brand-strong);
+    font-size: var(--ui-text-xs);
+    font-style: normal;
+    font-weight: var(--ui-font-weight-strong);
+  }
+
+  .tui-plus-refresh {
+    display: inline-flex;
+    align-self: center;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ui-space-2);
+    border: var(--ui-border-none);
+    background: var(--ui-surface-transparent);
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-text-sm);
+    padding: var(--ui-space-2);
+  }
+
+  .tui-plus-refresh svg {
+    width: var(--ui-control-icon-md);
+    height: var(--ui-control-icon-md);
+    stroke-width: var(--ui-icon-stroke);
+  }
+
+  @media (min-width: 1024px) {
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .tui-plus-page {
+      --ui-tui-plus-content-max: var(--app-desktop-page-content-width);
+    }
+  }
+}

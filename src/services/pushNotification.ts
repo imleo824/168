@@ -1,4 +1,4 @@
-import { apiFetch } from '@/services/api';
+import { apiFetch } from '@/services/apiCore';
 
 export type PushPermissionState = NotificationPermission | 'unsupported';
 export type PushUnsupportedReason =

@@ -13,6 +13,8 @@ import PageContentShell from '@/ui/PageContentShell';
 import PageHeader from '@/ui/PageHeader';
 import { InlineSpinner } from '@/ui/LoadingState';
 
+import '@/features/profile/ProfileBioEditorRoute.css';
+
 const PROFILE_BIO_MAX_LENGTH = 160;
 
 export default function ProfileBioEditorMobile() {

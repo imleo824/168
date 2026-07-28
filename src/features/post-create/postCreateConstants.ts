@@ -7,7 +7,7 @@ import {
 export const POST_CREATE_RETURN_PATH_KEY = 'post-create-return-path';
 export const POST_CREATE_EXIT_PATH_KEY = 'post-create-exit-path';
 export { POST_CONTENT_MAX_LENGTH };
-export const CATEGORY_META_TEXT_MAX_LENGTH = 120;
+export { CATEGORY_META_TEXT_MAX_LENGTH } from '@/features/category/categoryMetaSchema';
 export const POST_CREATE_TITLE_MAX_LENGTH = POST_TITLE_MAX_LENGTH;
 export const POST_CREATE_LOCATION_MAX_LENGTH = POST_LOCATION_MAX_LENGTH;
 export const POST_CREATE_CANCEL_GUARD_MS = 280;

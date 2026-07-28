@@ -54,15 +54,6 @@ export const allowedSelectorPropertyOverlapManifests = [
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
   },
   {
-    selector: ":where(.profile-avatar-button[data-tui-plus='true'], .app-bottom-nav-avatar-shell[data-tui-plus='true'], .tui-plus-x-mark)",
-    files: [
-      "src/styles/features/tui-plus-visual.css",
-      "src/styles/features/tui-plus.css",
-    ],
-    property: "--tui-plus-ring-gradient",
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-  {
     selector: ".admin-chat-config-header",
     files: [
       "src/styles/features/admin/admin-filters-responsive.css",
@@ -505,15 +496,6 @@ export const allowedSelectorPropertyOverlapManifests = [
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
   },
   {
-    selector: ".tui-plus-main",
-    files: [
-      "src/styles/features/tui-plus-premium-layout.css",
-      "src/styles/features/tui-plus.css",
-    ],
-    property: "gap",
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-  {
     selector: ".tui-plus-page, .tui-plus-link-editor-page",
     files: [
       "src/styles/features/tui-plus-premium-layout.css",
@@ -654,7 +636,6 @@ export const allowedSelectorPropertyOverlapManifests = [
       "src/styles/features/tui-plus-mobile.css",
       "src/styles/features/tui-plus-premium-layout.css",
       "src/styles/features/tui-plus-visual.css",
-      "src/styles/features/tui-plus.css",
     ],
     property: "background",
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
@@ -664,7 +645,6 @@ export const allowedSelectorPropertyOverlapManifests = [
     files: [
       "src/styles/features/tui-plus-mobile.css",
       "src/styles/features/tui-plus-visual.css",
-      "src/styles/features/tui-plus.css",
     ],
     properties: ["align-items", "border-radius", "color", "display", "height", "justify-content", "width"],
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
@@ -674,18 +654,8 @@ export const allowedSelectorPropertyOverlapManifests = [
     files: [
       "src/styles/features/tui-plus-mobile.css",
       "src/styles/features/tui-plus-visual.css",
-      "src/styles/features/tui-plus.css",
     ],
     property: "color",
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-  {
-    selector: ".tui-plus-x-benefit-item h3",
-    files: [
-      "src/styles/features/tui-plus-mobile.css",
-      "src/styles/features/tui-plus.css",
-    ],
-    properties: ["align-items", "color", "display", "font-size", "font-weight", "gap", "line-height"],
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
   },
   {
@@ -695,7 +665,6 @@ export const allowedSelectorPropertyOverlapManifests = [
       "src/styles/features/tui-plus-mobile.css",
       "src/styles/features/tui-plus-premium-layout.css",
       "src/styles/features/tui-plus-visual.css",
-      "src/styles/features/tui-plus.css",
     ],
     property: "align-items",
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
@@ -706,7 +675,6 @@ export const allowedSelectorPropertyOverlapManifests = [
       "src/styles/features/profile-plus-visual.css",
       "src/styles/features/tui-plus-mobile.css",
       "src/styles/features/tui-plus-visual.css",
-      "src/styles/features/tui-plus.css",
     ],
     properties: ["display", "gap", "grid-template-columns"],
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
@@ -725,18 +693,8 @@ export const allowedSelectorPropertyOverlapManifests = [
     files: [
       "src/styles/features/tui-plus-mobile.css",
       "src/styles/features/tui-plus-premium-layout.css",
-      "src/styles/features/tui-plus.css",
     ],
     property: "gap",
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-  {
-    selector: ".tui-plus-x-benefit-list",
-    files: [
-      "src/styles/features/tui-plus-mobile.css",
-      "src/styles/features/tui-plus.css",
-    ],
-    property: "display",
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
   },
   {
@@ -772,18 +730,8 @@ export const allowedSelectorPropertyOverlapManifests = [
     files: [
       "src/styles/features/tui-plus-mobile.css",
       "src/styles/features/tui-plus-visual.css",
-      "src/styles/features/tui-plus.css",
     ],
     properties: ["color", "font-size", "font-weight", "letter-spacing"],
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-  {
-    selector: ".tui-plus-x-eyebrow",
-    files: [
-      "src/styles/features/tui-plus-mobile.css",
-      "src/styles/features/tui-plus.css",
-    ],
-    property: "text-transform",
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
   },
   {
@@ -791,7 +739,6 @@ export const allowedSelectorPropertyOverlapManifests = [
     files: [
       "src/styles/features/tui-plus-mobile.css",
       "src/styles/features/tui-plus-visual.css",
-      "src/styles/features/tui-plus.css",
     ],
     properties: ["color", "font-size", "font-weight", "line-height"],
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
@@ -801,7 +748,6 @@ export const allowedSelectorPropertyOverlapManifests = [
     files: [
       "src/styles/features/tui-plus-mobile.css",
       "src/styles/features/tui-plus-visual.css",
-      "src/styles/features/tui-plus.css",
     ],
     properties: ["background", "content", "inset", "pointer-events", "position"],
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
@@ -812,7 +758,6 @@ export const allowedSelectorPropertyOverlapManifests = [
       "src/styles/features/tui-plus-mobile.css",
       "src/styles/features/tui-plus-premium-layout.css",
       "src/styles/features/tui-plus-visual.css",
-      "src/styles/features/tui-plus.css",
     ],
     property: "padding",
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
@@ -822,7 +767,6 @@ export const allowedSelectorPropertyOverlapManifests = [
     files: [
       "src/styles/features/tui-plus-mobile.css",
       "src/styles/features/tui-plus-visual.css",
-      "src/styles/features/tui-plus.css",
     ],
     properties: ["display", "gap", "overflow", "position"],
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
@@ -837,15 +781,6 @@ export const allowedSelectorPropertyOverlapManifests = [
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
   },
   {
-    selector: ".tui-plus-x-hero",
-    files: [
-      "src/styles/features/tui-plus-visual.css",
-      "src/styles/features/tui-plus.css",
-    ],
-    properties: ["justify-items", "text-align"],
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-  {
     selector: ".tui-plus-x-mark svg",
     files: [
       "src/styles/features/tui-plus-mobile.css",
@@ -855,21 +790,11 @@ export const allowedSelectorPropertyOverlapManifests = [
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
   },
   {
-    selector: ".tui-plus-x-mark, .tui-plus-x-eyebrow, .tui-plus-x-hero h1, .tui-plus-x-status, .tui-plus-x-subtitle",
-    files: [
-      "src/styles/features/tui-plus-mobile.css",
-      "src/styles/features/tui-plus.css",
-    ],
-    properties: ["position", "z-index"],
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-  {
     selector: ".tui-plus-x-mark",
     files: [
       "src/styles/features/tui-plus-mobile.css",
       "src/styles/features/tui-plus-premium-layout.css",
       "src/styles/features/tui-plus-visual.css",
-      "src/styles/features/tui-plus.css",
     ],
     properties: ["box-shadow", "height", "width"],
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
@@ -879,18 +804,8 @@ export const allowedSelectorPropertyOverlapManifests = [
     files: [
       "src/styles/features/tui-plus-mobile.css",
       "src/styles/features/tui-plus-visual.css",
-      "src/styles/features/tui-plus.css",
     ],
     properties: ["align-items", "background", "border-radius", "color", "display", "justify-content"],
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-  {
-    selector: ".tui-plus-x-plan-name",
-    files: [
-      "src/styles/features/tui-plus-mobile.css",
-      "src/styles/features/tui-plus.css",
-    ],
-    properties: ["color", "display", "font-size", "font-weight"],
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
   },
   {
@@ -903,58 +818,12 @@ export const allowedSelectorPropertyOverlapManifests = [
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
   },
   {
-    selector: ".tui-plus-x-price-row em",
-    files: [
-      "src/styles/features/tui-plus-mobile.css",
-      "src/styles/features/tui-plus.css",
-    ],
-    properties: ["color", "flex", "font-size", "font-style", "font-weight"],
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-  {
-    selector: ".tui-plus-x-price-row strong",
-    files: [
-      "src/styles/features/tui-plus-mobile.css",
-      "src/styles/features/tui-plus.css",
-    ],
-    properties: ["color", "display", "font-size", "font-weight", "line-height"],
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-  {
-    selector: ".tui-plus-x-price-row",
-    files: [
-      "src/styles/features/tui-plus-mobile.css",
-      "src/styles/features/tui-plus.css",
-    ],
-    properties: ["align-items", "display", "gap", "justify-content"],
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-  {
-    selector: ".tui-plus-x-primary",
-    files: [
-      "src/styles/features/tui-plus-mobile.css",
-      "src/styles/features/tui-plus.css",
-    ],
-    property: "width",
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-  {
     selector: ".tui-plus-x-status",
     files: [
       "src/styles/features/tui-plus-mobile.css",
       "src/styles/features/tui-plus-visual.css",
-      "src/styles/features/tui-plus.css",
     ],
     properties: ["color", "font-size", "font-weight", "line-height"],
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-  {
-    selector: ".tui-plus-x-subtitle",
-    files: [
-      "src/styles/features/tui-plus-mobile.css",
-      "src/styles/features/tui-plus.css",
-    ],
-    properties: ["color", "font-size", "line-height"],
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
   },
   {
@@ -971,7 +840,6 @@ export const allowedSelectorPropertyOverlapManifests = [
     files: [
       "src/styles/features/tui-plus-mobile.css",
       "src/styles/features/tui-plus-visual.css",
-      "src/styles/features/tui-plus.css",
     ],
     properties: ["background", "box-shadow", "color"],
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
@@ -981,7 +849,6 @@ export const allowedSelectorPropertyOverlapManifests = [
     files: [
       "src/styles/features/tui-plus-mobile.css",
       "src/styles/features/tui-plus-visual.css",
-      "src/styles/features/tui-plus.css",
     ],
     properties: ["align-items", "background", "border", "border-radius", "color", "display", "font-size", "font-weight", "gap", "justify-content", "min-height"],
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
@@ -991,7 +858,6 @@ export const allowedSelectorPropertyOverlapManifests = [
     files: [
       "src/styles/features/tui-plus-mobile.css",
       "src/styles/features/tui-plus-visual.css",
-      "src/styles/features/tui-plus.css",
     ],
     properties: ["color", "font-size"],
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
@@ -1001,7 +867,6 @@ export const allowedSelectorPropertyOverlapManifests = [
     files: [
       "src/styles/features/tui-plus-mobile.css",
       "src/styles/features/tui-plus-visual.css",
-      "src/styles/features/tui-plus.css",
     ],
     properties: ["background", "border-radius", "display", "gap", "grid-template-columns", "padding"],
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",

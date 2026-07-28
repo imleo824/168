@@ -244,8 +244,8 @@ assert(
 );
 assertIncludes(
   homeChrome,
-  '<HomeAdBanner ads={homeAds} compact />',
-  'Home chrome should use the compact banner contract inside the shared scrollaway chrome.',
+  '<LazyHomeAdBanner ads={homeAds} compact />',
+  'Home chrome should preserve the compact banner contract while lazy-loading the banner implementation.',
 );
 assertMatches(
   homeTopbarCss,
@@ -258,6 +258,7 @@ for (const required of [
   '--ui-home-feed-reading-column-width: min(100%, calc(var(--app-desktop-reading-main-width) - (var(--ui-app-shell-desktop-padding-x) * 2)));',
   '--ui-social-feed-list-max-width: var(--ui-home-feed-reading-column-width);',
   ".app-shell[data-route-surface='user'][data-desktop-surface='feed'] .home-scrollaway-chrome,\n    .app-shell[data-route-surface='user'][data-desktop-surface='feed'] .home-topic-tabs-sticky-shell",
+  ".app-shell[data-route-surface='user'][data-desktop-surface='feed'] .home-mobile-feed-panel [data-feed-frame]",
   ".app-shell[data-route-surface='user'][data-desktop-surface='feed'] .home-mobile-feed-panel [data-feed-scroll-root]",
   'overflow-y: auto;',
   'overscroll-behavior: contain;',
