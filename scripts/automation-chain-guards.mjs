@@ -113,6 +113,7 @@ mustHave('crawl main flow', crawl, /source_fetched/);
 mustHave('crawl main flow', crawl, /item_seen/);
 mustHave('crawl main flow', crawl, /raw_stored/);
 mustHave('crawl main flow', crawl, /post_payload_ready/);
+mustHave('crawl main flow', crawl, /ai_failed/);
 mustHave('crawl main flow', crawl, /post_db_write_failed/);
 mustHave('crawl main flow', crawl, /publish_succeeded/);
 mustHave('crawl main flow', crawl, /publish_failed/);
@@ -120,6 +121,8 @@ mustHave('crawl main flow', crawl, /帖子发布失败，已进入失败队列/)
 mustNotHave('crawl main flow', crawl, /resolveCategoryById|findPublishCategoryMetaSchema|ConfigService|AutoCrawlLock|AutoCrawlCategoryAuthor|heartbeatAutoCrawlLock|resolveAutoCrawlFinalCategoryByRules|initializeAutoCrawlSourcesFromSeed|lastGapDetectedAt|lastGapMissingCount|CREATE TABLE IF NOT EXISTS|CREATE INDEX IF NOT EXISTS/);
 
 mustHave('crawl AI', crawlAi, /context: AutoCrawlExtractionContext/);
+mustHave('crawl AI', crawlAi, /buildCrawlMetaSourceData/);
+mustHave('crawl AI', crawlAi, /quality_cleaned_title_and_content/);
 mustHave('crawl AI', crawlAi, /jsonMode: true/);
 mustHave('crawl AI', crawlAi, /enrichmentStatus/);
 mustHave('crawl AI', crawlAi, /数据库 Category 是分类唯一事实源/);

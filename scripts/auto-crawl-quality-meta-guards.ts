@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 
-import { buildRuleBasedCrawlMetaCandidates } from '../server/services/crawl-content-ai.service';
+import { buildCrawlMetaSourceData, buildRuleBasedCrawlMetaCandidates } from '../server/services/crawl-content-ai.service';
 import { normalizeCrawlCategoryMeta } from '../server/services/crawl-category-meta-normalize.service';
 import { filterCrawlContentBeforePublish } from '../server/services/crawl-content-quality.service';
 import { normalizeToLocationPreset } from '../server/services/location-preset-normalize.service';
@@ -716,6 +716,31 @@ const ruleBasedFallbackSchema = {
     { key: 'paymentMonths', label: '付几', type: 'number' as const, required: false },
   ],
 };
+
+const titleAwareSourceData = buildCrawlMetaSourceData({
+  rawTitle: '迪拜急招 React 前端工程师',
+  cleanedContent: '薪资 1000U/月，押二付一，包住，试用期后可转全职。',
+});
+assert.match(titleAwareSourceData, /^标题：迪拜急招 React 前端工程师\n/, 'auto-crawl meta extraction must include cleaned title when it carries structured clues.');
+const titleAwareRuleCandidates = buildRuleBasedCrawlMetaCandidates({
+  category: { id: 'category_jobs', name: '招聘', slug: 'jobs' },
+  schema: ruleBasedFallbackSchema,
+  locationPresets: [{ country: '阿联酋', cities: ['迪拜'] }],
+}, titleAwareSourceData);
+const titleAwareRuleMeta = await normalizeCrawlCategoryMeta({
+  category: { id: 'category_jobs', name: '招聘', slug: 'jobs' },
+  categoryMetaSchema: ruleBasedFallbackSchema,
+  rawMeta: titleAwareRuleCandidates,
+  locationPresets: [{ country: '阿联酋', cities: ['迪拜'] }],
+});
+
+assert.deepEqual(titleAwareRuleMeta.meta, {
+  position: '前端开发',
+  salaryRange: '$800 - $1,200',
+  location: '阿联酋 · 迪拜',
+  depositMonths: 2,
+  paymentMonths: 1,
+}, 'auto-crawl meta fallback must merge title and body clues instead of only reading the body.');
 
 const ruleBasedCandidates = buildRuleBasedCrawlMetaCandidates({
   category: { id: 'category_jobs', name: '招聘', slug: 'jobs' },

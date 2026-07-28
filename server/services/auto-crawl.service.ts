@@ -568,14 +568,36 @@ function extractionContext(
           detectedContact: Boolean(quality.contact),
         },
       });
-      const extracted = await buildCrawlExtract({
-        context,
-        rawTitle: quality.cleanedTitle || item.title,
-        rawContent: item.content,
-        cleanedContent: quality.cleanedContent,
-        sourceName: source.sourceName,
-        detectedContact: quality.contact,
-      });
+      let extracted: Awaited<ReturnType<typeof buildCrawlExtract>>;
+      try {
+        extracted = await buildCrawlExtract({
+          context,
+          rawTitle: quality.cleanedTitle || item.title,
+          rawContent: item.content,
+          cleanedContent: quality.cleanedContent,
+          sourceName: source.sourceName,
+          detectedContact: quality.contact,
+        });
+      } catch (error) {
+        logEvent(logger, {
+          level: 'error',
+          scope: 'ai',
+          phase: 'ai_failed',
+          message: '结构化字段提取失败，单条内容终止',
+          source,
+          item,
+          fingerprint: fp,
+          status: 'FAILED',
+          error: errorText(error),
+          details: {
+            categoryId: category.id,
+            categoryName: category.name,
+            schemaVersion: context.schema?.schemaVersion ?? null,
+            configuredMetaKeys: (context.schema?.fields || []).map((field) => field.key),
+          },
+        });
+        throw error;
+      }
 
       logEvent(logger, {
         level: extracted.audit.enrichmentStatus === 'success' ? 'info' : 'warn',
