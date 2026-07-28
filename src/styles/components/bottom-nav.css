@@ -97,6 +97,15 @@
     stroke-width: var(--ui-bottom-nav-active-icon-stroke);
   }
 
+  .app-bottom-nav-item:focus-visible {
+    outline: var(--ui-outline-none);
+    box-shadow: var(--ui-shadow-none);
+  }
+
+  .app-bottom-nav-item:focus-visible .app-bottom-nav-icon-shell {
+    box-shadow: var(--ui-bottom-nav-focus-shell-shadow, var(--ui-focus-outline-shadow));
+  }
+
   .app-bottom-nav-item:active {
     background: var(--ui-surface-transparent);
     transform: var(--ui-transform-none);
@@ -120,7 +129,7 @@
   .app-bottom-nav-avatar-shell {
     overflow: hidden;
     padding: var(--ui-space-half);
-    background: var(--ui-craft-empty-icon-surface, var(--ui-bottom-nav-active-surface));
+    background: var(--ui-bottom-nav-avatar-idle-surface, var(--ui-craft-empty-icon-surface, var(--ui-surface-muted)));
   }
 
   .app-bottom-nav-avatar-shell::before {

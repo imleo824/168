@@ -153,6 +153,9 @@ export default function AppBottomNavigation() {
 
   const profileName = user?.displayName || user?.username || user?.id || '我的';
   const profileIsTuiPlus = isTuiPlusActive(user);
+  const profileIconShellClassName = user
+    ? 'app-bottom-nav-icon-shell app-bottom-nav-avatar-shell'
+    : 'app-bottom-nav-icon-shell';
 
   return (
     <nav className="app-bottom-nav" aria-label="底部导航">
@@ -177,7 +180,7 @@ export default function AppBottomNavigation() {
           <span className="app-bottom-nav-label">买曝光</span>
         </button>
         <button type="button" className="app-bottom-nav-item app-bottom-nav-item--profile" data-state={pathname === APP_ROUTES.profile ? 'active' : 'idle'} aria-current={pathname === APP_ROUTES.profile ? 'page' : undefined} aria-label="我的" title="我的" {...profilePressHandlers}>
-          <span className="app-bottom-nav-icon-shell app-bottom-nav-avatar-shell" data-tui-plus={profileIsTuiPlus ? 'true' : undefined} aria-hidden="true">
+          <span className={profileIconShellClassName} data-tui-plus={profileIsTuiPlus ? 'true' : undefined} aria-hidden="true">
             {user ? (
               <AvatarImage src={user.photoUrl || ''} name={profileName} id={user.id} alt={profileName} className="app-bottom-nav-avatar" variant="thumb" />
             ) : (

@@ -78,13 +78,15 @@
     --ui-bottom-nav-idle-color: color-mix(in srgb, var(--ui-bottom-nav-idle) 88%, transparent);
     --ui-bottom-nav-active: var(--ui-brand-strong);
     --ui-bottom-nav-active-surface: color-mix(in srgb, var(--ui-brand) 18%, var(--ui-color-white));
-    --ui-craft-empty-icon-surface: var(--ui-bottom-nav-active-surface);
+    --ui-bottom-nav-avatar-idle-surface: color-mix(in srgb, var(--ui-surface-muted) 86%, var(--ui-color-white));
+    --ui-craft-empty-icon-surface: var(--ui-bottom-nav-avatar-idle-surface);
     --ui-bottom-nav-hover-surface: color-mix(in srgb, var(--ui-text-strong) 4.5%, transparent);
     --ui-bottom-nav-active-hover-surface: color-mix(in srgb, var(--ui-brand) 12%, var(--ui-color-white));
     --ui-bottom-nav-active-ring: color-mix(in srgb, var(--ui-brand) 18%, transparent);
     --ui-bottom-nav-active-glow-shadow: 0 calc(var(--ui-space-1) + var(--ui-space-half)) var(--ui-space-4) color-mix(in srgb, var(--ui-brand) 8%, transparent);
     --ui-bottom-nav-active-shell-shadow: inset 0 0 0 var(--ui-border-width-hairline) var(--ui-bottom-nav-active-ring), var(--ui-bottom-nav-active-glow-shadow);
     --ui-bottom-nav-active-avatar-shadow: inset 0 0 0 var(--ui-border-width-hairline) var(--ui-bottom-nav-active-ring), 0 0 0 var(--ui-border-width-hairline) color-mix(in srgb, var(--ui-brand) 76%, transparent), var(--ui-bottom-nav-active-glow-shadow);
+    --ui-bottom-nav-focus-shell-shadow: var(--ui-bottom-nav-active-shell-shadow), var(--ui-focus-outline-shadow);
     --ui-bottom-nav-avatar-placeholder-inset-shadow: inset 0 0 0 var(--ui-border-width-hairline) color-mix(in srgb, var(--ui-text-strong) 5%, transparent);
     --ui-bottom-nav-avatar-placeholder-surface:
       radial-gradient(circle at 50% 38%, color-mix(in srgb, var(--ui-brand) 18%, var(--ui-color-white)) 0 24%, transparent 25%),

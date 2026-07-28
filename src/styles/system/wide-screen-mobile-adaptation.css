@@ -348,7 +348,7 @@
       border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
       border-radius: var(--ui-radius-2xl);
       background: var(--ui-surface-card-solid);
-      box-shadow: var(--ui-shadow-card);
+      box-shadow: var(--ui-shadow-control);
     }
 
     .app-desktop-brand {
