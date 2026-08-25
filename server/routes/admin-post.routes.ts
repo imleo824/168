@@ -89,7 +89,7 @@ export function registerAdminPostRoutes(app: Express, options: RegisterAdminPost
       if (isHttpError(err)) {
         return res.status(err.statusCode).json({ error: err.message });
       }
-      res.status(500).json({ error: 'Failed to fetch posts' });
+      return res.status(500).json({ error: 'Failed to fetch posts' });
     }
   }));
 
@@ -135,7 +135,7 @@ export function registerAdminPostRoutes(app: Express, options: RegisterAdminPost
     });
 
     markContentDataChanged();
-    res.json({ success: true, post });
+    return res.json({ success: true, post });
   }));
 
   app.delete('/api/admin/posts/:id/permanent', authMiddleware, adminOnly, catchAsync(async (req, res) => {
@@ -159,7 +159,7 @@ export function registerAdminPostRoutes(app: Express, options: RegisterAdminPost
       }
     });
     markContentDataChanged();
-    res.json({ success: true });
+    return res.json({ success: true });
   }));
 
   app.patch('/api/admin/posts/:id', authMiddleware, adminOnly, catchAsync(async (req, res) => {

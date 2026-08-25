@@ -256,14 +256,14 @@ export default function UserSpaceTuiPlusLinks({ displayUser, isOwnProfile }: Pro
   useEffect(() => {
     if (!isOwnProfile || hasSessionLinkSnapshot) {
       setOwnLinks(null);
-      return;
+      return undefined;
     }
     let cancelled = false;
     void (async () => {
       try {
         const res = await apiFetch('/api/tui-plus/status', { cache: 'no-store' });
         if (!res.ok) return;
-        const payload = await readJsonResponse(res).catch(() => null);
+        const payload = await readJsonResponse(res).catch((): null => null);
         if (cancelled || !payload) return;
         setOwnLinks({
           isTuiPlus: Boolean(payload.active),

@@ -103,10 +103,10 @@ export async function getAutoCrawlRuntimeStatus(): Promise<AutoCrawlRuntimeStatu
   const query = (sql: string, ...params: unknown[]) => (prisma as any).$queryRawUnsafe(sql, ...params) as Promise<any[]>;
   const now = toIso(first<any>(await query(`SELECT now() AS now`))?.now) || new Date().toISOString();
   const [lockRow, activeRunRow, latestRunRow, staleRunningRunRow, totalsRow] = await Promise.all([
-    getAutomationTaskLock('auto_crawl').catch(() => null),
-    query(`SELECT "id","status","trigger","startedAt","finishedAt","scanned","delivered","filtered","duplicate","error","sourceCount","skipReason","errorMessage","latestTitle" FROM "AutoCrawlRun" WHERE "status"='RUNNING' AND "startedAt">=CURRENT_TIMESTAMP-INTERVAL '30 minutes' ORDER BY "startedAt" DESC,"id" DESC LIMIT 1`).then(first<any>).catch(() => null),
-    query(`SELECT "id","status","trigger","startedAt","finishedAt","scanned","delivered","filtered","duplicate","error","sourceCount","skipReason","errorMessage","latestTitle" FROM "AutoCrawlRun" ORDER BY "startedAt" DESC,"id" DESC LIMIT 1`).then(first<any>).catch(() => null),
-    query(`SELECT "id","status","trigger","startedAt","finishedAt","scanned","delivered","filtered","duplicate","error","sourceCount","skipReason","errorMessage","latestTitle" FROM "AutoCrawlRun" WHERE "status"='RUNNING' AND "startedAt"<CURRENT_TIMESTAMP-INTERVAL '30 minutes' ORDER BY "startedAt" ASC,"id" ASC LIMIT 1`).then(first<any>).catch(() => null),
+    getAutomationTaskLock('auto_crawl').catch((): null => null),
+    query(`SELECT "id","status","trigger","startedAt","finishedAt","scanned","delivered","filtered","duplicate","error","sourceCount","skipReason","errorMessage","latestTitle" FROM "AutoCrawlRun" WHERE "status"='RUNNING' AND "startedAt">=CURRENT_TIMESTAMP-INTERVAL '30 minutes' ORDER BY "startedAt" DESC,"id" DESC LIMIT 1`).then(first<any>).catch((): null => null),
+    query(`SELECT "id","status","trigger","startedAt","finishedAt","scanned","delivered","filtered","duplicate","error","sourceCount","skipReason","errorMessage","latestTitle" FROM "AutoCrawlRun" ORDER BY "startedAt" DESC,"id" DESC LIMIT 1`).then(first<any>).catch((): null => null),
+    query(`SELECT "id","status","trigger","startedAt","finishedAt","scanned","delivered","filtered","duplicate","error","sourceCount","skipReason","errorMessage","latestTitle" FROM "AutoCrawlRun" WHERE "status"='RUNNING' AND "startedAt"<CURRENT_TIMESTAMP-INTERVAL '30 minutes' ORDER BY "startedAt" ASC,"id" ASC LIMIT 1`).then(first<any>).catch((): null => null),
     query(`SELECT
       (SELECT COUNT(*)::int FROM "AutoCrawlSource") AS "sourceCount",
       (SELECT COUNT(*)::int FROM "AutoCrawlSource" WHERE "disabled"=FALSE) AS "enabledSourceCount",
@@ -114,7 +114,7 @@ export async function getAutoCrawlRuntimeStatus(): Promise<AutoCrawlRuntimeStatu
       (SELECT COUNT(*)::int FROM "AutoCrawlItem") AS "itemCount",
       (SELECT COUNT(*)::int FROM "AutoCrawlItem" WHERE "status"='PUBLISHED') AS "publishedItemCount",
       (SELECT COUNT(*)::int FROM "AutoCrawlItem" WHERE "postId" IS NOT NULL) AS "autoCrawlPostCount",
-      (SELECT MAX(p."createdAt") FROM "AutoCrawlItem" i JOIN "Post" p ON p."id"=i."postId" WHERE i."postId" IS NOT NULL) AS "latestAutoCrawlPostAt"`).then(first<any>).catch(() => ({})),
+      (SELECT MAX(p."createdAt") FROM "AutoCrawlItem" i JOIN "Post" p ON p."id"=i."postId" WHERE i."postId" IS NOT NULL) AS "latestAutoCrawlPostAt"`).then(first<any>).catch((): Record<string, unknown> => ({})),
   ]);
 
   const activeLock = lockRow ? {

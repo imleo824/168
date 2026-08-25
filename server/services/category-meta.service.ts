@@ -295,11 +295,11 @@ function parseCategoryMetaFilterPayload(raw: unknown) {
   try {
     const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-      return { value: null, error: 'categoryMetaFilters 必须是对象' };
+      return { value: null as Record<string, unknown> | null, error: 'categoryMetaFilters 必须是对象' };
     }
     return { value: parsed as Record<string, unknown> };
   } catch {
-    return { value: null, error: 'categoryMetaFilters 不是合法 JSON' };
+    return { value: null as Record<string, unknown> | null, error: 'categoryMetaFilters 不是合法 JSON' };
   }
 }
 

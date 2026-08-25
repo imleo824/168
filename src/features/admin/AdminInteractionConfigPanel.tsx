@@ -8,6 +8,7 @@ import { AdminAutoLikePanel } from './AdminAutoLikePanel';
 import { AdminAutoPostPanel } from './AdminAutoPostPanel';
 import { AdminCommentPublishPanel } from './AdminCommentPublishPanel';
 import { AdminQuotePublishPanel } from './AdminQuotePublishPanel';
+import { AdminAutomationOverviewPanel } from './AdminAutomationOverviewPanel';
 import {
   ADMIN_AUTOMATION_SECTIONS,
   AdminAutomationEmptyLogs,
@@ -16,7 +17,7 @@ import {
   type AdminAutomationSection,
 } from './AdminAutomationShared';
 
-type InteractionTab = 'quote-publish' | 'comment-publish' | 'auto-like' | 'auto-post' | 'auto-crawl';
+type InteractionTab = 'interaction-config' | 'quote-publish' | 'comment-publish' | 'auto-like' | 'auto-post' | 'auto-crawl';
 type ManualRunModule = 'quote-publish' | 'comment-publish' | 'auto-like' | 'auto-post';
 
 type AdminInteractionConfigPanelProps = {
@@ -174,7 +175,7 @@ function ModuleRunLogsPanel({ module }: { module: ManualRunModule }) {
     setIsLoading(true);
     try {
       const res = await apiFetch(endpoint, { cache: 'no-store', retry: false });
-      const payload = await res.json().catch(() => []);
+      const payload = await res.json().catch((): never[] => []);
       setRuns(res.ok && Array.isArray(payload) ? payload : []);
     } catch {
       setRuns([]);
@@ -252,7 +253,7 @@ function AutoCrawlLogsPanel() {
 }
 
 export function AdminInteractionConfigPanel({
-  initialTab = 'quote-publish',
+  initialTab = 'interaction-config',
 }: AdminInteractionConfigPanelProps) {
   const activeInteractionTab = initialTab;
   const [activeSection, setActiveSection] = useState<AdminAutomationSection>('config');
@@ -261,6 +262,10 @@ export function AdminInteractionConfigPanel({
   useEffect(() => {
     setActiveSection('config');
   }, [activeInteractionTab]);
+
+  if (activeInteractionTab === 'interaction-config') {
+    return <AdminAutomationOverviewPanel />;
+  }
 
   const renderConfig = () => {
     if (activeInteractionTab === 'quote-publish') return <AdminQuotePublishPanel />;

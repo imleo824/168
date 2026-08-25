@@ -71,18 +71,18 @@ async function createLockedRun(trigger: AutoCrawlObservedTrigger, lock: Automati
     },
   });
   await logger.flush();
-  return { ...run, lock, configEnabled: null };
+  return { ...run, lock, configEnabled: null as boolean | null };
 }
 
 async function runRecoverySafely() {
   try {
     const reconciliation = await reconcileInterruptedAutoCrawlState();
     const retryQueue = await runAutoCrawlRecoveryQueue();
-    return { reconciliation, retryQueue, error: null, skipped: false };
+    return { reconciliation, retryQueue, error: null as string | null, skipped: false };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error || 'recovery_failed');
     console.warn('[auto-crawl] recovery queue failed:', message);
-    return { reconciliation: null, retryQueue: null, error: message.slice(0, 500), skipped: false };
+    return { reconciliation: null, retryQueue: null, error: message.slice(0, 500) as string | null, skipped: false };
   }
 }
 

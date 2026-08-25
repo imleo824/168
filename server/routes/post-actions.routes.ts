@@ -228,7 +228,7 @@ export function registerPostActionsRoutes(app: Express, deps: PostActionsRoutesD
 
     if (post.quotedPostId) PostService.schedulePostRankingRefresh(post.quotedPostId);
     deps.markContentDataChanged();
-    res.json({ success: true, post: updatedPost });
+    return res.json({ success: true, post: updatedPost });
   }));
 
   app.delete('/api/posts/:id', authMiddleware, mustAuth, catchAsync(async (req: any, res) => {
@@ -256,6 +256,6 @@ export function registerPostActionsRoutes(app: Express, deps: PostActionsRoutesD
     if (post.quotedPostId) PostService.schedulePostRankingRefresh(post.quotedPostId);
     deps.markContentDataChanged();
     deps.markPromotionDataChanged();
-    res.json({ success: true });
+    return res.json({ success: true });
   }));
 }

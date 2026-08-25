@@ -48,7 +48,6 @@ const postCreatePage = read('src/features/post-create/PostCreatePage.tsx');
 const postCreatePageSections = read('src/features/post-create/postCreatePageSections.tsx');
 const postCreatePickerSheets = read('src/features/post-create/postCreatePickerSheets.tsx');
 const postCreateSettingsSheets = read('src/features/post-create/postCreateSettingsSheets.tsx');
-const postCreateFocusBridge = read('src/utils/postCreateFocusBridge.ts');
 const postCreateFocusCore = read('src/utils/postCreateFocusCore.ts');
 const postCreateFocusPrime = read('src/utils/postCreateFocusPrime.ts');
 const postCreateFocusRestore = read('src/utils/postCreateFocusRestore.ts');
@@ -642,10 +641,8 @@ assert(
     postCreateFocusPrime.includes('export function markPostCreateComposerFocusIntent()') &&
     postCreateFocusPrime.includes('export function primePostCreateComposerFocus()') &&
     postCreateFocusPrime.includes('installPostCreateFocusIntentCapture') &&
-    postCreateFocusRestore.includes('export function focusPostCreateComposer') &&
-    postCreateFocusBridge.includes("from './postCreateFocusPrime'") &&
-    postCreateFocusBridge.includes("from './postCreateFocusRestore'"),
-  'Create focus bridge must preserve click intent across route changes and multiple create entry points.',
+    postCreateFocusRestore.includes('export function focusPostCreateComposer'),
+  'Create focus modules must preserve click intent across route changes and multiple create entry points.',
 );
 
 assert(
@@ -837,8 +834,8 @@ assert(
     referralInvitePageContent.includes('const withdrawalBusy = baseWithdrawalBusy || withdrawalGuardPending;') &&
     referralInvitePageContent.includes('const conversionBusy = baseConversionBusy || conversionGuardPending;') &&
     referralInvitePageContent.includes('const summaryRetryBusy = summaryQuery.isRefetching || summaryRefetchGuardPending;') &&
-    referralInvitePageContent.includes('await withdrawalMutation.mutateAsync().catch(() => undefined);') &&
-    referralInvitePageContent.includes('await convertMutation.mutateAsync().catch(() => undefined);') &&
+    referralInvitePageContent.includes('await withdrawalMutation.mutateAsync().catch((): void => undefined);') &&
+    referralInvitePageContent.includes('await convertMutation.mutateAsync().catch((): void => undefined);') &&
     referralInvitePageContent.includes('onConfirm={() => void guardedConfirmWithdrawal()}') &&
     referralInvitePageContent.includes('onConfirm={() => void guardedConfirmConversion()}') &&
     referralInvitePageContent.includes('onClick={() => void guardedRefetchReferralSummary()}') &&

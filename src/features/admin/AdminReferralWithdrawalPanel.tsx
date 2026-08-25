@@ -72,7 +72,7 @@ export default function AdminReferralWithdrawalPanel() {
       if (status) params.set('status', status);
       if (search.trim()) params.set('search', search.trim());
       const res = await apiFetch(`/api/admin/referral-withdrawals?${params.toString()}`, { cache: 'no-store' });
-      const payload = await res.json().catch(() => []);
+      const payload = await res.json().catch((): never[] => []);
       if (!res.ok) throw new Error(payload?.error || '邀请提现加载失败');
       setItems(Array.isArray(payload) ? payload : []);
     } catch (err: any) {

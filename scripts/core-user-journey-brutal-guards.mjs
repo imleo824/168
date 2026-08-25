@@ -105,7 +105,7 @@ mustHave('post create stores structured promotion link only', postCreateRoutes, 
 mustHave('post create front end sends client nonce', postCreatePage, 'clientNonce');
 mustHave('post create front end uses async flow submit guard', postCreatePage, 'run: runSubmit');
 mustHave('post create front end blocks busy submit', postCreatePage, 'disabled={submitDisabled}');
-mustHave('shared async flow drops duplicate runs', asyncFlow, 'if (!mountedRef.current || inFlightRef.current || cooldownRef.current) return;');
+mustHave('shared async flow drops duplicate runs', asyncFlow, 'if (!mountedRef.current || inFlightRef.current || cooldownRef.current) return undefined;');
 mustHave('post create front end member prompt for link', postCreatePage, "setTuiPlusPromptBenefit('postPromotionLink')");
 mustHave('post create link editor checks active membership', postCreateSections, 'const tuiPlusActive = isTuiPlusActive(user);');
 

@@ -16,6 +16,7 @@ import {
   type QuotePublishAfterPostCreated,
   type QuotePublishRunStatus,
 } from '../services/quote-publish-v5.service';
+import type { AutoPostAfterPostCreated } from '../services/auto-post.service';
 import { runObservedQuotePublish } from '../services/interaction-observed-runner.service';
 
 const RUN_STATUSES = new Set(['PENDING', 'SUCCEEDED', 'SKIPPED', 'FAILED']);
@@ -32,11 +33,15 @@ function parseForce(raw: unknown) {
 
 export function registerQuotePublishRoutes(app: Express, options: {
   afterPostCreated?: QuotePublishAfterPostCreated;
+  afterAutoPostCreated?: AutoPostAfterPostCreated;
 } = {}) {
   registerNotificationRoutes(app);
   registerPostCommentRoutes(app);
   registerAdminCommentPublishRoutes(app);
-  registerAdminAutomationRoutes(app);
+  registerAdminAutomationRoutes(app, {
+    afterAutoPostCreated: options.afterAutoPostCreated,
+    afterQuotePostCreated: options.afterPostCreated,
+  });
 
   app.get('/api/admin/quote-publish/config', authMiddleware, adminOnly, catchAsync(async (_req, res) => {
     setNoStore(res);

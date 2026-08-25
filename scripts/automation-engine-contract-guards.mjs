@@ -125,7 +125,7 @@ mustHave('admin automation routes', adminAutomationRoutes, 'getAutomationStatusS
 mustHave('admin automation routes', adminAutomationRoutes, 'forceReleaseAutomationTaskLock(moduleName)');
 mustHave('admin automation routes', adminAutomationRoutes, 'const moduleName = parseAutomationModule(req.params.module)');
 mustNotHave('admin automation routes', adminAutomationRoutes, 'forceReleaseAutomationTaskLock(req.params.module');
-mustHave('quote routes', quoteRoutes, 'registerAdminAutomationRoutes(app)');
+mustHave('quote routes', quoteRoutes, 'registerAdminAutomationRoutes(app, {');
 mustNotHave('quote routes', quoteRoutes, '/api/admin/automation/status');
 mustNotHave('quote routes', quoteRoutes, 'forceReleaseAutomationTaskLock');
 

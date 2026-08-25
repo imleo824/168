@@ -141,7 +141,7 @@ function parseRunCursor(raw?: string) { const cursor = String(raw || '').trim();
 function recentRobotTouched(post: CandidatePost) { const cutoff = Date.now() - RECENT_ROBOT_ENGAGEMENT_COOLDOWN_MS; return [post.robotLastCommentAt, post.robotLastQuoteAt].some((value) => value && new Date(value).getTime() >= cutoff); }
 
 export async function getCommentPublishConfig() {
-  const row = await db().systemConfig.findUnique({ where: { key: 'comment_publish_config' } }).catch(() => null);
+  const row = await db().systemConfig.findUnique({ where: { key: 'comment_publish_config' } }).catch((): null => null);
   return normalize(row?.value);
 }
 export async function updateCommentPublishConfig(config: Partial<CommentPublishConfig> & { model?: unknown; aiModel?: unknown }) {
@@ -393,7 +393,7 @@ export async function getCommentPublishStatus() {
   const [config, platformAi, lock, stats, latestResult, heartbeats] = await Promise.all([
     getCommentPublishConfig(),
     getAutomationAiRuntime('comment', { force: true }),
-    getAutomationTaskLock(COMMENT_TASK_LOCK_NAME).catch(() => null),
+    getAutomationTaskLock(COMMENT_TASK_LOCK_NAME).catch((): null => null),
     getCommentPublishRunStats().catch(() => ({} as Record<string, number>)),
     listCommentPublishRuns({ limit: 1 }).catch(() => ({ items: [] as any[] })),
     listAutomationHeartbeats({ module: 'comment_publish', limit: 5 }).catch(() => [] as any[]),

@@ -183,7 +183,7 @@ export function registerUserSocialRoutes(app: Express, deps: UserSocialRoutesDep
 
     await UserService.follow(req.user.id, req.params.id);
     deps.markInteractionDataChanged([req.user.id, req.params.id]);
-    res.json({ success: true });
+    return res.json({ success: true });
   }));
 
   app.delete('/api/users/:id/follow', followLimiter, authMiddleware, mustAuth, catchAsync(async (req: any, res) => {
@@ -193,7 +193,7 @@ export function registerUserSocialRoutes(app: Express, deps: UserSocialRoutesDep
 
     await UserService.unfollow(req.user.id, req.params.id);
     deps.markInteractionDataChanged([req.user.id, req.params.id]);
-    res.json({ success: true });
+    return res.json({ success: true });
   }));
 
   app.get('/api/users/:id/follow-status', authMiddleware, catchAsync(async (req: any, res) => {
@@ -202,7 +202,7 @@ export function registerUserSocialRoutes(app: Express, deps: UserSocialRoutesDep
       return res.json({ following: false });
     }
     const following = await UserService.isFollowing(req.user.id, req.params.id);
-    res.json({ following });
+    return res.json({ following });
   }));
 
   app.post('/api/users/:id/block', followLimiter, authMiddleware, mustAuth, catchAsync(async (req: any, res) => {
@@ -227,7 +227,7 @@ export function registerUserSocialRoutes(app: Express, deps: UserSocialRoutesDep
 
     deps.markInteractionDataChanged(blockerId);
     setNoStore(res);
-    res.json({ success: true, message: '已屏蔽该用户' });
+    return res.json({ success: true, message: '已屏蔽该用户' });
   }));
 
   app.delete('/api/users/:id/block', followLimiter, authMiddleware, mustAuth, catchAsync(async (req: any, res) => {
@@ -242,7 +242,7 @@ export function registerUserSocialRoutes(app: Express, deps: UserSocialRoutesDep
 
     deps.markInteractionDataChanged(blockerId);
     setNoStore(res);
-    res.json({ success: true, message: '已取消屏蔽' });
+    return res.json({ success: true, message: '已取消屏蔽' });
   }));
 
   app.get('/api/users/:id/block-status', authMiddleware, mustAuth, catchAsync(async (req: any, res) => {
@@ -258,6 +258,6 @@ export function registerUserSocialRoutes(app: Express, deps: UserSocialRoutesDep
       },
     });
 
-    res.json({ blocked: !!block });
+    return res.json({ blocked: !!block });
   }));
 }

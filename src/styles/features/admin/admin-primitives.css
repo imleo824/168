@@ -139,6 +139,44 @@
     font-weight: var(--ui-font-weight-title);
   }
 
+  .admin-automation-progress {
+    height: var(--ui-space-2);
+    overflow: hidden;
+    border-radius: var(--ui-radius-full);
+    background: var(--ui-surface-muted);
+  }
+
+  .admin-automation-progress__value {
+    height: 100%;
+    border-radius: var(--ui-radius-full);
+    background: var(--ui-text-primary);
+    transition: width var(--ui-duration-base) var(--ease-standard);
+  }
+
+  .admin-automation-error {
+    color: var(--ui-admin-state-danger-text);
+  }
+
+  .admin-automation-status-icon {
+    flex: 0 0 auto;
+  }
+
+  .admin-automation-status-icon--success {
+    color: var(--ui-admin-state-success-text);
+  }
+
+  .admin-automation-status-icon--danger {
+    color: var(--ui-admin-state-danger-text);
+  }
+
+  .admin-automation-status-icon--info {
+    color: var(--ui-admin-state-info-text);
+  }
+
+  .admin-automation-status-icon--neutral {
+    color: var(--ui-text-muted);
+  }
+
   .admin-tone-success {
     background: var(--ui-admin-state-success-surface);
     color: var(--ui-admin-state-success-text);

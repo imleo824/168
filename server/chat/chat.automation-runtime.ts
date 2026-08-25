@@ -73,7 +73,7 @@ async function readInvocationStats(since: Date) {
     if (key === 'FAILED') stat.failed = Number(row.count || 0);
     if (key === 'PENDING') stat.pending = Number(row.count || 0);
   }
-  stat.fallbackUsed = errors.filter((item) => String(item.error || '').includes('fallback')).length;
+  stat.fallbackUsed = errors.filter((item: { error: string | null }) => String(item.error || '').includes('fallback')).length;
   const recentErrors: string[] = [];
   const seenErrors = new Set<string>();
   for (const item of errors) {
@@ -90,7 +90,7 @@ async function readInvocationStats(since: Date) {
 export async function getChatAutomationStatus() {
   const [config, aiRuntime] = await Promise.all([
     getChatConfig({ force: true }),
-    getAutomationAiRuntime('chat', { force: true }).catch(() => null),
+    getAutomationAiRuntime('chat', { force: true }).catch((): null => null),
   ]);
   const now = new Date();
   const since = new Date(now.getTime() - 24 * 60 * 60 * 1000);

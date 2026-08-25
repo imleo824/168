@@ -134,7 +134,7 @@ export function registerAdminUserRoutes(app: Express, options: RegisterAdminUser
         return res.status(err.statusCode).json({ error: err.message });
       }
       console.warn('[admin-users] Failed to fetch users', err);
-      res.status(500).json({ error: 'Failed to fetch users' });
+      return res.status(500).json({ error: 'Failed to fetch users' });
     }
   }));
 
@@ -180,7 +180,7 @@ export function registerAdminUserRoutes(app: Express, options: RegisterAdminUser
 
     clearAuthUserCache(user.id);
     markUserDataChanged(user.id);
-    res.json({ success: true, user });
+    return res.json({ success: true, user });
   }));
 
   app.post('/api/admin/users/:id/points', authMiddleware, adminOnly, catchAsync(async (req, res) => {
@@ -264,6 +264,6 @@ export function registerAdminUserRoutes(app: Express, options: RegisterAdminUser
 
     clearAuthUserCache(result.id);
     markUserDataChanged(result.id);
-    res.json({ success: true, user: result });
+    return res.json({ success: true, user: result });
   }));
 }

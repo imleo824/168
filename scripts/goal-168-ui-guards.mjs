@@ -20,7 +20,6 @@ function read(relativePath) {
       'src/features/post-detail/PostDetailInteractionsSection.tsx',
       'src/features/post-detail/usePostDetailLikeWall.ts',
     ],
-    'src/hooks/useData.ts': ['src/hooks/useDataPosts.ts', 'src/hooks/useDataCache.ts'],
     'src/features/profile/ProfileMobilePage.tsx': [
       'src/features/profile/profilePageSections.tsx',
       'src/features/profile/useProfileMediaUploads.ts',
@@ -86,7 +85,7 @@ const detailTopbarIdentityCss = read('src/styles/system/ui-detail-topbar-identit
 const feedCardCss = read('src/styles/components/feed-card-shell.css');
 const postCreatePage = read('src/features/post-create/PostCreatePage.tsx');
 const postCreateEditorCss = read('src/styles/features/create-promote-post-editor.css');
-const dataHook = read('src/hooks/useData.ts');
+const dataHook = read('src/hooks/useDataConfig.ts');
 const promoteHistory = read('src/pages/PromoteHistory.tsx');
 const promoteRecordsCss = read('src/styles/features/promote-history-edit.css');
 const promotePage = read('src/features/promote/PromoteMobilePage.tsx');
@@ -459,8 +458,8 @@ assertIncludes('src/pages/PostDetailLegacy.tsx', 'FlameKindling', 'detail heat a
 assertNotIncludes('src/features/post/PostCard.tsx', 'ChartNoAxesColumnIncreasing', 'feed heat action must not restore the old ranking icon.');
 assertNotIncludes('src/pages/PostDetailLegacy.tsx', 'ChartNoAxesColumnIncreasing', 'detail heat action must not restore the old ranking icon.');
 
-assertIncludes('src/hooks/useData.ts', 'if (cachedPost.isFeedPreview) return;', 'detail cache must not seed truncated feed preview content.');
-assertIncludes('src/hooks/useData.ts', 'return cachedPost?.isFeedPreview ? undefined : cachedPost;', 'detail placeholder data must skip truncated feed preview content.');
+assertIncludes('src/hooks/useDataCache.ts', 'if (cachedPost.isFeedPreview) return;', 'detail cache must not seed truncated feed preview content.');
+assertIncludes('src/hooks/useDataPosts.ts', 'return cachedPost?.isFeedPreview ? undefined : cachedPost;', 'detail placeholder data must skip truncated feed preview content.');
 
 assertIncludes('src/features/promote/promotionDisplayUtils.ts', 'categoryName ? `${categoryName}置顶贴`', 'category pinned promotion titles must include the real category name.');
 assertIncludes('src/features/promote/promotionDisplayUtils.ts', 'booking.campaign?.categoryName', 'category pinned title must use campaign category data when present.');

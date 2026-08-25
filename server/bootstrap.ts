@@ -685,6 +685,7 @@ async function publishPostCreatedToChat(_params: {
     role?: string | null;
     displayName?: string | null;
     photoUrl?: string | null;
+    userType?: string | null;
   };
 }) {
   return;
@@ -839,6 +840,7 @@ registerAutoPostRoutes(app, {
 });
 registerQuotePublishRoutes(app, {
   afterPostCreated: handleQuotePublishPostCreated,
+  afterAutoPostCreated: handleAutoPostCreated,
 });
 registerApiHealthRoute(app);
 

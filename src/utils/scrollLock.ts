@@ -241,7 +241,7 @@ function detachListeners() {
 }
 
 export function acquireScrollLock(options: ScrollLockOptions = {}): (() => void) | undefined {
-  if (typeof document === 'undefined') return;
+  if (typeof document === 'undefined') return undefined;
 
   const lockId = nextLockId;
   nextLockId += 1;

@@ -116,7 +116,7 @@ export function useAsyncFlow<TArgs extends unknown[] = []>(
   }, [onError]);
 
   const run = useCallback(async (...args: TArgs) => {
-    if (!mountedRef.current || inFlightRef.current || cooldownRef.current) return;
+    if (!mountedRef.current || inFlightRef.current || cooldownRef.current) return undefined;
 
     const runId = latestRunIdRef.current + 1;
     latestRunIdRef.current = runId;
@@ -139,11 +139,11 @@ export function useAsyncFlow<TArgs extends unknown[] = []>(
         error instanceof DOMException &&
         error.name === 'AbortError'
       ) {
-        return;
+        return undefined;
       }
 
       reportError(error);
-      return;
+      return undefined;
     } finally {
       void finalize(runId);
     }

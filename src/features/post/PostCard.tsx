@@ -483,19 +483,19 @@ const PostCard = memo(function PostCard({ post: inputPost, isOwner = false, show
   useLayoutEffect(() => {
     if (!shouldMeasureContentOverflow) {
       setIsContentOverflowing((current) => (current ? false : current));
-      return;
+      return undefined;
     }
     const element = contentRef.current;
     if (!element) {
       setIsContentOverflowing((current) => (current ? false : current));
-      return;
+      return undefined;
     }
     const measure = () => {
       const next = element.scrollHeight > element.clientHeight + 1;
       setIsContentOverflowing((current) => (current === next ? current : next));
     };
     measure();
-    if (typeof ResizeObserver === 'undefined') return;
+    if (typeof ResizeObserver === 'undefined') return undefined;
     const observer = new ResizeObserver(measure);
     observer.observe(element);
     return () => observer.disconnect();

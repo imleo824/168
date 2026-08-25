@@ -52,7 +52,7 @@ export function registerAccountAuthRoutes(app: Express, context: AccountAuthRout
     issueAuthSessionCookie(res, { userId: user.id, jwtSecret: JWT_SECRET });
 
     const { passwordHash: _, paymentPasswordHash: __, ...safeUser } = user as any;
-    res.json({ success: true, user: { ...safeUser, hasPassword: Boolean((user as any).passwordHash), hasPaymentPassword: Boolean((user as any).paymentPasswordHash) } });
+    return res.json({ success: true, user: { ...safeUser, hasPassword: Boolean((user as any).passwordHash), hasPaymentPassword: Boolean((user as any).paymentPasswordHash) } });
   }));
 
   app.post('/api/auth/register', authLimiter, catchAsync(async (req, res) => {
@@ -101,7 +101,7 @@ export function registerAccountAuthRoutes(app: Express, context: AccountAuthRout
     markUserDataChanged(user.id);
 
     const { passwordHash: _, paymentPasswordHash: __, ...safeUser } = user as any;
-    res.json({
+    return res.json({
       success: true,
       user: { ...safeUser, hasPassword: true, hasPaymentPassword: false },
       isNewUser: true,
@@ -112,6 +112,6 @@ export function registerAccountAuthRoutes(app: Express, context: AccountAuthRout
   app.post('/api/auth/logout', catchAsync(async (_req, res) => {
     clearAuthSessionCookie(res);
     setNoStore(res);
-    res.json({ success: true });
+    return res.json({ success: true });
   }));
 }

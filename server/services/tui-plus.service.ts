@@ -133,7 +133,7 @@ function assertUserCanUseTuiPlus(user: any, message = TUI_PLUS_REQUIRED_MESSAGE,
 
 export async function isActiveTuiPlusUser(userId: string | null | undefined) {
   if (!userId || !isDbConfigured()) return false;
-  const status = await getTuiPlusStatus(userId).catch(() => null);
+  const status = await getTuiPlusStatus(userId).catch((): null => null);
   return Boolean(status?.active);
 }
 

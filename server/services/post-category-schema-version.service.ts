@@ -10,7 +10,7 @@ export async function ensurePostPublishStorageReady() {
   // requests only verify the contract so publishing never performs DDL.
   ensurePostPublishStorageReadyPromise = prisma.$queryRawUnsafe(
     'SELECT "categoryMetaSchemaVersion", "clientNonce" FROM "Post" LIMIT 0',
-  ).then(() => undefined).catch((error) => {
+  ).then((): undefined => undefined).catch((error): never => {
     ensurePostPublishStorageReadyPromise = null;
     throw error;
   });

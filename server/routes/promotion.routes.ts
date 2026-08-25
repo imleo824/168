@@ -32,7 +32,7 @@ export function registerPromotionRoutes(app: Express, deps: PromotionRoutesDeps)
     if (!type || !dates) {
       return res.status(400).json({ error: '缺少推广类型或日期' });
     }
-    if (!await ensurePromotionBookingMember(req.user.id, res)) return;
+    if (!await ensurePromotionBookingMember(req.user.id, res)) return res;
 
     try {
       const slots = await PromotionService.getBookedSlotsBatch(type, dates, categoryId, req.user?.id);
@@ -78,7 +78,7 @@ export function registerPromotionRoutes(app: Express, deps: PromotionRoutesDeps)
     if (!type || !hasDates || !hasSlotIndices) {
       return res.status(400).json({ error: '参数不完整' });
     }
-    if (!await ensurePromotionBookingMember(user.id, res)) return;
+    if (!await ensurePromotionBookingMember(user.id, res)) return res;
 
     try {
       const result = await PromotionBookingService.bookBatch({

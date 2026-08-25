@@ -182,7 +182,7 @@ export function registerPostTelegramSyncRoutes(app: Express, deps: PostTelegramS
       ...post,
       telegramSyncStatus: TELEGRAM_SYNC_STATUS_PENDING,
       telegramSyncRequestedAt: now,
-      telegramSyncLastError: null,
+      telegramSyncLastError: null as string | null,
       syncToTelegram: false,
     };
     const scheduled = await deps.scheduleTelegramChannelSync({

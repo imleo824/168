@@ -278,7 +278,7 @@ export function registerChatGateway(server: HttpServer, options: { jwtSecret: st
     }, HEARTBEAT_INTERVAL_MS);
   }
 
-  wss.on('connection', async (ws, req, user: ChatGatewayClientUser | null) => {
+  wss.on('connection', async (ws: WebSocket, req: IncomingMessage, user: ChatGatewayClientUser | null) => {
     const client: ChatClient = {
       id: `${Date.now()}:${Math.random().toString(36).slice(2)}`,
       ws,
@@ -293,7 +293,7 @@ export function registerChatGateway(server: HttpServer, options: { jwtSecret: st
     ws.on('pong', () => {
       client.isAlive = true;
     });
-    ws.on('message', (raw) => {
+    ws.on('message', (raw: RawData) => {
       client.messageChain = client.messageChain.then(() => handleChatMessage(client, raw)).catch((error) => {
         console.warn('[chat:gateway] message failed:', error instanceof Error ? error.message : error);
         const statusCode = Number((error as any)?.statusCode || 500);

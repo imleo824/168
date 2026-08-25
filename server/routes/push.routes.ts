@@ -5,6 +5,7 @@ import { UserType } from '@prisma/client';
 import { authMiddleware, adminOnly, mustAuth, type AuthRequest } from '../middlewares/auth';
 import { catchAsync } from '../middlewares/error';
 import { setNoStore } from '../http-cache';
+import { normalizeStringParam as normalizeString } from '../http/params';
 import prisma, { isDbConfigured } from '../db';
 import {
   deactivateWebPushSubscription,
@@ -16,11 +17,6 @@ import {
 } from '../services/pwa-push.service';
 import { startPwaPushExtraEventPoller } from '../services/pwa-push-extra-events.service';
 import { createUserNotification } from '../services/user-notification.service';
-
-function normalizeString(value: unknown, maxLength: number) {
-  const text = typeof value === 'string' ? value.trim() : '';
-  return text.slice(0, maxLength);
-}
 
 function normalizeUserIds(value: unknown) {
   if (!Array.isArray(value)) return [] as string[];

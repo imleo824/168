@@ -147,7 +147,7 @@ export const HomeStructuredFilterSheetPanel = memo(function HomeStructuredFilter
   const actionPending = applyPending || resetPending;
 
   useEffect(() => {
-    if (!open || !focusFieldKey) return;
+    if (!open || !focusFieldKey) return undefined;
     const timer = window.setTimeout(() => {
       const target = fieldRefs.current[focusFieldKey];
       target?.scrollIntoView({ block: 'center', behavior: 'smooth' });

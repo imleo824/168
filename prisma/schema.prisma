@@ -745,6 +745,30 @@ model AutomationHeartbeat {
   @@index([status, createdAt(sort: Desc), id(sort: Desc)], map: "idx_automation_heartbeat_status_created")
 }
 
+model AutomationBatchRun {
+  id                String    @id @default(uuid())
+  activeKey         String?   @unique
+  trigger           String    @default("MANUAL")
+  status            String    @default("PENDING")
+  modules           Json
+  results           Json?
+  currentModule     String?
+  requestedById     String?
+  totalModules      Int       @default(0)
+  completedModules  Int       @default(0)
+  succeededModules  Int       @default(0)
+  skippedModules    Int       @default(0)
+  failedModules     Int       @default(0)
+  error             String?   @db.Text
+  startedAt         DateTime?
+  finishedAt        DateTime?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  @@index([status, createdAt(sort: Desc), id(sort: Desc)], map: "idx_automation_batch_status_created")
+  @@index([createdAt(sort: Desc), id(sort: Desc)], map: "idx_automation_batch_created")
+}
+
 model RobotContentSignature {
   id          String   @id @default(uuid())
   module      String

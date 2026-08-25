@@ -68,7 +68,7 @@ export function registerAccountSettingsRoutes(app: Express, context: AccountSett
       throw error;
     }
 
-    res.json({ success: true, loginAccount: cleanUsername });
+    return res.json({ success: true, loginAccount: cleanUsername });
   }));
 
   app.put('/api/me/password', authMiddleware, mustAuth, catchAsync(async (req: AuthRequest, res) => {
@@ -91,7 +91,7 @@ export function registerAccountSettingsRoutes(app: Express, context: AccountSett
       throw error;
     }
 
-    res.json({ success: true });
+    return res.json({ success: true });
   }));
 
   app.put('/api/me/payment-password', authMiddleware, mustAuth, catchAsync(async (req: AuthRequest, res) => {
@@ -117,7 +117,7 @@ export function registerAccountSettingsRoutes(app: Express, context: AccountSett
       throw error;
     }
 
-    res.json({ success: true, hasPaymentPassword: true });
+    return res.json({ success: true, hasPaymentPassword: true });
   }));
 
   app.put('/api/me/bio', authMiddleware, mustAuth, catchAsync(async (req: AuthRequest, res) => {
@@ -132,7 +132,7 @@ export function registerAccountSettingsRoutes(app: Express, context: AccountSett
 
     await updateUserBio(req.user.id, normalizedBio);
     markUserDataChanged(req.user.id);
-    res.json({ success: true, bio: normalizedBio });
+    return res.json({ success: true, bio: normalizedBio });
   }));
 
   app.patch('/api/me/profile', authMiddleware, mustAuth, catchAsync(async (req: any, res) => {
@@ -185,7 +185,7 @@ export function registerAccountSettingsRoutes(app: Express, context: AccountSett
     markUserDataChanged(req.user.id);
 
     const { passwordHash, paymentPasswordHash, ...safeUser } = user as any;
-    res.json({
+    return res.json({
       ...safeUser,
       photoUrl: user.photoUrl,
       coverUrl: user.coverUrl || null,

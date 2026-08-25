@@ -152,7 +152,7 @@ export async function getPlatformAiConfig(options: { force?: boolean } = {}): Pr
   let source: PlatformAiRuntimeConfig['source'] = 'default';
   let raw: unknown = null;
   if (isDbConfigured()) {
-    const row = await (prisma as any).systemConfig.findUnique({ where: { key: CONFIG_KEY } }).catch(() => null);
+    const row = await (prisma as any).systemConfig.findUnique({ where: { key: CONFIG_KEY } }).catch((): null => null);
     if (row?.value) {
       raw = row.value;
       source = 'db';

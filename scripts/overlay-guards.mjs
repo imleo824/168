@@ -121,15 +121,12 @@ const homeLayout = read('src/features/home/homeLayout.ts');
 const homeMobileLayoutCss = read('src/styles/features/home-mobile-layout.css');
 const homeMobileFirstPaintCss = read('src/styles/system/home-mobile-first-paint-contract.css');
 const homeFeedQueriesHook = read('src/hooks/useHomeFeedQueries.ts');
-const dataHooks = read('src/hooks/useData.ts');
+const dataHooks = read('src/hooks/useDataConfig.ts');
 const postCreatePage = read('src/features/post-create/PostCreatePage.tsx');
 const postDetailPage = read('src/pages/PostDetailLegacy.tsx');
 const postDetailSections = read('src/features/post-detail/PostDetailLegacySections.tsx');
 const scrollTargets = read('src/utils/scrollTargets.ts');
-const homeBootstrapHook = dataHooks.slice(
-  dataHooks.indexOf('export function useHomeBootstrap'),
-  dataHooks.indexOf('export function useReducePostRecommendation'),
-);
+const homeBootstrapHook = dataHooks;
 const profileDialog = read('src/features/profile/ProfileDialog.tsx');
 const feedScrollShell = read('src/features/feed/FeedScrollShell.tsx');
 const homeFeedContent = read('src/features/home/HomeFeedContent.tsx');

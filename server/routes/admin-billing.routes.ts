@@ -136,7 +136,7 @@ export function registerAdminBillingRoutes(app: Express, options: RegisterAdminB
       if (isHttpError(err)) {
         return res.status(err.statusCode).json({ error: err.message });
       }
-      res.status(500).json({ error: 'Failed to fetch transactions' });
+      return res.status(500).json({ error: 'Failed to fetch transactions' });
     }
   }));
 
@@ -220,7 +220,7 @@ export function registerAdminBillingRoutes(app: Express, options: RegisterAdminB
       if (isHttpError(err)) {
         return res.status(err.statusCode).json({ error: err.message });
       }
-      res.status(500).json({ error: 'Failed to fetch orders' });
+      return res.status(500).json({ error: 'Failed to fetch orders' });
     }
   }));
 
@@ -326,6 +326,6 @@ export function registerAdminBillingRoutes(app: Express, options: RegisterAdminB
       });
     });
 
-    res.json({ success: true, order: result });
+    return res.json({ success: true, order: result });
   }));
 }

@@ -316,7 +316,7 @@ export default function RechargeMobile() {
   }, [user]);
 
   useEffect(() => {
-    if (!user || step !== 'INSTRUCTIONS') return;
+    if (!user || step !== 'INSTRUCTIONS') return undefined;
 
     const timer = window.setInterval(() => {
       void loadOrders();

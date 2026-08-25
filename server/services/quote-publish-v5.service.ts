@@ -215,7 +215,7 @@ async function pickSourceAndRobot(candidates: CandidatePost[], robots: RobotUser
 export async function cleanupExpiredQuotePublishRuns() {
   if (!isDbConfigured()) return;
   const before = new Date(Date.now() - RUN_RETENTION_DAYS * 24 * 60 * 60 * 1000);
-  await db().quotePublishRun.deleteMany({ where: { createdAt: { lt: before }, status: { in: ['SKIPPED', 'FAILED'] } } }).catch(() => undefined);
+  await db().quotePublishRun.deleteMany({ where: { createdAt: { lt: before }, status: { in: ['SKIPPED', 'FAILED'] } } }).catch((): void => undefined);
 }
 async function todaySucceeded() {
   const range = getPlatformDayRange();
@@ -391,7 +391,7 @@ export async function listQuotePublishRuns(options: ListRunsOptions = {}) {
   let cursorCreatedAt = parsedCursor?.createdAt || null;
   let cursorId = parsedCursor?.id || null;
   if (cursorId && !cursorCreatedAt) {
-    const row = await db().quotePublishRun.findUnique({ where: { id: cursorId }, select: { id: true, createdAt: true } }).catch(() => null);
+    const row = await db().quotePublishRun.findUnique({ where: { id: cursorId }, select: { id: true, createdAt: true } }).catch((): null => null);
     cursorCreatedAt = row?.createdAt || null;
     cursorId = row?.id || cursorId;
   }
@@ -425,7 +425,7 @@ export async function runQuotePublishOnce(options: RunOptions = {}) {
   await cleanupExpiredQuotePublishRuns();
   const trigger = options.trigger || 'MANUAL';
   const config = await getQuotePublishConfig({ force: true });
-  const aiRuntime = await getAutomationAiRuntime('quote', { force: true }).catch(() => null);
+  const aiRuntime = await getAutomationAiRuntime('quote', { force: true }).catch((): null => null);
   const run = await createRun(trigger, aiRuntime?.model || 'platform-ai');
   await logInteractionAutomationEvent({
     module: 'quote_publish',
@@ -530,7 +530,7 @@ export async function getQuotePublishStatus() {
   const [config, platformAi, lock, stats, latest, heartbeats] = await Promise.all([
     getQuotePublishConfig({ force: true }),
     getAutomationAiRuntime('quote', { force: true }),
-    getAutomationTaskLock(QUOTE_TASK_LOCK_NAME).catch(() => null),
+    getAutomationTaskLock(QUOTE_TASK_LOCK_NAME).catch((): null => null),
     getQuotePublishRunStats().catch(() => ({ statuses: {} } as any)),
     listQuotePublishRuns({ limit: 1 }).catch(() => ({ items: [] as any[] })),
     listAutomationHeartbeats({ module: 'quote_publish', limit: 5 }).catch(() => [] as any[]),

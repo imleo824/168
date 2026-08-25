@@ -314,7 +314,7 @@ export default function ProfileMobile() {
       telegramSyncStatus: result.telegramSyncStatus || 'PENDING',
       telegramSyncedAt: result.telegramSyncedAt ?? null,
       telegramSyncRequestedAt: new Date().toISOString(),
-      telegramSyncLastError: null,
+      telegramSyncLastError: null as string | null,
     };
     queryClient.setQueriesData({ queryKey: ['posts'] }, (old: any) =>
       patchPostInCachedData(old, postId, nextPatch),

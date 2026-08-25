@@ -195,7 +195,7 @@ async function createInternalLike(input: { postId: string; postAuthorId: string;
 
 async function recordAndReturn(result: AutoLikeRunResult, status: AutoLikeRunStatus, reason?: string | null) {
   rememberLatestRun({ ...result, reason: reason ?? result.reason ?? null });
-  const runId = await createRunRow({ trigger: result.trigger, status, postId: result.lastPostId || null, robotUserId: result.lastRobotUserId || null, reason: reason ?? result.reason ?? null }).catch((error) => {
+  const runId = await createRunRow({ trigger: result.trigger, status, postId: result.lastPostId || null, robotUserId: result.lastRobotUserId || null, reason: reason ?? result.reason ?? null }).catch((error): string | null => {
     console.warn('[auto-like] run history write failed:', error?.message || error);
     return null;
   });
@@ -235,7 +235,7 @@ function pickPair(input: { posts: Array<{ id: string; userId: string }>; robots:
   return null;
 }
 
-export async function getAutoLikeConfig() { const row = await db().systemConfig.findUnique({ where: { key: CONFIG_KEY } }).catch(() => null); return normalizeConfig(row?.value); }
+export async function getAutoLikeConfig() { const row = await db().systemConfig.findUnique({ where: { key: CONFIG_KEY } }).catch((): null => null); return normalizeConfig(row?.value); }
 export async function updateAutoLikeConfig(config: Partial<AutoLikeConfig>) {
   const current = await getAutoLikeConfig();
   const next = normalizeConfig(config, current);
@@ -269,7 +269,7 @@ async function runAutoLikeLocked(config: AutoLikeConfig, enabled: boolean, trigg
     if (attempt.status === 'SUCCEEDED') { liked += 1; robotDailyCounts.set(pair.robot.id, (robotDailyCounts.get(pair.robot.id) || 0) + 1); }
     else if (attempt.status === 'FAILED') failed += 1;
     else skipped += 1;
-    const attemptRunId = await createRunRow({ trigger, status: attempt.status, postId: pair.post.id, robotUserId: pair.robot.id, reason: attempt.reason }).catch((error) => {
+    const attemptRunId = await createRunRow({ trigger, status: attempt.status, postId: pair.post.id, robotUserId: pair.robot.id, reason: attempt.reason }).catch((error): string | null => {
       console.warn('[auto-like] attempt history write failed:', error?.message || error);
       return null;
     });

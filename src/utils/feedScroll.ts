@@ -108,7 +108,7 @@ export function scrollFeedToTop(
 }
 
 export function subscribeFeedScrollModeChange(callback: () => void): (() => void) | undefined {
-  if (!canUseDom()) return;
+  if (!canUseDom()) return undefined;
 
   let frame: number | null = null;
   const schedule = () => {

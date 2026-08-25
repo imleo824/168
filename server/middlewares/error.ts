@@ -45,8 +45,15 @@ export const errorHandler = (err: any, req: Request, res: Response, next: NextFu
 };
 
 // Wrapper for async route callbacks
-export const catchAsync = (fn: Function) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+type RequestWithMiddlewareContext = Request & {
+  user?: any;
+  requestId?: string;
+};
+
+type AsyncRequestHandler = (req: RequestWithMiddlewareContext, res: Response, next: NextFunction) => unknown | Promise<unknown>;
+
+export const catchAsync = (fn: AsyncRequestHandler) => {
+  return (req: RequestWithMiddlewareContext, res: Response, next: NextFunction) => {
     Promise.resolve(fn(req, res, next)).catch(next);
   };
 };

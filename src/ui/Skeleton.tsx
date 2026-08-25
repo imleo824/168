@@ -210,8 +210,8 @@ export const HomeFeedSkeleton = memo(function HomeFeedSkeleton({
   );
 });
 
-const noopHomeTopicTabSelect = () => undefined;
-const noopHomeTopicFilterApply = () => undefined;
+const noopHomeTopicTabSelect = (): undefined => undefined;
+const noopHomeTopicFilterApply = (): undefined => undefined;
 
 export const HomePageSkeleton = memo(function HomePageSkeleton({
   includeBottomNavigation = false,

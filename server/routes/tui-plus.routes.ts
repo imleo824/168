@@ -67,7 +67,7 @@ export function registerTuiPlusRoutes(app: Express, context: TuiPlusRoutesContex
   };
 
   const syncTuiPlusAndMark = async (userId: string) => {
-    const result = await syncTuiPlusEntitlementsForUser(userId).catch(() => null);
+    const result = await syncTuiPlusEntitlementsForUser(userId).catch((): null => null);
     if (!result) return null;
     if (result.changedUsers || result.changedSubscriptions || result.releasedPlatformSources) markTuiPlusProfileChanged(userId);
     if (result.changedSources || result.releasedPlatformSources) markTuiPlusSourceChanged();
@@ -81,7 +81,7 @@ export function registerTuiPlusRoutes(app: Express, context: TuiPlusRoutesContex
   };
 
   const createActivationPost = async (userId: string, plan: unknown) => {
-    const post = await createTuiPlusActivationPost(userId, plan).catch((error) => {
+    const post = await createTuiPlusActivationPost(userId, plan).catch((error): null => {
       console.warn('[tui-plus] activation post failed', error);
       return null;
     });

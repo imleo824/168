@@ -190,7 +190,7 @@ export function registerBillingRoutes(app: Express, deps: BillingRoutesDeps) {
       });
     }
 
-    res.status(201).json({
+    return res.status(201).json({
       order,
       address: deposit.address,
       autoCredit: deposit.autoCredit,
@@ -258,7 +258,7 @@ export function registerBillingRoutes(app: Express, deps: BillingRoutesDeps) {
       minUsdt: Math.max(0, Number(configs?.tron_deposit_min_usdt || 1)),
       claimedByScanner: true,
     });
-    res.json({ success: true, ...result });
+    return res.json({ success: true, ...result });
   }));
 
   app.get('/api/me/orders', authMiddleware, mustAuth, catchAsync(async (req: any, res) => {
@@ -316,6 +316,6 @@ export function registerBillingRoutes(app: Express, deps: BillingRoutesDeps) {
     const hasMore = orders.length > limit;
     const items = hasMore ? orders.slice(0, limit) : orders;
     deps.setPaginationHeaders(res, { hasMore, nextCursor: hasMore ? items[items.length - 1]?.id || null : null });
-    res.json(items);
+    return res.json(items);
   }));
 }

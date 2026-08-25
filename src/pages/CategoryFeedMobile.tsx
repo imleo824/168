@@ -125,13 +125,13 @@ function useInfiniteScroll({
     setLoadMoreError(false);
 
     await fetchNextPage()
-      .then(() => undefined)
-      .catch(() => {
+      .then((): undefined => undefined)
+      .catch((): void => {
         if (requestGenerationRef.current === requestGeneration) {
           setLoadMoreError(true);
         }
       })
-      .finally(() => {
+      .finally((): void => {
         if (requestGenerationRef.current === requestGeneration) {
           inFlightRef.current = false;
         }
@@ -141,11 +141,11 @@ function useInfiniteScroll({
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (!enabled || !canAutoLoad) return;
+    if (!enabled || !canAutoLoad) return undefined;
     const target = sentinelRef.current;
-    if (!target || !hasNextPage) return;
+    if (!target || !hasNextPage) return undefined;
 
-    if (typeof IntersectionObserver === 'undefined') return;
+    if (typeof IntersectionObserver === 'undefined') return undefined;
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -161,7 +161,7 @@ function useInfiniteScroll({
   }, [canAutoLoad, enabled, hasNextPage, isFetching, isFetchingNextPage, requestNextPage]);
 
   useEffect(() => {
-    if (!enabled || !canAutoLoad || typeof IntersectionObserver !== 'undefined') return;
+    if (!enabled || !canAutoLoad || typeof IntersectionObserver !== 'undefined') return undefined;
 
     const maybeLoadMore = () => {
       if (!hasNextPage || isFetching || isFetchingNextPage || inFlightRef.current) return;

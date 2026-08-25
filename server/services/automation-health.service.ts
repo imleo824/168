@@ -6,6 +6,20 @@ import prisma from '../db';
 export type AutomationModuleName = 'auto_like' | 'quote_publish' | 'comment_publish' | 'auto_post' | 'auto_crawl' | 'chat_bot';
 export type AutomationHeartbeatTrigger = 'STARTUP_HEALTH_CHECK' | 'SCHEDULED_TICK' | 'MANUAL_DEBUG' | 'MAINTENANCE';
 export type AutomationHeartbeatStatus = 'SUCCEEDED' | 'SKIPPED' | 'FAILED';
+export type AutomationHeartbeatRecord = {
+  id: string;
+  module: AutomationModuleName;
+  trigger: AutomationHeartbeatTrigger;
+  status: AutomationHeartbeatStatus;
+  enabled: boolean | null;
+  reason: string | null;
+  runId: string | null;
+  details: unknown;
+  startedAt: Date | string;
+  finishedAt: Date | string;
+  durationMs: number;
+  createdAt: Date | string;
+};
 
 type RecordHeartbeatInput = {
   module: AutomationModuleName;
@@ -70,7 +84,7 @@ export async function recordAutomationHeartbeat(input: RecordHeartbeatInput) {
 export async function listAutomationHeartbeats(options: { module?: AutomationModuleName; limit?: number } = {}) {
   const limit = Math.min(100, Math.max(1, Math.floor(Number(options.limit || 50))));
   const moduleName = options.module || null;
-  return prisma.$queryRaw<any[]>(Prisma.sql`
+  return prisma.$queryRaw<AutomationHeartbeatRecord[]>(Prisma.sql`
     SELECT *
     FROM "AutomationHeartbeat"
     WHERE (${moduleName}::text IS NULL OR "module" = ${moduleName})

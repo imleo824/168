@@ -270,7 +270,7 @@ async function readResponseBufferWithLimit(response: globalThis.Response, maxByt
       chunks.push(chunk);
     }
   } catch (error) {
-    await reader.cancel().catch(() => undefined);
+    await reader.cancel().catch((): void => undefined);
     throw error;
   } finally {
     reader.releaseLock();

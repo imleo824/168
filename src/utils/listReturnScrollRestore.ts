@@ -180,7 +180,7 @@ function restoreDocumentScrollTop(
 
   const isCloseEnough = () => Math.abs(getCurrentScrollTop() - safeTop) <= 8;
   const canReachTarget = () => getMaxReachableScrollTop() >= safeTop - 8;
-  const tick = (forceFinish = false) => {
+  const tick = (forceFinish = false): void => {
     if (done) return;
     if (isListReturnRestoreDeferred()) {
       finish('deferred');
@@ -200,7 +200,7 @@ function restoreDocumentScrollTop(
   };
 
   tick();
-  if (done) return;
+  if (done) return undefined;
 
   const frame1 = window.requestAnimationFrame(() => {
     tick();
@@ -295,7 +295,7 @@ export function ListReturnScrollRestorer({
   scope: string;
   ready: boolean;
   restoreVersion: unknown;
-}) {
+}): null {
   useListReturnScroll(scope, ready, restoreVersion);
   return null;
 }

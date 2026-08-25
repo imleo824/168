@@ -151,7 +151,7 @@ function ImageUpload({
   const registerUploadRequest = useCallback((xhr: XMLHttpRequest) => {
     if (!mountedRef.current) {
       xhr.abort();
-      return;
+      return undefined;
     }
 
     activeUploadsRef.current.add(xhr);

@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import type { Dirent } from 'node:fs';
 import path from 'node:path';
 
 import prisma, { isDbConfigured } from '../db';
@@ -45,6 +46,7 @@ const MAX_STRING_LENGTH = 800;
 const MAX_ARRAY_LENGTH = 30;
 const MAX_OBJECT_KEYS = 80;
 const MAX_DEPTH = 5;
+type AutoCrawlLogFile = { fullPath: string; mtimeMs: number };
 
 function truncate(raw: unknown, max = MAX_STRING_LENGTH) {
   const value = String(raw ?? '').replace(/\s+/g, ' ').trim();
@@ -108,13 +110,13 @@ export async function cleanupAutoCrawlExecutionLogs() {
   try {
     await ensureLogDir();
     const cutoff = Date.now() - RETENTION_MS;
-    const entries = await fs.readdir(LOG_DIR, { withFileTypes: true }).catch(() => []);
+    const entries: Dirent[] = await fs.readdir(LOG_DIR, { withFileTypes: true }).catch((): Dirent[] => []);
     await Promise.all(entries
       .filter((entry) => entry.isFile() && entry.name.endsWith('.jsonl'))
       .map(async (entry) => {
         const fullPath = path.join(LOG_DIR, entry.name);
-        const stat = await fs.stat(fullPath).catch(() => null);
-        if (stat && stat.mtimeMs < cutoff) await fs.unlink(fullPath).catch(() => undefined);
+        const stat = await fs.stat(fullPath).catch((): null => null);
+        if (stat && stat.mtimeMs < cutoff) await fs.unlink(fullPath).catch((): void => undefined);
       }));
   } catch (error) {
     console.warn('[auto-crawl-log] cleanup failed:', error instanceof Error ? error.message : error);
@@ -122,7 +124,7 @@ export async function cleanupAutoCrawlExecutionLogs() {
 }
 
 export function createAutoCrawlExecutionLogger(runId: string, trigger: string) {
-  let chain = Promise.resolve();
+  let chain: Promise<void> = Promise.resolve();
   const log = (event: Omit<AutoCrawlExecutionLogEvent, 'timestamp' | 'runId' | 'trigger' | 'level'> & { level?: AutoCrawlExecutionLogLevel }) => {
     const payload: AutoCrawlExecutionLogEvent = {
       timestamp: new Date().toISOString(),
@@ -152,7 +154,7 @@ export function createAutoCrawlExecutionLogger(runId: string, trigger: string) {
     });
     return chain;
   };
-  return { log, flush: () => chain.catch(() => undefined) };
+  return { log, flush: (): Promise<void> => chain.catch((): void => undefined) };
 }
 
 function summarize(events: AutoCrawlExecutionLogEvent[]): AutoCrawlExecutionLogSummary | null {
@@ -258,7 +260,7 @@ async function listDatabaseRunSummaries(limit: number) {
      ORDER BY "startedAt" DESC,"id" DESC
      LIMIT $1::integer`,
     Math.max(1, Math.min(100, limit)),
-  ).catch(() => []);
+  ).catch((): any[] => []);
   return Array.isArray(rows) ? rows.map(runSummary) : [];
 }
 
@@ -270,24 +272,28 @@ async function getDatabaseRun(runId: string) {
      WHERE "id"=$1
      LIMIT 1`,
     runId,
-  ).catch(() => []);
+  ).catch((): any[] => []);
   return Array.isArray(rows) ? rows[0] || null : null;
 }
 
 export async function listAutoCrawlExecutionLogs(limit = 20): Promise<AutoCrawlExecutionLogSummary[]> {
   await cleanupAutoCrawlExecutionLogs();
   await ensureLogDir();
-  const entries = await fs.readdir(LOG_DIR, { withFileTypes: true }).catch(() => []);
-  const files = await Promise.all(entries
+  const entries: Dirent[] = await fs.readdir(LOG_DIR, { withFileTypes: true }).catch((): Dirent[] => []);
+  const files: Array<AutoCrawlLogFile | null> = await Promise.all(entries
     .filter((entry) => entry.isFile() && entry.name.endsWith('.jsonl'))
     .map(async (entry) => {
       const fullPath = path.join(LOG_DIR, entry.name);
-      const stat = await fs.stat(fullPath).catch(() => null);
+      const stat = await fs.stat(fullPath).catch((): null => null);
       return stat ? { fullPath, mtimeMs: stat.mtimeMs } : null;
     }));
   const summaries: AutoCrawlExecutionLogSummary[] = [];
-  for (const file of files.filter(Boolean).sort((a: any, b: any) => b.mtimeMs - a.mtimeMs).slice(0, Math.max(1, Math.min(100, limit))) as Array<{ fullPath: string }>) {
-    const summary = summarize(await readEvents(file.fullPath).catch(() => []));
+  const recentFiles = files
+    .filter((file): file is AutoCrawlLogFile => Boolean(file))
+    .sort((a, b) => b.mtimeMs - a.mtimeMs)
+    .slice(0, Math.max(1, Math.min(100, limit)));
+  for (const file of recentFiles) {
+    const summary = summarize(await readEvents(file.fullPath).catch((): AutoCrawlExecutionLogEvent[] => []));
     if (summary) summaries.push(summary);
   }
   const byRunId = new Map(summaries.map((summary) => [summary.runId, summary]));
@@ -301,7 +307,7 @@ export async function listAutoCrawlExecutionLogs(limit = 20): Promise<AutoCrawlE
 
 export async function getAutoCrawlExecutionLog(runId: string, options: { sourceId?: string } = {}) {
   await cleanupAutoCrawlExecutionLogs();
-  const events = await readEvents(filePath(runId)).catch(() => []);
+  const events = await readEvents(filePath(runId)).catch((): AutoCrawlExecutionLogEvent[] => []);
   let filtered = options.sourceId
     ? events.filter((event) => event.sourceId === options.sourceId || event.scope === 'run')
     : events;

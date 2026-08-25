@@ -234,7 +234,7 @@ export default function MessagesMobile() {
         (previous) => markNotificationReadInCache(previous, item.id, readAt),
       );
       void markNotificationRead(item.id)
-        .catch(() => undefined)
+        .catch((): void => undefined)
         .finally(() => {
           void queryClient.invalidateQueries({ queryKey: ['me', 'notifications', 'unread-count'] });
         });

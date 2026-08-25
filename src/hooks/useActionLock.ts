@@ -110,7 +110,7 @@ export function useActionLock<TArgs extends unknown[], TResult>(
       const result = actionRef.current(...args);
       if (isPromiseLike<ActionResult<TResult>>(result)) {
         return Promise.resolve(result)
-          .catch((error) => {
+          .catch((error): undefined => {
             if (!isAbortError(error)) {
               onErrorRef.current?.(error);
               if (!onErrorRef.current) console.error('[useActionLock] action failed', error);

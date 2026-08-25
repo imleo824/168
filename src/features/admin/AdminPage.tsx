@@ -882,7 +882,7 @@ export default function Admin() {
          body: JSON.stringify(sanitizedConfig)
        });
        if (res.ok) {
-         const payload = await res.json().catch(() => null);
+         const payload = await res.json().catch((): null => null);
          await Promise.all([
            fetchAdminConfig(),
            refreshPublicConfigCaches(payload?.config, payload?.categories),
@@ -1029,7 +1029,7 @@ export default function Admin() {
 
         {isInteractionAutomationTab(activeTab) && (
           <AdminInteractionConfigPanel
-            initialTab={activeTab === 'interaction-config' ? 'quote-publish' : activeTab as any}
+            initialTab={activeTab as any}
           />
         )}
 

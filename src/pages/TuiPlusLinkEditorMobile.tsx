@@ -421,7 +421,7 @@ export default function TuiPlusLinkEditorMobile() {
 
   const refreshStatus = useCallback(async () => {
     const res = await apiFetch('/api/tui-plus/status', { cache: 'no-store' });
-    const payload = res.ok ? await readJsonResponse(res).catch(() => null) : null;
+    const payload = res.ok ? await readJsonResponse(res).catch((): null => null) : null;
     applyPayload(payload);
     return payload;
   }, [applyPayload]);
@@ -431,7 +431,7 @@ export default function TuiPlusLinkEditorMobile() {
     void (async () => {
       try {
         const res = await apiFetch('/api/tui-plus/status', { cache: 'no-store' });
-        const payload = res.ok ? await readJsonResponse(res).catch(() => null) : null;
+        const payload = res.ok ? await readJsonResponse(res).catch((): null => null) : null;
         if (!cancelled && payload) applyPayload(payload);
       } catch {
         if (!cancelled) setStatusPayload({ active: false });

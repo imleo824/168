@@ -12,8 +12,8 @@ export function normalizeExternalLocation(rawLocation?: unknown) {
 export function derivePostLocation(externalLocation?: unknown) {
   return {
     location: normalizeExternalLocation(externalLocation),
-    countryCode: null,
-    countryName: null,
+    countryCode: null as string | null,
+    countryName: null as string | null,
   };
 }
 

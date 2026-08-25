@@ -238,7 +238,7 @@ export function registerAdminPromotionRoutes(app: Express, options: RegisterAdmi
       if (isHttpError(err)) {
         return res.status(err.statusCode).json({ error: err.message });
       }
-      res.status(500).json({ error: 'Failed to fetch promotions' });
+      return res.status(500).json({ error: 'Failed to fetch promotions' });
     }
   }));
 
@@ -314,7 +314,7 @@ export function registerAdminPromotionRoutes(app: Express, options: RegisterAdmi
     try {
       const result = await PromotionService.deleteBookingByAdmin(bookingId);
       markPromotionDataChanged();
-      res.json({ success: true, ...result });
+      return res.json({ success: true, ...result });
     } catch (err) {
       if (isHttpError(err)) {
         return res.status(err.statusCode).json({ error: err.message });

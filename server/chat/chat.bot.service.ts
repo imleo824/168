@@ -63,7 +63,7 @@ function buildPrompt(bot: any, recentMessages: ChatMessagePayload[], task: BotTa
 }
 async function generateReply(bot: any, task: BotTask) {
   const recentMessages = await listRecentVisibleMessages(36);
-  const aiRuntime = await getAutomationAiRuntime('chat').catch(() => null);
+  const aiRuntime = await getAutomationAiRuntime('chat').catch((): null => null);
   if (!aiRuntime?.ready) return { text: '', reason: aiRuntime?.disabledReason || 'platform_ai_not_ready' };
   const response = await generateAutomationAiText({ purpose: 'chat', system: '只输出一句中文短消息；不要解释，不要编号，不要输出 SKIP。', user: buildPrompt(bot, recentMessages, task), temperature: 0.8, topP: 0.92, maxTokens: 80, timeoutMs: CHAT_AI_TIMEOUT_MS });
   const picked = response.ok ? pickBestCandidate(response.text) : '';
@@ -87,14 +87,14 @@ export function createChatBotService(options: { broadcastMessage: BroadcastMessa
   function getTaskKey(task: BotTask) { return task.trigger === 'HUMAN_MESSAGE' ? `human:${task.inputMessage?.id || 'unknown'}:${task.sequence || 0}` : 'idle:warmup'; }
 
   async function runNext() {
-    const config = await getChatConfig().catch(() => null);
+    const config = await getChatConfig().catch((): null => null);
     const concurrency = Math.max(1, Number(config?.botConcurrency || 1));
     while (active < concurrency && queue.length > 0) {
       const task = queue.shift();
       if (!task) break;
       active += 1;
       syncRuntimeSnapshot();
-      void runTask(task).catch((error) => console.warn('[chat:bot] task failed:', error?.message || error)).finally(() => {
+      void runTask(task).catch((error) => console.warn('[chat:bot] task failed:', error?.message || error) as void).finally((): void => {
         if (task.dedupeKey) pendingTaskKeys.delete(task.dedupeKey);
         active -= 1;
         syncRuntimeSnapshot();
@@ -112,7 +112,7 @@ export function createChatBotService(options: { broadcastMessage: BroadcastMessa
       if (!config.enabled || !config.aiEnabled) { await recordChatBotHeartbeat({ task, startedAt, status: 'SKIPPED', reason: 'disabled' }); return; }
       const bot = await pickAvailableChatBot(0);
       if (!bot?.authorUserId) { await recordChatBotHeartbeat({ task, startedAt, status: 'SKIPPED', reason: 'no_available_robot' }); return; }
-      const aiRuntime = await getAutomationAiRuntime('chat').catch(() => null);
+      const aiRuntime = await getAutomationAiRuntime('chat').catch((): null => null);
       invocation = await createBotInvocation({ authorUserId: bot.authorUserId, trigger: task.trigger, inputMessageId: task.inputMessage?.id || null, model: aiRuntime?.model || config.aiModel || 'unknown' });
       if (!aiRuntime?.ready) { const reason = aiRuntime?.disabledReason || 'platform_ai_not_ready'; await finishBotInvocation(invocation.id, { status: 'SKIPPED', error: reason }); await recordChatBotHeartbeat({ task, startedAt, status: 'SKIPPED', reason, invocationId: invocation.id }); return; }
       const reply = await generateReply(bot, task);
@@ -126,8 +126,8 @@ export function createChatBotService(options: { broadcastMessage: BroadcastMessa
       options.broadcastMessage(message);
     } catch (error) {
       const reason = error instanceof Error ? error.message : String(error);
-      if (invocation?.id) await finishBotInvocation(invocation.id, { status: 'FAILED', error: reason }).catch(() => {});
-      await recordChatBotHeartbeat({ task, startedAt, status: 'FAILED', reason, invocationId: invocation?.id || null }).catch(() => {});
+      if (invocation?.id) await finishBotInvocation(invocation.id, { status: 'FAILED', error: reason }).catch((): void => undefined);
+      await recordChatBotHeartbeat({ task, startedAt, status: 'FAILED', reason, invocationId: invocation?.id || null }).catch((): void => undefined);
     }
   }
 
@@ -142,7 +142,7 @@ export function createChatBotService(options: { broadcastMessage: BroadcastMessa
   }
 
   async function handleHumanMessage(message: ChatMessagePayload) {
-    const config = await getChatConfig().catch(() => null);
+    const config = await getChatConfig().catch((): null => null);
     if (!config?.enabled || !config.aiEnabled) return;
     for (let index = 0; index < HUMAN_REPLY_COUNT; index += 1) enqueue({ trigger: 'HUMAN_MESSAGE', inputMessage: message, sequence: index }, 0);
   }
@@ -153,7 +153,7 @@ export function createChatBotService(options: { broadcastMessage: BroadcastMessa
       void (async () => {
         const startedAt = new Date();
         try {
-          const config = await getChatConfig().catch(() => null);
+          const config = await getChatConfig().catch((): null => null);
           const onlineCount = options.getOnlineCount?.() || 0;
           if (!config?.enabled || !config.aiEnabled) await recordObservedChatBotRun({ trigger: 'IDLE_WARMUP', startedAt, status: 'SKIPPED', reason: 'disabled', details: { onlineCount } });
           else { const queued = enqueue({ trigger: 'IDLE_WARMUP' }, 0); await recordObservedChatBotRun({ trigger: 'IDLE_WARMUP', startedAt, status: queued.queued ? 'SUCCEEDED' : 'SKIPPED', reason: queued.reason, details: { onlineCount, queuePending: queue.length, pendingKeys: pendingTaskKeys.size } }); }

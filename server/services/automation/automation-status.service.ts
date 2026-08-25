@@ -1,6 +1,16 @@
 import { isDbConfigured } from '../../db';
-import { listAutomationHeartbeats, type AutomationModuleName } from '../automation-health.service';
-import { getAutomationTaskLocks } from '../automation-task-lock.service';
+import { listAutomationHeartbeats, type AutomationHeartbeatRecord, type AutomationModuleName } from '../automation-health.service';
+import { getAutomationTaskLocks, type AutomationTaskLockDetails } from '../automation-task-lock.service';
+import { getAutomationBatchSnapshot } from './automation-batch.service';
+
+type AutomationBatchSummary = Awaited<ReturnType<typeof getAutomationBatchSnapshot>>;
+type AutomationModuleState = {
+  module: AutomationModuleName;
+  state: 'RUNNING' | 'UNKNOWN' | 'FAILED' | 'HEALTHY' | 'IDLE';
+  activeLock: AutomationTaskLockDetails | null;
+  lastHeartbeat: AutomationHeartbeatRecord | null;
+  reason: string | null;
+};
 
 const MODULES: AutomationModuleName[] = [
   'auto_crawl',
@@ -11,12 +21,12 @@ const MODULES: AutomationModuleName[] = [
   'chat_bot',
 ];
 
-function toTime(value: unknown) {
-  const time = value ? new Date(value as any).getTime() : 0;
+function toTime(value: Date | string | number | null | undefined) {
+  const time = value ? new Date(value).getTime() : 0;
   return Number.isFinite(time) ? time : 0;
 }
 
-function deriveState(activeLock: boolean, heartbeat: any) {
+function deriveState(activeLock: boolean, heartbeat: AutomationHeartbeatRecord | null): AutomationModuleState['state'] {
   if (activeLock) return 'RUNNING';
   if (!heartbeat) return 'UNKNOWN';
   if (heartbeat.status === 'FAILED') return 'FAILED';
@@ -24,7 +34,7 @@ function deriveState(activeLock: boolean, heartbeat: any) {
   return 'IDLE';
 }
 
-function summarize(modules: Array<{ state: string }>) {
+function summarize(modules: Array<Pick<AutomationModuleState, 'state'>>) {
   return {
     total: modules.length,
     running: modules.filter((item) => item.state === 'RUNNING').length,
@@ -37,27 +47,28 @@ function summarize(modules: Array<{ state: string }>) {
 
 export async function getAutomationStatusSnapshot() {
   if (!isDbConfigured()) {
-    const modules = MODULES.map((module) => ({ module, state: 'UNKNOWN', activeLock: null, lastHeartbeat: null, reason: 'database_not_configured' }));
-    return { ok: false, databaseConfigured: false, generatedAt: new Date().toISOString(), summary: summarize(modules), modules };
+    const modules = MODULES.map<AutomationModuleState>((module) => ({ module, state: 'UNKNOWN', activeLock: null, lastHeartbeat: null, reason: 'database_not_configured' }));
+    return { ok: false, databaseConfigured: false, generatedAt: new Date().toISOString(), summary: summarize(modules), modules, batch: { active: null, latest: null } };
   }
 
-  const [locks, heartbeats] = await Promise.all([
-    getAutomationTaskLocks().catch(() => []),
-    listAutomationHeartbeats({ limit: 100 }).catch(() => []),
+  const [locks, heartbeats, batch] = await Promise.all([
+    getAutomationTaskLocks().catch((): AutomationTaskLockDetails[] => []),
+    listAutomationHeartbeats({ limit: 100 }).catch((): AutomationHeartbeatRecord[] => []),
+    getAutomationBatchSnapshot().catch((): AutomationBatchSummary => ({ active: null, latest: null })),
   ]);
 
-  const lockByName = new Map<string, any>();
-  for (const lock of locks as any[]) lockByName.set(String(lock.name || ''), lock);
+  const lockByName = new Map<string, AutomationTaskLockDetails>();
+  for (const lock of locks) lockByName.set(String(lock.name || ''), lock);
 
-  const heartbeatByModule = new Map<string, any>();
-  for (const heartbeat of heartbeats as any[]) {
+  const heartbeatByModule = new Map<string, AutomationHeartbeatRecord>();
+  for (const heartbeat of heartbeats) {
     const module = String(heartbeat.module || '');
     if (!MODULES.includes(module as AutomationModuleName)) continue;
     const current = heartbeatByModule.get(module);
     if (!current || toTime(heartbeat.createdAt) > toTime(current.createdAt)) heartbeatByModule.set(module, heartbeat);
   }
 
-  const modules = MODULES.map((module) => {
+  const modules: AutomationModuleState[] = MODULES.map((module) => {
     const activeLock = lockByName.get(module) || null;
     const lastHeartbeat = heartbeatByModule.get(module) || null;
     const state = deriveState(Boolean(activeLock?.active), lastHeartbeat);
@@ -71,5 +82,5 @@ export async function getAutomationStatusSnapshot() {
   });
 
   const summary = summarize(modules);
-  return { ok: summary.failed === 0, databaseConfigured: true, generatedAt: new Date().toISOString(), summary, modules };
+  return { ok: summary.failed === 0, databaseConfigured: true, generatedAt: new Date().toISOString(), summary, modules, batch };
 }

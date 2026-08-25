@@ -183,7 +183,7 @@ async function buildRecommendationContext(currentUserId?: string | null): Promis
   if (inflight) return inflight;
 
   const pending = buildRecommendationContextUncached(currentUserId)
-    .catch((error) => {
+    .catch((error): null => {
       console.warn('Recommendation context unavailable; falling back to base feed ranking:', error);
       return null;
     })

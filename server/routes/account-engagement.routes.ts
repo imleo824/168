@@ -2,10 +2,9 @@ import type { Express, Request, Response } from 'express';
 import { authMiddleware, mustAuth, type AuthRequest } from '../middlewares/auth';
 import { catchAsync } from '../middlewares/error';
 import { setListCacheHeaders, setPrivateCache } from '../http-cache';
-import prisma, { isDbConfigured } from '../db';
+import { isDbConfigured } from '../db';
 import { listLikedPostsForUser } from '../services/user-likes.service';
-
-const HIDDEN_AUTO_POST_CURATED_SOURCE = 'auto_post_curated_content';
+import { listCommentsForUser } from '../services/user-comments.service';
 
 type PaginationParams = {
   limit: number;
@@ -52,7 +51,7 @@ export function registerAccountEngagementRoutes(app: Express, context: AccountEn
       nextCursor: page.nextCursor,
     });
     setListCacheHeaders(res, currentUserId, 15);
-    res.json(page.items);
+    return res.json(page.items);
   }));
 
   app.get('/api/me/comments', authMiddleware, mustAuth, catchAsync(async (req: AuthRequest, res) => {
@@ -64,54 +63,13 @@ export function registerAccountEngagementRoutes(app: Express, context: AccountEn
     }
 
     const blockedIds = await getBlockedUserIds(currentUserId);
-    const comments = await prisma.postComment.findMany({
-      where: {
-        userId: currentUserId,
-        deletedAt: null,
-        status: 'VISIBLE',
-        post: {
-          deletedAt: null,
-          isPublished: true,
-          ...(blockedIds.length ? { userId: { notIn: blockedIds } } : {}),
-          NOT: {
-            source: HIDDEN_AUTO_POST_CURATED_SOURCE,
-            user: { is: { userType: 'ROBOT' as const } },
-          },
-        },
-      },
-      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
-      take: limit + 1,
-      ...(cursor ? { cursor: { id: cursor }, skip: 1 } : {}),
-      select: {
-        id: true,
-        postId: true,
-        userId: true,
-        content: true,
-        status: true,
-        createdAt: true,
-        updatedAt: true,
-        post: {
-          select: {
-            id: true,
-            title: true,
-            content: true,
-            images: true,
-            createdAt: true,
-            userId: true,
-            user: { select: { id: true, displayName: true, photoUrl: true, userType: true } },
-          },
-        },
-      },
-    });
-
-    const hasMore = comments.length > limit;
-    const items = hasMore ? comments.slice(0, limit) : comments;
+    const page = await listCommentsForUser({ userId: currentUserId, blockedUserIds: blockedIds, limit, cursor });
     setPaginationHeaders(res, {
-      hasMore,
-      nextCursor: hasMore ? items[items.length - 1]?.id || null : null,
+      hasMore: page.hasMore,
+      nextCursor: page.nextCursor,
     });
     setListCacheHeaders(res, currentUserId, 15);
-    return res.json(items);
+    return res.json(page.items);
   }));
 
   app.get('/api/notifications/feed-counts', authMiddleware, mustAuth, catchAsync(async (req: AuthRequest, res) => {

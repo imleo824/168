@@ -143,7 +143,7 @@ function subscriptionUsesVapidPublicKey(subscription: PushSubscription, publicKe
 async function getFreshBrowserPushSubscription(registration: ServiceWorkerRegistration, publicKey: string, subscribeIfMissing: boolean) {
   let subscription = await registration.pushManager.getSubscription();
   if (subscription && !subscriptionUsesVapidPublicKey(subscription, publicKey)) {
-    await subscription.unsubscribe().catch(() => undefined);
+    await subscription.unsubscribe().catch((): void => undefined);
     subscription = null;
   }
   if (!subscription && subscribeIfMissing) {
@@ -200,7 +200,7 @@ export async function disableBrowserPush() {
     const registration = await navigator.serviceWorker.ready;
     const subscription = await registration.pushManager.getSubscription();
     endpoint = subscription?.endpoint || '';
-    await subscription?.unsubscribe().catch(() => undefined);
+    await subscription?.unsubscribe().catch((): void => undefined);
   }
 
   const res = await apiFetch('/api/push/unsubscribe', {

@@ -311,7 +311,7 @@ async function callTelegramBotApi(params: { token: string; method: string; paylo
     body: JSON.stringify(params.payload),
     signal: controller.signal,
   }).finally(() => clearTimeout(timeout));
-  const result = await response.json().catch(() => null);
+  const result = await response.json().catch((): null => null);
   if (!response.ok || !result?.ok) throw new Error(result?.description || `Telegram API ${params.method} failed`);
   return result;
 }
@@ -321,7 +321,7 @@ async function callTelegramBotApiMultipart(params: { token: string; method: stri
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 12000);
   const response = await fetch(endpoint, { method: 'POST', body: params.formData, signal: controller.signal }).finally(() => clearTimeout(timeout));
-  const result = await response.json().catch(() => null);
+  const result = await response.json().catch((): null => null);
   if (!response.ok || !result?.ok) throw new Error(result?.description || `Telegram API ${params.method} failed`);
   return result;
 }

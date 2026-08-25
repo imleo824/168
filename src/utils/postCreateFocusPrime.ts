@@ -108,7 +108,7 @@ export function primePostCreateComposerFocus() {
 }
 
 export function installPostCreateFocusIntentCapture(root?: Document): (() => void) | undefined {
-  if (!canUsePostCreateFocusDocument()) return;
+  if (!canUsePostCreateFocusDocument()) return undefined;
   const targetRoot = root || document;
 
   const primeFromPointer = (event: PointerEvent) => {

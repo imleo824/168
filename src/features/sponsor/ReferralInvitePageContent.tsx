@@ -143,7 +143,7 @@ export default function ReferralInvitePageContent({ isRulesOpen, onCloseRules }:
       return;
     }
     if (normalizedPaymentPassword.length < 6) return setPaymentError('请输入支付密码');
-    await withdrawalMutation.mutateAsync().catch(() => undefined);
+    await withdrawalMutation.mutateAsync().catch((): void => undefined);
   };
   const handleConfirmConversion = async () => {
     if (baseConversionBusy) return;
@@ -152,7 +152,7 @@ export default function ReferralInvitePageContent({ isRulesOpen, onCloseRules }:
     if (parsedConvertAmount <= 0) return setConvertError('请输入转换金额');
     if (parsedConvertAmount > summary.availableCommission) return setConvertError(`最多可转换 ${formatMoney(summary.availableCommission)}U`);
     if (previewConvertPoints <= 0) return setConvertError('转换金额不足以生成积分');
-    await convertMutation.mutateAsync().catch(() => undefined);
+    await convertMutation.mutateAsync().catch((): void => undefined);
   };
   const { guarded: guardedConfirmWithdrawal, isPending: withdrawalGuardPending } = useInteractionGuard(handleConfirmWithdrawal, {
     policy: 'critical',

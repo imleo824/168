@@ -325,7 +325,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
-    await apiFetch('/api/auth/logout', { method: 'POST' }).catch(() => null);
+    await apiFetch('/api/auth/logout', { method: 'POST' }).catch((): null => null);
     setUser(null);
     cacheUserSnapshot(null);
     queryClient.removeQueries();

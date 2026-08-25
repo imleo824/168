@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises';
+import type { Dirent } from 'node:fs';
 import path from 'node:path';
 
 export type InteractionAutomationModule = 'auto_like' | 'comment_publish' | 'quote_publish' | 'auto_post';
@@ -25,6 +26,7 @@ const MAX_STRING_LENGTH = 800;
 const MAX_ARRAY_LENGTH = 20;
 const MAX_OBJECT_KEYS = 60;
 const MAX_DEPTH = 4;
+type InteractionLogFile = { fullPath: string; mtimeMs: number };
 
 function truncate(raw: unknown, max = MAX_STRING_LENGTH) {
   const value = String(raw ?? '').replace(/\s+/g, ' ').trim();
@@ -174,13 +176,13 @@ export async function cleanupInteractionAutomationExecutionLogs() {
   for (const module of ['auto_like', 'comment_publish', 'quote_publish', 'auto_post'] as InteractionAutomationModule[]) {
     try {
       await ensureModuleLogDir(module);
-      const entries = await fs.readdir(path.join(LOG_DIR, module), { withFileTypes: true }).catch(() => []);
+      const entries: Dirent[] = await fs.readdir(path.join(LOG_DIR, module), { withFileTypes: true }).catch((): Dirent[] => []);
       await Promise.all(entries
         .filter((entry) => entry.isFile() && entry.name.endsWith('.jsonl'))
         .map(async (entry) => {
           const fullPath = path.join(LOG_DIR, module, entry.name);
-          const stat = await fs.stat(fullPath).catch(() => null);
-          if (stat && stat.mtimeMs < cutoff) await fs.unlink(fullPath).catch(() => undefined);
+          const stat = await fs.stat(fullPath).catch((): null => null);
+          if (stat && stat.mtimeMs < cutoff) await fs.unlink(fullPath).catch((): void => undefined);
         }));
     } catch (error) {
       console.warn('[interaction-automation-log] cleanup failed:', error instanceof Error ? error.message : error);

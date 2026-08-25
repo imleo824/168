@@ -186,7 +186,7 @@ export async function validateAutoPostConfigForSave(config: AutoPostConfig) { if
 async function pickContent(topic: AutoPostTopic) { const items = await getDb().autoPostContent.findMany({ where: { topic, isActive: true, usedAt: null }, orderBy: [{ qualityScore: 'desc' }, { createdAt: 'asc' }, { id: 'asc' }], take: PICK_CONTENT_LIMIT }); if (items.length === 0) return null; const pool = items.slice(0, Math.min(PICK_RANDOM_POOL_LIMIT, items.length)); return pool[Math.floor(Math.random() * pool.length)] || pool[0]; }
 async function pickRunnableTopic(config: AutoPostConfig) {
   const topics = AUTO_POST_CONFIG_TOPICS.filter((topic) => getTopicConfig(config, topic as AutoPostTopic).enabled) as AutoPostTopic[];
-  if (topics.length === 0) return { topic: null, reason: 'no_topic_enabled' };
+  if (topics.length === 0) return { topic: null as AutoPostTopic | null, reason: 'no_topic_enabled' };
   const shuffled = [...topics].sort(() => Math.random() - 0.5);
   for (const topic of shuffled) {
     const topicConfig = getTopicConfig(config, topic);
@@ -198,7 +198,7 @@ async function pickRunnableTopic(config: AutoPostConfig) {
     const content = await pickContent(topic);
     if (content) return { topic, content, validation, reason: '' };
   }
-  return { topic: null, reason: 'no_available_topic_content' };
+  return { topic: null as AutoPostTopic | null, reason: 'no_available_topic_content' };
 }
 async function createPostFromContent(params: { contentItem: any; author: any; category: any | null; config: AutoPostConfig }) {
   const { contentItem, author, category } = params;

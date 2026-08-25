@@ -56,7 +56,7 @@ export function beginScrollIntent(intent: ScrollIntent, ttlMs = DEFAULT_TTL_MS[i
   const expiresAt = now() + Math.max(0, ttlMs);
 
   if (current && current.priority > priority && current.expiresAt > expiresAt) {
-    return;
+    return undefined;
   }
 
   activeIntent = { intent, priority, expiresAt };

@@ -67,10 +67,10 @@ export class FeedHydratorService {
       : [];
     const needsLikedPostLookup = Boolean(params.currentUserId) && posts.some((post: any) => !Array.isArray(post.likes));
     const [users, categories, likedPostIds] = await Promise.all([
-      this.deps.repository.listUsersByIds(userIds).catch(() => []),
-      this.deps.repository.listCategoriesByIds(categoryIds).catch(() => []),
+      this.deps.repository.listUsersByIds(userIds).catch((): any[] => []),
+      this.deps.repository.listCategoriesByIds(categoryIds).catch((): any[] => []),
       needsLikedPostLookup
-        ? this.deps.repository.listLikedPostIds(params.currentUserId, postIds).catch(() => [])
+        ? this.deps.repository.listLikedPostIds(params.currentUserId, postIds).catch((): any[] => [])
         : Promise.resolve(embeddedLikedPostIds),
     ]);
 

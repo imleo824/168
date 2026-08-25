@@ -53,7 +53,6 @@ const pushNotification = read('src/services/pushNotification.ts');
 const appBottomNavigation = read('src/app/AppBottomNavigation.tsx');
 const usePostCreateFocusIntentCapture = read('src/app/usePostCreateFocusIntentCapture.ts');
 const publishIconButton = read('src/ui/PublishIconButton.tsx');
-const postCreateFocusBridge = read('src/utils/postCreateFocusBridge.ts');
 const postCreateFocusPrime = read('src/utils/postCreateFocusPrime.ts');
 const postCreateFocusRestore = read('src/utils/postCreateFocusRestore.ts');
 const postCard = read('src/features/post/PostCard.tsx');
@@ -935,12 +934,6 @@ assert.doesNotMatch(
   ].join('\n'),
   /@\/utils\/postCreateFocusBridge|@\/utils\/postCreateFocusRestore/,
   'home startup and navigation surfaces must import create-focus trigger/prime helpers directly, not the compatibility bridge or create-page restore module',
-);
-
-assert.match(
-  postCreateFocusBridge,
-  /from ['"]\.\/postCreateFocusPrime['"][\s\S]*from ['"]\.\/postCreateFocusCore['"][\s\S]*from ['"]\.\/postCreateFocusRestore['"]/,
-  'post-create focus bridge should remain a compatibility facade over split prime/core/restore modules',
 );
 
 assert.doesNotMatch(

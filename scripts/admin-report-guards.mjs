@@ -54,6 +54,7 @@ const schema = read('prisma/schema.prisma');
 const configRoutes = read('server/routes/config.routes.ts');
 const adminBillingRoutes = read('server/routes/admin-billing.routes.ts');
 const adminDepositRoutes = read('server/routes/admin-deposit.routes.ts');
+const adminDepositService = read('server/services/admin-deposit.service.ts');
 const adminPostRoutes = read('server/routes/admin-post.routes.ts');
 const adminPromotionRoutes = read('server/routes/admin-promotion.routes.ts');
 const adminReportRoutes = read('server/routes/admin-report.routes.ts');
@@ -143,9 +144,8 @@ assert.match(adminDesktopDataTable, /getTransactionActionLabel/, 'admin transact
 assert.match(configRoutes, /ref === 'exposure' \|\| ref === '曝光' \|\| ref === '爆料'/, 'public categories must normalize exposure aliases to one 爆料 category.');
 assert.match(configRoutes, /getPublicCategoryCanonicalRefs/, 'public categories must dedupe after public-name normalization.');
 
-const addressStatsRoute = extractRoute(adminDepositRoutes, "app.get('/api/admin/deposit-addresses/stats'");
-assert.match(addressStatsRoute, /const todayRange = getPlatformDayRange\(\)/, 'deposit stats today must use platform day range');
-assert.match(addressStatsRoute, /creditedAt:\s*\{\s*gte:\s*todayRange\.start,\s*lt:\s*todayRange\.end\s*\}/, 'deposit stats today recharge metrics must be bounded by platform today');
+assert.match(adminDepositService, /const todayRange = getPlatformDayRange\(\)/, 'deposit stats today must use platform day range');
+assert.match(adminDepositService, /creditedAt:\s*\{\s*gte:\s*todayRange\.start,\s*lt:\s*todayRange\.end\s*\}/, 'deposit stats today recharge metrics must be bounded by platform today');
 
 const opsReportRoute = extractRoute(adminReportRoutes, "app.get('/api/admin/ops-report'");
 assert.doesNotMatch(opsReportRoute, /INTERVAL '8 hours'/, 'ops report date buckets must not hardcode Shanghai offset');

@@ -1350,7 +1350,7 @@ export async function runAutoCrawlOnce(options: { trigger?: RunTrigger; force?: 
       errorMessage: errorText(error),
     });
   } finally {
-    await logger.flush().catch(() => undefined);
+    await logger.flush().catch((): void => undefined);
   }
 }
 
@@ -1430,7 +1430,7 @@ export async function reprocessAutoCrawlItems(options: {
         loadAutoCrawlDatabaseConfig(),
       ]);
       if (!storedItems.length) {
-        return { run: null, items: [], summary: { scanned: 0, delivered: 0, filtered: 0, duplicate: 0, error: 0 } };
+        return { run: null as AutoCrawlRunRecord | null, items: [] as StoredAutoCrawlReprocessItem[], summary: { scanned: 0, delivered: 0, filtered: 0, duplicate: 0, error: 0 } };
       }
 
       const owner = `REPROCESS:${Date.now()}:${crypto.randomUUID()}`;
@@ -1662,6 +1662,6 @@ export async function reprocessAutoCrawlItems(options: {
         const run = await finishLoggedRun(logger, id, { status: totals.error ? 'PARTIAL_FAILED' : 'SUCCEEDED', ...totals });
         return { run, items, summary: totals };
       } finally {
-        await logger.flush().catch(() => undefined);
+        await logger.flush().catch((): void => undefined);
       }
     }

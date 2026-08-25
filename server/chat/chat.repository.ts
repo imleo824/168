@@ -82,7 +82,7 @@ export async function ensurePublicChatRoom() {
   if (publicRoomCache && isChatStorageAvailable()) return publicRoomCache;
   if (publicRoomPromise) return publicRoomPromise;
   if (!(await ensureChatStorageAvailable({ repair: true }))) return fallback;
-  publicRoomPromise = (async () => {
+  publicRoomPromise = (async (): Promise<PublicChatRoomPayload> => {
     try {
       const room = await db().chatRoom.upsert({ where: { key: PUBLIC_CHAT_ROOM_KEY }, update: {}, create: { key: PUBLIC_CHAT_ROOM_KEY, title: '公共聊天室' }, select: { id: true, key: true, title: true } });
       publicRoomCache = room;
@@ -108,7 +108,7 @@ export async function ensureDefaultChatBots() {
   let created = 0;
   if (total <= 0) {
     for (const robot of DEFAULT_CHAT_ROBOTS) {
-      const existing = await db().user.findFirst({ where: { userType: 'ROBOT', displayName: robot.displayName }, select: { id: true } }).catch(() => null);
+      const existing = await db().user.findFirst({ where: { userType: 'ROBOT', displayName: robot.displayName }, select: { id: true } }).catch((): null => null);
       if (existing?.id) continue;
       await db().user.create({ data: { displayName: robot.displayName, bio: robot.bio, userType: 'ROBOT', isDisabled: false, points: 0, role: 'USER' } });
       created += 1;
@@ -162,7 +162,7 @@ export async function listAdminChatBotInvocations(options: { limit: number; stat
   const relatedMessages = messageIds.length ? await db().chatMessage.findMany({ where: { id: { in: messageIds } }, select: CHAT_MESSAGE_SELECT }) : [];
   const messageMap = new Map<string, ChatMessagePayload>(relatedMessages.map((message: any) => [message.id, toChatMessagePayload(message)]));
   return Promise.all(rows.map(async (row: any) => {
-    const contextRows = await db().chatMessage.findMany({ where: { roomId: row.roomId, status: 'VISIBLE', createdAt: { lte: row.startedAt || row.createdAt } }, select: CHAT_MESSAGE_SELECT, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], take: 12 }).catch(() => []);
+    const contextRows = await db().chatMessage.findMany({ where: { roomId: row.roomId, status: 'VISIBLE', createdAt: { lte: row.startedAt || row.createdAt } }, select: CHAT_MESSAGE_SELECT, orderBy: [{ createdAt: 'desc' }, { id: 'desc' }], take: 12 }).catch((): any[] => []);
     const contextMessages = contextRows.reverse().map(toChatMessagePayload);
     const inputMessage = row.inputMessageId ? messageMap.get(row.inputMessageId) || null : null;
     const outputMessage = row.outputMessageId ? messageMap.get(row.outputMessageId) || null : null;

@@ -14,6 +14,6 @@ export function useHomeBootstrapPrefetch(enabled = true) {
       queryKey: ['home', 'bootstrap'],
       queryFn: () => getHomeBootstrap(),
       staleTime: REFERENCE_DATA_STALE_TIME,
-    }).catch(() => undefined);
+    }).catch((): void => undefined);
   }, [enabled, queryClient]);
 }

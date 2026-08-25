@@ -16,7 +16,7 @@ export function usePromoteDateWindow() {
   const [today, setToday] = useState(() => getTodayStart());
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined') return undefined;
 
     const refreshToday = () => {
       setToday((current) => {

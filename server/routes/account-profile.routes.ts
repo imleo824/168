@@ -68,6 +68,6 @@ export function registerAccountProfileRoutes(app: Express, context: AccountProfi
 
     setPublicCache(res, 30, 120, 60);
     res.setHeader('X-User-Profile-Cache', cacheStatus);
-    res.json(processedUser);
+    return res.json(processedUser);
   }));
 }
