@@ -25,4 +25,22 @@
       font-size: var(--ui-type-feed-body-compact-size);
     }
   }
+
+  @media (min-width: 1024px) {
+    .app-shell[data-route-surface='user'][data-desktop-surface='feed'] .ins-post-card {
+      --ui-feed-card-media-radius-desktop: var(--ui-radius-xl);
+      --feed-card-layout-padding-y: var(--ui-space-5);
+      transition:
+        background-color var(--ui-duration-base) var(--ease-standard),
+        border-color var(--ui-duration-base) var(--ease-standard);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='feed'] .ins-post-card:hover {
+      background: var(--ui-surface-weak);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='feed'] .ins-post-card .x-card-action-cell {
+      border-radius: var(--ui-radius-lg);
+    }
+  }
 }

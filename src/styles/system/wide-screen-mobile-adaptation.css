@@ -11,7 +11,7 @@
     --app-shell-viewport-width: var(--ui-viewport-width);
     --app-shell-viewport-height: var(--app-layout-vh);
     --app-desktop-sidebar-width: calc(var(--ui-space-8) * 7 + var(--ui-space-4));
-    --app-desktop-feed-main-width: calc(var(--ui-space-8) * 21 + var(--ui-space-4));
+    --app-desktop-feed-main-width: calc(var(--ui-space-8) * 26);
     --app-desktop-reading-main-width: var(--app-desktop-feed-main-width);
     --app-desktop-detail-main-width: calc(
       var(--app-desktop-reading-main-width) +
@@ -28,7 +28,7 @@
     --app-desktop-context-width: calc(var(--ui-space-8) * 8 + var(--ui-space-6));
     --app-desktop-shell-gap: var(--ui-space-6);
     --app-desktop-shell-padding-x: var(--ui-space-6);
-    --app-desktop-shell-padding-y: var(--ui-space-5);
+    --app-desktop-shell-padding-y: var(--ui-space-3);
     --app-desktop-frame-width: calc(
       var(--app-desktop-sidebar-width) +
       var(--app-desktop-workspace-main-width) +
@@ -299,6 +299,9 @@
 
     .app-shell[data-route-surface='user'][data-desktop-surface='feed'] .app-shell-main {
       overflow: hidden;
+      border: var(--ui-border-none);
+      border-radius: var(--ui-radius-none);
+      box-shadow: var(--ui-shadow-none);
     }
 
     .app-shell[data-route-surface='user'][data-desktop-surface='conversation'] .app-shell-main {
@@ -335,6 +338,8 @@
       width: 100%;
       align-self: stretch;
       top: var(--app-desktop-shell-padding-y);
+      padding-inline-end: var(--ui-space-3);
+      border-inline-end: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
     }
 
     .app-shell[data-route-surface='user']:not([data-desktop-surface='feed']) .app-desktop-context-rail {
@@ -345,10 +350,9 @@
     .app-desktop-nav-item,
     .app-desktop-context-card {
       min-width: var(--ui-space-none);
-      border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
-      border-radius: var(--ui-radius-2xl);
-      background: var(--ui-surface-card-solid);
-      box-shadow: var(--ui-shadow-control);
+      border: var(--ui-border-none);
+      background: var(--ui-surface-transparent);
+      box-shadow: var(--ui-shadow-none);
     }
 
     .app-desktop-brand {
@@ -356,7 +360,8 @@
       grid-template-columns: var(--ui-control-lg) minmax(0, 1fr);
       align-items: center;
       gap: var(--ui-space-3);
-      padding: var(--ui-space-4);
+      padding: var(--ui-space-3) var(--ui-space-4);
+      border-radius: var(--ui-radius-xl);
       color: var(--ui-text-strong);
       text-decoration: var(--ui-text-decoration-none);
     }
@@ -367,7 +372,7 @@
       height: var(--ui-control-lg);
       align-items: center;
       justify-content: center;
-      border-radius: var(--ui-radius-xl);
+      border-radius: var(--ui-radius-lg);
       background: var(--ui-brand);
       color: var(--ui-color-white);
       font-size: var(--ui-text-title);
@@ -396,7 +401,7 @@
 
     .app-desktop-nav {
       display: grid;
-      gap: var(--ui-space-2);
+      gap: var(--ui-space-1);
     }
 
     .app-desktop-nav-item {
@@ -411,6 +416,7 @@
       font-weight: var(--ui-font-weight-strong);
       line-height: var(--ui-line-tight);
       text-decoration: var(--ui-text-decoration-none);
+      border-radius: var(--ui-radius-lg);
       transition:
         background-color var(--ui-duration-base) var(--ease-standard),
         border-color var(--ui-duration-base) var(--ease-standard),
@@ -425,20 +431,26 @@
     }
 
     .app-desktop-nav-item:hover {
-      border-color: var(--ui-line-medium);
       background: var(--ui-state-hover);
       color: var(--ui-text-strong);
     }
 
     .app-desktop-nav-item--active,
     .app-desktop-nav-item--active:hover {
-      border-color: var(--ui-brand-soft-25);
       background: var(--ui-state-selected);
       color: var(--ui-brand-strong);
     }
 
+    .app-desktop-nav-item:focus-visible,
+    .app-desktop-context-action:focus-visible,
+    .app-desktop-brand:focus-visible {
+      outline: var(--ui-outline-width) solid var(--ui-focus-outline);
+      outline-offset: var(--ui-focus-ring-width);
+    }
+
     .app-desktop-context-card {
       padding: var(--ui-space-4);
+      border-radius: var(--ui-radius-none);
     }
 
     .app-desktop-context-kicker {
@@ -487,7 +499,7 @@
       align-items: center;
       justify-content: center;
       border: var(--ui-border-width-hairline) solid var(--ui-line-soft);
-      border-radius: var(--ui-radius-xl);
+      border-radius: var(--ui-radius-lg);
       background: var(--ui-surface-card-solid);
       color: var(--ui-text-strong);
       font-size: var(--ui-text-sm);
@@ -549,6 +561,31 @@
     .app-shell[data-route-surface='user']:not([data-desktop-surface='feed'])::after {
       display: none;
       content: none;
+    }
+  }
+
+  @media (min-width: 96rem) {
+    .app-shell[data-route-surface='user'][data-desktop-surface='feed'] {
+      --app-desktop-main-width: var(--app-desktop-feed-main-width);
+      --app-desktop-shell-active-width: min(
+        calc(
+          var(--app-desktop-sidebar-width) +
+          var(--app-desktop-feed-main-width) +
+          var(--app-desktop-context-width) +
+          (var(--app-desktop-shell-gap) * 2)
+        ),
+        calc(var(--app-shell-viewport-width) - (var(--app-desktop-shell-padding-x) * 2))
+      );
+      grid-template-columns:
+        minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
+        minmax(0, var(--app-desktop-feed-main-width))
+        minmax(calc(var(--ui-space-8) * 6), var(--app-desktop-context-width));
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='feed'] .app-desktop-context-rail {
+      display: flex;
+      padding-inline-start: var(--ui-space-3);
+      border-inline-start: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
     }
   }
 

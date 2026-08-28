@@ -59,7 +59,7 @@
   @media (min-width: 1024px) {
     .app-shell[data-route-surface='user'][data-desktop-surface='feed'] .home-mobile-shell {
       --ui-feed-desktop-grid-min-column-width: calc(var(--ui-space-8) * 10);
-      --ui-feed-card-list-gap: var(--ui-space-3);
+      --ui-feed-card-list-gap: var(--ui-space-none);
       --ui-home-desktop-feed-width: var(--app-desktop-page-content-width);
       --ui-home-desktop-shell-width: var(--app-desktop-page-content-width);
       --ui-home-feed-reading-column-width: min(100%, calc(var(--app-desktop-reading-main-width) - (var(--ui-app-shell-desktop-padding-x) * 2)));
@@ -117,28 +117,32 @@
     }
 
     .app-shell[data-route-surface='user'][data-desktop-surface='feed'] .post-feed-list-panel {
-      display: block;
+      display: flex;
       max-width: var(--ui-home-feed-reading-column-width);
+      flex-direction: column;
+      gap: var(--ui-space-none);
       margin-inline: auto;
-      column-count: var(--ui-home-feed-column-count);
-      column-gap: var(--ui-feed-card-list-gap);
-      padding: var(--ui-space-3);
-      background: var(--ui-surface-transparent);
+      padding: var(--ui-space-none) var(--ui-space-4);
+      background: var(--ui-surface-card);
     }
 
     .app-shell[data-route-surface='user'][data-desktop-surface='feed'] .post-feed-list-panel > .feed-list-item {
       display: block;
-      margin-block-end: var(--ui-feed-card-list-gap);
-      break-inside: avoid;
+      margin-block-end: var(--ui-space-none);
       content-visibility: visible;
       contain-intrinsic-size: auto;
-      -webkit-column-break-inside: avoid;
     }
 
     .app-shell[data-route-surface='user'][data-desktop-surface='feed'] .feed-scroll-content > :not(.post-feed-list-panel) {
       width: 100%;
       max-width: var(--ui-home-feed-reading-column-width);
       margin-inline: auto;
+    }
+  }
+
+  @media (min-width: 96rem) {
+    .app-shell[data-route-surface='user'][data-desktop-surface='feed'] .home-topbar {
+      display: none;
     }
   }
 }

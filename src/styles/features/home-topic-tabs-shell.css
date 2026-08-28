@@ -38,6 +38,17 @@
     background: var(--ui-topbar-surface-standard);
   }
 
+  @media (min-width: 1024px) {
+    .app-shell[data-route-surface='user'][data-desktop-surface='feed'] .home-topic-tabs-shell {
+      padding-inline: var(--ui-space-4);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='feed'] :is(.home-topic-tab) {
+      min-height: var(--ui-control-lg);
+      padding-inline: var(--ui-space-3);
+    }
+  }
+
   .home-topic-tabs-rail {
     display: block;
     width: 100%;
