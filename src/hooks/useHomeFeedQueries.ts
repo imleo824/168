@@ -1,5 +1,11 @@
-import { useEffect, useMemo } from 'react';
-import { useInfiniteQuery, useQueryClient, type InfiniteData, type QueryKey } from '@tanstack/react-query';
+import { useEffect, useMemo, useRef } from 'react';
+import {
+  useInfiniteQuery,
+  useQueryClient,
+  type InfiniteData,
+  type QueryKey,
+  type UseInfiniteQueryResult,
+} from '@tanstack/react-query';
 import { getHomeFeedPage } from '@/services/homeStartupApi';
 import { getHomeFirstScreen } from '@/services/homeFirstScreenApi';
 import type { CategoryMetaFeedFilters, Post } from '@/types';
@@ -27,6 +33,8 @@ interface UseHomeFeedQueriesOptions {
 }
 
 type HomeFeedPage = { items: Post[]; nextCursor: string | null; hasMore: boolean };
+type HomeFeedInfiniteData = InfiniteData<HomeFeedPage, string | undefined>;
+type HomeFeedQuery = UseInfiniteQueryResult<HomeFeedInfiniteData, Error>;
 
 type HomeFeedInitialSnapshotState = {
   initialData?: InfiniteData<HomeFeedPage, string | undefined>;
@@ -34,9 +42,9 @@ type HomeFeedInitialSnapshotState = {
 };
 
 type UseHomeFeedQueriesResult = FeedQueryResult & {
-  activeQuery: any;
+  activeQuery: HomeFeedQuery;
   activeQueryKey: QueryKey;
-  fetchNextPage: () => void;
+  fetchNextPage: HomeFeedQuery['fetchNextPage'];
 }
 
 function dedupeById<T extends { id?: string | number }>(rows: T[]): T[] {
@@ -51,10 +59,10 @@ function dedupeById<T extends { id?: string | number }>(rows: T[]): T[] {
   return out;
 }
 
-function getNextCursor(lastPage: any) {
-  const items = Array.isArray(lastPage?.items) ? lastPage.items : [];
+function getNextCursor(lastPage: HomeFeedPage): string | undefined {
+  const items = lastPage.items;
   if (!items.length) return undefined;
-  return lastPage?.hasMore && lastPage?.nextCursor ? lastPage.nextCursor : undefined;
+  return lastPage.hasMore && lastPage.nextCursor ? lastPage.nextCursor : undefined;
 }
 
 function getSnapshotInitialState(viewerId: string | null | undefined, params: HomeFeedSnapshotParams): HomeFeedInitialSnapshotState {
@@ -86,6 +94,8 @@ export function useHomeFeedQueries({
   viewerId = null,
 }: UseHomeFeedQueriesOptions): UseHomeFeedQueriesResult {
   const queryClient = useQueryClient();
+  const lastPersistedSnapshotRef = useRef<HomeFeedPage | null>(null);
+  const lastPersistedSnapshotScopeRef = useRef('');
   const homeFeedRequestParams = useMemo<HomeFeedSnapshotParams>(
     () => stableHomeFeedParams({
       feed: feedKind,
@@ -110,7 +120,7 @@ export function useHomeFeedQueries({
     [homeFeedRequestParams, viewerId],
   );
 
-  const homeFeedQuery = useInfiniteQuery({
+  const homeFeedQuery = useInfiniteQuery<HomeFeedPage, Error, HomeFeedInfiniteData, QueryKey, string | undefined>({
     queryKey: homeFeedQueryKey,
     queryFn: async ({ pageParam, signal }) => {
       if (!pageParam) {
@@ -142,7 +152,7 @@ export function useHomeFeedQueries({
           categoryMetaScope: homeFeedRequestParams.categoryMetaScope,
           categoryMetaFilters: homeFeedRequestParams.categoryMetaFilters,
           limit: HOME_FEED_PAGE_SIZE,
-          cursor: pageParam as string | undefined,
+          cursor: pageParam,
         },
         { signal }
       );
@@ -155,11 +165,23 @@ export function useHomeFeedQueries({
     ...commonHomeFeedQueryOptions,
   });
 
+  const firstPage = homeFeedQuery.data?.pages?.[0];
+
   useEffect(() => {
-    const firstPage = homeFeedQuery.data?.pages?.[0];
     if (!firstPage || homeFeedQuery.isPlaceholderData || homeFeedQuery.isError) return;
+
+    const snapshotScope = `${viewerId || 'anonymous'}:${homeFeedRequestParamsKey}`;
+    if (
+      lastPersistedSnapshotScopeRef.current === snapshotScope &&
+      lastPersistedSnapshotRef.current === firstPage
+    ) {
+      return;
+    }
+
     writeHomeFeedSnapshot(HOME_FEED_QUERY_VERSION, viewerId, homeFeedRequestParams, firstPage);
-  }, [homeFeedQuery.data, homeFeedQuery.isError, homeFeedQuery.isPlaceholderData, homeFeedRequestParams, viewerId]);
+    lastPersistedSnapshotScopeRef.current = snapshotScope;
+    lastPersistedSnapshotRef.current = firstPage;
+  }, [firstPage, homeFeedQuery.isError, homeFeedQuery.isPlaceholderData, homeFeedRequestParams, homeFeedRequestParamsKey, viewerId]);
 
   const activeQuery = homeFeedQuery;
   const activeQueryKey = homeFeedQueryKey;

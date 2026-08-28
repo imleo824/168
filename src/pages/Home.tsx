@@ -442,7 +442,8 @@ export default function Home() {
       }
     }, LOAD_MORE_WATCHDOG_MS);
 
-    return Promise.resolve(queries.fetchNextPage())
+    return queries.fetchNextPage()
+      .then(() => undefined)
       .catch(() => {
         if (activeFeedIdentityRef.current === targetIdentity) {
           setLoadMoreError(true);
