@@ -64,6 +64,8 @@
       --ui-home-desktop-shell-width: var(--app-desktop-page-content-width);
       --ui-home-feed-reading-column-width: min(100%, calc(var(--app-desktop-reading-main-width) - (var(--ui-app-shell-desktop-padding-x) * 2)));
       --ui-social-feed-list-max-width: var(--ui-home-feed-reading-column-width);
+      --home-topic-tab-min-height: var(--ui-control-lg);
+      --home-topic-filter-row-height: var(--ui-control-sm);
 
       display: flex;
       height: 100%;

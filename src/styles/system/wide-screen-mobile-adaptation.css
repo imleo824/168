@@ -218,7 +218,12 @@
     }
 
     .app-shell[data-route-surface='user'][data-desktop-surface='feed'] {
+      --app-desktop-main-side-gap-total: var(--app-desktop-shell-gap);
+      --app-desktop-balance-spacer-width: var(--ui-space-none);
       align-items: stretch;
+      grid-template-columns:
+        minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
+        minmax(0, var(--app-desktop-main-active-width));
     }
 
     .app-shell[data-route-surface='user'] > .ui-layer-header {
@@ -402,6 +407,14 @@
     .app-desktop-nav {
       display: grid;
       gap: var(--ui-space-1);
+    }
+
+    .app-desktop-sidebar-context {
+      display: grid;
+      gap: var(--ui-space-4);
+      margin-top: var(--ui-space-4);
+      padding-top: var(--ui-space-4);
+      border-top: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
     }
 
     .app-desktop-nav-item {
@@ -591,21 +604,13 @@
         calc(
           var(--app-desktop-sidebar-width) +
           var(--app-desktop-feed-main-width) +
-          var(--app-desktop-context-width) +
-          (var(--app-desktop-shell-gap) * 2)
+          var(--app-desktop-shell-gap)
         ),
         calc(var(--app-shell-viewport-width) - (var(--app-desktop-shell-padding-x) * 2))
       );
       grid-template-columns:
         minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
-        minmax(0, var(--app-desktop-feed-main-width))
-        minmax(calc(var(--ui-space-8) * 6), var(--app-desktop-context-width));
-    }
-
-    .app-shell[data-route-surface='user'][data-desktop-surface='feed'] .app-desktop-context-rail {
-      display: flex;
-      padding-inline-start: var(--ui-space-3);
-      border-inline-start: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+        minmax(0, var(--app-desktop-feed-main-width));
     }
   }
 
