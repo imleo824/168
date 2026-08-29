@@ -12,8 +12,6 @@
   }
 
   :is(.profile-modern-page, .user-space-page-next) :is(.profile-identity-copy, .user-space-profile-copy) {
-    display: flex;
-    flex-direction: column;
     gap: var(--profile-plus-flow-gap);
     margin-top: var(--ui-space-1);
   }
@@ -23,7 +21,6 @@
   }
 
   :is(.profile-modern-page, .user-space-page-next) .profile-name-row {
-    gap: var(--profile-plus-inline-gap);
     padding-block: var(--ui-space-none);
     line-height: var(--ui-line-tight);
   }
@@ -33,11 +30,8 @@
   }
 
   :is(.profile-modern-page, .user-space-page-next) :is(.profile-bio-button, .user-space-bio-mobile, .user-space-bio-desktop) {
-    gap: var(--profile-plus-inline-gap);
     min-height: 0;
     margin: var(--ui-space-none);
-    padding: var(--ui-space-none);
-    line-height: var(--ui-line-normal);
   }
 
   :is(.profile-modern-page, .user-space-page-next) .profile-bio-text {
@@ -46,7 +40,6 @@
 
   :is(.profile-modern-page, .user-space-page-next) .profile-bio-edit-icon {
     margin-left: var(--ui-space-none);
-    margin-top: var(--ui-space-none);
   }
 
   :is(.profile-modern-page, .user-space-page-next) .user-space-plus-links {

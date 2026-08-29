@@ -39,6 +39,9 @@ export default function AppRequireTuiPlusRoute({ children, benefit = 'generic' }
   const fallbackPath = getFallbackFrom(location, benefit);
 
   if (loading) return <PageLoader />;
+  // Membership is an entitlement check for an authenticated account. Let a
+  // contextual guest state explain the task and open the shared sign-in flow.
+  if (!user) return <>{children}</>;
   if (isTuiPlusActive(user)) return <>{children}</>;
 
   return (

@@ -128,6 +128,24 @@ assert(
 );
 
 assert(
+  authRoute.includes('allowContextualGuestState?: boolean;') &&
+    authRoute.includes('if (!user && !allowContextualGuestState)') &&
+    appShell.includes('<AppRequireAuthRoute allowContextualGuestState><PostCreate /></AppRequireAuthRoute>') &&
+    appShell.includes('<AppRequireAuthRoute allowContextualGuestState><Sponsor /></AppRequireAuthRoute>') &&
+    appShell.includes('<AppRequireAuthRoute allowContextualGuestState><AppRequireTuiPlusRoute benefit="promotionBooking"><Promote /></AppRequireTuiPlusRoute></AppRequireAuthRoute>') &&
+    appShell.includes('<AppRequireAuthRoute allowContextualGuestState><PromoteHistory /></AppRequireAuthRoute>') &&
+    appShell.includes('<AppRequireAuthRoute allowContextualGuestState><Recharge /></AppRequireAuthRoute>') &&
+    appRequireTuiPlusRoute.includes('if (!user) return <>{children}</>;'),
+  'Task-specific guest states must stay reachable after auth resolves; membership gating applies only to signed-in accounts.',
+);
+
+assertOrder(
+  appRequireTuiPlusRoute,
+  ['if (loading) return <PageLoader />;', 'if (!user) return <>{children}</>;', 'if (isTuiPlusActive(user)) return <>{children}</>;'],
+  'Tui Plus route protection must resolve loading, guest explanation, and signed-in entitlement checks in that order.',
+);
+
+assert(
   appShell.includes('const KNOWN_USER_ROUTE_EXACT_PATHS = [') &&
     appShell.includes('const KNOWN_USER_ROUTE_PREFIXES = [') &&
     appShell.includes('|| !isKnownUserRoutePath(pathname)') &&

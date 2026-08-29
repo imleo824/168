@@ -39,7 +39,17 @@ function getAuthRouteMeta(pathname: string) {
   return AUTH_ROUTE_META[pathname] || { documentTitle: '登录后继续｜推推', pageTitle: '需要登录', showBack: true };
 }
 
-export default function AppRequireAuthRoute({ children }: { children: ReactNode }) {
+type AppRequireAuthRouteProps = {
+  children: ReactNode;
+  /**
+   * Lets a route render its own guest state after authentication has resolved.
+   * The route remains inside the shared loading and referral-attribution flow;
+   * this only preserves a task-specific sign-in explanation when it exists.
+   */
+  allowContextualGuestState?: boolean;
+};
+
+export default function AppRequireAuthRoute({ children, allowContextualGuestState = false }: AppRequireAuthRouteProps) {
   const { user, loading, requireAuth } = useAuth();
   const location = useLocation();
   const handledInviteCodeRef = useRef('');
@@ -54,7 +64,7 @@ export default function AppRequireAuthRoute({ children }: { children: ReactNode 
   }, [loading, location.search, requireAuth, user]);
 
   if (loading) return <PageLoader />;
-  if (!user) {
+  if (!user && !allowContextualGuestState) {
     const routeMeta = getAuthRouteMeta(location.pathname);
 
     return (

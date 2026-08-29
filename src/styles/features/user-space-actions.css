@@ -366,8 +366,6 @@
   }
 
   .profile-tui-plus-chip {
-    display: inline-flex;
-    align-items: center;
     gap: var(--ui-space-1);
   }
 

@@ -9,21 +9,12 @@ export const allowedSelectorPropertyOverlapManifests = [
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
   },
   {
-    selector: ":is(.profile-modern-page, .user-space-page-next) :is(.profile-bio-button, .user-space-bio-mobile, .user-space-bio-desktop)",
-    files: [
-      "src/styles/features/profile-plus-visual.css",
-      "src/styles/features/profile-shared-bio.css",
-    ],
-    properties: ["gap", "line-height", "padding"],
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-  {
     selector: ":is(.profile-modern-page, .user-space-page-next) :is(.profile-identity-copy, .user-space-profile-copy)",
     files: [
       "src/styles/features/profile-plus-visual.css",
       "src/styles/features/profile-shared-bio.css",
     ],
-    properties: ["display", "flex-direction", "gap", "margin-top"],
+    properties: ["gap", "margin-top"],
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
   },
   {
@@ -41,16 +32,7 @@ export const allowedSelectorPropertyOverlapManifests = [
       "src/styles/features/profile-plus-visual.css",
       "src/styles/features/profile-shared-bio.css",
     ],
-    properties: ["margin-left", "margin-top"],
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-  {
-    selector: ":is(.profile-modern-page, .user-space-page-next) .profile-name-row",
-    files: [
-      "src/styles/features/profile-plus-visual.css",
-      "src/styles/features/profile-shared-bio.css",
-    ],
-    property: "gap",
+    property: "margin-left",
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
   },
   {
@@ -330,15 +312,6 @@ export const allowedSelectorPropertyOverlapManifests = [
       "src/styles/features/user-space-actions.css",
     ],
     properties: ["color", "flex", "height", "stroke-width", "width"],
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-  {
-    selector: ".profile-tui-plus-chip",
-    files: [
-      "src/styles/features/tui-plus.css",
-      "src/styles/features/user-space-actions.css",
-    ],
-    properties: ["align-items", "display"],
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
   },
   {
