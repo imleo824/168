@@ -1,8 +1,25 @@
 /* Shared profile cover layout and shell. */
 
 @layer utilities {
-  :is(.profile-modern-page, .user-space-page-next) {
+  .profile-modern-page {
+    --profile-cover-top-bleed: var(--ui-space-none);
+  }
+
+  .user-space-page-next {
     --profile-cover-top-bleed: calc(var(--ui-topbar-height) + env(safe-area-inset-top));
+  }
+
+  .profile-modern-page > .profile-modern-topbar {
+    position: absolute;
+    inset: var(--ui-space-none) var(--ui-space-none) auto;
+    z-index: var(--ui-z-page-header);
+    border: var(--ui-border-none);
+    background: var(--ui-surface-transparent);
+    pointer-events: none;
+  }
+
+  .profile-modern-page > .profile-modern-topbar .ui-topbar-action-slot {
+    pointer-events: auto;
   }
 
   :is(.profile-modern-page, .user-space-page-next) :is(.profile-identity-section, .user-space-profile-section) {
