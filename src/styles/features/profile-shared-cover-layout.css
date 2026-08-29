@@ -9,20 +9,8 @@
     --profile-cover-top-bleed: calc(var(--ui-topbar-height) + env(safe-area-inset-top));
   }
 
-  .profile-modern-page > .profile-modern-topbar {
-    position: absolute;
-    inset: var(--ui-space-none) var(--ui-space-none) auto;
-    z-index: var(--ui-z-page-header);
-    border: var(--ui-border-none);
-    background: var(--ui-surface-transparent);
-    pointer-events: none;
-  }
-
-  .profile-modern-page > .profile-modern-topbar .ui-topbar-action-slot {
-    pointer-events: auto;
-  }
-
   :is(.profile-modern-page, .user-space-page-next) :is(.profile-identity-section, .user-space-profile-section) {
+    position: relative;
     box-sizing: border-box;
     width: 100%;
     max-width: var(--ui-max-width-none);
@@ -69,6 +57,30 @@
   :is(.profile-modern-page, .user-space-page-next) .profile-header-cover[data-profile-cover-edge='flush']::before,
   :is(.profile-modern-page, .user-space-page-next) .profile-header-cover[data-profile-cover-edge='flush']::after {
     border-radius: var(--ui-radius-none);
+  }
+
+  .profile-modern-page .profile-cover-settings-button {
+    position: absolute;
+    top: var(--ui-space-3);
+    right: var(--ui-space-3);
+    z-index: var(--ui-z-local-floating);
+    display: inline-flex;
+    width: var(--ui-control-md);
+    height: var(--ui-control-md);
+    align-items: center;
+    justify-content: center;
+    border: var(--ui-border-width-hairline) solid color-mix(in srgb, var(--ui-color-white) 40%, transparent);
+    border-radius: var(--ui-radius-pill);
+    background: color-mix(in srgb, var(--ui-color-black) 20%, transparent);
+    color: var(--ui-color-white);
+    padding: var(--ui-space-none);
+    box-shadow: var(--ui-shadow-subtle-raise);
+  }
+
+  .profile-modern-page .profile-cover-settings-button svg {
+    width: var(--ui-control-icon-sm);
+    height: var(--ui-control-icon-sm);
+    stroke-width: var(--ui-icon-action-stroke);
   }
 
   :is(.profile-modern-page, .user-space-page-next) > .ui-app-page-main {

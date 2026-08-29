@@ -2,7 +2,6 @@ import { lazy, Suspense, useState, useEffect, useCallback, useMemo } from "react
 import { APP_ROUTES } from "@/app/routePaths";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate, useLocation } from "react-router-dom";
-import PageHeader from '@/ui/PageHeader';
 import { useConfig } from "@/hooks/useDataConfig";
 import { useLikes, useMyComments, usePosts } from "@/hooks/useDataPosts";
 import { useFans, useFollowingUsers, useUser } from "@/hooks/useDataSocial";
@@ -30,7 +29,6 @@ import {
   validatePasswordChange,
 } from "@/features/profile/profileHelpers";
 
-import { subscribeProfileSettingsOpen } from './profileSettingsIntent';
 import { useProfileMediaUploads } from './useProfileMediaUploads';
 import {
   ProfileAuthRequiredState,
@@ -234,8 +232,6 @@ export default function ProfileMobile() {
   }, [activeTab]);
 
   const profileTabLoading = <PageLoadingState text="正在加载" className="profile-tab-loading" />;
-
-  useEffect(() => subscribeProfileSettingsOpen(() => setIsSecurityOpen(true)), []);
 
   useEffect(() => {
     if (!isSecurityOpen) return;
@@ -547,7 +543,6 @@ export default function ProfileMobile() {
     return (
       <AppPage mobileAddressBarScroll className="profile-modern-page surface-page">
         <SEO title="登录推推" description="登录推推，管理您发布的圈内分类信息、资源和服务。" noindex />
-        <PageHeader title="" titleAs="div" showBack={false} titleAlign="center" className="profile-modern-topbar" />
         <PageContentShell as="main" className="ui-auth-required-wrap ui-app-page-main">
           <ProfileAuthRequiredState onAction={() => requireAuth(() => navigate(APP_ROUTES.profile))} />
         </PageContentShell>
@@ -563,12 +558,6 @@ export default function ProfileMobile() {
         restoreVersion={`${activeTab}:${activeListVersion}`}
       />
       <SEO title="我的个人中心｜推推" description="管理您在推推发布的圈内信息、资源、积分和账号资料。" noindex />
-      <PageHeader
-        title=""
-        showBack={false}
-        titleAlign="center"
-        className="profile-modern-topbar"
-      />
       <input
         ref={coverInputRef}
         type="file"

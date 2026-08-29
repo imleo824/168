@@ -1,6 +1,6 @@
 import { lazy, Suspense, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, ChevronRight, Crown, Edit2, MessageCircle } from 'lucide-react';
+import { Camera, ChevronRight, Crown, Edit2, MessageCircle, SlidersHorizontal } from 'lucide-react';
 
 import { APP_ROUTES } from '@/app/routePaths';
 import AuthRequiredState from '@/ui/AuthRequiredState';
@@ -97,6 +97,15 @@ export function ProfileIdentitySection({
         onClick={onCoverClick}
         showEditBadge={false}
       />
+      <button
+        type="button"
+        onClick={onEditHome}
+        className="profile-cover-settings-button pressable"
+        aria-label="编辑个人信息"
+        title="编辑个人信息"
+      >
+        <SlidersHorizontal aria-hidden="true" />
+      </button>
       <section className="profile-identity-card" aria-label="个人资料">
         <div className="profile-identity-main">
           <div className="profile-avatar-stack">
