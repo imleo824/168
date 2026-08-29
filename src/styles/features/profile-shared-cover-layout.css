@@ -9,6 +9,10 @@
     --profile-cover-top-bleed: calc(var(--ui-topbar-height) + env(safe-area-inset-top));
   }
 
+  .app-shell[data-route-surface='user'][data-desktop-surface='profile'] .app-shell-main {
+    padding-block-start: var(--ui-space-none);
+  }
+
   :is(.profile-modern-page, .user-space-page-next) :is(.profile-identity-section, .user-space-profile-section) {
     position: relative;
     box-sizing: border-box;
