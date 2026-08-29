@@ -53,4 +53,8 @@
   :is(.profile-modern-page, .user-space-page-next) .profile-header-cover[data-profile-cover-edge='flush']::after {
     border-radius: var(--ui-radius-none);
   }
+
+  :is(.profile-modern-page, .user-space-page-next) > .ui-app-page-main {
+    padding-top: var(--ui-space-none);
+  }
 }
