@@ -85,12 +85,29 @@ for (const required of [
   '<Route path={APP_ROUTES.invite} element={<AppRequireAuthRoute><ReferralInvite /></AppRequireAuthRoute>} />',
   '<Route path={APP_ROUTES.about} element={<BrandAbout />} />',
   '<AppDesktopSidebar />',
-  '<AppDesktopContextRail onlineCountText={onlineCountText} />',
   'data-desktop-surface={desktopSurfaceKind}',
   '<Route path="/post/:id" element={<PostDetail />} />',
 ]) {
   if (appShellSource.includes(required)) continue;
   failures.push(`AppShell must keep one unified user app shell with first-class desktop chrome; missing ${required}`);
+}
+
+for (const forbidden of [
+  'AppDesktopContextRail',
+  'app-desktop-context-rail',
+  '快速操作',
+  'app-desktop-context-action',
+]) {
+  if (!appShellSource.includes(forbidden)) continue;
+  failures.push(`AppShell must keep desktop user pages to two columns without a shortcut rail: ${forbidden}`);
+}
+
+for (const required of [
+  '<section className="app-desktop-sidebar-context" aria-label="当前在线">',
+  "<span>{onlineCountText || '实时更新'}</span>",
+]) {
+  if (appShellSource.includes(required)) continue;
+  failures.push(`AppShell must keep the online status permanently in the desktop sidebar: ${required}`);
 }
 
 const routePathsSource = read('src/app/routePaths.ts');
@@ -213,9 +230,8 @@ for (const required of [
   ".app-shell[data-route-surface='user'] .app-bottom-nav {\n      display: none;",
   "@media (min-width: 1024px) and (max-width: 1179px)",
   "--app-desktop-main-width: var(--app-desktop-workspace-main-width);",
-  ".app-desktop-sidebar,\n    .app-desktop-context-rail {\n      position: sticky;",
+  ".app-desktop-sidebar {\n      position: sticky;",
   "top: var(--app-desktop-shell-padding-y);",
-  ".app-shell[data-route-surface='user']:not([data-desktop-surface='feed']) .app-desktop-context-rail {\n      display: none;",
 ]) {
   if (adaptationSource.includes(required)) continue;
   failures.push(`wide-screen-mobile-adaptation.css missing current desktop shell contract: ${required}`);

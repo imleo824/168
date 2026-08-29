@@ -314,9 +314,7 @@ function GlobalAuthOverlay() {
 }
 
 function AppDesktopSidebar() {
-  const { pathname } = useLocation();
   const { onlineCountText } = useOnlinePresence();
-  const isHomePath = pathname === APP_ROUTES.home;
 
   return (
     <aside className="app-desktop-sidebar" aria-label="桌面主导航">
@@ -345,57 +343,13 @@ function AppDesktopSidebar() {
           );
         })}
       </nav>
-      {isHomePath ? (
-        <section className="app-desktop-sidebar-context" aria-label="首页快捷入口">
-          <div className="app-desktop-context-card">
-            <div className="app-desktop-context-kicker">当前在线</div>
-            <div className="app-desktop-context-metric">
-              <span className="app-desktop-context-dot" aria-hidden="true" />
-              <span>{onlineCountText || '实时更新'}</span>
-            </div>
+      <section className="app-desktop-sidebar-context" aria-label="当前在线">
+        <div className="app-desktop-context-card">
+          <div className="app-desktop-context-kicker">当前在线</div>
+          <div className="app-desktop-context-metric">
+            <span className="app-desktop-context-dot" aria-hidden="true" />
+            <span>{onlineCountText || '实时更新'}</span>
           </div>
-          <div className="app-desktop-context-card">
-            <h2 className="app-desktop-context-title">快速操作</h2>
-            <div className="app-desktop-context-actions">
-              <NavLink className="app-desktop-context-action app-desktop-context-action--primary" to={APP_ROUTES.create}>
-                发布分类信息
-              </NavLink>
-              <NavLink className="app-desktop-context-action" to={APP_ROUTES.sponsor}>
-                购买曝光
-              </NavLink>
-              <NavLink className="app-desktop-context-action" to={APP_ROUTES.about}>
-                了解推推
-              </NavLink>
-            </div>
-          </div>
-        </section>
-      ) : null}
-    </aside>
-  );
-}
-
-function AppDesktopContextRail({ onlineCountText }: { onlineCountText: string }) {
-  return (
-    <aside className="app-desktop-context-rail" aria-label="桌面快捷入口">
-      <section className="app-desktop-context-card">
-        <div className="app-desktop-context-kicker">当前在线</div>
-        <div className="app-desktop-context-metric">
-          <span className="app-desktop-context-dot" aria-hidden="true" />
-          <span>{onlineCountText || '实时更新'}</span>
-        </div>
-      </section>
-      <section className="app-desktop-context-card">
-        <h2 className="app-desktop-context-title">快速操作</h2>
-        <div className="app-desktop-context-actions">
-          <NavLink className="app-desktop-context-action app-desktop-context-action--primary" to={APP_ROUTES.create}>
-            发布分类信息
-          </NavLink>
-          <NavLink className="app-desktop-context-action" to={APP_ROUTES.sponsor}>
-            购买曝光
-          </NavLink>
-          <NavLink className="app-desktop-context-action" to={APP_ROUTES.about}>
-            了解推推
-          </NavLink>
         </div>
       </section>
     </aside>
@@ -528,7 +482,6 @@ function AppLayout() {
             </Suspense>
           </ErrorBoundary>
         </div>
-        {isUserSurface && !isHomePath ? <AppDesktopContextRail onlineCountText={onlineCountText} /> : null}
         {isUserSurface ? <AppBottomNavigation /> : null}
         <GlobalAuthOverlay />
       </div>
