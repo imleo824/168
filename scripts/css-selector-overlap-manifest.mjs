@@ -135,34 +135,6 @@ export const allowedSelectorPropertyOverlapManifests = [
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
   },
   {
-    selector: ".app-bottom-nav-avatar-shell[data-tui-plus='true']::before",
-    files: [
-      "src/styles/features/tui-plus-avatar-ring-contract.css",
-      "src/styles/features/tui-plus.css",
-    ],
-    properties: ["background", "box-shadow", "inset"],
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-  {
-    selector: ".app-bottom-nav-avatar-shell[data-tui-plus='true']",
-    files: [
-      "src/styles/components/avatar.css",
-      "src/styles/features/tui-plus-avatar-ring-contract.css",
-      "src/styles/features/tui-plus.css",
-    ],
-    properties: ["background", "box-shadow"],
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-  {
-    selector: ".app-bottom-nav-avatar-shell[data-tui-plus='true']",
-    files: [
-      "src/styles/features/tui-plus-avatar-ring-contract.css",
-      "src/styles/features/tui-plus.css",
-    ],
-    property: "overflow",
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-  {
     selector: ".empty-state-card .ui-state-icon",
     files: [
       "src/styles/components/state-contract.css",

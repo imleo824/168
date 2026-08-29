@@ -1,38 +1,6 @@
 /* Shared Tui Plus identity surfaces. */
 
 @layer utilities {
-  :where(.profile-avatar-button[data-tui-plus='true'], .app-bottom-nav-avatar-shell[data-tui-plus='true']) {
-    --tui-plus-ring-gradient: var(--ui-tui-plus-ring-gradient);
-  }
-
-  .profile-avatar-button[data-tui-plus='true']::before {
-    background: var(--tui-plus-ring-gradient);
-    box-shadow: var(--ui-tui-plus-avatar-ring-shadow);
-  }
-
-  .profile-avatar-button[data-tui-plus='true']::after {
-    content: var(--ui-content-empty);
-    pointer-events: none;
-    position: absolute;
-    inset: calc(var(--ui-profile-avatar-ring-gap) * -1);
-    z-index: var(--ui-z-local-base);
-    display: block;
-    border-radius: var(--ui-radius-pill);
-    background: var(--ui-color-white);
-  }
-
-  .app-bottom-nav-avatar-shell[data-tui-plus='true'] {
-    overflow: visible;
-    background: var(--tui-plus-ring-gradient);
-    box-shadow: var(--ui-tui-plus-bottom-nav-ring-shadow);
-  }
-
-  .app-bottom-nav-avatar-shell[data-tui-plus='true']::before {
-    inset: calc(var(--ui-space-half) + var(--ui-border-width-hairline));
-    background: var(--ui-panel-card-surface, var(--ui-color-white));
-    box-shadow: var(--ui-bottom-nav-avatar-placeholder-inset-shadow);
-  }
-
   .profile-name-row {
     display: flex;
     max-width: 100%;

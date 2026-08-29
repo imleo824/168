@@ -240,14 +240,13 @@ assertIncludes('src/styles/features/promote-layout-shell.css', 'overflow-x: clip
 assertNotIncludes('src/pages/UserSpace.tsx', 'mobileAddressBarScroll', 'user-space page must not register a nested mobile addressbar scroll container.');
 assertIncludes('src/styles/features/user-space-next.css', '.user-space-page-next.ui-page-enter', 'user-space page must opt out of page enter transforms that destabilize sticky topbars.');
 
-assertMatches('src/features/profile/ProfileMobilePage.tsx', /<PageHeader[\s\S]*?title=""[\s\S]*?className="profile-modern-topbar"/, 'profile topbar title must be removed.');
-assertNotIncludes('src/features/profile/ProfileMobilePage.tsx', 'title="我的"', 'profile page must not restore the topbar 我的 title.');
-assertIncludes('src/features/profile/ProfileMobilePage.tsx', 'profile-name-row', 'edit-home action must live beside the nickname.');
-assertIncludes('src/features/profile/ProfileMobilePage.tsx', 'profile-edit-home-button', 'edit-home action must be an icon button beside the nickname.');
-assertIncludes('src/features/profile/ProfileMobilePage.tsx', '<Edit2 size={13}', 'edit-home action must use an edit icon, not a text topbar action.');
-assertIncludes('src/features/profile/ProfileMobilePage.tsx', 'aria-label="编辑主页"', 'edit-home icon button must keep an accessible name.');
-assertIncludes('src/styles/features/profile-shared-header.css', '.profile-name-row', 'nickname/edit layout must be owned by shared profile header CSS.');
-assertIncludes('src/styles/features/profile-shared-header.css', '.profile-edit-home-button', 'edit-home icon styling must be owned by shared profile header CSS.');
+assertNotIncludes('src/features/profile/ProfileMobilePage.tsx', '<PageHeader', 'profile cover must start without a reserved topbar row.');
+assertIncludes('src/pages/ProfileMobile.tsx', "topbarMode: 'static'", 'profile route must explicitly disable the shared topbar row.');
+assertIncludes('src/features/profile/profilePageSections.tsx', 'className="profile-cover-settings-button pressable"', 'profile settings action must float over the cover.');
+assertIncludes('src/features/profile/profilePageSections.tsx', 'aria-label="编辑个人信息"', 'profile cover settings action must keep an accessible name.');
+assertNotIncludes('src/features/profile/profilePageSections.tsx', 'profile-edit-home-button', 'profile settings action must not consume a separate nickname row.');
+assertIncludes('src/styles/features/profile-shared-cover-layout.css', '.profile-cover-settings-button', 'profile cover settings positioning must be owned by the shared cover layout.');
+assertIncludes('src/styles/features/profile-shared-cover-layout.css', 'position: absolute;', 'profile cover settings action must remain an overlay.');
 
 assertIncludes('src/styles/features/home-feed-foundation.css', '--home-topic-rhythm-y: var(--ui-space-none);', 'home category tabs must sit directly under the topbar.');
 assertIncludes('src/styles/features/home-feed-foundation.css', '--home-topic-tabs-top-gap: var(--ui-space-none);', 'home category tabs must not add top gap under the topbar.');

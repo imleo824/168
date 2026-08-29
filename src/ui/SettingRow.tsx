@@ -1,5 +1,12 @@
 import { ChevronRight } from 'lucide-react';
-import type { ReactNode } from 'react';
+import type { ComponentPropsWithoutRef, ReactNode } from 'react';
+
+type SettingRowButtonProps = Omit<
+  ComponentPropsWithoutRef<'button'>,
+  'children' | 'className' | 'disabled' | 'onClick' | 'type'
+> & {
+  [key: `data-${string}`]: string | number | boolean | undefined;
+};
 
 interface SettingRowProps {
   title: ReactNode;
@@ -17,6 +24,7 @@ interface SettingRowProps {
   showChevron?: boolean;
   disabled?: boolean;
   active?: boolean;
+  buttonProps?: SettingRowButtonProps;
 }
 
 export default function SettingRow({
@@ -35,17 +43,10 @@ export default function SettingRow({
   showChevron = Boolean(onClick),
   disabled = false,
   active = false,
+  buttonProps,
 }: SettingRowProps) {
-  const Component = onClick ? 'button' : 'div';
-
-  return (
-    <Component
-      type={onClick ? 'button' : undefined}
-      onClick={onClick}
-      disabled={onClick ? disabled : undefined}
-      className={`setting-row ${onClick ? 'pressable' : ''} ${className}`.trim()}
-      aria-expanded={onClick ? active : undefined}
-    >
+  const content = (
+    <>
       <div className={`setting-row-content ${contentClassName}`.trim()}>
         {icon ? (
           <span className={`setting-row-icon ${iconClassName}`.trim()}>
@@ -74,6 +75,27 @@ export default function SettingRow({
           </span>
         ) : null}
       </span>
-    </Component>
+    </>
+  );
+
+  if (onClick) {
+    return (
+      <button
+        {...buttonProps}
+        type="button"
+        onClick={onClick}
+        disabled={disabled}
+        className={`setting-row pressable ${className}`.trim()}
+        aria-expanded={active || undefined}
+      >
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <div className={`setting-row ${className}`.trim()}>
+      {content}
+    </div>
   );
 }

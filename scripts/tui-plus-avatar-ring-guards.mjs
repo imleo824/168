@@ -31,7 +31,7 @@ mustHave('final avatar ring contract', finalRingContract, '.profile-avatar-butto
 mustHave('final avatar ring contract', finalRingContract, '.user-space-avatar-next[data-tui-plus=\'true\']::before');
 mustHave('final avatar ring contract', finalRingContract, '.ins-post-card .feed-card-author-avatar-link[data-tui-plus=\'true\']::before');
 mustHave('final avatar ring contract', finalRingContract, '.ui-profile-icon-button[data-tui-plus=\'true\']::before');
-mustHave('final avatar ring contract', finalRingContract, '.app-bottom-nav-avatar-shell[data-tui-plus=\'true\']::before');
+mustHave('shared avatar component', avatarStyles, '.app-bottom-nav-avatar-shell[data-tui-plus=\'true\']');
 mustHave('final avatar ring contract', finalRingContract, 'inset: calc((var(--ui-avatar-tui-plus-ring-gap) + var(--ui-avatar-tui-plus-ring-size)) * -1)');
 mustHave('final avatar ring contract', finalRingContract, 'background: var(--ui-avatar-tui-plus-ring-gradient)');
 mustHave('final avatar ring contract', finalRingContract, 'overflow: visible');

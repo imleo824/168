@@ -13,6 +13,8 @@ import {
 import AppPage from '@/ui/AppPage';
 import PageHeader from '@/ui/PageHeader';
 import PageContentShell from '@/ui/PageContentShell';
+import SettingRow from '@/ui/SettingRow';
+import SurfaceSectionCard from '@/ui/SurfaceSectionCard';
 import SEO from '@/platform/SEO';
 import { useAuth } from '@/context/AuthContext';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
@@ -130,57 +132,70 @@ export default function NotificationSettings() {
         className="notification-settings-topbar ui-layer-header"
       />
       <PageContentShell as="main" className="notification-settings-main ui-app-page-main">
-        <section className="notification-settings-section notification-settings-section--single" aria-label="通知设置">
-          <button
-            type="button"
-            role="switch"
-            aria-checked={displayedEnabled}
+        <SurfaceSectionCard
+          as="section"
+          tone="solid"
+          paddingClassName="notification-settings-section-surface"
+          className="notification-settings-section notification-settings-section--single"
+          ariaLabel="通知设置"
+        >
+          <SettingRow
+            title="系统提醒"
+            description="开启后，重要消息会收到系统提醒。"
             className="notification-settings-item notification-settings-item--master pressable"
-            aria-disabled={!canUse || settingsBusy}
             disabled={!canUse || settingsBusy}
-            data-pending={settingsBusy ? 'true' : 'false'}
             onClick={() => void guardedMasterToggle()}
-          >
-            <span className="notification-settings-item-copy">
-              <span className="notification-settings-item-title">系统提醒</span>
-              <span className="notification-settings-item-description">开启后，重要消息会收到系统提醒。</span>
-            </span>
-            <span className="notification-settings-switch notification-settings-switch--sm" data-checked={displayedEnabled ? 'true' : 'false'} aria-hidden="true">
-              <span className="notification-settings-switch-thumb" />
-            </span>
-          </button>
+            contentClassName="notification-settings-item-content"
+            titleClassName="notification-settings-item-title"
+            descriptionClassName="notification-settings-item-description"
+            showChevron={false}
+            buttonProps={{
+              role: 'switch',
+              'aria-checked': displayedEnabled,
+              'aria-disabled': !canUse || settingsBusy,
+              'data-pending': settingsBusy ? 'true' : 'false',
+            }}
+            trailing={(
+              <span className="notification-settings-switch notification-settings-switch--sm" data-checked={displayedEnabled ? 'true' : 'false'} aria-hidden="true">
+                <span className="notification-settings-switch-thumb" />
+              </span>
+            )}
+          />
 
           <div className="notification-settings-list" role="list">
             {PREFERENCE_ITEMS.map((item) => {
               const Icon = item.icon;
               const checked = Boolean(displayedPreference?.[item.key]);
               return (
-                <button
+                <SettingRow
                   key={item.key}
-                  type="button"
-                  role="switch"
-                  aria-checked={checked}
+                  title={item.title}
+                  description={item.description}
+                  icon={<Icon />}
+                  iconClassName="notification-settings-item-icon"
                   className="notification-settings-item pressable"
-                  aria-disabled={!displayedPreference || settingsBusy}
                   disabled={!displayedPreference || settingsBusy}
-                  data-pending={settingsBusy ? 'true' : 'false'}
                   onClick={() => void guardedPreferenceToggle(item.key)}
-                >
-                  <span className="notification-settings-item-icon" aria-hidden="true">
-                    <Icon />
-                  </span>
-                  <span className="notification-settings-item-copy">
-                    <span className="notification-settings-item-title">{item.title}</span>
-                    <span className="notification-settings-item-description">{item.description}</span>
-                  </span>
-                  <span className="notification-settings-switch notification-settings-switch--sm" data-checked={checked ? 'true' : 'false'} aria-hidden="true">
-                    <span className="notification-settings-switch-thumb" />
-                  </span>
-                </button>
+                  contentClassName="notification-settings-item-content"
+                  titleClassName="notification-settings-item-title"
+                  descriptionClassName="notification-settings-item-description"
+                  showChevron={false}
+                  buttonProps={{
+                    role: 'switch',
+                    'aria-checked': checked,
+                    'aria-disabled': !displayedPreference || settingsBusy,
+                    'data-pending': settingsBusy ? 'true' : 'false',
+                  }}
+                  trailing={(
+                    <span className="notification-settings-switch notification-settings-switch--sm" data-checked={checked ? 'true' : 'false'} aria-hidden="true">
+                      <span className="notification-settings-switch-thumb" />
+                    </span>
+                  )}
+                />
               );
             })}
           </div>
-        </section>
+        </SurfaceSectionCard>
       </PageContentShell>
     </AppPage>
   );

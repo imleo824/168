@@ -227,7 +227,6 @@
     display: none;
   }
 
-  .profile-modern-page .profile-edit-home-icon,
   .profile-modern-page .profile-bio-edit-icon {
     width: var(--ui-control-icon-xs);
     height: var(--ui-control-icon-xs);

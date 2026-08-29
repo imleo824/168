@@ -259,7 +259,7 @@
 
   .notification-settings-row-copy,
   .notification-settings-section-heading,
-  .notification-settings-item-copy {
+  .notification-settings-item-content .setting-row-copy {
     display: flex;
     min-width: 0;
     flex-direction: column;
@@ -316,15 +316,23 @@
 
   .notification-settings-item {
     width: 100%;
-    grid-template-columns: var(--ui-control-sm) minmax(0, 1fr) auto;
+    display: flex;
+    justify-content: space-between;
     border-inline: var(--ui-border-none);
     border-top: var(--ui-border-none);
+    border-radius: var(--ui-radius-none);
     background: var(--ui-surface-transparent);
+    padding: var(--ui-space-3) var(--ui-space-4);
     text-align: left;
   }
 
-  .notification-settings-item--master {
-    grid-template-columns: minmax(0, 1fr) auto;
+  .notification-settings-item-content {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .notification-settings-item .setting-row-trailing {
+    flex: 0 0 auto;
   }
 
   .notification-settings-item-icon {

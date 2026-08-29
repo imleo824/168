@@ -3,6 +3,7 @@ import AppPage from '@/ui/AppPage';
 import PageHeader from '@/ui/PageHeader';
 import PageContentShell from '@/ui/PageContentShell';
 import { ActionLink } from '@/ui/ActionButton';
+import SurfaceSectionCard from '@/ui/SurfaceSectionCard';
 import { APP_ROUTES } from '@/app/routePaths';
 import SEO from '@/platform/SEO';
 import '@/features/brand/BrandAboutRoute.css';
@@ -129,13 +130,19 @@ export default function BrandAbout() {
           {featureCards.map((feature) => {
             const Icon = feature.icon;
             return (
-              <article key={feature.title} className="brand-about-card">
+              <SurfaceSectionCard
+                key={feature.title}
+                as="article"
+                tone="solid"
+                paddingClassName="brand-about-card-surface"
+                className="brand-about-card"
+              >
                 <div className="brand-about-card-icon">
                   <Icon className="brand-about-card-icon-graphic" />
                 </div>
                 <h2 className="brand-about-card-title">{feature.title}</h2>
                 <p className="brand-about-card-copy">{feature.description}</p>
-              </article>
+              </SurfaceSectionCard>
             );
           })}
         </section>

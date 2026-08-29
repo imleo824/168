@@ -43,28 +43,6 @@
     display: none;
   }
 
-  :is(.profile-modern-page, .user-space-page-next) .profile-edit-home-button {
-    display: inline-flex;
-    width: var(--ui-control-sm);
-    height: var(--ui-control-sm);
-    min-width: var(--ui-control-sm);
-    min-height: var(--ui-control-sm);
-    flex: 0 0 var(--ui-control-sm);
-    align-items: center;
-    justify-content: center;
-    border: var(--ui-border-none);
-    border-radius: var(--ui-radius-pill);
-    background: var(--ui-surface-transparent);
-    color: var(--ui-text-secondary);
-    padding: var(--ui-space-none);
-  }
-
-  :is(.profile-modern-page, .user-space-page-next) .profile-edit-home-button:hover,
-  :is(.profile-modern-page, .user-space-page-next) .profile-edit-home-button:active {
-    background: var(--ui-state-hover);
-    color: var(--ui-text-strong);
-  }
-
   :is(.profile-modern-page, .user-space-page-next) :is(.profile-bio-button, .user-space-bio-mobile, .user-space-bio-desktop) {
     display: flex;
     width: 100%;

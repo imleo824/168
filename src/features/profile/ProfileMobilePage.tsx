@@ -515,6 +515,9 @@ export default function ProfileMobile() {
     if (!targetUserId) return;
     navigate(user?.id === targetUserId ? APP_ROUTES.profile : `/user/${targetUserId}`);
   }, [navigate, user?.id]);
+  const openProfileSettings = useCallback(() => {
+    setIsSecurityOpen(true);
+  }, []);
 
   const { guarded: guardedStatusChange } = useInteractionGuard(handleStatusChange, 520);
   const { guarded: guardedDelete } = useInteractionGuard(handleDelete, 520);
@@ -536,6 +539,11 @@ export default function ProfileMobile() {
   const { guarded: guardedOpenRelationUser } = useInteractionGuard<[string]>(openRelationUser, {
     policy: 'instant',
     cooldownMs: 360,
+    mode: 'drop',
+  });
+  const { guarded: guardedOpenProfileSettings } = useInteractionGuard(openProfileSettings, {
+    policy: 'instant',
+    cooldownMs: 520,
     mode: 'drop',
   });
 
@@ -634,7 +642,7 @@ export default function ProfileMobile() {
           isUploadingAvatar={isUploadingAvatar}
           onCoverClick={handleCoverButtonClick}
           onAvatarClick={handleAvatarButtonClick}
-          onEditHome={() => setIsSecurityOpen(true)}
+          onEditHome={() => void guardedOpenProfileSettings()}
           onTabChange={setActiveTab}
         />
 

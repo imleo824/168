@@ -841,10 +841,11 @@ assertIncludes('src/pages/CategoryFeedMobile.tsx', '<LazyPostFeedList', 'categor
 assertIncludes('src/pages/UserSpace.tsx', '<LazyPostFeedList', 'user-space feed must use the lazily loaded shared post feed list.');
 assertIncludes('src/features/profile/profilePageSections.tsx', '<LazyPostFeedList', 'profile post tabs must use the lazily loaded shared post feed list.');
 assertIncludes('src/features/profile/profilePageSections.tsx', 'profile-relation-list-shell', 'profile relation lists must use their own shell instead of the post feed shell.');
-assertIncludes('src/features/profile/ProfileMobilePage.tsx', '<PageHeader\n        title=""\n        showBack={false}\n        titleAlign="center"', 'profile page topbar must reserve chrome without rendering the 我的 title.');
-assertNotIncludes('src/features/profile/ProfileMobilePage.tsx', 'title={user.displayName || "我的"}', 'profile topbar must not use the nickname as the page title.');
+assertNotIncludes('src/features/profile/ProfileMobilePage.tsx', '<PageHeader', 'profile cover must not reserve a standalone topbar row.');
+assertIncludes('src/pages/ProfileMobile.tsx', "topbarMode: 'static'", 'profile route must declare its no-topbar cover policy.');
 assertIncludes('src/features/profile/profilePageSections.tsx', '<div className="profile-avatar-stack">', 'profile nickname must live in the avatar stack.');
-assertIncludes('src/features/profile/profilePageSections.tsx', 'className="profile-edit-home-button pressable"', 'profile edit-home action must live beside the nickname as an icon.');
+assertIncludes('src/features/profile/profilePageSections.tsx', 'className="profile-cover-settings-button pressable"', 'profile edit action must float over the cover.');
+assertNotIncludes('src/features/profile/profilePageSections.tsx', 'profile-edit-home-button', 'profile edit action must not create a separate nickname-row control.');
 assertIncludes('src/pages/UserSpace.tsx', '<div className="profile-avatar-stack user-space-avatar-stack">', 'user-space nickname must live in the shared avatar stack.');
 assertNotIncludes('src/pages/UserSpace.tsx', 'title={userName}', 'user-space topbar must not use the nickname as the page title.');
 assertIncludes('src/pages/UserSpace.tsx', '<PageHeader title="个人空间" titleAlign="center"', 'user-space topbar title must stay centered.');
@@ -856,13 +857,13 @@ assertCssRuleIncludes(
   'src/styles/features/profile-shared-bio.css',
   ':is(.profile-modern-page, .user-space-page-next) :is(.profile-name-mobile, .profile-name-desktop, .user-space-name-mobile, .user-space-name-desktop)',
   ['width: auto;', 'max-width: none;', 'overflow: visible;', 'text-overflow: clip;', 'white-space: nowrap;', 'overflow-wrap: normal;'],
-  'profile and user-space nicknames must render fully beside the edit icon.',
+  'profile and user-space nicknames must render fully without a competing edit control.',
 );
 assertCssRuleIncludes(
   'src/styles/features/profile-shared-bio.css',
   ':is(.profile-modern-page, .user-space-page-next) .profile-name-row',
   ['display: inline-flex;', 'gap: var(--ui-space-1);', 'overflow-x: auto;'],
-  'profile edit-home icon must align beside the nickname through the shared profile header contract.',
+  'profile name rows must retain the shared compact identity contract.',
 );
 assertIncludes('src/features/home/HomeTopicTabs.tsx', "'--home-topic-tab-count': Math.max(items.length, 1)", 'home topic tabs must expose their dynamic count to the equal-grid contract.');
 assertIncludes('src/features/home/homeStructuredFilterUtils.ts', 'sortHomeStructuredFilterFields', 'home structured filters must order location fields first.');

@@ -6,7 +6,6 @@
 
 @layer utilities {
   .app-shell[data-route-surface='user'] {
-    --app-mobile-canvas-target-width: calc(var(--ui-space-8) * 12 + var(--ui-space-2) + var(--ui-space-half));
     --app-mobile-canvas-width: var(--ui-viewport-width);
     --app-shell-viewport-width: var(--ui-viewport-width);
     --app-shell-viewport-height: var(--app-layout-vh);
@@ -25,7 +24,10 @@
     --app-desktop-content-main-width: calc(var(--ui-space-8) * 29 + var(--ui-space-4));
     --app-desktop-utility-main-width: calc(var(--ui-space-8) * 24 + var(--ui-space-4));
     --app-desktop-main-width: var(--app-desktop-workspace-main-width);
-    --app-desktop-context-width: calc(var(--ui-space-8) * 8 + var(--ui-space-6));
+    --app-desktop-page-target-width: calc(
+      var(--app-desktop-workspace-main-width) -
+      (var(--ui-app-shell-desktop-padding-x) * 2)
+    );
     --app-desktop-shell-gap: var(--ui-space-6);
     --app-desktop-shell-padding-x: var(--ui-space-6);
     --app-desktop-shell-padding-y: var(--ui-space-3);
@@ -35,10 +37,6 @@
       (var(--app-desktop-shell-gap) * 2)
     );
     --app-desktop-shell-width: var(--app-desktop-frame-width);
-    --app-adaptive-scale: 1;
-    --app-adaptive-scale-max: 1.28;
-    --app-adaptive-scale-wide: 1.32;
-    --app-adaptive-visual-width: var(--app-shell-viewport-width);
     --app-adaptive-canvas-border: var(--ui-border-none);
     --app-adaptive-canvas-shadow: var(--ui-shadow-none);
     --app-adaptive-page-bg: var(--ui-surface-card);
@@ -68,16 +66,13 @@
     background: var(--ui-surface-page);
   }
 
-  .app-desktop-sidebar,
-  .app-desktop-context-rail {
+  .app-desktop-sidebar {
     display: none;
   }
 
   @media (min-width: 768px) and (max-width: 1023px) {
     .app-shell[data-route-surface='user'] {
-      --app-mobile-canvas-width: var(--app-mobile-canvas-target-width);
-      --app-adaptive-scale: min(var(--app-adaptive-scale-max), calc((var(--app-shell-viewport-width) - var(--ui-space-8)) / var(--app-mobile-canvas-target-width)));
-      --app-adaptive-visual-width: calc(var(--app-mobile-canvas-width) * var(--app-adaptive-scale));
+      --app-mobile-canvas-width: min(100%, calc(var(--ui-space-8) * 24));
       --app-adaptive-canvas-border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
       --app-adaptive-canvas-shadow: 0 var(--ui-space-6) calc(var(--ui-space-8) * 2 + var(--ui-space-4)) color-mix(in srgb, var(--ui-color-black) 10%, transparent);
       --app-adaptive-page-bg:
@@ -94,20 +89,23 @@
       position: relative;
       width: var(--app-mobile-canvas-width);
       max-width: var(--app-mobile-canvas-width);
-      min-height: calc(var(--app-shell-viewport-height) / var(--app-adaptive-scale));
+      min-height: var(--app-shell-viewport-height);
       flex: 0 0 var(--app-mobile-canvas-width);
+      padding-block-start: var(--ui-space-none);
+      padding-inline: var(--ui-space-none);
       border-inline: var(--app-adaptive-canvas-border);
       background: var(--ui-surface-page);
       box-shadow: var(--app-adaptive-canvas-shadow);
-      transform: scale(var(--app-adaptive-scale));
-      transform-origin: top center;
+      transform: none;
+      transform-origin: initial;
     }
 
     .app-shell[data-route-surface='user'] .app-bottom-nav {
       right: auto;
       left: 50%;
       width: var(--app-mobile-canvas-width);
-      transform: translateX(-50%) scale(var(--app-adaptive-scale)) translateZ(var(--ui-space-none));
+      max-width: var(--app-mobile-canvas-width);
+      transform: translateX(-50%) translateZ(var(--ui-space-none));
       transform-origin: bottom center;
     }
 
@@ -118,6 +116,34 @@
   }
 
   @media (min-width: 1024px) {
+    .app-shell[data-route-surface='user'][data-desktop-surface='feed'] {
+      --app-desktop-page-target-width: var(--app-desktop-feed-main-width);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='detail'] {
+      --app-desktop-page-target-width: var(--app-desktop-reading-main-width);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='conversation'] {
+      --app-desktop-page-target-width: var(--app-desktop-conversation-main-width);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='profile'] {
+      --app-desktop-page-target-width: var(--app-desktop-profile-main-width);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='compose'] {
+      --app-desktop-page-target-width: var(--app-desktop-compose-main-width);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='content'] {
+      --app-desktop-page-target-width: var(--app-desktop-content-main-width);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='utility'] {
+      --app-desktop-page-target-width: var(--app-desktop-utility-main-width);
+    }
+
     .app-shell[data-route-surface='user'] {
       display: grid;
       width: 100%;
@@ -130,19 +156,6 @@
       --app-desktop-shell-left: calc((var(--app-shell-viewport-width) - var(--app-desktop-shell-active-width)) / 2);
       --app-desktop-shell-content-height: calc(var(--app-shell-viewport-height) - (var(--app-desktop-shell-padding-y) * 2));
       --app-desktop-main-side-gap-total: var(--app-desktop-shell-gap);
-      --app-desktop-context-side-gap-total: calc(var(--app-desktop-shell-gap) * 2);
-      --app-desktop-context-active-width: min(
-        var(--app-desktop-context-width),
-        max(
-          var(--ui-space-none),
-          calc(
-            var(--app-desktop-shell-active-width) -
-            var(--app-desktop-sidebar-width) -
-            var(--app-desktop-context-side-gap-total) -
-            var(--app-desktop-main-width)
-          )
-        )
-      );
       --app-desktop-main-left: calc(var(--app-desktop-shell-left) + var(--app-desktop-sidebar-width) + var(--app-desktop-shell-gap));
       --app-desktop-main-active-width: min(
         var(--app-desktop-main-width),
@@ -197,7 +210,7 @@
 
     .app-shell[data-route-surface='user'] .app-shell-main {
       --app-desktop-page-content-width: min(
-        100%,
+        var(--app-desktop-page-target-width),
         calc(var(--app-desktop-main-active-width) - (var(--ui-app-shell-desktop-padding-x) * 2))
       );
       --app-desktop-main-content-height: calc(
@@ -376,7 +389,6 @@
     }
 
     .app-desktop-nav-item:focus-visible,
-    .app-desktop-context-action:focus-visible,
     .app-desktop-brand:focus-visible {
       outline: var(--ui-outline-width) solid var(--ui-focus-outline);
       outline-offset: var(--ui-focus-ring-width);
@@ -413,52 +425,6 @@
       box-shadow: 0 0 0 var(--ui-space-half) var(--ui-focus-ring);
     }
 
-    .app-desktop-context-title {
-      margin: var(--ui-space-none);
-      color: var(--ui-text-strong);
-      font-size: var(--ui-text-title);
-      font-weight: var(--ui-font-weight-title);
-      line-height: var(--ui-line-tight);
-    }
-
-    .app-desktop-context-actions {
-      display: grid;
-      gap: var(--ui-space-2);
-      margin-top: var(--ui-space-4);
-    }
-
-    .app-desktop-context-action {
-      display: flex;
-      min-height: var(--ui-control-lg);
-      align-items: center;
-      justify-content: center;
-      border: var(--ui-border-width-hairline) solid var(--ui-line-soft);
-      border-radius: var(--ui-radius-lg);
-      background: var(--ui-surface-card-solid);
-      color: var(--ui-text-strong);
-      font-size: var(--ui-text-sm);
-      font-weight: var(--ui-font-weight-strong);
-      line-height: var(--ui-line-tight);
-      text-align: center;
-      text-decoration: var(--ui-text-decoration-none);
-      transition:
-        background-color var(--ui-duration-base) var(--ease-standard),
-        border-color var(--ui-duration-base) var(--ease-standard),
-        color var(--ui-duration-base) var(--ease-standard);
-    }
-
-    .app-desktop-context-action:hover {
-      border-color: var(--ui-line-medium);
-      background: var(--ui-state-hover);
-      color: var(--ui-text-strong);
-    }
-
-    .app-desktop-context-action--primary,
-    .app-desktop-context-action--primary:hover {
-      border-color: var(--ui-brand);
-      background: var(--ui-brand);
-      color: var(--ui-color-white);
-    }
   }
 
   @media (min-width: 1024px) and (max-width: 1179px) {
@@ -486,10 +452,6 @@
       grid-template-columns:
         minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
         minmax(0, var(--app-desktop-main-active-width));
-    }
-
-    .app-desktop-context-rail {
-      display: none;
     }
 
     .app-shell[data-route-surface='user']:not([data-desktop-surface='feed'])::after {

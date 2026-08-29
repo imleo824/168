@@ -166,8 +166,8 @@ assert.deepEqual(
 
 assert.match(
   profileMobilePage,
-  /const LazyProfileEditDialogs = lazy\(\(\) => import\('\.\/ProfileEditDialogs'\)\);[\s\S]*const LazyProfileSecuritySheet = lazy\(\(\) => import\('\.\/ProfileSecuritySheet'\)\);[\s\S]*subscribeProfileSettingsOpen\(\(\) => setIsSecurityOpen\(true\)\)[\s\S]*isEditDialogOpen \? \([\s\S]*<Suspense fallback=\{null\}>[\s\S]*<LazyProfileEditDialogs[\s\S]*isSecurityOpen \? \([\s\S]*<Suspense fallback=\{null\}>[\s\S]*<LazyProfileSecuritySheet/,
-  'profile page should keep edit dialogs and security sheet out of the default profile route chunk while preserving the settings-open intent',
+  /const LazyProfileEditDialogs = lazy\(\(\) => import\('\.\/ProfileEditDialogs'\)\);[\s\S]*const LazyProfileSecuritySheet = lazy\(\(\) => import\('\.\/ProfileSecuritySheet'\)\);[\s\S]*const \{ guarded: guardedOpenProfileSettings \} = useInteractionGuard\(openProfileSettings,[\s\S]*isEditDialogOpen \? \([\s\S]*<Suspense fallback=\{null\}>[\s\S]*<LazyProfileEditDialogs[\s\S]*isSecurityOpen \? \([\s\S]*<Suspense fallback=\{null\}>[\s\S]*<LazyProfileSecuritySheet/,
+  'profile page should keep edit dialogs and security sheet out of the default profile route chunk while preserving the guarded cover settings action',
 );
 
 assert.doesNotMatch(

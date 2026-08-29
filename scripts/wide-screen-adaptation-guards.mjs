@@ -207,6 +207,7 @@ for (const required of [
   "--app-desktop-detail-main-width",
   "--app-desktop-conversation-main-width",
   "--app-desktop-workspace-main-width",
+  "--app-desktop-page-target-width",
   "--app-shell-viewport-width: var(--ui-viewport-width);",
   "--app-shell-viewport-height: var(--app-layout-vh);",
   "--app-desktop-shell-content-height: calc(var(--app-shell-viewport-height) - (var(--app-desktop-shell-padding-y) * 2));",
@@ -214,6 +215,7 @@ for (const required of [
   "--ui-topbar-content-max-width: var(--app-desktop-page-content-width);",
   "--ui-page-tabs-max-width: var(--app-desktop-page-content-width);",
   "@media (min-width: 1024px)",
+  "@media (min-width: 768px) and (max-width: 1023px)",
   ".app-shell[data-route-surface='user'] {",
   "grid-template-columns:",
   "justify-content: center;",
@@ -232,6 +234,8 @@ for (const required of [
   "--app-desktop-main-width: var(--app-desktop-workspace-main-width);",
   ".app-desktop-sidebar {\n      position: sticky;",
   "top: var(--app-desktop-shell-padding-y);",
+  "--app-mobile-canvas-width: min(100%, calc(var(--ui-space-8) * 24));",
+  "transform: translateX(-50%) translateZ(var(--ui-space-none));",
 ]) {
   if (adaptationSource.includes(required)) continue;
   failures.push(`wide-screen-mobile-adaptation.css missing current desktop shell contract: ${required}`);
@@ -263,6 +267,9 @@ for (const forbidden of [
   'position: fixed;',
   'left: 0;',
   'right: 0;',
+  'scale(var(--app-adaptive-scale))',
+  '--app-adaptive-scale-max',
+  '--app-adaptive-scale-wide',
 ]) {
   if (!adaptationSource.includes(forbidden)) continue;
   failures.push(`wide-screen-mobile-adaptation.css must not fall back to legacy/rigid desktop hacks: ${forbidden}`);

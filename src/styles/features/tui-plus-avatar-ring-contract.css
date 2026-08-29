@@ -100,20 +100,6 @@
     box-shadow: var(--ui-shadow-none);
   }
 
-  .app-bottom-nav-avatar-shell[data-tui-plus='true'] {
-    overflow: visible;
-    background: var(--ui-avatar-tui-plus-ring-gradient);
-    box-shadow:
-      var(--ui-bottom-nav-active-avatar-shadow),
-      0 0 0 var(--ui-avatar-tui-plus-ring-size) var(--ui-avatar-tui-plus-ring-color);
-  }
-
-  .app-bottom-nav-avatar-shell[data-tui-plus='true']::before {
-    inset: calc(var(--ui-space-half) + var(--ui-avatar-tui-plus-ring-size));
-    background: var(--ui-avatar-tui-plus-ring-surface, var(--ui-panel-card-surface, var(--ui-color-white)));
-    box-shadow: var(--ui-bottom-nav-avatar-placeholder-inset-shadow);
-  }
-
   .ui-avatar[data-tui-plus='true']:not(:where([data-tui-plus='true'] .ui-avatar, [data-tui-plus='true'] > .ui-avatar)) {
     overflow: visible;
     border-radius: var(--ui-radius-pill);

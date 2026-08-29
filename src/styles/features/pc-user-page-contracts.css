@@ -1,14 +1,59 @@
 /* User-surface desktop consistency contract. Feature styles keep mobile ownership. */
 
 @layer utilities {
+  .app-shell[data-route-surface='user'] {
+    --ui-user-page-section-gap: var(--ui-space-4);
+    --ui-user-page-toolbar-gap: var(--ui-space-2);
+    --ui-user-page-control-height: var(--ui-control-md);
+    --ui-user-page-surface-radius: var(--ui-radius-lg);
+    --ui-user-page-line: var(--ui-line-hairline);
+  }
+
+  .app-shell[data-route-surface='user'] :is(
+    button,
+    a,
+    input,
+    select,
+    textarea
+  ):focus-visible {
+    outline: var(--ui-outline-width) solid var(--ui-focus-outline);
+    outline-offset: var(--ui-focus-ring-width);
+  }
+
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .app-shell[data-route-surface='user'] {
+      --ui-app-page-main-gap: var(--ui-space-5);
+      --ui-page-edge-padding-x: var(--ui-space-5);
+    }
+
+    .app-shell[data-route-surface='user'] :is(
+      .ui-app-page-main,
+      .ui-page-content-shell,
+      .ui-topbar-inner,
+      .ui-page-tabs-bar
+    ) {
+      min-width: var(--ui-space-none);
+    }
+
+    .app-shell[data-route-surface='user'] :is(
+      .ui-section-card,
+      .post-create-shell-card,
+      .recharge-form-card,
+      .recharge-payment-panel,
+      .notification-settings-section
+    ) {
+      border-radius: var(--ui-user-page-surface-radius);
+    }
+  }
+
   @media (min-width: 1024px) {
     .app-shell[data-route-surface='user'] {
       --ui-pc-page-block: var(--ui-space-5);
-      --ui-pc-section-gap: var(--ui-space-5);
-      --ui-pc-toolbar-gap: var(--ui-space-3);
-      --ui-pc-control-height: var(--ui-control-md);
-      --ui-pc-surface-radius: var(--ui-radius-lg);
-      --ui-pc-line: var(--ui-line-hairline);
+      --ui-pc-section-gap: var(--ui-user-page-section-gap);
+      --ui-pc-toolbar-gap: var(--ui-user-page-toolbar-gap);
+      --ui-pc-control-height: var(--ui-user-page-control-height);
+      --ui-pc-surface-radius: var(--ui-user-page-surface-radius);
+      --ui-pc-line: var(--ui-user-page-line);
     }
 
     .app-shell[data-route-surface='user'] .ui-app-page-main {
@@ -110,17 +155,6 @@
       border-color: var(--ui-line-medium);
       border-radius: var(--ui-radius-md);
       font-size: var(--ui-text-sm);
-    }
-
-    .app-shell[data-route-surface='user'] :is(
-      button,
-      a,
-      input,
-      select,
-      textarea
-    ):focus-visible {
-      outline: var(--ui-outline-width) solid var(--ui-focus-outline);
-      outline-offset: var(--ui-focus-ring-width);
     }
 
     .app-shell[data-route-surface='user'][data-desktop-surface='detail'] :is(

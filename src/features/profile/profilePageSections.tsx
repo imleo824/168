@@ -174,15 +174,6 @@ export function ProfileIdentitySection({
               <Crown className="profile-tui-plus-chip-icon" aria-hidden="true" />
               {tuiPlusLabel}
             </button>
-            <button
-              type="button"
-              onClick={onEditHome}
-              className="profile-edit-home-button pressable"
-              aria-label="编辑主页"
-              title="编辑主页"
-            >
-              <Edit2 size={13} className="profile-edit-home-icon" aria-hidden="true" />
-            </button>
           </div>
 
           {user.bio ? (

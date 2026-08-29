@@ -27,5 +27,7 @@
     --ui-profile-user-row-padding-y: var(--ui-space-3);
     --ui-profile-user-row-padding-x: var(--ui-page-padding-x);
     --ui-profile-user-row-chevron-size: var(--ui-control-icon-xs);
+    --ui-profile-cover-settings-border: color-mix(in srgb, var(--ui-color-white) 40%, transparent);
+    --ui-profile-cover-settings-surface: color-mix(in srgb, var(--ui-color-black) 20%, transparent);
   }
 }

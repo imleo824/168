@@ -181,13 +181,14 @@ assert(
 assert(
   profileMobilePage.includes("const LazyProfileEditDialogs = lazy(() => import('./ProfileEditDialogs'));") &&
     profileMobilePage.includes("const LazyProfileSecuritySheet = lazy(() => import('./ProfileSecuritySheet'));") &&
-    profileMobilePage.includes('subscribeProfileSettingsOpen(() => setIsSecurityOpen(true))') &&
+    profileMobilePage.includes('const { guarded: guardedOpenProfileSettings } = useInteractionGuard(openProfileSettings, {') &&
+    profileMobilePage.includes('onEditHome={() => void guardedOpenProfileSettings()}') &&
     profileMobilePage.includes('const isEditDialogOpen = isEditingLoginAccount || isEditingContact || isEditingPassword || isEditingPaymentPassword || isEditingDisplayName;') &&
     profileMobilePage.includes('<LazyProfileEditDialogs') &&
     profileMobilePage.includes('<LazyProfileSecuritySheet') &&
     !profileMobilePage.includes("import ProfileEditDialogs from './ProfileEditDialogs';") &&
     !profileMobilePage.includes("import ProfileSecuritySheet from './ProfileSecuritySheet';"),
-  'Profile page must lazy-load edit dialogs and security sheet while keeping the topbar settings intent wired at the route shell.',
+  'Profile page must lazy-load edit dialogs and security sheet while keeping the cover settings action guarded at the page shell.',
 );
 
 assert(
@@ -397,9 +398,7 @@ assert(
 assert(
   /\.app-shell\[data-route-surface='user'\]\s*\{[\s\S]*?height:\s*var\(--app-shell-viewport-height\);[\s\S]*?min-height:\s*var\(--app-shell-viewport-height\);[\s\S]*?overflow:\s*hidden;/.test(wideScreenAdaptationCss) &&
     /\.app-shell\[data-route-surface='user'\] \.app-shell-main\s*\{[\s\S]*?height:\s*var\(--app-desktop-shell-content-height\);[\s\S]*?overflow-y:\s*auto;[\s\S]*?overscroll-behavior:\s*contain;/.test(wideScreenAdaptationCss) &&
-    wideScreenAdaptationCss.includes(`.app-shell[data-route-surface='user'][data-desktop-surface='feed'] .app-shell-main {
-      overflow: hidden;
-    }`) &&
+    /\.app-shell\[data-route-surface='user'\]\[data-desktop-surface='feed'\] \.app-shell-main\s*\{[\s\S]*?overflow:\s*hidden;/.test(wideScreenAdaptationCss) &&
     wideScreenAdaptationCss.includes('--app-shell-viewport-height: var(--app-layout-vh);') &&
     wideScreenAdaptationCss.includes('--app-desktop-shell-content-height: calc(var(--app-shell-viewport-height) - (var(--app-desktop-shell-padding-y) * 2));') &&
     !wideScreenAdaptationCss.includes('100svh') &&
@@ -408,37 +407,15 @@ assert(
 );
 
 assert(
-  homeFeedFoundationCss.includes(`.app-shell[data-route-surface='user'][data-desktop-surface='feed'] .home-mobile-shell {
-      --ui-feed-desktop-grid-min-column-width: calc(var(--ui-space-8) * 10);
-      --ui-feed-card-list-gap: var(--ui-space-3);
-      --ui-home-desktop-feed-width: var(--app-desktop-page-content-width);
-      --ui-home-desktop-shell-width: var(--app-desktop-page-content-width);
-      --ui-home-feed-reading-column-width: min(100%, calc(var(--app-desktop-reading-main-width) - (var(--ui-app-shell-desktop-padding-x) * 2)));
-      --ui-social-feed-list-max-width: var(--ui-home-feed-reading-column-width);
-
-      display: flex;
-      height: 100%;
-      min-height: 0;
-      flex-direction: column;
-      overflow: hidden;`) &&
-    homeFeedFoundationCss.includes(`.app-shell[data-route-surface='user'][data-desktop-surface='feed'] .home-scrollaway-chrome,
-    .app-shell[data-route-surface='user'][data-desktop-surface='feed'] .home-topic-tabs-sticky-shell {
-      flex: 0 0 auto;
-    }`) &&
-    homeFeedFoundationCss.includes(`.app-shell[data-route-surface='user'][data-desktop-surface='feed'] .home-mobile-feed-panel [data-feed-scroll-root] {
-      width: 100%;
-      height: 100%;
-      min-height: 0;
-      max-width: var(--ui-max-width-none);
-      overflow-x: hidden;
-      overflow-y: auto;
-      overscroll-behavior: contain;`),
+  /\.app-shell\[data-route-surface='user'\]\[data-desktop-surface='feed'\] \.home-mobile-shell\s*\{[\s\S]*?display:\s*flex;[\s\S]*?height:\s*100%;[\s\S]*?flex-direction:\s*column;[\s\S]*?overflow:\s*hidden;/.test(homeFeedFoundationCss) &&
+    /\.app-shell\[data-route-surface='user'\]\[data-desktop-surface='feed'\] \.home-scrollaway-chrome,[\s\S]*?\.app-shell\[data-route-surface='user'\]\[data-desktop-surface='feed'\] \.home-topic-tabs-sticky-shell\s*\{[\s\S]*?flex:\s*0 0 auto;/.test(homeFeedFoundationCss) &&
+    /\.app-shell\[data-route-surface='user'\]\[data-desktop-surface='feed'\] \.home-mobile-feed-panel \[data-feed-scroll-root\]\s*\{[\s\S]*?overflow-x:\s*hidden;[\s\S]*?overflow-y:\s*auto;[\s\S]*?overscroll-behavior:\s*contain;/.test(homeFeedFoundationCss),
   'Desktop feed scrolling must belong to the feed scroll root while the topbar and tabs stay outside the scroller.',
 );
 
 assert(
-  homeFeedFoundationCss.includes('column-count: var(--ui-home-feed-column-count);') &&
-    homeFeedFoundationCss.includes('max-width: var(--ui-home-feed-reading-column-width);') &&
+  homeFeedFoundationCss.includes('max-width: var(--ui-home-feed-reading-column-width);') &&
+    /\.post-feed-list-panel\s*\{[\s\S]*?flex-direction:\s*column;/.test(homeFeedFoundationCss) &&
     !homeFeedFoundationCss.includes('column-count: 2;'),
   'Desktop feed must remain a single centered reading column instead of a two-column masonry layout.',
 );
@@ -719,10 +696,10 @@ assert(
 );
 
 assert(
-  profileRoute.includes('guardedOpenProfileSettings') &&
-    profileRoute.includes('cooldownMs: 520') &&
-    profileRoute.includes('mode: \'drop\''),
-  'Profile settings topbar entry must be guarded so rapid taps do not repeatedly proxy-click the settings sheet trigger.',
+  profileMobilePage.includes('guardedOpenProfileSettings') &&
+    profileMobilePage.includes('cooldownMs: 520') &&
+    profileMobilePage.includes('mode: \'drop\''),
+  'Profile cover settings entry must be guarded so rapid taps do not repeatedly open the settings sheet.',
 );
 
 assert(

@@ -13,6 +13,7 @@ import { PaymentInfoSkeleton, Skeleton } from '@/ui/Skeleton';
 import type { RechargeOrder } from '@/types';
 import { InlineSpinner } from '@/ui/LoadingState';
 import PageContentShell from '@/ui/PageContentShell';
+import SurfaceSectionCard from '@/ui/SurfaceSectionCard';
 import { APP_ROUTES } from '@/app/routePaths';
 import { useAuth } from '@/context/AuthContext';
 
@@ -398,7 +399,13 @@ export default function RechargeMobile() {
       />
 
       <PageContentShell className="recharge-shell ui-app-page-main">
-        <section className="recharge-form-card" aria-label={step === 'AMOUNT' ? '充值金额' : '等待到账'}>
+        <SurfaceSectionCard
+          as="section"
+          tone="solid"
+          paddingClassName="recharge-form-card-surface"
+          className="recharge-form-card"
+          ariaLabel={step === 'AMOUNT' ? '充值金额' : '等待到账'}
+        >
           <form onSubmit={handleSubmit} className="recharge-form">
             {step === 'AMOUNT' ? (
               <div className="recharge-step recharge-step--amount">
@@ -541,7 +548,7 @@ export default function RechargeMobile() {
               </div>
             )}
           </form>
-        </section>
+        </SurfaceSectionCard>
       </PageContentShell>
     </AppPage>
   );
