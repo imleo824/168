@@ -22,7 +22,7 @@ type AuthRouteMeta = {
 const AUTH_ROUTE_META: Record<string, AuthRouteMeta> = {
   [APP_ROUTES.create]: { documentTitle: '登录后发布｜推推', pageTitle: '发布分类信息', showBack: true },
   [APP_ROUTES.messages]: { documentTitle: '登录后查看消息｜推推', pageTitle: '消息', showBack: false },
-  [APP_ROUTES.sponsor]: { documentTitle: '登录后进入推广｜推推', pageTitle: '买曝光', showBack: false },
+  [APP_ROUTES.sponsor]: { documentTitle: '登录后进入推广｜推推', pageTitle: '推广', showBack: false },
   [APP_ROUTES.invite]: { documentTitle: '登录后邀请好友｜推推', pageTitle: '邀请好友', showBack: true },
   [APP_ROUTES.inviteRecords]: { documentTitle: '登录后查看邀请记录｜推推', pageTitle: '邀请记录', showBack: true },
   [APP_ROUTES.promote]: { documentTitle: '登录后推广内容｜推推', pageTitle: '付费推广', showBack: true },

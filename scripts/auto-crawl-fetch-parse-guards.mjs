@@ -42,6 +42,7 @@ assert.match(fetchParse, /isAllowedTextContentType/, 'fetch/parse service must v
 assert.match(fetchParse, /timestampOf/, 'feed timestamps must be validated without inventing moving cursors.');
 assert.match(fetchParse, /resolveAutoCrawlFetchUrl/, 'fetch/parse service must own the final source URL resolver.');
 assert.match(fetchParse, /normalizeHttpUrl/, 'feed links and images must be normalized through one HTTP URL helper.');
+assert.match(fetchParse, /function elementHtmlByClass[\s\S]*let depth = 1[\s\S]*tagRe\.lastIndex = bodyStart/, 'Telegram text extraction must tolerate nested message markup instead of stopping at the first child closing tag.');
 assert.match(fetchParse, /parseRss\(response\.text, response\.finalUrl\)/, 'RSS parsing must receive the final feed URL for relative links and images.');
 assert.match(fetchParse, /extractImagesFromHtml\(`\$\{rawContent\}\\n\$\{chunk\}`, link \|\| baseUrl\)/, 'RSS media extraction must resolve relative image URLs against the item or feed URL.');
 assert.match(fetchParse, /<!\\\[CDATA\\\[/, 'RSS text cleanup must unwrap CDATA before stripping HTML.');

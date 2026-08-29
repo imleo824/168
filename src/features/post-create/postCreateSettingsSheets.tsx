@@ -279,7 +279,7 @@ export function PostCreatePromoteChoiceSheet({
         <div className="post-create-promote-handle ui-sheet-handle" aria-hidden="true" />
         <h2 className="post-create-promote-title">已发出</h2>
         <p className="post-create-promote-copy">
-          要不要买曝光？买曝光后更容易被看到。
+          要不要推广？推广后更容易被看到。
         </p>
         <div className="post-create-promote-actions">
           <ActionButton
@@ -298,7 +298,7 @@ export function PostCreatePromoteChoiceSheet({
             onClick={onGoPromote}
             className="post-create-promote-action"
           >
-            买曝光
+            推广
           </ActionButton>
         </div>
       </div>

@@ -24,6 +24,39 @@ assert.equal(quality.contact, '@helper1234', 'post author contact must be extrac
 assert.ok(quality.removed.contactLines >= 2, 'contact removal must be audited.');
 assert.ok(quality.removed.tailLines >= 2, 'tail removal must be audited.');
 
+const telegramNoise = filterCrawlContentBeforePublish({
+  title: 'Forwarded from Jobs Channel',
+  content: [
+    'Forwarded from Jobs Channel',
+    '迪拜客服招聘，月薪 1800U，包住，要求中文沟通顺畅。',
+    'View in Telegram',
+    '12 Comments',
+    '频道客服：@official_channel_bot',
+    '迪拜客服招聘，月薪 1900U，包住，要求中文沟通顺畅。',
+    '频道导航',
+    'https://t.me/source_channel',
+  ].join('\n'),
+  images: [],
+});
+
+assert.equal(telegramNoise.shouldPublish, true, 'telegram UI chrome must not block valid source content.');
+assert.doesNotMatch(telegramNoise.cleanedContent, /Forwarded from|View in Telegram|Comments|频道客服|频道导航|source_channel/i, 'telegram UI chrome and source contacts must be removed.');
+assert.match(telegramNoise.cleanedContent, /迪拜客服招聘/, 'valid business content must survive telegram noise cleanup.');
+assert.ok(telegramNoise.removed.boilerplateLines >= 2, 'telegram UI chrome removal must be audited as boilerplate.');
+
+const telegramTemplateDuplicate = filterCrawlContentBeforePublish({
+  title: '房源更新',
+  content: [
+    '金边公寓出租，近商圈，可月付，适合长期居住。',
+    '金边公寓出租，近商圈，可月付，适合长期居住。',
+    '金边公寓出租，近商圈，可月付，适合长期居住。',
+  ].join('\n'),
+  images: [],
+});
+
+assert.equal((telegramTemplateDuplicate.cleanedContent.match(/金边公寓出租/g) || []).length, 1, 'normalized duplicate source lines must collapse before publishing.');
+assert.ok(telegramTemplateDuplicate.removed.duplicateLines >= 2, 'duplicate line cleanup must be audited.');
+
 for (const keyword of ['官网', '网址', '.com', '下载', 'TRX', '注册']) {
   const rejected = filterCrawlContentBeforePublish({
     title: keyword === '官网' ? '官网活动入口' : '东京本地信息',

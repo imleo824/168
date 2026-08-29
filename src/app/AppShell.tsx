@@ -62,7 +62,7 @@ const DESKTOP_NAV_ITEMS = [
   { to: APP_ROUTES.home, label: '首页', icon: House, end: true },
   { to: APP_ROUTES.messages, label: '消息', icon: Bell, end: false },
   { to: APP_ROUTES.create, label: '发推', icon: CirclePlus, end: false },
-  { to: APP_ROUTES.sponsor, label: '买曝光', icon: TrendingUp, end: false },
+  { to: APP_ROUTES.sponsor, label: '推广', icon: TrendingUp, end: false },
   { to: APP_ROUTES.profile, label: '我的', icon: UserRound, end: false },
   { to: APP_ROUTES.about, label: '关于推推', icon: Info, end: false },
 ] as const;

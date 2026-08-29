@@ -1018,7 +1018,7 @@ const bottomNavOrder = [
   'app-bottom-nav-label">首页',
   'app-bottom-nav-label">消息',
   'app-bottom-nav-label">发推',
-  'app-bottom-nav-label">买曝光',
+  'app-bottom-nav-label">推广',
   'app-bottom-nav-label">我的',
 ];
 assertNotIncludes('src/app/AppBottomNavigation.tsx', 'app-bottom-nav-label">聊天', 'bottom navigation must use messages instead of the removed chat entry.');
@@ -1027,7 +1027,7 @@ let lastBottomNavIndex = -1;
 for (const label of bottomNavOrder) {
   const index = bottomNavSource.indexOf(label);
   if (index <= lastBottomNavIndex) {
-    violations.push('src/app/AppBottomNavigation.tsx: bottom nav order must be 首页、消息、发推、买曝光、我的.');
+    violations.push('src/app/AppBottomNavigation.tsx: bottom nav order must be 首页、消息、发推、推广、我的.');
     break;
   }
   lastBottomNavIndex = index;

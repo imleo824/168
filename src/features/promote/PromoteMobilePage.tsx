@@ -667,10 +667,10 @@ export default function PromoteMobile() {
       onBlurCapture={handlePromoteBlurCapture}
       className="promote-mobile-page promote-page surface-page"
     >
-      <SEO title="买曝光｜推推" description="在推推购买首页横幅、热门置顶和分类置顶，让内容更容易被看到。" />
+      <SEO title="推广｜推推" description="在推推推广首页横幅、热门置顶和分类置顶，让内容更容易被看到。" />
 
       <PageHeader
-        title="买曝光"
+        title="推广"
         onBack={handleBack}
       />
 

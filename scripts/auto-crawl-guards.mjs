@@ -222,6 +222,10 @@ mustHave('quality', crawlQuality, /captures\[0\]/);
 mustHave('quality', crawlQuality, /removeInlineContacts\(titleSource\)/);
 mustHave('quality contact detection', crawlQuality, /detectContactFromLine/);
 mustHave('quality contact detection', crawlQuality, /contact: body\.contact/);
+mustHave('quality telegram chrome cleanup', crawlQuality, /TELEGRAM_UI_LINE_PATTERNS/);
+mustHave('quality telegram chrome cleanup', crawlQuality, /isTelegramUiLine/);
+mustHave('quality duplicate normalization', crawlQuality, /canonicalLineKey/);
+mustHave('quality duplicate normalization', crawlQuality, /replace\(\/https\?:\\\/\\\/\\S\+\/gi, ''\)/);
 mustNotHave('quality', crawlQuality, /replace\(pattern, '\$1'\)/);
 mustNotHave('quality', crawlQuality, /EMOJI_EXCESSIVE_COUNT_THRESHOLD|emojiCount >= 24|CrawlAdDecision|CrawlCategoryValueDecision|extractFirstContact|CATEGORY_INTENT_RULES/);
 

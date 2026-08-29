@@ -96,7 +96,22 @@ function splitTelegramBlocks(html: string) {
 }
 
 function elementHtmlByClass(html: string, classToken: string) {
-  return html.match(new RegExp(`<([a-zA-Z][\\w:-]*)\\b[^>]*class=["'][^"']*${classToken}[^"']*["'][^>]*>([\\s\\S]*?)<\\/\\1>`, 'i'))?.[2] || '';
+  const token = classToken.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const openRe = new RegExp(`<([a-zA-Z][\\w:-]*)\\b[^>]*class=["'][^"']*\\b${token}\\b[^"']*["'][^>]*>`, 'i');
+  const open = openRe.exec(html);
+  if (!open) return '';
+  const tagName = open[1].toLowerCase();
+  let depth = 1;
+  const bodyStart = (open.index || 0) + open[0].length;
+  const tagRe = new RegExp(`<\\/?${tagName}\\b[^>]*>`, 'gi');
+  tagRe.lastIndex = bodyStart;
+  let tag: RegExpExecArray | null;
+  while ((tag = tagRe.exec(html)) !== null) {
+    if (tag[0].startsWith('</')) depth -= 1;
+    else if (!/\/>$/.test(tag[0])) depth += 1;
+    if (depth === 0) return html.slice(bodyStart, tag.index);
+  }
+  return html.slice(bodyStart);
 }
 
 function normalizeHttpUrl(raw: unknown, baseUrl = '') {

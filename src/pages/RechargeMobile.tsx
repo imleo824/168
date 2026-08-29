@@ -337,7 +337,7 @@ export default function RechargeMobile() {
   if (!user) {
     return (
       <AppPage mobileAddressBarScroll className="recharge-page">
-        <SEO title="充积分｜推推" description="登录后在推推充积分，用于买曝光、置顶和会员功能。" noindex />
+        <SEO title="充积分｜推推" description="登录后在推推充积分，用于推广、置顶和会员功能。" noindex />
         <PageHeader title="充积分" onBack={goBackToSource} />
         <PageContentShell as="main" className="ui-auth-required-wrap ui-app-page-main">
           <AuthRequiredState

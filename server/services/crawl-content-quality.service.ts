@@ -51,6 +51,13 @@ const CONTACT_PATTERNS = [
 ];
 
 const DIRECT_REJECT_KEYWORDS = ['官网', '网址', '.com', '下载', 'TRX', '注册'] as const;
+const TELEGRAM_UI_LINE_PATTERNS = [
+  /^(?:forwarded from|转发自|转自|via)\b/i,
+  /^(?:view in telegram|open in telegram|please open telegram|instant view|comments?|replies|share|copy link)$/i,
+  /^(?:查看原文|打开 Telegram|在 Telegram 中查看|阅读全文|查看评论|发表评论|复制链接|分享)$/i,
+  /^\d+\s*(?:comments?|replies|views?|shares?)$/i,
+  /^\d+\s*(?:条评论|次浏览|次转发)$/,
+];
 
 function unique<T>(items: T[]) {
   return Array.from(new Set(items));
@@ -64,6 +71,7 @@ function compact(raw: string) {
   return String(raw || '')
     .normalize('NFKC')
     .replace(/\r\n?/g, '\n')
+    .replace(/[\u200B-\u200F\u202A-\u202E\uFEFF\u00AD]/g, '')
     .replace(/[ \t]+/g, ' ')
     .replace(/[!！?？。,.，、]{3,}/g, '。')
     .replace(/\n{3,}/g, '\n\n')
@@ -113,6 +121,19 @@ function removeInlineContacts(line: string) {
     .trim();
 }
 
+function isTelegramUiLine(line: string) {
+  const value = compact(line).replace(/\s+/g, ' ');
+  return TELEGRAM_UI_LINE_PATTERNS.some((pattern) => pattern.test(value));
+}
+
+function canonicalLineKey(line: string) {
+  return compact(line)
+    .replace(/https?:\/\/\S+/gi, '')
+    .replace(/\b(?:t\.me|telegram\.me|wa\.me)\/\S+/gi, '')
+    .replace(/(^|[^A-Za-z0-9_.@])@[A-Za-z0-9_]{4,64}(?!\.[A-Za-z])/g, '$1')
+    .toLowerCase();
+}
+
 function contactValue(raw: unknown) {
   return compact(String(raw || '')).slice(0, 120);
 }
@@ -120,7 +141,7 @@ function contactValue(raw: unknown) {
 function detectContactFromLine(line: string) {
   const value = compact(line);
   if (!value) return '';
-  if (/(?:广告合作|商务合作|投稿|频道导航|频道矩阵|官方频道|防失联|备用频道|交流群|资源群)/i.test(value)) return '';
+  if (/(?:广告合作|商务合作|投稿|频道导航|频道矩阵|官方频道|防失联|备用频道|交流群|资源群|频道客服|唯一客服)/i.test(value)) return '';
 
   const labeledTelegram = value.match(/(?:TG|Telegram|飞机|电报)[:：\s@]*([A-Za-z0-9_]{4,64})/i);
   if (labeledTelegram?.[1]) return contactValue(`@${labeledTelegram[1].replace(/^@/, '')}`);
@@ -178,6 +199,7 @@ function isPromoLine(line: string) {
 function isBoilerplateLine(line: string, hasContentAbove: boolean) {
   const value = compact(line);
   if (!value || isSeparatorLine(value)) return true;
+  if (isTelegramUiLine(value)) return true;
   if (/^(?:VIEW IN TELEGRAM|Please open Telegram|查看原文|打开 Telegram).*$/i.test(value)) return true;
   if (hasContentAbove && /^(?:@[A-Za-z0-9_]{4,64}|https?:\/\/\S+|t\.me\/\S+)$/i.test(value)) return true;
   if (/(?:认准唯一|绝无小号|没有任何小号|防假冒|防冒充|谨防冒充|谨防上当|唯一客服|唯一账号|唯一联系方式)/i.test(value)) return true;
@@ -186,7 +208,7 @@ function isBoilerplateLine(line: string, hasContentAbove: boolean) {
 }
 
 function repeatedLineRatio(lines: string[]) {
-  const meaningful = lines.map((line) => compact(line)).filter((line) => textLength(line) >= 4);
+  const meaningful = lines.map((line) => canonicalLineKey(line)).filter((line) => textLength(line) >= 4);
   if (meaningful.length < 3) return 0;
   const seen = new Set<string>();
   let repeats = 0;
@@ -241,7 +263,7 @@ function cleanBody(rawContent: string): BodyCleanResult {
     const line = compact(emoji.cleaned);
     if (!line) continue;
 
-    const dedupeKey = line.toLowerCase();
+    const dedupeKey = canonicalLineKey(line);
     if (seen.has(dedupeKey)) {
       duplicateLines += 1;
       continue;

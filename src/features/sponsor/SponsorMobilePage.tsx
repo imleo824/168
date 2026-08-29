@@ -205,20 +205,20 @@ export default function SponsorMobilePage() {
   if (!isAuthLoading && !user) {
     return (
       <AppPage mobileAddressBarScroll bottomSafe className="sponsor-page surface-page">
-        <SEO title="买曝光｜推推" description="登录后管理推推积分、充积分、买曝光和曝光效果。" noindex />
-        <PageHeader title="买曝光" showBack={false} titleAlign="center" />
+        <SEO title="推广｜推推" description="登录后管理推推积分、充积分、推广和曝光效果。" noindex />
+        <PageHeader title="推广" showBack={false} titleAlign="center" />
         <PageContentShell as="main" className="ui-auth-required-wrap ui-app-page-main">
           <AuthRequiredState
             icon={<HandCoins />}
             context="sponsor"
             density="compact"
-            title="登录后买曝光"
+            title="登录后推广"
             description="查看积分余额、充积分入口、曝光服务和积分记录。"
             actionLabel="登录 / 注册"
             previewItems={[
               { icon: <HandCoins aria-hidden="true" />, label: '积分余额', description: '查看当前积分和近期变化' },
               { icon: <Plus aria-hidden="true" />, label: '充积分', description: '快速进入充积分流程' },
-              { icon: <ReceiptText aria-hidden="true" />, label: '积分记录', description: '追踪充积分、买曝光和消费记录' },
+              { icon: <ReceiptText aria-hidden="true" />, label: '积分记录', description: '追踪充积分、推广和消费记录' },
             ]}
             onAction={() => requireAuth()}
             tone="open"
@@ -230,11 +230,11 @@ export default function SponsorMobilePage() {
 
   return (
     <AppPage mobileAddressBarScroll bottomSafe className="sponsor-page surface-page">
-      <SEO title="买曝光｜推推" description="管理推推积分、充积分、买曝光和曝光效果。" noindex />
-      <PageHeader title="买曝光" showBack={false} titleAlign="center" />
+      <SEO title="推广｜推推" description="管理推推积分、充积分、推广和曝光效果。" noindex />
+      <PageHeader title="推广" showBack={false} titleAlign="center" />
 
       <PageContentShell as="main" className="sponsor-workbench ui-app-page-main">
-        <section className="sponsor-hero" aria-label="买曝光工具台">
+        <section className="sponsor-hero" aria-label="推广工具台">
           <div className="sponsor-balance-block">
             {isAuthLoading ? <Skeleton className="sponsor-balance-skeleton" /> : (
               <p className="sponsor-balance-value">{user?.points ?? 0}<span>积分</span></p>
@@ -243,7 +243,7 @@ export default function SponsorMobilePage() {
 
           <div className="sponsor-primary-actions">
             <ActionButton type="button" variant="brand" onClick={() => void guardedGoRecharge()} className="sponsor-primary-action">充积分</ActionButton>
-            <ActionButton type="button" variant="brand" onClick={() => void guardedGoPromote()} className="sponsor-primary-action">买曝光</ActionButton>
+            <ActionButton type="button" variant="brand" onClick={() => void guardedGoPromote()} className="sponsor-primary-action">推广</ActionButton>
           </div>
         </section>
 
@@ -280,7 +280,7 @@ export default function SponsorMobilePage() {
                   <div className="record-list sponsor-record-list">{recentPromotionGroups.map((group) => <LazyPromotionRecordCard key={group.key} group={group} onCopyRecordId={handleCopyRecordId} />)}</div>
                   {hasMorePromotionGroups ? <RecordMoreLink label="查看更多曝光记录" onClick={() => void guardedGoPromoteHistory()} /> : null}
                 </Suspense>
-              ) : <EmptyStateCard title="暂无曝光记录" description="买曝光后会在这里展示。" compact className="sponsor-empty-state" action={<ActionButton type="button" variant="muted" size="sm" onClick={() => void guardedGoPromote()}>买曝光</ActionButton>} />}
+              ) : <EmptyStateCard title="暂无曝光记录" description="推广后会在这里展示。" compact className="sponsor-empty-state" action={<ActionButton type="button" variant="muted" size="sm" onClick={() => void guardedGoPromote()}>推广</ActionButton>} />}
             </div>
           ) : (
             <div id="sponsor-ledger-panel" role="tabpanel" className="sponsor-record-panel">
@@ -291,7 +291,7 @@ export default function SponsorMobilePage() {
                   <div className="record-list sponsor-record-list">{visibleLedgerRecords.map((record) => <LazyLedgerRecordCard key={`${record.kind}-${record.id}`} record={record} pointsPerUsdt={pointsPerUsdt} onCopyRecordId={handleCopyRecordId} />)}</div>
                   {hasMoreLedgerRecords ? <RecordMoreLink label="查看更多交易记录" onClick={() => void guardedGoTransactions()} /> : null}
                 </Suspense>
-              ) : <EmptyStateCard title="暂无积分记录" description="充积分到账或买曝光消费后会在这里展示。" compact className="sponsor-empty-state" action={<ActionButton type="button" variant="muted" size="sm" onClick={() => void guardedGoRecharge()}>充积分</ActionButton>} />}
+              ) : <EmptyStateCard title="暂无积分记录" description="充积分到账或推广消费后会在这里展示。" compact className="sponsor-empty-state" action={<ActionButton type="button" variant="muted" size="sm" onClick={() => void guardedGoRecharge()}>充积分</ActionButton>} />}
             </div>
           )}
         </section>

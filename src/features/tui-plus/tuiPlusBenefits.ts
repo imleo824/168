@@ -25,7 +25,7 @@ export const TUI_PLUS_BENEFITS: Record<TuiPlusBenefitKey, TuiPlusBenefitCopy> = 
   },
   promotionBooking: {
     key: 'promotionBooking',
-    title: '开通会员后可买曝光',
+    title: '开通会员后可推广',
     detail: '可购买首页和分类曝光。',
     confirmLabel: '开通会员',
     cancelLabel: '先不了',

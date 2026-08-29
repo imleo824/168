@@ -172,12 +172,12 @@ export default function AppBottomNavigation() {
           <span className="app-bottom-nav-icon-shell" aria-hidden="true"><CirclePlus className="app-bottom-nav-icon" /></span>
           <span className="app-bottom-nav-label">发推</span>
         </button>
-        <button type="button" className="app-bottom-nav-item app-bottom-nav-item--sponsor" data-state={pathname === APP_ROUTES.sponsor ? 'active' : 'idle'} aria-current={pathname === APP_ROUTES.sponsor ? 'page' : undefined} aria-label="买曝光" title="买曝光" {...sponsorPressHandlers}>
+        <button type="button" className="app-bottom-nav-item app-bottom-nav-item--sponsor" data-state={pathname === APP_ROUTES.sponsor ? 'active' : 'idle'} aria-current={pathname === APP_ROUTES.sponsor ? 'page' : undefined} aria-label="推广" title="推广" {...sponsorPressHandlers}>
           <span className="app-bottom-nav-icon-shell" aria-hidden="true">
             <TrendingUp className="app-bottom-nav-icon" />
             {signupRewardBadgePoints > 0 ? <span className="app-bottom-nav-reward-badge">+{signupRewardBadgePoints}</span> : null}
           </span>
-          <span className="app-bottom-nav-label">买曝光</span>
+          <span className="app-bottom-nav-label">推广</span>
         </button>
         <button type="button" className="app-bottom-nav-item app-bottom-nav-item--profile" data-state={pathname === APP_ROUTES.profile ? 'active' : 'idle'} aria-current={pathname === APP_ROUTES.profile ? 'page' : undefined} aria-label="我的" title="我的" {...profilePressHandlers}>
           <span className={profileIconShellClassName} data-tui-plus={profileIsTuiPlus ? 'true' : undefined} aria-hidden="true">

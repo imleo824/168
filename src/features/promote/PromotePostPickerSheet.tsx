@@ -55,7 +55,7 @@ export default function PromotePostPickerSheet({
           <div className="promote-picker-empty">
             <div className="promote-picker-empty-copy-group">
               <p className="promote-picker-empty-title">暂无可曝光的推</p>
-              <p className="promote-picker-empty-copy">发一条推后，就可以回来买曝光。</p>
+              <p className="promote-picker-empty-copy">发一条推后，就可以回来推广。</p>
             </div>
             <ActionButton
               type="button"
