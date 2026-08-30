@@ -58,8 +58,8 @@ async function claimDueAutoCrawlRetries(limit = AUTO_RETRY_LIMIT) {
          AND "postId" IS NULL
          AND "retryCount"<3
          AND "updatedAt"<=CURRENT_TIMESTAMP-(CASE
-           WHEN "retryCount"<=1 THEN INTERVAL '5 minutes'
-           WHEN "retryCount"=2 THEN INTERVAL '30 minutes'
+           WHEN "retryCount"=0 THEN INTERVAL '5 minutes'
+           WHEN "retryCount"=1 THEN INTERVAL '30 minutes'
            ELSE INTERVAL '2 hours'
          END)
        ORDER BY "updatedAt" ASC,"id" ASC
@@ -67,7 +67,7 @@ async function claimDueAutoCrawlRetries(limit = AUTO_RETRY_LIMIT) {
        LIMIT $1::integer
      )
      UPDATE "AutoCrawlItem" item
-     SET "status"='RAW',"updatedAt"=CURRENT_TIMESTAMP
+     SET "status"='RAW',"retryCount"="retryCount"+1,"updatedAt"=CURRENT_TIMESTAMP
      FROM due
      WHERE item."id"=due."id"
      RETURNING item."id"`,

@@ -5,6 +5,7 @@ import { catchAsync } from '../middlewares/error';
 import { setNoStore } from '../http-cache';
 import {
   deleteAutoCrawlSource,
+  configureAutoCrawlPublishHooks,
   ensureAutoCrawlStorage,
   getAutoCrawlConfig,
   markAutoCrawlSourceDueNow,
@@ -75,15 +76,22 @@ async function normalizeSourcePayload(raw: unknown): Promise<Partial<AutoCrawlSo
   const body = bodyObject(raw);
   const categoryId = String(body.categoryId || '').trim();
   if (!categoryId) throw new Error('请选择数据库分类');
-  const category = await prisma.category.findUnique({
-    where: { id: categoryId },
-    select: { id: true, name: true },
-  });
+  const authorUserId = String(body.authorUserId || '').trim();
+  const [category, author] = await Promise.all([
+    prisma.category.findUnique({
+      where: { id: categoryId },
+      select: { id: true, name: true },
+    }),
+    authorUserId
+      ? prisma.user.findUnique({ where: { id: authorUserId }, select: { id: true, isDisabled: true } })
+      : Promise.resolve(null),
+  ]);
   if (!category) throw new Error('所选数据库分类不存在');
 
   const disabled = 'disabled' in body ? toBool(body.disabled, false) : false;
-  const authorUserId = String(body.authorUserId || '').trim();
   if (!disabled && !authorUserId) throw new Error('启用的数据源必须绑定发布账号');
+  if (authorUserId && !author) throw new Error('绑定的发布账号不存在');
+  if (!disabled && author?.isDisabled) throw new Error('绑定的发布账号已被禁用');
 
   return {
     ...body,
@@ -137,9 +145,10 @@ async function sourceSaveResult(saved: { config: AutoCrawlConfig; sourceId: stri
   };
 }
 
-export function registerAutoCrawlRoutes(app: Express) {
+export function registerAutoCrawlRoutes(app: Express, deps: { markContentDataChanged?: () => void } = {}) {
   if (registered) return;
   registered = true;
+  configureAutoCrawlPublishHooks(deps);
 
   app.get('/api/admin/auto-crawl/config', authMiddleware, adminOnly, catchAsync(async (_req, res) => {
     setNoStore(res);

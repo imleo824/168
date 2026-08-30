@@ -4,6 +4,8 @@ import prisma, { isDbConfigured } from '../db';
 import { PostService } from '../post.service';
 import { buildCrawlExtract, type AutoCrawlExtractionContext } from './crawl-content-ai.service';
 import { filterCrawlContentBeforePublish, type CrawlQualityDecision } from './crawl-content-quality.service';
+import { persistAutoCrawlImages, AutoCrawlMediaError } from './auto-crawl-media.service';
+import { buildLocationPresetValueSet } from './category-meta.service';
 import {
       getAutoCrawlCategorySchema,
       getAutoCrawlDatabaseCategory,
@@ -47,6 +49,20 @@ import {
   stableId,
   toInt,
 } from './auto-crawl-normalize';
+import { canonicalizePersistentUploadedImageUrl } from './social-image.service';
+import { normalizeTelegramContactHandle } from './telegram-sync.service';
+import {
+  derivePostLocation,
+  normalizeBooleanInput,
+  normalizeExternalLocation,
+  normalizeShowContactInput,
+} from './post/post-create-input';
+import {
+  createPreparedPost,
+  PostPublishError,
+  preparePostPublishData,
+  type PreparedPostPublishData,
+} from './post/post-publish-contract';
 
 const CONFIG_RUN_LIMIT = 30;
 const MAX_RUN_SOURCES = 50;
@@ -77,15 +93,23 @@ type StoredAutoCrawlReprocessItem = {
   fingerprint: string;
   contentHash: string;
   previousStatus: string;
+  retryCount: number;
   postId?: string | null;
 };
 type AutoCrawlPublishResult = {
   post: { id: string };
   extracted: Awaited<ReturnType<typeof buildCrawlExtract>>;
   category: DatabaseCategory;
+  prepared: PreparedPostPublishData;
+  media: Awaited<ReturnType<typeof persistAutoCrawlImages>>;
 };
 
 let storageReady: Promise<void> | null = null;
+let markAutoCrawlContentDataChanged: (() => void) | null = null;
+
+export function configureAutoCrawlPublishHooks(hooks: { markContentDataChanged?: () => void }) {
+  markAutoCrawlContentDataChanged = hooks.markContentDataChanged || null;
+}
 
 function db() { return prisma as any; }
 function hash(value: unknown) { return crypto.createHash('md5').update(String(value || '')).digest('hex'); }
@@ -157,7 +181,30 @@ function parseStoredImages(metadata: unknown) {
     : [];
 }
 
+function parseStoredImageMap(metadata: unknown) {
+  const value = parseJsonObject(metadata).persistedImageMap;
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
+  return Object.fromEntries(Object.entries(value as Record<string, unknown>)
+    .map(([sourceUrl, storedUrl]) => [cleanString(sourceUrl, 1000), cleanString(storedUrl, 1000)] as const)
+    .filter(([sourceUrl, storedUrl]) => Boolean(sourceUrl && storedUrl)));
+}
+
+function autoCrawlClientNonce(source: AutoCrawlSourceConfig, item: AutoCrawlItem) {
+  return `auto-crawl:${hash(`${source.id}:${item.id}:${item.link}`).slice(0, 48)}`;
+}
+
+function retryablePublishError(error: unknown) {
+  return error instanceof AutoCrawlMediaError
+    || (error instanceof PostPublishError && error.retryable)
+    || /timeout|network|storage|fetch|database|connection|ai_/i.test(errorText(error));
+}
+
 function schedulePostSideEffects(postId: string) {
+  try {
+    markAutoCrawlContentDataChanged?.();
+  } catch (error) {
+    console.warn('[auto-crawl] content cache invalidation failed:', errorText(error));
+  }
   try {
     PostService.schedulePostRankingRefresh(postId);
   } catch (error) {
@@ -289,7 +336,7 @@ export async function getAutoCrawlConfig(): Promise<AutoCrawlConfig> {
   await ensureAutoCrawlStorage();
   const [configs, sources, runs, categoryOptions] = await Promise.all([
     rows<any>(`SELECT "enabled","checkIntervalMinutes","maxItemsPerSource","maxSourcesPerRun" FROM "AutoCrawlConfig" WHERE "id"='default' LIMIT 1`),
-    rows<any>(`SELECT s."id",s."source",s."type",s."sourceName",s."categoryId",s."authorUserId",s."showContact",s."disabled",s."cursor",s."cursorKind",s."pollIntervalMinutes",s."nextRunAt",s."lastSyncAt",s."lastFetchedCount",s."lastParsedCount",s."lastCandidateCount",s."lastDeliveredCount",s."lastFilteredCount",s."lastDuplicateCount",s."failCount",s."lastError",s."lastVisibleMinCursor",s."lastVisibleMaxCursor",s."sourceHealth",s."createdAt",s."updatedAt",c."name" AS "resolvedCategoryName"
+    rows<any>(`SELECT s."id",s."source",s."type",s."sourceName",s."categoryId",s."authorUserId",s."showContact",s."disabled",s."cursor",s."cursorKind",s."backfillBeforeCursor",s."backfillTargetCursor",s."pollIntervalMinutes",s."nextRunAt",s."lastSyncAt",s."lastFetchedCount",s."lastParsedCount",s."lastCandidateCount",s."lastDeliveredCount",s."lastFilteredCount",s."lastDuplicateCount",s."failCount",s."lastError",s."lastVisibleMinCursor",s."lastVisibleMaxCursor",s."sourceHealth",s."createdAt",s."updatedAt",c."name" AS "resolvedCategoryName"
       FROM "AutoCrawlSource" s
       LEFT JOIN "Category" c ON c."id"=s."categoryId"
       ORDER BY s."disabled" ASC,c."name" ASC NULLS LAST,s."updatedAt" DESC`),
@@ -547,10 +594,13 @@ function extractionContext(
       item: AutoCrawlItem,
       quality: CrawlQualityDecision,
       context: AutoCrawlExtractionContext,
+      publishHash: string,
+      auditMetadata: Record<string, unknown>,
       logger?: AutoCrawlExecutionLogger | null,
-      fp?: string,
+      fp = '',
     ): Promise<AutoCrawlPublishResult> {
       if (!source.authorUserId) throw new Error('auto_crawl_author_required');
+      if (!fp) throw new Error('auto_crawl_fingerprint_required');
       const category = context.category;
       logEvent(logger, {
         scope: 'ai',
@@ -613,6 +663,78 @@ function extractionContext(
         reason: extracted.audit.enrichmentError || undefined,
         details: extractionAudit(extracted),
       });
+
+      let media: Awaited<ReturnType<typeof persistAutoCrawlImages>>;
+      try {
+        media = await persistAutoCrawlImages({
+          sourceId: source.id,
+          sourcePostId: item.id,
+          authorUserId: source.authorUserId,
+          images: item.images || [],
+          cached: item.persistedImageMap,
+          canonicalizeImageUrl: canonicalizePersistentUploadedImageUrl,
+        });
+      } catch (error) {
+        logEvent(logger, {
+          level: 'error',
+          scope: 'publish',
+          phase: 'media_persist_failed',
+          message: '抓取图片持久化失败，整条内容进入重试',
+          source,
+          item,
+          fingerprint: fp,
+          status: 'RETRYABLE',
+          error: errorText(error),
+          details: error instanceof AutoCrawlMediaError ? { media: error.audit } : undefined,
+        });
+        throw error;
+      }
+
+      const normalizedContact = normalizeTelegramContactHandle(extracted.contact);
+      let prepared: PreparedPostPublishData;
+      try {
+        prepared = preparePostPublishData({
+          title: extracted.title,
+          content: extracted.content,
+          images: media.images,
+          location: extracted.location,
+          contact: normalizedContact,
+          showContact: source.showContact && Boolean(normalizedContact),
+          isAnonymous: false,
+          clientNonce: autoCrawlClientNonce(source, item),
+          categoryMeta: extracted.meta,
+          source: source.sourceName || source.source,
+        }, {
+          category,
+          categoryMetaSchema: context.schema,
+          locationPresetValues: buildLocationPresetValueSet(context.locationPresets),
+          normalizeLocation: normalizeExternalLocation,
+          deriveLocation: derivePostLocation,
+          normalizeContact: normalizeTelegramContactHandle,
+          normalizeBoolean: normalizeBooleanInput,
+          normalizeShowContact: normalizeShowContactInput,
+          canonicalizeImageUrl: canonicalizePersistentUploadedImageUrl,
+          allowContentTruncation: true,
+          allowTitleTruncation: true,
+          forcePublicIdentity: true,
+        });
+      } catch (error) {
+        logEvent(logger, {
+          level: 'error',
+          scope: 'publish',
+          phase: 'post_contract_failed',
+          message: '抓取内容未通过统一发布契约',
+          source,
+          item,
+          fingerprint: fp,
+          status: retryablePublishError(error) ? 'RETRYABLE' : 'REJECTED',
+          reason: error instanceof PostPublishError ? error.code : undefined,
+          error: errorText(error),
+          details: error instanceof PostPublishError ? error.details : undefined,
+        });
+        throw error;
+      }
+
       logEvent(logger, {
         scope: 'publish',
         phase: 'post_payload_ready',
@@ -622,15 +744,16 @@ function extractionContext(
         fingerprint: fp,
         status: 'READY',
         details: {
-          title: extracted.title,
+          contractVersion: prepared.contractVersion,
+          title: prepared.title,
           categoryId: category.id,
           categoryName: category.name,
-          location: extracted.location || null,
-          contact: extracted.contact || null,
-          imagesCount: item.images?.length || 0,
+          location: prepared.location,
+          contact: prepared.contact || null,
+          imagesCount: prepared.images.length,
           authorUserId: source.authorUserId,
           isPublished: true,
-          categoryMeta: extracted.meta,
+          categoryMeta: prepared.categoryMeta,
         },
       });
 
@@ -645,8 +768,8 @@ function extractionContext(
         details: {
           categoryId: category.id,
           authorUserId: source.authorUserId,
-          metaKeys: Object.keys(extracted.meta || {}),
-          schemaVersion: extracted.audit.schemaVersion,
+          metaKeys: Object.keys(prepared.categoryMeta),
+          schemaVersion: prepared.categoryMetaSchemaVersion,
         },
       });
 
@@ -654,26 +777,59 @@ function extractionContext(
       try {
         post = await prisma.$transaction(async (tx) => {
           await (tx as any).$queryRawUnsafe(`SELECT set_config('app.auto_crawl_write','1',true)`);
-          const created = await tx.post.create({
-            data: {
-              title: extracted.title,
-              content: extracted.content,
-              location: extracted.location || null,
-              contact: extracted.contact,
-              showContact: source.showContact && Boolean(extracted.contact),
-              images: item.images || [],
-              source: (source.sourceName || source.source).slice(0, 80),
-              isAnonymous: false,
-              isPublished: true,
-              bumpedAt: new Date(),
-              category: { connect: { id: category.id } },
-              user: { connect: { id: source.authorUserId } },
-              categoryMeta: extracted.meta,
-              categoryMetaSchemaVersion: extracted.audit.schemaVersion || null,
-            },
+          const author = await tx.user.findUnique({
+            where: { id: source.authorUserId },
+            select: { id: true, isDisabled: true },
+          });
+          if (!author) throw new Error('auto_crawl_author_not_found');
+          if (author.isDisabled) throw new Error('auto_crawl_author_disabled');
+          const existing = prepared.clientNonce
+            ? await tx.post.findFirst({
+              where: { userId: source.authorUserId, clientNonce: prepared.clientNonce },
+              select: { id: true, deletedAt: true },
+            })
+            : null;
+          if (existing?.deletedAt) throw new Error('auto_crawl_idempotent_post_deleted');
+          const created = existing || await createPreparedPost(tx, prepared, { userId: source.authorUserId, createdAt: new Date() }, {
             select: { id: true },
           });
-          return created;
+          const finalMetadata = {
+            contractVersion: prepared.contractVersion,
+            quality: qualityAudit(quality),
+            extraction: extractionAudit(extracted),
+            media: media.audit,
+            persistedImageMap: media.mapping,
+            publishContentHash: publishHash,
+            ...auditMetadata,
+            finalPayload: {
+              title: prepared.title,
+              content: prepared.content,
+              images: prepared.images,
+              location: prepared.location,
+              contact: prepared.contact,
+              showContact: prepared.showContact,
+              categoryId: prepared.category?.id || null,
+              categoryMeta: prepared.categoryMeta,
+              categoryMetaSchemaVersion: prepared.categoryMetaSchemaVersion,
+              clientNonce: prepared.clientNonce,
+              source: prepared.source,
+            },
+          };
+          const linkedItems = await (tx as any).$executeRawUnsafe(
+            `UPDATE "AutoCrawlItem" SET
+              "status"='PUBLISHED',"cleanTitle"=$2,"cleanContent"=$3,"postId"=$4,
+              "contentHash"=$5,"filterReason"=NULL,"errorMessage"=NULL,
+              "metadata"=COALESCE("metadata",'{}'::jsonb)||$6::jsonb,"updatedAt"=CURRENT_TIMESTAMP
+             WHERE "fingerprint"=$1`,
+            fp,
+            prepared.title,
+            prepared.content,
+            created.id,
+            publishHash,
+            JSON.stringify(finalMetadata),
+          );
+          if (Number(linkedItems) !== 1) throw new Error('auto_crawl_item_publish_link_failed');
+          return { id: created.id };
         });
       } catch (error) {
         logEvent(logger, {
@@ -689,8 +845,8 @@ function extractionContext(
           details: {
             categoryId: category.id,
             authorUserId: source.authorUserId,
-            metaKeys: Object.keys(extracted.meta || {}),
-            schemaVersion: extracted.audit.schemaVersion,
+            metaKeys: Object.keys(prepared.categoryMeta),
+            schemaVersion: prepared.categoryMetaSchemaVersion,
           },
         });
         throw error;
@@ -707,7 +863,7 @@ function extractionContext(
         details: { postId: post.id },
       });
 
-      return { post, extracted, category };
+      return { post, extracted, category, prepared, media };
     }
 
     function commitCursor(stats: SourceStats, item: AutoCrawlItem) {
@@ -724,7 +880,8 @@ async function updateSourceStats(source: AutoCrawlSourceConfig, stats: SourceSta
           "nextRunAt"=CURRENT_TIMESTAMP+($4::text||' minutes')::interval,
           "lastFetchedCount"=$5,"lastParsedCount"=$6,"lastCandidateCount"=$7,"lastDeliveredCount"=$8,
           "lastFilteredCount"=$9,"lastDuplicateCount"=$10,"lastVisibleMinCursor"=$11,"lastVisibleMaxCursor"=$12,
-          "failCount"=0,"lastError"=$13,"sourceHealth"=$14,"updatedAt"=CURRENT_TIMESTAMP
+          "failCount"=0,"lastError"=$13,"sourceHealth"=$14,
+          "backfillBeforeCursor"=$15,"backfillTargetCursor"=$16,"updatedAt"=CURRENT_TIMESTAMP
          WHERE "id"=$1`,
         source.id,
         stats.cursor || source.cursor || '',
@@ -740,6 +897,8 @@ async function updateSourceStats(source: AutoCrawlSourceConfig, stats: SourceSta
         stats.visibleMaxCursor || null,
         lastError,
         health,
+        source.backfillBeforeCursor || null,
+        source.backfillTargetCursor || null,
       );
     }
 
@@ -775,6 +934,10 @@ async function processSource(
         failedReason: '',
       };
       const source = inputSource;
+      const initialCursor = source.cursor || '';
+      const initialBackfillBeforeCursor = source.backfillBeforeCursor || null;
+      const initialBackfillTargetCursor = source.backfillTargetCursor || null;
+      let rawStoreFailed = false;
 
       logEvent(logger, {
         scope: 'source',
@@ -820,6 +983,8 @@ async function processSource(
       }
       const context = extractionContext(category, databaseConfig);
       const fetched = await fetchAutoCrawlItems(source, { maxItemsPerSource: config.maxItemsPerSource });
+      source.backfillBeforeCursor = cleanString(fetched.parseMeta.backfillBeforeCursor, 128) || null;
+      source.backfillTargetCursor = cleanString(fetched.parseMeta.backfillTargetCursor, 128) || null;
       stats.fetched = fetched.all.length;
       stats.parsed = fetched.items.length;
       stats.visibleMinCursor = fetched.visibleMinCursor;
@@ -918,6 +1083,7 @@ async function processSource(
           await writeItem(source, runId, item, fp, itemHash);
         } catch (error) {
           const message = errorText(error);
+          rawStoreFailed = true;
           stats.error += 1;
           logEvent(logger, {
             level: 'error',
@@ -942,7 +1108,6 @@ async function processSource(
             status: 'FAILED',
             error: message,
           });
-          commitCursor(stats, item);
           continue;
         }
         logEvent(logger, {
@@ -1027,20 +1192,10 @@ async function processSource(
         }
 
         try {
-          const { post, extracted } = await publish(source, item, quality, context, logger, fp);
-          await markItem(fp, 'PUBLISHED', {
-            title: extracted.title,
-            content: extracted.content,
-            postId: post.id,
-            contentHash: publishHash,
-            metadata: {
-              quality: qualityAudit(quality),
-              extraction: extractionAudit(extracted),
-              publishContentHash: publishHash,
-              imageCount: item.images?.length || 0,
-              parse: fetched.parseMeta,
-            },
-          });
+          const { post, prepared } = await publish(source, item, quality, context, publishHash, {
+            imageCount: item.images?.length || 0,
+            parse: fetched.parseMeta,
+          }, logger, fp);
           logEvent(logger, {
             scope: 'publish', phase: 'publish_succeeded', message: '帖子发布成功',
             source, item, fingerprint: fp, status: 'PUBLISHED',
@@ -1058,19 +1213,32 @@ async function processSource(
           });
           schedulePostSideEffects(post.id);
           stats.delivered += 1;
-          stats.latestTitle ||= extracted.title;
+          stats.latestTitle ||= prepared.title;
         } catch (error) {
           const message = errorText(error);
+          const failureStatus: AutoCrawlItemStatus = retryablePublishError(error)
+            ? 'RETRYABLE'
+            : error instanceof PostPublishError ? 'REJECTED' : 'FAILED';
           stats.error += 1;
-          await markItem(fp, 'FAILED', {
+          await markItem(fp, failureStatus, {
             error: message,
             contentHash: publishHash,
-            metadata: { quality: qualityAudit(quality), publishContentHash: publishHash, imageCount: item.images?.length || 0, parse: fetched.parseMeta },
+            metadata: {
+              quality: qualityAudit(quality),
+              publishContentHash: publishHash,
+              imageCount: item.images?.length || 0,
+              parse: fetched.parseMeta,
+              ...(error instanceof PostPublishError ? { contractError: { code: error.code, details: error.details } } : {}),
+              ...(error instanceof AutoCrawlMediaError ? {
+                media: error.audit,
+                persistedImageMap: error.audit.mapping,
+              } : {}),
+            },
           });
           logEvent(logger, {
             level: 'error', scope: 'publish', phase: 'publish_failed',
             message: '帖子发布失败，已进入失败队列', source, item, fingerprint: fp,
-            status: 'FAILED', error: message,
+            status: failureStatus, error: message,
           });
           logEvent(logger, {
             level: 'error',
@@ -1080,13 +1248,18 @@ async function processSource(
             source,
             item,
             fingerprint: fp,
-            status: 'FAILED',
+            status: failureStatus,
             error: message,
           });
         }
         commitCursor(stats, item);
       }
 
+      if (rawStoreFailed) {
+        stats.cursor = initialCursor;
+        source.backfillBeforeCursor = initialBackfillBeforeCursor;
+        source.backfillTargetCursor = initialBackfillTargetCursor;
+      }
       await updateSourceStats(source, stats);
       logEvent(logger, {
         scope: 'source',
@@ -1150,7 +1323,7 @@ export async function finishAutoCrawlRun(id: string, patch: Partial<AutoCrawlRun
 async function runnableSources(config: AutoCrawlConfig, force: boolean) {
   const limit = clampRun(config.maxSourcesPerRun, DEFAULT_MAX_SOURCES_PER_RUN, MAX_RUN_SOURCES);
   const due = force ? '' : `AND (s."nextRunAt" IS NULL OR s."nextRunAt"<=CURRENT_TIMESTAMP)`;
-  const result = await rows<any>(`SELECT s."id",s."source",s."type",s."sourceName",s."categoryId",s."authorUserId",s."showContact",s."disabled",s."cursor",s."cursorKind",s."pollIntervalMinutes",s."nextRunAt",s."lastSyncAt",s."lastFetchedCount",s."lastParsedCount",s."lastCandidateCount",s."lastDeliveredCount",s."lastFilteredCount",s."lastDuplicateCount",s."failCount",s."lastError",s."lastVisibleMinCursor",s."lastVisibleMaxCursor",s."sourceHealth",s."createdAt",s."updatedAt",c."name" AS "resolvedCategoryName"
+  const result = await rows<any>(`SELECT s."id",s."source",s."type",s."sourceName",s."categoryId",s."authorUserId",s."showContact",s."disabled",s."cursor",s."cursorKind",s."backfillBeforeCursor",s."backfillTargetCursor",s."pollIntervalMinutes",s."nextRunAt",s."lastSyncAt",s."lastFetchedCount",s."lastParsedCount",s."lastCandidateCount",s."lastDeliveredCount",s."lastFilteredCount",s."lastDuplicateCount",s."failCount",s."lastError",s."lastVisibleMinCursor",s."lastVisibleMaxCursor",s."sourceHealth",s."createdAt",s."updatedAt",c."name" AS "resolvedCategoryName"
     FROM "AutoCrawlSource" s
     JOIN "Category" c ON c."id"=s."categoryId"
     WHERE s."disabled"=FALSE ${due}
@@ -1379,7 +1552,7 @@ async function fetchStoredItemsForReprocess(options: {
   }
   params.push(options.limit);
   const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
-  const stored = await rows<any>(`SELECT i.*,s."source",s."type",s."sourceName" AS "sourceConfigName",s."categoryId",s."authorUserId",s."showContact",s."disabled",s."cursor",s."cursorKind",s."pollIntervalMinutes",s."nextRunAt",s."lastSyncAt",s."lastFetchedCount",s."lastParsedCount",s."lastCandidateCount",s."lastDeliveredCount",s."lastFilteredCount",s."lastDuplicateCount",s."failCount",s."lastError",s."lastVisibleMinCursor",s."lastVisibleMaxCursor",s."sourceHealth",s."createdAt",s."updatedAt",c."name" AS "resolvedCategoryName"
+  const stored = await rows<any>(`SELECT i.*,s."source",s."type",s."sourceName" AS "sourceConfigName",s."categoryId",s."authorUserId",s."showContact",s."disabled",s."cursor",s."cursorKind",s."backfillBeforeCursor",s."backfillTargetCursor",s."pollIntervalMinutes",s."nextRunAt",s."lastSyncAt",s."lastFetchedCount",s."lastParsedCount",s."lastCandidateCount",s."lastDeliveredCount",s."lastFilteredCount",s."lastDuplicateCount",s."failCount",s."lastError",s."lastVisibleMinCursor",s."lastVisibleMaxCursor",s."sourceHealth",s."createdAt",s."updatedAt",c."name" AS "resolvedCategoryName"
     FROM "AutoCrawlItem" i
     JOIN "AutoCrawlSource" s ON s."id"=i."sourceId"
     LEFT JOIN "Category" c ON c."id"=s."categoryId"
@@ -1404,10 +1577,12 @@ async function fetchStoredItemsForReprocess(options: {
         cursorValue: cleanString(row.cursorValue, 128),
         cursorNumber: Number(row.cursorNumber || 0),
         images: parseStoredImages(row.metadata),
+        persistedImageMap: parseStoredImageMap(row.metadata),
       },
       fingerprint: cleanString(row.fingerprint, 80),
       contentHash: cleanString(row.contentHash, 80),
       previousStatus: cleanString(row.status, 40),
+      retryCount: Math.max(0, Number(row.retryCount || 0)),
       postId: row.postId || null,
     };
   });
@@ -1588,22 +1763,12 @@ export async function reprocessAutoCrawlItems(options: {
           try {
             const category = getAutoCrawlDatabaseCategory(databaseConfig, source.categoryId);
             const context = extractionContext(category, databaseConfig);
-            const { post, extracted } = await publish(source, item, quality, context, logger, fp);
-            await markItem(fp, 'PUBLISHED', {
-              title: extracted.title,
-              content: extracted.content,
-              postId: post.id,
-              contentHash: publishHash,
-              metadata: {
-                quality: qualityAudit(quality),
-                extraction: extractionAudit(extracted),
-                publishContentHash: publishHash,
-                reprocessedAt: new Date().toISOString(),
-              },
-            });
+            const { post, prepared } = await publish(source, item, quality, context, publishHash, {
+              reprocessedAt: new Date().toISOString(),
+            }, logger, fp);
             schedulePostSideEffects(post.id);
             totals.delivered += 1;
-            totals.latestTitle ||= extracted.title;
+            totals.latestTitle ||= prepared.title;
             logEvent(logger, {
               scope: 'publish',
               phase: 'publish_succeeded',
@@ -1627,11 +1792,23 @@ export async function reprocessAutoCrawlItems(options: {
             items.push({ id: item.id, status: 'PUBLISHED', postId: post.id });
           } catch (error) {
             const message = errorText(error);
+            const failureStatus: AutoCrawlItemStatus = retryablePublishError(error) && stored.retryCount < 3
+              ? 'RETRYABLE'
+              : error instanceof PostPublishError && !error.retryable ? 'REJECTED' : 'FAILED';
             totals.error += 1;
-            await markItem(fp, 'FAILED', {
+            await markItem(fp, failureStatus, {
               error: message,
               contentHash: publishHash,
-              metadata: { quality: qualityAudit(quality), publishContentHash: publishHash, reprocessedAt: new Date().toISOString() },
+              metadata: {
+                quality: qualityAudit(quality),
+                publishContentHash: publishHash,
+                reprocessedAt: new Date().toISOString(),
+                ...(error instanceof PostPublishError ? { contractError: { code: error.code, details: error.details } } : {}),
+                ...(error instanceof AutoCrawlMediaError ? {
+                  media: error.audit,
+                  persistedImageMap: error.audit.mapping,
+                } : {}),
+              },
             });
             logEvent(logger, {
               level: 'error',
@@ -1641,7 +1818,7 @@ export async function reprocessAutoCrawlItems(options: {
               source,
               item,
               fingerprint: fp,
-              status: 'FAILED',
+              status: failureStatus,
               error: message,
             });
             logEvent(logger, {
@@ -1652,10 +1829,10 @@ export async function reprocessAutoCrawlItems(options: {
               source,
               item,
               fingerprint: fp,
-              status: 'FAILED',
+              status: failureStatus,
               error: message,
             });
-            items.push({ id: item.id, status: 'FAILED', error: message });
+            items.push({ id: item.id, status: failureStatus, error: message });
           }
         }
 

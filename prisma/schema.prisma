@@ -851,6 +851,8 @@ model AutoCrawlSource {
   disabled             Boolean   @default(false)
   cursor               String    @default("")
   cursorKind           String    @default("baseline_pending")
+  backfillBeforeCursor String?
+  backfillTargetCursor String?
   pollIntervalMinutes  Int       @default(30)
   nextRunAt            DateTime?
   lastSyncAt           DateTime?

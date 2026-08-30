@@ -17,6 +17,8 @@ export type AutoCrawlSourceConfig = {
   disabled: boolean;
   cursor: string;
   cursorKind: AutoCrawlCursorKind;
+  backfillBeforeCursor?: string | null;
+  backfillTargetCursor?: string | null;
   pollIntervalMinutes: number;
   nextRunAt?: string | null;
   lastSyncAt?: string | null;
@@ -73,4 +75,5 @@ export type AutoCrawlItem = {
   cursorValue: string;
   cursorNumber: number;
   images: string[];
+  persistedImageMap?: Record<string, string>;
 };

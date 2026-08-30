@@ -188,7 +188,9 @@ mustNotHave('comment publish business service', comment, 'recordAutomationHeartb
 mustHave('crawl content AI', crawlContentAi, 'normalizeCrawlCategoryMeta');
 mustHave('crawl content AI', crawlContentAi, 'metaStandardization');
 mustHave('crawl content AI', crawlContentAi, '当前分类允许的 Meta Schema');
-mustHave('crawl content AI', crawlContentAi, 'Meta 提取多少写多少，不完整不影响发布');
+mustHave('crawl content AI', crawlContentAi, 'required=true 的字段必须优先从原文完整提取');
+mustHave('crawl content AI', crawlContentAi, '禁止猜测或填造默认值');
+mustHave('crawl content AI', crawlContentAi, '后续发布契约会阻止结构不完整的内容');
 mustHave('crawl meta normalizer', crawlMetaNormalizer, 'assertSchemaMatchesCategory');
 mustHave('crawl meta normalizer', crawlMetaNormalizer, 'normalizeToLocationPreset');
 mustHave('crawl meta normalizer', crawlMetaNormalizer, 'exactConfiguredOption');

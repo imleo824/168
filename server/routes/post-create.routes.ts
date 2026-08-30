@@ -1,11 +1,10 @@
 import type { Express } from 'express';
-import { Prisma } from '@prisma/client';
 import { postLimiter } from '../middlewares/rateLimit';
 import { authMiddleware, mustAuth } from '../middlewares/auth';
 import prisma, { isDbConfigured } from '../db';
 import { ConfigService, type PublishCategoryMetaConfig } from '../config.service';
 import { PostService } from '../post.service';
-import { buildLocationPresetValueSet, normalizePublishCategoryMetaPayload } from '../services/category-meta.service';
+import { buildLocationPresetValueSet } from '../services/category-meta.service';
 import {
   ensurePostPublishStorageReady,
 } from '../services/post-category-schema-version.service';
@@ -18,17 +17,14 @@ import {
 } from '../services/post-contact-eligibility.service';
 import { normalizePublishCategorySlug } from '../../shared/publishCategorySchema';
 import {
-  POST_CONTACT_MAX_LENGTH,
-  POST_CONTENT_MAX_LENGTH,
-  POST_IMAGE_ONLY_TITLE,
-  POST_IMAGE_URL_MAX_LENGTH,
-  POST_LOCATION_MAX_LENGTH,
-  POST_MAX_IMAGE_COUNT,
   POST_PROMOTION_LINK_MEMBER_MESSAGE,
   POST_PROMOTION_LINK_META_KEY,
-  POST_TITLE_MAX_LENGTH,
-  normalizePostPromotionLinkInput,
 } from '../../shared/postPublishing';
+import {
+  createPreparedPost,
+  PostPublishError,
+  preparePostPublishData,
+} from '../services/post/post-publish-contract';
 
 const CATEGORY_PARAM_MAX_LENGTH = 128;
 const POST_CLIENT_NONCE_PATTERN = /^[A-Za-z0-9._:-]{8,128}$/;
@@ -60,13 +56,6 @@ class PostCreateHttpError extends Error {
     super(message);
     this.statusCode = statusCode;
   }
-}
-
-function normalizePostTitle(rawTitle: string, content: string) {
-  const title = rawTitle.replace(/\s+/g, ' ').trim();
-  if (title) return title;
-  const contentTitle = content.replace(/\s+/g, ' ').trim().slice(0, POST_TITLE_MAX_LENGTH);
-  return contentTitle || POST_IMAGE_ONLY_TITLE;
 }
 
 function normalizePostClientNonce(raw: unknown) {
@@ -117,31 +106,17 @@ export function registerPostCreateRoutes(app: Express, deps: PostCreateRoutesDep
       if (!isDbConfigured()) return deps.sendDatabaseUnavailable(res, '发布内容');
       await ensurePostPublishStorageReady();
       const { title, content, contact, categoryId, categoryMeta, promotionLink, images, location, quotedPostId, isAnonymous, showContact } = req.body;
-      const normalizedTitle = typeof title === 'string' ? title.trim() : '';
-      const normalizedContent = typeof content === 'string' ? content.trim() : '';
       const normalizedCategoryId = typeof categoryId === 'string' ? categoryId.trim() : '';
       const normalizedQuotedPostId = typeof quotedPostId === 'string' ? quotedPostId.trim() : '';
       const normalizedClientNonce = normalizePostClientNonce(req.body?.clientNonce || req.get('Idempotency-Key') || req.get('X-Idempotency-Key'));
       const rawClientNonce = String(req.body?.clientNonce || req.get('Idempotency-Key') || req.get('X-Idempotency-Key') || '').trim();
-      const normalizedLocation = deps.normalizeExternalLocation(location);
       const rawContactInput = typeof contact === 'string' ? contact.trim() : '';
       const normalizedContact = deps.normalizeTelegramContactHandle(contact);
-      const promotionLinkResult = normalizePostPromotionLinkInput(promotionLink);
-      if (promotionLinkResult.error) throw new PostCreateHttpError(400, promotionLinkResult.error);
-      const normalizedPromotionLink = promotionLinkResult.link;
       const isRobotUser = req.user.userType === 'ROBOT';
-      const anonymousPost = isRobotUser ? false : deps.normalizeBooleanInput(isAnonymous, false);
-      const requestedShowContact = deps.normalizeShowContactInput(showContact, normalizedContact);
-      const shouldShowContact = requestedShowContact;
-      const finalContact = normalizedContact;
 
       if (rawClientNonce && !normalizedClientNonce) return res.status(400).json({ error: '发布请求标识不合法，请刷新页面后重试' });
       if (normalizedCategoryId.length > CATEGORY_PARAM_MAX_LENGTH) return res.status(400).json({ error: '分类参数不合法' });
       if (normalizedQuotedPostId && !deps.POST_ID_PATTERN.test(normalizedQuotedPostId)) return res.status(400).json({ error: '引用的帖子不存在或已删除' });
-      if (normalizedContent.length > POST_CONTENT_MAX_LENGTH) return res.status(400).json({ error: `内容最长 ${POST_CONTENT_MAX_LENGTH} 字` });
-      if (location !== undefined && location !== null && typeof location !== 'string') return res.status(400).json({ error: '地点参数不合法' });
-      if (normalizedLocation && normalizedLocation.length > POST_LOCATION_MAX_LENGTH) return res.status(400).json({ error: `地点最长 ${POST_LOCATION_MAX_LENGTH} 字` });
-      if (finalContact && finalContact.length > POST_CONTACT_MAX_LENGTH) return res.status(400).json({ error: `联系方式最长 ${POST_CONTACT_MAX_LENGTH} 字` });
       if (!isRobotUser && rawContactInput && !normalizedContact) return res.status(400).json({ error: '联系方式格式错误：仅支持 Telegram 用户名（5-32位，字母开头，可含数字/下划线）' });
 
       const config = await ConfigService.getConfigs();
@@ -150,29 +125,7 @@ export function registerPostCreateRoutes(app: Express, deps: PostCreateRoutesDep
       const locationPresetValues = buildLocationPresetValueSet(config?.location_presets);
       let selectedCategory = null as any;
       let categoryMetaSchema: PublishCategoryMetaConfig | null = null;
-      let normalizedCategoryMeta: Record<string, unknown> = {};
       let quotedPostMeta: AccessiblePostMeta | null = null;
-      let normalizedImages: string[] = [];
-
-      if (images !== undefined && images !== null) {
-        if (!Array.isArray(images)) return res.status(400).json({ error: '图片参数必须是数组' });
-        if (images.length > POST_MAX_IMAGE_COUNT) return res.status(400).json({ error: `最多上传 ${POST_MAX_IMAGE_COUNT} 张图片` });
-        const rawImageUrls = images.map((item: unknown) => (typeof item === 'string' ? item.trim() : ''));
-        normalizedImages = rawImageUrls.map((url) => deps.canonicalizePersistentUploadedImageUrl(url));
-        const invalidImageIndex = normalizedImages.findIndex((url, index) => {
-          const rawUrl = rawImageUrls[index] || '';
-          return !rawUrl || rawUrl.length > POST_IMAGE_URL_MAX_LENGTH || !url;
-        });
-        if (invalidImageIndex >= 0) return res.status(400).json({ error: `第 ${invalidImageIndex + 1} 张图片必须先上传成功` });
-        normalizedImages = Array.from(new Set(normalizedImages));
-      }
-
-      if (normalizedQuotedPostId) {
-        quotedPostMeta = await deps.resolveQuotablePostMeta(normalizedQuotedPostId, req.user.id, req.user.role);
-        if (!quotedPostMeta) return res.status(404).json({ error: '引用的帖子不存在或已删除' });
-        if (!normalizedContent) return res.status(400).json({ error: '引用发帖需要填写文字内容' });
-        if (normalizedImages.length > 0) return res.status(400).json({ error: '引用发帖暂不支持上传图片' });
-      }
 
       if (normalizedCategoryId) {
         const requestedCategorySlug = normalizePublishCategorySlug(normalizedCategoryId);
@@ -188,23 +141,41 @@ export function registerPostCreateRoutes(app: Express, deps: PostCreateRoutesDep
           create: { slug: requestedCategorySlug, name: categoryName },
           select: { id: true, slug: true, name: true },
         });
-
-        const validationResult = normalizePublishCategoryMetaPayload(categoryMeta, categoryMetaSchema, locationPresetValues);
-        if (validationResult.errors.length > 0) return res.status(400).json({ error: `分类附加信息校验失败：${validationResult.errors.join('；')}` });
-        normalizedCategoryMeta = validationResult.normalized;
       }
 
-      if (!normalizedContent && normalizedImages.length === 0) return res.status(400).json({ error: '请提供文字或图片内容' });
-      const finalTitle = normalizePostTitle(normalizedTitle, normalizedContent);
-      if (finalTitle.length > POST_TITLE_MAX_LENGTH) return res.status(400).json({ error: `标题最长 ${POST_TITLE_MAX_LENGTH} 字` });
-      if (!isRobotUser && shouldShowContact && !finalContact) return res.status(400).json({ error: '已开启联系按钮时，必须提供 Telegram 联系方式（@用户名）' });
-      if (req.user.isDisabled) return res.status(403).json({ error: '您的账号已被禁用，无法发布信息！' });
+      const prepared = preparePostPublishData({
+        title,
+        content,
+        images,
+        location,
+        contact,
+        showContact,
+        isAnonymous,
+        quotedPostId: normalizedQuotedPostId,
+        clientNonce: normalizedClientNonce,
+        promotionLink,
+        categoryMeta,
+      }, {
+        category: selectedCategory,
+        categoryMetaSchema,
+        locationPresetValues,
+        normalizeLocation: deps.normalizeExternalLocation,
+        deriveLocation: deps.derivePostLocation,
+        normalizeContact: deps.normalizeTelegramContactHandle,
+        normalizeBoolean: deps.normalizeBooleanInput,
+        normalizeShowContact: deps.normalizeShowContactInput,
+        canonicalizeImageUrl: deps.canonicalizePersistentUploadedImageUrl,
+        forcePublicIdentity: isRobotUser,
+      });
 
-      const { location: extractedLocation, countryCode: extractedCountryCode, countryName: extractedCountryName } = deps.derivePostLocation(normalizedLocation);
-      const finalCategoryMeta = normalizedPromotionLink
-        ? { ...normalizedCategoryMeta, [POST_PROMOTION_LINK_META_KEY]: normalizedPromotionLink }
-        : normalizedCategoryMeta;
-      const categoryMetaSchemaVersion = categoryMetaSchema?.schemaVersion || null;
+      if (normalizedQuotedPostId) {
+        quotedPostMeta = await deps.resolveQuotablePostMeta(normalizedQuotedPostId, req.user.id, req.user.role);
+        if (!quotedPostMeta) return res.status(404).json({ error: '引用的帖子不存在或已删除' });
+        if (!prepared.content) return res.status(400).json({ error: '引用发帖需要填写文字内容' });
+        if (prepared.images.length > 0) return res.status(400).json({ error: '引用发帖暂不支持上传图片' });
+      }
+
+      if (req.user.isDisabled) return res.status(403).json({ error: '您的账号已被禁用，无法发布信息！' });
 
       const { post, updatedUser, idempotentReplay } = await prisma.$transaction(async (tx) => {
         const now = new Date();
@@ -218,12 +189,12 @@ export function registerPostCreateRoutes(app: Express, deps: PostCreateRoutesDep
         if (!user) throw new Error('用户不存在');
         if (user.isDisabled) throw new PostCreateHttpError(403, '您的账号已被禁用，无法发布信息！');
 
-        if (normalizedClientNonce) {
+        if (prepared.clientNonce) {
           const existingRows = await tx.$queryRaw<any[]>`
             SELECT "id"
             FROM "Post"
             WHERE "userId" = ${req.user.id}
-              AND "clientNonce" = ${normalizedClientNonce}
+              AND "clientNonce" = ${prepared.clientNonce}
               AND "deletedAt" IS NULL
             LIMIT 1
           `;
@@ -238,28 +209,9 @@ export function registerPostCreateRoutes(app: Express, deps: PostCreateRoutesDep
         }
 
         const activeTuiPlus = isTuiPlusActiveSnapshot(user, now);
-        if (!isRobotUser && normalizedPromotionLink && !activeTuiPlus) throw new PostCreateHttpError(403, POST_PROMOTION_LINK_MEMBER_MESSAGE);
-        if (!isRobotUser && shouldShowContact && !activeTuiPlus) await assertCanShowContactOnPost(tx, req.user.id, now);
-        const newPost = await tx.post.create({
-          data: {
-            title: finalTitle,
-            content: normalizedContent,
-            location: extractedLocation,
-            countryCode: extractedCountryCode,
-            countryName: extractedCountryName,
-            contact: finalContact,
-            showContact: shouldShowContact,
-            ...(quotedPostMeta?.id ? { quotedPost: { connect: { id: quotedPostMeta.id } } } : {}),
-            ...(selectedCategory?.id ? { category: { connect: { id: selectedCategory.id } } } : {}),
-            ...(Object.keys(finalCategoryMeta).length > 0 ? { categoryMeta: finalCategoryMeta as Prisma.InputJsonValue } : {}),
-            categoryMetaSchemaVersion: categoryMetaSchemaVersion || null,
-            clientNonce: normalizedClientNonce || null,
-            images: normalizedImages,
-            isAnonymous: anonymousPost,
-            createdAt: now,
-            bumpedAt: now,
-            user: { connect: { id: req.user.id } },
-          },
+        if (!isRobotUser && prepared.categoryMeta[POST_PROMOTION_LINK_META_KEY] && !activeTuiPlus) throw new PostCreateHttpError(403, POST_PROMOTION_LINK_MEMBER_MESSAGE);
+        if (!isRobotUser && prepared.showContact && !activeTuiPlus) await assertCanShowContactOnPost(tx, req.user.id, now);
+        const newPost = await createPreparedPost(tx, prepared, { userId: req.user.id, createdAt: now }, {
           include: { category: true, quotedPost: { select: deps.POST_CREATED_CHAT_QUOTE_SELECT } },
         });
         if (quotedPostMeta?.id) {
@@ -287,7 +239,7 @@ export function registerPostCreateRoutes(app: Express, deps: PostCreateRoutesDep
           quotedPostId: post.quotedPostId,
           quoteCount: post.quoteCount || 0,
           categoryMeta: (post as unknown as { categoryMeta?: Record<string, unknown> | null }).categoryMeta ?? null,
-          categoryMetaSchemaVersion,
+          categoryMetaSchemaVersion: prepared.categoryMetaSchemaVersion,
           createdAt: post.createdAt,
         },
         userPoints: updatedUser.points,
@@ -295,6 +247,7 @@ export function registerPostCreateRoutes(app: Express, deps: PostCreateRoutesDep
     } catch (error: any) {
       console.error(error);
       if (error instanceof PostCreateHttpError) return res.status(error.statusCode).json({ error: error.message });
+      if (error instanceof PostPublishError) return res.status(400).json({ error: error.message });
       if (error instanceof PostContactEligibilityError) return res.status(error.statusCode).json({ error: error.message });
       if (deps.isDatabaseUnavailableError(error)) return deps.sendDatabaseUnavailable(res, '发布内容');
       if (deps.isDatabaseSchemaDriftError(error)) return deps.sendDatabaseSchemaDrift(res, '发布内容');

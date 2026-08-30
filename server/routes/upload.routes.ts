@@ -245,15 +245,61 @@ function normalizeLocalUploadPath(value: string) {
   return normalized;
 }
 
-async function writeLocalUploadFromBuffer(filePath: string, buffer: Buffer) {
+export async function writeLocalUploadFromBuffer(filePath: string, buffer: Buffer) {
   const safePath = normalizeLocalUploadPath(filePath);
   if (!safePath || !isLocalUploadUrlAllowed()) return '';
   const absolutePath = path.join(uploadDir, safePath);
   const relativeCheck = path.relative(uploadDir, absolutePath);
   if (!relativeCheck || relativeCheck.startsWith('..') || path.isAbsolute(relativeCheck)) return '';
   await fsPromises.mkdir(path.dirname(absolutePath), { recursive: true });
-  await fsPromises.writeFile(absolutePath, buffer, { flag: 'wx' });
+  try {
+    await fsPromises.writeFile(absolutePath, buffer, { flag: 'wx' });
+  } catch (error: any) {
+    if (error?.code !== 'EEXIST') throw error;
+  }
   return `/uploads/${safePath}`;
+}
+
+export async function persistUploadedImageBuffer(input: {
+  buffer: Buffer;
+  mime: string;
+  userId: string;
+  purpose?: string;
+  suffix?: string;
+  storageKey?: string;
+}) {
+  if (!hasValidImageSignature(input.buffer, input.mime)) throw new Error('image_signature_invalid');
+  const extByMime: Record<string, string> = {
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/webp': 'webp',
+  };
+  const ext = extByMime[input.mime];
+  if (!ext) throw new Error('image_type_not_supported');
+  const stableKey = String(input.storageKey || '').replace(/[^a-z0-9_-]/gi, '').slice(0, 120);
+  const filePath = stableKey
+    ? `${UPLOAD_STORAGE_FOLDERS[input.purpose || 'post'] || UPLOAD_STORAGE_FOLDERS.post}/${input.userId}/auto-crawl/${stableKey}.${ext}`
+    : buildUploadStoragePath(input.purpose || 'post', input.userId, ext, input.suffix);
+
+  if (supabaseCandidates.length && await ensureUploadBucket()) {
+    const resolved = await resolveUploadStorageClient();
+    if (resolved?.bucketPublic) {
+      const storageClient = resolved.client;
+      const uploadPayload = { contentType: input.mime, cacheControl: '31536000', upsert: false };
+      const result = await storageClient.storage.from(UPLOAD_BUCKET).upload(filePath, input.buffer, uploadPayload);
+      if (!result.error) {
+        const { data: { publicUrl } } = storageClient.storage.from(UPLOAD_BUCKET).getPublicUrl(filePath);
+        if (publicUrl) return publicUrl;
+      }
+      if (result.error && !/already exists|duplicate/i.test(result.error.message || '')) throw result.error;
+      const { data: { publicUrl } } = storageClient.storage.from(UPLOAD_BUCKET).getPublicUrl(filePath);
+      if (publicUrl) return publicUrl;
+    }
+  }
+
+  const localUrl = await writeLocalUploadFromBuffer(filePath, input.buffer);
+  if (localUrl) return localUrl;
+  throw new Error('image_storage_unavailable');
 }
 
 export function isSupabaseBucketMissingError(error: any) {

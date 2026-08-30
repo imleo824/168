@@ -44,6 +44,7 @@ type MetaFieldSpec = {
   type: string;
   options?: string[];
   maxLength?: number;
+  required?: boolean;
 };
 
 const CANDIDATE_TEXT_LIMIT = 12_000;
@@ -76,6 +77,7 @@ function fieldSpec(field: PublishCategoryMetaFieldConfig): MetaFieldSpec {
     type: field.type,
     ...(field.options ? { options: field.options } : {}),
     ...(typeof field.maxLength === 'number' ? { maxLength: field.maxLength } : {}),
+    ...(field.required ? { required: true } : {}),
   };
 }
 
@@ -293,7 +295,7 @@ function schemaInstruction(context: AutoCrawlExtractionContext) {
     ? '\n薪资 select 字段必须先识别金额、币种和周期，再归入配置区间：U、USDT、USD、美元、刀按美元等值处理；也要识别 RMB/CNY/人民币、PHP/披索/比索、THB/泰铢、KHR/瑞尔、VND/越南盾、AED/迪拉姆、MYR/马币/林吉特、SGD/新币、IDR/印尼盾、LAK/基普、MMK/缅币、JPY/日元、KRW/韩元、HKD/港币、MOP/澳门币、EUR/欧元等常见币种。能按原文语义合理换算到美元月薪区间时，输出最接近的 options 原文值；没有明确数字金额，或币种/周期不足以可靠判断，或只写面谈、面议、待遇从优、薪资详聊、看能力，必须输出“面议”。'
     : '';
 
-  return `当前分类允许的 Meta Schema：${JSON.stringify(fields)}${locationRule}${salaryRangeRule}\n本次只处理这些后台字段：${configuredLabels || '无'}。meta 只能包含 Schema 中配置的 key；未配置的原文属性必须完全忽略，不要抽取、不要转写、不要放入 meta 候选，例如年龄、性别、国籍、语言、学历、工作时间、休假、班次、人数、经验要求等，除非它们本身就是 Schema 字段。字段 key 只是输出键，原文不需要出现 key 字符串；只围绕 Schema 字段的 label、type、options 理解上下文后提取，不要做关键词照抄。number 字段只在 Schema 配置了对应字段时才解析数值，例如配置了薪资数字字段且原文“薪资 1000USD”才输出 {"salary":1000}；select 字段必须输出 options 中的原文值，不能自造新值。无法确认的字段直接省略，Meta 提取多少写多少，不完整不影响发布。`;
+  return `当前分类允许的 Meta Schema：${JSON.stringify(fields)}${locationRule}${salaryRangeRule}\n本次只处理这些后台字段：${configuredLabels || '无'}。meta 只能包含 Schema 中配置的 key；required=true 的字段必须优先从原文完整提取，但原文没有可靠证据时仍必须省略，禁止猜测或填造默认值，后续发布契约会阻止结构不完整的内容。未配置的原文属性必须完全忽略，不要抽取、不要转写、不要放入 meta 候选，例如年龄、性别、国籍、语言、学历、工作时间、休假、班次、人数、经验要求等，除非它们本身就是 Schema 字段。字段 key 只是输出键，原文不需要出现 key 字符串；只围绕 Schema 字段的 label、type、options 理解上下文后提取，不要做关键词照抄。number 字段只在 Schema 配置了对应字段时才解析数值，例如配置了薪资数字字段且原文“薪资 1000USD”才输出 {"salary":1000}；select 字段必须输出 options 中的原文值，不能自造新值。无法确认的字段直接省略。`;
 }
 
 function locationFromMeta(meta: Record<string, unknown>, schema: PublishCategoryMetaConfig | null) {

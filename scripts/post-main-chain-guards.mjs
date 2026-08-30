@@ -14,6 +14,7 @@ const REQUIRED_FILES = [
   'server/services/post/feed-dependency.ts',
   'server/services/post/post-engagement.ts',
   'server/services/post/post-identifiers.ts',
+  'server/services/post/post-publish-contract.ts',
   'server/services/post/post-ranking-maintenance.ts',
   'server/services/post/post-selects.ts',
   'server/services/post/recommendation-context.ts',
@@ -36,9 +37,11 @@ const REQUIRED_POST_CREATE_MARKERS = [
   'if (normalizedCategoryId) {',
   'normalizePublishCategoryMetaPayload',
   'prisma.category.upsert',
-  '...(selectedCategory?.id ? { category: { connect: { id: selectedCategory.id } } } : {})',
-  'categoryMetaSchemaVersion: categoryMetaSchemaVersion || null',
-  'clientNonce: normalizedClientNonce || null',
+  'preparePostPublishData',
+  'createPreparedPost',
+  'category: { connect: { id: prepared.category.id } }',
+  'categoryMetaSchemaVersion: prepared.categoryMetaSchemaVersion',
+  'clientNonce: prepared.clientNonce',
   'PostService.schedulePostRankingRefresh',
 ];
 
@@ -168,6 +171,8 @@ async function main() {
 
   const postRoutes = await read('server/routes/post.routes.ts');
   const postCreateRoutes = await read('server/routes/post-create.routes.ts');
+  const postPublishContract = await read('server/services/post/post-publish-contract.ts');
+  const postCreateChain = `${postCreateRoutes}\n${postPublishContract}`;
   const postActions = await read('server/routes/post-actions.routes.ts');
   const bootstrap = await read('server/bootstrap.ts');
   const postModule = await read('server/modules/post/index.ts');
@@ -179,7 +184,7 @@ async function main() {
 
   const ok = [
     assertMarkers('Post routes module', postRoutes, REQUIRED_POST_ROUTE_MARKERS),
-    assertMarkers('Post create route module', postCreateRoutes, REQUIRED_POST_CREATE_MARKERS),
+    assertMarkers('Post create route and contract', postCreateChain, REQUIRED_POST_CREATE_MARKERS),
     assertForbiddenMarkers('Post create route module', postCreateRoutes, FORBIDDEN_POST_CREATE_MARKERS),
     assertMarkers('Post action routes module', postActions, REQUIRED_POST_ACTION_MARKERS),
     assertMarkerOrder('Bootstrap post route registration', bootstrap, 'registerPostCreateRoutes(app,', 'registerPostReadRoutes(app,'),

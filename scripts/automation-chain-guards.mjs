@@ -19,6 +19,7 @@ const automationRuntime = read('server/services/automation/automation-runtime.ts
 const defaultModules = read('server/services/automation/default-automation-modules.ts');
 const lock = read('server/services/automation-task-lock.service.ts');
 const crawl = read('server/services/auto-crawl.service.ts');
+const publishContract = read('server/services/post/post-publish-contract.ts');
 const crawlDatabaseConfig = read('server/services/auto-crawl-database-config.service.ts');
 const crawlRunner = read('server/services/auto-crawl-observed-runner.service.ts');
 const crawlRuntime = read('server/services/auto-crawl-runtime-status.service.ts');
@@ -102,8 +103,13 @@ mustNotHave('crawl database config', crawlDatabaseConfig, /ConfigService|getDefa
 mustHave('crawl main flow', crawl, /loadAutoCrawlDatabaseConfig/);
 mustHave('crawl main flow', crawl, /getAutoCrawlDatabaseCategory\(databaseConfig, source\.categoryId\)/);
 mustHave('crawl main flow', crawl, /getAutoCrawlCategorySchema\(databaseConfig, category\)/);
-mustHave('crawl main flow', crawl, /category: \{ connect: \{ id: category\.id \} \}/);
+mustHave('crawl shared publish contract', publishContract, /export type PreparedPostPublishData/);
+mustHave('crawl shared publish contract', publishContract, /normalizePublishCategoryMetaPayload/);
+mustHave('crawl shared publish contract', publishContract, /export async function createPreparedPost/);
+mustHave('crawl main flow', crawl, /preparePostPublishData/);
 mustHave('crawl main flow', crawl, /categoryMeta: extracted\.meta/);
+mustHave('crawl main flow', crawl, /createPreparedPost\(tx, prepared/);
+mustNotHave('crawl main flow', crawl, /tx\.post\.create/);
 mustHave('crawl main flow', crawl, /set_config\('app\.auto_crawl_write','1',true\)/);
 mustHave('crawl main flow', crawl, /fetchStoredItemsForReprocess/);
 mustHave('crawl main flow', crawl, /quality_checked/);

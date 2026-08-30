@@ -149,6 +149,8 @@ export function normalizeSource(raw: Partial<AutoCrawlSourceConfig>): AutoCrawlS
     cursorKind: ['message_id', 'timestamp', 'baseline_pending'].includes(String(raw.cursorKind))
       ? raw.cursorKind as AutoCrawlCursorKind
       : cursor.cursorKind,
+    backfillBeforeCursor: cleanString(raw.backfillBeforeCursor, 128) || null,
+    backfillTargetCursor: cleanString(raw.backfillTargetCursor, 128) || null,
     pollIntervalMinutes: toInt(raw.pollIntervalMinutes, fallbackPollInterval, AUTO_CRAWL_MIN_POLL_INTERVAL_MINUTES, AUTO_CRAWL_MAX_POLL_INTERVAL_MINUTES),
     nextRunAt: raw.nextRunAt ? nowIso(raw.nextRunAt) : null,
     lastSyncAt: raw.lastSyncAt ? nowIso(raw.lastSyncAt) : null,

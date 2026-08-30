@@ -174,7 +174,7 @@ function extractTelegramBodyImages(block: string) {
   return images;
 }
 
-function parseTelegram(html: string): AutoCrawlItem[] {
+export function parseTelegram(html: string): AutoCrawlItem[] {
   return splitTelegramBlocks(html)
     .map((block) => {
       const postPath = attr(block, 'data-post');
@@ -302,7 +302,7 @@ function isPrivateAddress(address: string) {
   return true;
 }
 
-async function assertPublicHttpTarget(rawUrl: string) {
+export async function assertPublicHttpTarget(rawUrl: string) {
   const url = new URL(rawUrl);
   if (!['http:', 'https:'].includes(url.protocol)) throw new Error('auto_crawl_source_protocol_not_allowed');
   if (url.username || url.password) throw new Error('auto_crawl_source_credentials_not_allowed');
@@ -367,20 +367,99 @@ function mergeTelegramItems(items: AutoCrawlItem[]) {
   return [...byId.values()].sort((left, right) => left.cursorNumber - right.cursorNumber);
 }
 
+type TelegramBackfillSelection = {
+  unresolved: boolean;
+  backfillCandidateIds: Set<string>;
+  backfillBeforeCursor: string | null;
+  backfillTargetCursor: string | null;
+};
+
+export function selectAutoCrawlCandidates(
+  all: AutoCrawlItem[],
+  source: AutoCrawlSourceConfig,
+  maxItems: number,
+  backfill: TelegramBackfillSelection,
+) {
+  const cursor = Number(source.cursor || 0);
+  const newItems = source.cursorKind === 'baseline_pending' || !cursor
+    ? all.slice(-5)
+    : all.filter((item) => item.cursorNumber === 0 || item.cursorNumber > cursor);
+  const selectedNewItems = mergeTelegramItems(newItems).slice(0, maxItems);
+  const selectedNewIds = new Set(selectedNewItems.map((item) => item.id));
+  const sourceBackfillBefore = Number(source.backfillBeforeCursor || 0);
+  const sourceBackfillTarget = Number(source.backfillTargetCursor || 0);
+  const sourceHasActiveBackfill = sourceBackfillBefore > 0 && sourceBackfillTarget > 0;
+  const resumedItems = sourceHasActiveBackfill ? all
+    .filter((item) => backfill.backfillCandidateIds.has(item.id)
+      && item.cursorNumber > sourceBackfillTarget
+      && item.cursorNumber <= cursor
+      && !selectedNewIds.has(item.id))
+    .sort((left, right) => right.cursorNumber - left.cursorNumber)
+    : [];
+  const selectedResumedItems = resumedItems.slice(0, Math.max(0, maxItems - selectedNewItems.length));
+  let backfillBeforeCursor = backfill.backfillBeforeCursor;
+  let backfillTargetCursor = backfill.backfillTargetCursor;
+
+  if (source.type === 'telegram') {
+    const target = backfill.backfillTargetCursor || source.backfillTargetCursor || null;
+    const hasUnprocessedFetchedBackfill = selectedResumedItems.length < resumedItems.length;
+    if (selectedNewItems.length && sourceHasActiveBackfill) {
+      // New live messages have priority; keep the exact historical checkpoint.
+      backfillBeforeCursor = source.backfillBeforeCursor || null;
+      backfillTargetCursor = source.backfillTargetCursor || null;
+    } else if (selectedNewItems.length || newItems.length) {
+      // Drain all newer messages from the channel head before moving the
+      // historical checkpoint. Persist only the original target meanwhile.
+      backfillBeforeCursor = null;
+      backfillTargetCursor = target;
+    } else if (selectedResumedItems.length && (backfill.unresolved || hasUnprocessedFetchedBackfill)) {
+      backfillBeforeCursor = String(Math.min(...selectedResumedItems.map((item) => item.cursorNumber)));
+      backfillTargetCursor = target;
+    } else if (sourceHasActiveBackfill && backfill.unresolved) {
+      backfillBeforeCursor = backfill.backfillBeforeCursor || source.backfillBeforeCursor || null;
+      backfillTargetCursor = target;
+    } else if (!sourceHasActiveBackfill && backfill.unresolved) {
+      // Activate the resumable checkpoint only after the newer range is empty.
+      // This activation run intentionally publishes no historical candidate.
+      backfillTargetCursor = target;
+    } else {
+      backfillBeforeCursor = null;
+      backfillTargetCursor = null;
+    }
+  }
+
+  return {
+    items: [...selectedNewItems, ...selectedResumedItems],
+    backfillBeforeCursor,
+    backfillTargetCursor,
+  };
+}
+
 async function fetchTelegramWithBackfill(source: AutoCrawlSourceConfig, baseUrl: string) {
   const responses = [await fetchText(baseUrl)];
   let all = parseTelegram(responses[0].text);
   const cursor = Number(source.cursor || 0);
+  const resumedBefore = Number(source.backfillBeforeCursor || 0);
+  const resumedTarget = Number(source.backfillTargetCursor || 0);
+  const isResuming = resumedBefore > 0 && resumedTarget > 0;
+  const backfillCandidateIds = new Set<string>();
   let pages = 1;
-  let previousMin = all.length ? Math.min(...all.map((item) => item.cursorNumber)) : 0;
+  let previousMin = isResuming
+    ? resumedBefore
+    : all.length ? Math.min(...all.map((item) => item.cursorNumber)) : 0;
+  // A target without a `before` cursor means the live/newer portion of the gap
+  // is still being drained. Keep the original target, but paginate from the
+  // current Telegram page so no middle page can be skipped.
+  const targetCursor = resumedTarget > 0 ? resumedTarget : cursor;
   let stoppedReason = 'cursor_reached';
 
-  while (cursor > 0 && previousMin > cursor && pages < MAX_TELEGRAM_BACKFILL_PAGES) {
+  while (targetCursor > 0 && previousMin > targetCursor && pages < MAX_TELEGRAM_BACKFILL_PAGES) {
     const olderUrl = new URL(baseUrl);
     olderUrl.searchParams.set('before', String(Math.trunc(previousMin)));
     const response = await fetchText(olderUrl.toString());
     responses.push(response);
     const older = parseTelegram(response.text);
+    older.forEach((item) => backfillCandidateIds.add(item.id));
     const merged = mergeTelegramItems([...all, ...older]);
     const nextMin = merged.length ? Math.min(...merged.map((item) => item.cursorNumber)) : previousMin;
     all = merged;
@@ -396,17 +475,21 @@ async function fetchTelegramWithBackfill(source: AutoCrawlSourceConfig, baseUrl:
     previousMin = nextMin;
   }
 
-  const minCursor = all.length ? Math.min(...all.map((item) => item.cursorNumber)) : 0;
-  const gapUnresolved = cursor > 0 && minCursor > cursor;
+  const minCursor = all.length ? Math.min(...all.map((item) => item.cursorNumber)) : previousMin;
+  const gapUnresolved = targetCursor > 0 && minCursor > targetCursor
+    && !['no_older_items', 'pagination_not_progressing'].includes(stoppedReason);
   if (gapUnresolved && pages >= MAX_TELEGRAM_BACKFILL_PAGES) stoppedReason = 'page_limit_reached';
   return {
     all,
     responses,
     pages,
     gapUnresolved,
-    gapFrom: gapUnresolved ? cursor + 1 : null,
-    gapTo: gapUnresolved ? Math.max(cursor + 1, minCursor - 1) : null,
+    gapFrom: gapUnresolved ? targetCursor + 1 : null,
+    gapTo: gapUnresolved ? Math.max(targetCursor + 1, minCursor - 1) : null,
     stoppedReason,
+    backfillCandidateIds,
+    backfillBeforeCursor: gapUnresolved ? String(minCursor) : null,
+    backfillTargetCursor: gapUnresolved ? String(targetCursor) : null,
   };
 }
 
@@ -418,7 +501,15 @@ export async function fetchAutoCrawlItems(source: AutoCrawlSourceConfig, options
   let contentType = '';
   let status = 0;
   let htmlBytes = 0;
-  let telegramGap = { unresolved: false, from: null as number | null, to: null as number | null, stoppedReason: '' };
+  let telegramGap = {
+    unresolved: false,
+    from: null as number | null,
+    to: null as number | null,
+    stoppedReason: '',
+    backfillCandidateIds: new Set<string>(),
+    backfillBeforeCursor: null as string | null,
+    backfillTargetCursor: null as string | null,
+  };
 
   if (source.type === 'telegram') {
     const result = await fetchTelegramWithBackfill(source, url);
@@ -428,7 +519,15 @@ export async function fetchAutoCrawlItems(source: AutoCrawlSourceConfig, options
     contentType = result.responses[0]?.contentType || '';
     status = result.responses[0]?.status || 0;
     htmlBytes = result.responses.reduce((sum, response) => sum + response.text.length, 0);
-    telegramGap = { unresolved: result.gapUnresolved, from: result.gapFrom, to: result.gapTo, stoppedReason: result.stoppedReason };
+    telegramGap = {
+      unresolved: result.gapUnresolved,
+      from: result.gapFrom,
+      to: result.gapTo,
+      stoppedReason: result.stoppedReason,
+      backfillCandidateIds: result.backfillCandidateIds,
+      backfillBeforeCursor: result.backfillBeforeCursor,
+      backfillTargetCursor: result.backfillTargetCursor,
+    };
   } else {
     const response = await fetchText(url);
     all = parseRss(response.text, response.finalUrl);
@@ -441,11 +540,11 @@ export async function fetchAutoCrawlItems(source: AutoCrawlSourceConfig, options
   const numericCursors = all.map((item) => item.cursorNumber).filter((value) => value > 0 && Number.isFinite(value));
   const visibleMinCursor = numericCursors.length ? String(Math.min(...numericCursors)) : '';
   const visibleMaxCursor = numericCursors.length ? String(Math.max(...numericCursors)) : '';
-  const cursor = Number(source.cursor || 0);
   const maxItems = Math.max(1, options.maxItemsPerSource);
-  const items = source.cursorKind === 'baseline_pending' || !cursor
-    ? all.slice(-5)
-    : all.filter((item) => item.cursorNumber === 0 || item.cursorNumber > cursor).slice(0, maxItems);
+  const selection = selectAutoCrawlCandidates(all, source, maxItems, telegramGap);
+  const items = selection.items;
+  telegramGap.backfillBeforeCursor = selection.backfillBeforeCursor;
+  telegramGap.backfillTargetCursor = selection.backfillTargetCursor;
 
   if (status === 200 && all.length === 0 && htmlBytes > 500) {
     throw new Error('auto_crawl_parser_degraded_zero_items');
@@ -470,6 +569,8 @@ export async function fetchAutoCrawlItems(source: AutoCrawlSourceConfig, options
       gapFrom: telegramGap.from,
       gapTo: telegramGap.to,
       gapStoppedReason: telegramGap.stoppedReason,
+      backfillBeforeCursor: telegramGap.backfillBeforeCursor,
+      backfillTargetCursor: telegramGap.backfillTargetCursor,
       maxFetchBytes: MAX_FETCH_BYTES,
     },
   };

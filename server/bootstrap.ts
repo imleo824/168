@@ -834,7 +834,7 @@ const handleAutoPostCreated: AutoPostAfterPostCreated = async ({ post, user }) =
 };
 
 registerConfigRoutes(app);
-registerAutoCrawlRoutes(app);
+registerAutoCrawlRoutes(app, { markContentDataChanged });
 registerAutoPostRoutes(app, {
   afterPostCreated: handleAutoPostCreated,
 });
