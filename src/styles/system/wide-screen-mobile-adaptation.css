@@ -239,6 +239,27 @@
       transform: none;
       transform-origin: initial;
       -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: var(--ui-line-medium) var(--ui-surface-transparent);
+    }
+
+    .app-shell[data-route-surface='user'] .app-shell-main::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    .app-shell[data-route-surface='user'] .app-shell-main::-webkit-scrollbar-track {
+      background: var(--ui-surface-transparent);
+    }
+
+    .app-shell[data-route-surface='user'] .app-shell-main::-webkit-scrollbar-thumb {
+      background: var(--ui-line-medium);
+      border-radius: var(--ui-radius-full);
+      transition: background-color var(--ui-duration-base) var(--ease-standard);
+    }
+
+    .app-shell[data-route-surface='user'] .app-shell-main::-webkit-scrollbar-thumb:hover {
+      background: var(--ui-text-muted);
     }
 
     .app-shell[data-route-surface='user'][data-desktop-surface='feed'] .app-shell-main {
@@ -275,12 +296,8 @@
       max-height: var(--app-desktop-shell-content-height);
       flex-direction: column;
       gap: var(--ui-space-4);
-    }
-
-    .app-desktop-sidebar {
       width: 100%;
       align-self: stretch;
-      top: var(--app-desktop-shell-padding-y);
       padding-inline-end: var(--ui-space-3);
       border-inline-end: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
     }
@@ -303,6 +320,11 @@
       border-radius: var(--ui-radius-xl);
       color: var(--ui-text-strong);
       text-decoration: var(--ui-text-decoration-none);
+      transition: transform var(--ui-duration-base) var(--ease-standard);
+    }
+
+    .app-desktop-brand:hover {
+      transform: translateY(-1px);
     }
 
     .app-desktop-brand-mark {
@@ -317,6 +339,12 @@
       font-size: var(--ui-text-title);
       font-weight: var(--ui-font-weight-display);
       line-height: var(--ui-line-none);
+      box-shadow: var(--ui-shadow-card);
+      transition: box-shadow var(--ui-duration-base) var(--ease-standard);
+    }
+
+    .app-desktop-brand:hover .app-desktop-brand-mark {
+      box-shadow: var(--ui-shadow-card-hover);
     }
 
     .app-desktop-brand-copy {
@@ -357,17 +385,18 @@
       grid-template-columns: var(--ui-control-sm) minmax(0, 1fr);
       align-items: center;
       gap: var(--ui-space-3);
-      padding: var(--ui-space-2) var(--ui-space-4);
+      padding: var(--ui-space-2.5) var(--ui-space-4);
       color: var(--ui-text-secondary);
       font-size: var(--ui-text-sm);
       font-weight: var(--ui-font-weight-strong);
       line-height: var(--ui-line-tight);
       text-decoration: var(--ui-text-decoration-none);
-      border-radius: var(--ui-radius-lg);
+      border-radius: var(--ui-radius-xl);
       transition:
         background-color var(--ui-duration-base) var(--ease-standard),
         border-color var(--ui-duration-base) var(--ease-standard),
-        color var(--ui-duration-base) var(--ease-standard);
+        color var(--ui-duration-base) var(--ease-standard),
+        transform var(--ui-duration-base) var(--ease-standard);
     }
 
     .app-desktop-nav-icon {
@@ -375,17 +404,29 @@
       height: var(--ui-control-icon-md);
       justify-self: center;
       stroke-width: var(--ui-icon-stroke);
+      transition: transform var(--ui-duration-fast) var(--ease-standard);
     }
 
     .app-desktop-nav-item:hover {
       background: var(--ui-state-hover);
       color: var(--ui-text-strong);
+      transform: translateX(2px);
+    }
+
+    .app-desktop-nav-item:hover .app-desktop-nav-icon {
+      transform: scale(1.1);
     }
 
     .app-desktop-nav-item--active,
     .app-desktop-nav-item--active:hover {
       background: var(--ui-state-selected);
       color: var(--ui-brand-strong);
+      font-weight: var(--ui-font-weight-display);
+      transform: translateX(0);
+    }
+
+    .app-desktop-nav-item--active .app-desktop-nav-icon {
+      stroke: var(--ui-brand-strong);
     }
 
     .app-desktop-nav-item:focus-visible,
@@ -396,7 +437,14 @@
 
     .app-desktop-context-card {
       padding: var(--ui-space-4);
-      border-radius: var(--ui-radius-none);
+      border-radius: var(--ui-radius-xl);
+      background: var(--ui-surface-card);
+      border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+      transition: background-color var(--ui-duration-base) var(--ease-standard);
+    }
+
+    .app-desktop-context-card:hover {
+      background: var(--ui-surface-card);
     }
 
     .app-desktop-context-kicker {
@@ -404,6 +452,7 @@
       font-size: var(--ui-text-xs);
       font-weight: var(--ui-font-weight-strong);
       line-height: var(--ui-line-tight);
+      letter-spacing: var(--ui-tracking-normal);
     }
 
     .app-desktop-context-metric {
@@ -422,7 +471,8 @@
       height: var(--ui-space-2);
       border-radius: var(--ui-radius-full);
       background: var(--ui-brand);
-      box-shadow: 0 0 0 var(--ui-space-half) var(--ui-focus-ring);
+      box-shadow: var(--ui-focus-ring);
+      animation: app-bottom-nav-online-breathe 2.4s ease-in-out infinite;
     }
 
   }

@@ -100,6 +100,7 @@
       border-radius: var(--ui-radius-none);
       background: var(--ui-surface-card);
       box-shadow: var(--ui-shadow-none);
+      transition: background-color var(--ui-duration-base) var(--ease-standard);
     }
 
     .app-shell[data-route-surface='user'] :is(
@@ -188,6 +189,20 @@
       margin-inline: auto;
     }
 
+    .app-shell[data-route-surface='user'] :is(.payment-action-overlay, .ui-sheet-overlay) {
+      align-items: center;
+      padding: var(--ui-space-6) var(--ui-space-4);
+    }
+
+    .app-shell[data-route-surface='user'] :is(.payment-action-sheet, .ui-sheet-panel) {
+      border-radius: var(--ui-radius-2xl);
+      border: var(--ui-border-width-hairline) solid var(--ui-pc-line);
+      box-shadow: var(--ui-shadow-panel);
+    }
+
+    .app-shell[data-route-surface='user'] :is(.payment-action-handle, .ui-sheet-handle) {
+      display: none;
+    }
   }
 
   @media (min-width: 1180px) {
@@ -218,6 +233,42 @@
       .profile-relation-list-item
     ):hover {
       background: var(--ui-state-hover);
+    }
+
+    .app-shell[data-route-surface='user'] :is(
+      .post-create-shell-card,
+      .recharge-form-card,
+      .recharge-payment-panel,
+      .tui-plus-link-editor-card,
+      .promote-history-edit-card,
+      .referral-share-card
+    ) {
+      transition:
+        border-color var(--ui-duration-base) var(--ease-standard),
+        box-shadow var(--ui-duration-base) var(--ease-standard);
+    }
+
+    .app-shell[data-route-surface='user'] :is(
+      .post-create-shell-card,
+      .recharge-form-card,
+      .recharge-payment-panel,
+      .tui-plus-link-editor-card,
+      .promote-history-edit-card,
+      .referral-share-card
+    ):hover {
+      border-color: var(--ui-line-medium);
+    }
+
+    .app-shell[data-route-surface='user'] :is(
+      .ui-control,
+      .recharge-amount-input,
+      .promote-history-target-input,
+      .promotion-effects-date-input,
+      .tui-plus-link-editor-field input,
+      .tui-plus-link-editor-field textarea,
+      .profile-bio-editor-input
+    ):hover:not(:disabled):not(:focus-visible) {
+      border-color: var(--ui-line-strong);
     }
   }
 }
