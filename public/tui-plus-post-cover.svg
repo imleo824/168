@@ -24,15 +24,15 @@
     <rect width="534" height="88" rx="18" fill="rgba(255,255,255,0.070)"/>
     <rect x="22" y="22" width="28" height="28" rx="10" fill="rgba(249,217,120,0.18)"/>
     <text x="34" y="45" fill="#F9D978" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" font-weight="900" text-anchor="middle">3</text>
-    <text x="76" y="38" fill="#FFFFFF" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="32" font-weight="900">帖子专属推广外链</text>
-    <text x="76" y="63" fill="rgba(255,255,255,0.72)" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="22" font-weight="600">帖子可添加跳转链接，直达你的产品或网页</text>
+    <text x="76" y="38" fill="#FFFFFF" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="32" font-weight="900">发帖直接设置推广链接</text>
+    <text x="76" y="63" fill="rgba(255,255,255,0.72)" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="22" font-weight="600">点击到网址注册</text>
   </g>
 
   <g transform="translate(612 274)">
     <rect width="534" height="88" rx="18" fill="rgba(255,255,255,0.070)"/>
     <rect x="22" y="22" width="28" height="28" rx="10" fill="rgba(249,217,120,0.18)"/>
     <text x="34" y="45" fill="#F9D978" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" font-weight="900" text-anchor="middle">4</text>
-    <text x="76" y="38" fill="#FFFFFF" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="32" font-weight="900">解锁广告置顶权限</text>
+    <text x="76" y="38" fill="#FFFFFF" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="32" font-weight="900">会员专属付费广告功能</text>
     <text x="76" y="63" fill="rgba(255,255,255,0.72)" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="22" font-weight="600">享有首页与分类频道广告置顶购买与投放特权</text>
   </g>
 

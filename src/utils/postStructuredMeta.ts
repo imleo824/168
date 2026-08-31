@@ -1,4 +1,4 @@
-import { selectFinestDisplayLocation } from '@/utils/postPresentation';
+import { selectFinestDisplayLocation } from './postPresentation.ts';
 
 export type PostStructuredMetaItem = {
   key: string;

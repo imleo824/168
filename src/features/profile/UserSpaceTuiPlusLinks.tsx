@@ -5,7 +5,7 @@ import { ExternalLink, Link2 } from 'lucide-react';
 import { APP_ROUTES } from '@/app/routePaths';
 import { useAuth } from '@/context/AuthContext';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
-import { apiFetch } from '@/services/api';
+import { getTuiPlusStatus } from '@/services/api';
 
 type ContactKind = 'telegram' | 'whatsapp' | 'line' | 'generic';
 type ProfileTextLink = {
@@ -261,9 +261,7 @@ export default function UserSpaceTuiPlusLinks({ displayUser, isOwnProfile }: Pro
     let cancelled = false;
     void (async () => {
       try {
-        const res = await apiFetch('/api/tui-plus/status', { cache: 'no-store' });
-        if (!res.ok) return;
-        const payload = await readJsonResponse(res).catch((): null => null);
+        const payload = await getTuiPlusStatus({ cache: 'no-store' });
         if (cancelled || !payload) return;
         setOwnLinks({
           isTuiPlus: Boolean(payload.active),

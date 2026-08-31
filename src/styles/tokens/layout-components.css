@@ -114,7 +114,7 @@
     --ui-motion-spin-turn: 360deg;
     --ui-social-feed-max-width: min(100%, calc(var(--ui-space-8) * 19 + var(--ui-space-4)));
     --ui-home-desktop-feed-width: var(--ui-social-feed-max-width);
-    --ui-home-desktop-shell-width: calc(var(--ui-home-desktop-feed-width) + var(--ui-space-8) * 5);
+    --ui-home-desktop-container-width: calc(var(--ui-home-desktop-feed-width) + var(--ui-space-8) * 5);
     --ui-home-feed-reading-column-width: min(100%, calc(var(--app-desktop-reading-main-width) - (var(--ui-app-shell-desktop-padding-x) * 2)));
     --ui-home-feed-column-count: 1;
     --ui-home-desktop-page-padding-x: var(--ui-space-3);

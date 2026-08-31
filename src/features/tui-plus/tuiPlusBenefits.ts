@@ -39,8 +39,8 @@ export const TUI_PLUS_BENEFITS: Record<TuiPlusBenefitKey, TuiPlusBenefitCopy> = 
   },
   postPromotionLink: {
     key: 'postPromotionLink',
-    title: '开通会员解锁推广外链',
-    detail: '开通推推会员后，发布帖子可附加独立推广链接，直达你的产品或网页。',
+    title: '推广链接是会员权益',
+    detail: '会员可在帖子中添加推广链接。',
     confirmLabel: '开通会员',
     cancelLabel: '暂不开通',
   },

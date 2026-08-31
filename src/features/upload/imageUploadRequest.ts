@@ -1,4 +1,5 @@
 import type { ImageUploadPurpose, PreparedImageUpload } from './imageUploadConfig';
+import { UPLOAD_API_ENDPOINT } from './api/uploadApi';
 
 export interface UploadImageOptions {
   onProgress?: (pct: number) => void;
@@ -245,7 +246,7 @@ function uploadPreparedImageOnce(
     try {
       reportProgress(0);
       xhr.timeout = Math.max(5_000, Number(options.timeoutMs || DEFAULT_UPLOAD_TIMEOUT_MS));
-      xhr.open('POST', '/api/upload', true);
+      xhr.open('POST', UPLOAD_API_ENDPOINT, true);
       xhr.withCredentials = true;
       xhr.send(formData);
     } catch (error) {

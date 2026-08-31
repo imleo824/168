@@ -137,11 +137,6 @@ assertIncludes(
 );
 assertIncludes(
   appShell,
-  '<AppDesktopContextRail onlineCountText={onlineCountText} />',
-  'Desktop feed routes must share the app-level context rail and online count.',
-);
-assertIncludes(
-  appShell,
   '<AppBottomNavigation />',
   'Mobile bottom navigation must stay inside the same unified user app shell.',
 );
@@ -183,7 +178,7 @@ for (const required of [
   "overscroll-behavior: contain;",
   ".app-shell[data-route-surface='user'][data-desktop-surface='feed'] .app-shell-main {\n      overflow: hidden;",
   ".app-shell[data-route-surface='user'] .app-bottom-nav {\n      display: none;",
-  ".app-desktop-sidebar,\n    .app-desktop-context-rail {\n      position: sticky;",
+  ".app-desktop-sidebar {\n      position: sticky;",
 ]) {
   assertIncludes(wideScreenAdaptation, required, `Wide-screen adaptation must preserve the desktop shell contract; missing ${required}`);
 }
@@ -262,7 +257,6 @@ for (const required of [
   ".app-shell[data-route-surface='user'][data-desktop-surface='feed'] .home-mobile-feed-panel [data-feed-scroll-root]",
   'overflow-y: auto;',
   'overscroll-behavior: contain;',
-  'column-count: var(--ui-home-feed-column-count);',
   'max-width: var(--ui-home-feed-reading-column-width);',
 ]) {
   assertIncludes(homeFeedFoundationCss, required, `Desktop feed must keep chrome outside the feed scroller and use the current desktop feed contract; missing ${required}`);

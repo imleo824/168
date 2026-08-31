@@ -1,8 +1,7 @@
 /* Home feed shell and page-level feed variables. */
 
 @layer utilities {
-  .home-mobile-shell,
-  .home-desktop-shell {
+  .home-mobile-shell {
     --home-topic-rhythm-y: var(--ui-space-none);
     --home-topic-tabs-top-gap: var(--ui-space-none);
     --home-topic-tabs-shell-padding-block: var(--home-topic-rhythm-y);
@@ -28,16 +27,8 @@
     --home-feed-state-padding-block: var(--ui-space-3);
     --home-feed-state-padding-inline: var(--ui-space-3);
     --home-feed-state-context-opacity: var(--ui-disabled-opacity);
-    --home-desktop-shell-padding-bottom: calc(var(--ui-space-8) * 4);
 
-    width: 100%;
-    background: var(--ui-surface-page);
     color: var(--ui-text-primary);
-  }
-
-  .home-desktop-shell {
-    min-height: var(--app-visual-vh, 100dvh);
-    padding-bottom: var(--home-desktop-shell-padding-bottom);
   }
 
   .home-mobile-feed-panel {
@@ -61,7 +52,7 @@
       --ui-feed-desktop-grid-min-column-width: calc(var(--ui-space-8) * 10);
       --ui-feed-card-list-gap: var(--ui-space-none);
       --ui-home-desktop-feed-width: var(--app-desktop-page-content-width);
-      --ui-home-desktop-shell-width: var(--app-desktop-page-content-width);
+      --ui-home-desktop-container-width: var(--app-desktop-page-content-width);
       --ui-home-feed-reading-column-width: min(100%, calc(var(--app-desktop-reading-main-width) - (var(--ui-app-shell-desktop-padding-x) * 2)));
       --ui-social-feed-list-max-width: var(--ui-home-feed-reading-column-width);
       --home-topic-tab-min-height: var(--ui-control-lg);

@@ -271,3 +271,19 @@ export async function pageFetcher<T>(url: string, options?: ApiRequestOptions): 
     hasMore: res.headers.get('X-Has-More') === 'true',
   };
 }
+
+export const getSessionUser = (options?: ApiRequestOptions) => apiFetch('/api/session', options);
+export const loginWithPasswordApi = (payload: { username: string; password: string }) =>
+  apiFetch('/api/auth/password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+export const registerWithPasswordApi = (payload: { username: string; password: string; inviteCode?: string; inviteSource?: string }) =>
+  apiFetch('/api/auth/register', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+export const logoutApi = () => apiFetch('/api/auth/logout', { method: 'POST' });
+

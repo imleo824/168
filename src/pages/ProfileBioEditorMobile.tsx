@@ -6,7 +6,7 @@ import { APP_ROUTES } from '@/app/routePaths';
 import { useAuth } from '@/context/AuthContext';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import SEO from '@/platform/SEO';
-import { apiFetch } from '@/services/api';
+import { updateUserBio } from '@/services/api';
 import ActionButton from '@/ui/ActionButton';
 import AppPage from '@/ui/AppPage';
 import PageContentShell from '@/ui/PageContentShell';
@@ -40,15 +40,7 @@ export default function ProfileBioEditorMobile() {
     if (isSaving) return;
     setIsSaving(true);
     try {
-      const res = await apiFetch('/api/me/bio', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bio: cleanBio }),
-      });
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        throw new Error(body?.error || body?.message || '保存失败');
-      }
+      await updateUserBio({ bio: cleanBio });
       patchUser({ bio: cleanBio });
       await refreshUser(true);
       if (user?.id) queryClient.invalidateQueries({ queryKey: ['user-profile', user.id] });

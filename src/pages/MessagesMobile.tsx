@@ -13,7 +13,7 @@ import SEO from '@/platform/SEO';
 import SegmentTabs from '@/ui/SegmentTabs';
 import TopbarIconButton from '@/ui/TopbarIconButton';
 import { APP_ROUTES } from '@/app/routePaths';
-import { apiFetch } from '@/services/api';
+import { getNotificationsList, markAllNotificationsAsRead, markNotificationAsRead } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 import PushNotificationSetting from '@/features/notifications/PushNotificationSetting';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
@@ -107,12 +107,6 @@ function normalizeInternalPath(value?: string | null) {
   return raw;
 }
 
-function getNotificationRequestUrl(activeFilter: NotificationFilter) {
-  const params = new URLSearchParams({ limit: '40' });
-  if (activeFilter !== 'ALL') params.set('type', activeFilter);
-  return `/api/me/notifications?${params.toString()}`;
-}
-
 function getNotificationTargetPath(item: NotificationItem) {
   const explicitTarget = normalizeInternalPath(item.targetUrl);
   if (explicitTarget) return explicitTarget;
@@ -133,25 +127,18 @@ function getNotificationTargetText(item: NotificationItem) {
 }
 
 async function fetchNotifications(activeFilter: NotificationFilter): Promise<NotificationResponse> {
-  const res = await apiFetch(getNotificationRequestUrl(activeFilter));
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body?.error || '消息加载失败');
-  }
-  return res.json();
+  return getNotificationsList({
+    type: activeFilter,
+    limit: 40,
+  });
 }
 
 async function markAllNotificationsRead() {
-  const res = await apiFetch('/api/me/notifications/read-all', { method: 'POST' });
-  if (!res.ok) throw new Error('更新消息状态失败');
-  return res.json();
+  return markAllNotificationsAsRead();
 }
 
 async function markNotificationRead(notificationId: string) {
-  const encodedId = encodeURIComponent(notificationId);
-  const res = await apiFetch(`/api/me/notifications/${encodedId}/read`, { method: 'POST' });
-  if (!res.ok) throw new Error('更新消息状态失败');
-  return res.json();
+  return markNotificationAsRead(notificationId);
 }
 
 function markNotificationReadInCache(previous: NotificationResponse | undefined, notificationId: string, readAt: string) {

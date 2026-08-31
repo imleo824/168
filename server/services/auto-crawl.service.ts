@@ -257,25 +257,25 @@ function logEvent(
 }
 
 export async function ensureAutoCrawlStorage() {
-      if (!isDbConfigured()) return;
-      if (!storageReady) {
-        storageReady = rows<{ configTable: string | null; sourceTable: string | null; runTable: string | null; itemTable: string | null }>(
-          `SELECT
-            to_regclass('public."AutoCrawlConfig"')::text AS "configTable",
-            to_regclass('public."AutoCrawlSource"')::text AS "sourceTable",
-            to_regclass('public."AutoCrawlRun"')::text AS "runTable",
-            to_regclass('public."AutoCrawlItem"')::text AS "itemTable"`,
-        ).then(([tables]) => {
-          if (!tables?.configTable || !tables.sourceTable || !tables.runTable || !tables.itemTable) {
-            throw new Error('auto_crawl_database_migration_required');
-          }
-        }).catch((error) => {
-          storageReady = null;
-          throw error;
-        });
+  if (!isDbConfigured()) return;
+  if (!storageReady) {
+    storageReady = rows<{ configTable: string | null; sourceTable: string | null; runTable: string | null; itemTable: string | null }>(
+      `SELECT
+        to_regclass('public."AutoCrawlConfig"')::text AS "configTable",
+        to_regclass('public."AutoCrawlSource"')::text AS "sourceTable",
+        to_regclass('public."AutoCrawlRun"')::text AS "runTable",
+        to_regclass('public."AutoCrawlItem"')::text AS "itemTable"`,
+    ).then(([tables]) => {
+      if (!tables?.configTable || !tables.sourceTable || !tables.runTable || !tables.itemTable) {
+        throw new Error('auto_crawl_database_migration_required');
       }
-      await storageReady;
-    }
+    }).catch((error) => {
+      storageReady = null;
+      throw error;
+    });
+  }
+  await storageReady;
+}
 
     function mapSource(row: any): AutoCrawlSourceConfig {
   return normalizeSource({
@@ -517,33 +517,68 @@ async function findPublishedDuplicate(
 }
 
 async function writeItem(source: AutoCrawlSourceConfig, runId: string, item: AutoCrawlItem, fp: string, itemHash: string) {
-  await exec(
-    `INSERT INTO "AutoCrawlItem"("id","sourceId","runId","sourceType","sourceName","sourcePostId","sourceUrl","rawTitle","rawContent","contentHash","fingerprint","cursorValue","cursorNumber","sourcePublishedAt","status","metadata","lastSeenAt","updatedAt")
-     VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,'RAW',$15::jsonb,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
-     ON CONFLICT("sourceId","sourcePostId") DO UPDATE SET
-       "runId"=EXCLUDED."runId","sourceType"=EXCLUDED."sourceType","sourceName"=EXCLUDED."sourceName",
-       "sourceUrl"=EXCLUDED."sourceUrl","rawTitle"=EXCLUDED."rawTitle","rawContent"=EXCLUDED."rawContent",
-       "contentHash"=EXCLUDED."contentHash","fingerprint"=EXCLUDED."fingerprint",
-       "cursorValue"=EXCLUDED."cursorValue","cursorNumber"=EXCLUDED."cursorNumber",
-       "sourcePublishedAt"=EXCLUDED."sourcePublishedAt",
-       "metadata"=COALESCE("AutoCrawlItem"."metadata",'{}'::jsonb)||EXCLUDED."metadata",
-       "lastSeenAt"=CURRENT_TIMESTAMP,"updatedAt"=CURRENT_TIMESTAMP`,
-    stableId(fp),
-    source.id,
-    runId,
-    source.type,
-    source.sourceName,
-    item.id,
-    item.link || null,
-    item.title,
-    item.content,
-    itemHash,
-    fp,
-    item.cursorValue,
-    item.cursorNumber,
-    new Date(item.timestamp),
-    JSON.stringify({ source: source.source, imageCount: item.images?.length || 0, images: item.images || [] }),
-  );
+  try {
+    await exec(
+      `INSERT INTO "AutoCrawlItem"("id","sourceId","runId","sourceType","sourceName","sourcePostId","sourceUrl","rawTitle","rawContent","contentHash","fingerprint","cursorValue","cursorNumber","sourcePublishedAt","status","metadata","lastSeenAt","updatedAt")
+       VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,'RAW',$15::jsonb,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
+       ON CONFLICT("sourceId","sourcePostId") DO UPDATE SET
+         "runId"=EXCLUDED."runId","sourceType"=EXCLUDED."sourceType","sourceName"=EXCLUDED."sourceName",
+         "sourceUrl"=EXCLUDED."sourceUrl","rawTitle"=EXCLUDED."rawTitle","rawContent"=EXCLUDED."rawContent",
+         "contentHash"=EXCLUDED."contentHash","fingerprint"=EXCLUDED."fingerprint",
+         "cursorValue"=EXCLUDED."cursorValue","cursorNumber"=EXCLUDED."cursorNumber",
+         "sourcePublishedAt"=EXCLUDED."sourcePublishedAt",
+         "metadata"=COALESCE("AutoCrawlItem"."metadata",'{}'::jsonb)||EXCLUDED."metadata",
+         "lastSeenAt"=CURRENT_TIMESTAMP,"updatedAt"=CURRENT_TIMESTAMP`,
+      stableId(fp),
+      source.id,
+      runId,
+      source.type,
+      source.sourceName,
+      item.id,
+      item.link || null,
+      item.title,
+      item.content,
+      itemHash,
+      fp,
+      item.cursorValue,
+      item.cursorNumber,
+      new Date(item.timestamp),
+      JSON.stringify({ source: source.source, imageCount: item.images?.length || 0, images: item.images || [] }),
+    );
+  } catch (error: any) {
+    const errStr = String(error?.message || error || '');
+    if (errStr.includes('42P10') || errStr.includes('ON CONFLICT')) {
+      await exec(
+        `INSERT INTO "AutoCrawlItem"("id","sourceId","runId","sourceType","sourceName","sourcePostId","sourceUrl","rawTitle","rawContent","contentHash","fingerprint","cursorValue","cursorNumber","sourcePublishedAt","status","metadata","lastSeenAt","updatedAt")
+         VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,'RAW',$15::jsonb,CURRENT_TIMESTAMP,CURRENT_TIMESTAMP)
+         ON CONFLICT("id") DO UPDATE SET
+           "runId"=EXCLUDED."runId","sourceType"=EXCLUDED."sourceType","sourceName"=EXCLUDED."sourceName",
+           "sourceUrl"=EXCLUDED."sourceUrl","rawTitle"=EXCLUDED."rawTitle","rawContent"=EXCLUDED."rawContent",
+           "contentHash"=EXCLUDED."contentHash","fingerprint"=EXCLUDED."fingerprint",
+           "cursorValue"=EXCLUDED."cursorValue","cursorNumber"=EXCLUDED."cursorNumber",
+           "sourcePublishedAt"=EXCLUDED."sourcePublishedAt",
+           "metadata"=COALESCE("AutoCrawlItem"."metadata",'{}'::jsonb)||EXCLUDED."metadata",
+           "lastSeenAt"=CURRENT_TIMESTAMP,"updatedAt"=CURRENT_TIMESTAMP`,
+        stableId(fp),
+        source.id,
+        runId,
+        source.type,
+        source.sourceName,
+        item.id,
+        item.link || null,
+        item.title,
+        item.content,
+        itemHash,
+        fp,
+        item.cursorValue,
+        item.cursorNumber,
+        new Date(item.timestamp),
+        JSON.stringify({ source: source.source, imageCount: item.images?.length || 0, images: item.images || [] }),
+      );
+      return;
+    }
+    throw error;
+  }
 }
 
 async function markItem(

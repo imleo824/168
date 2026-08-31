@@ -25,7 +25,7 @@ import UserSpaceTuiPlusLinks, {
   getActiveProfileWebsites,
 } from '@/features/profile/UserSpaceTuiPlusLinks';
 import { isTuiPlusActive } from '@/features/tui-plus/tuiPlusBenefits';
-import { apiFetch } from '@/services/api';
+import { updateProfile } from '@/services/api';
 import {
   ACCEPTED_IMAGE_TYPES,
   COVER_UPLOAD_RETRY_OPTIONS,
@@ -432,23 +432,10 @@ export default function UserSpace() {
 
       setCoverPreviewUrl(normalizedCoverUrl);
 
-      const saveRes = await apiFetch('/api/me/profile', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ coverUrl: normalizedCoverUrl }),
-      });
+      const savedUser = await updateProfile({ coverUrl: normalizedCoverUrl });
 
       if (sessionId !== coverUploadTokenRef.current) return;
 
-      if (!saveRes.ok) {
-        const saveMessage = await parseResponseError(saveRes, '封面保存失败');
-        setCoverPreviewUrl(previousCover);
-        patchUser({ coverUrl: previousCover || null });
-        showToast(saveMessage, 'error');
-        return;
-      }
-
-      const savedUser = await saveRes.json().catch(() => ({ coverUrl: normalizedCoverUrl }));
       const savedCoverUrl = normalizePersistentImageUrl(String(savedUser?.coverUrl || normalizedCoverUrl).trim());
       const nextCoverUrl = savedCoverUrl || normalizedCoverUrl;
 

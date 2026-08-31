@@ -243,7 +243,7 @@ export function PostCreateComposerSection({
                 layout="field"
                 tileClassName="post-create-image-preview-tile"
                 disabled={isQuoteMode || isPublishingLocked}
-                disabledReason={isQuoteMode ? '引用模式下暂不支持添加图片' : '发布中，请稍候...'}
+                disabledReason={isQuoteMode ? '引用发布暂不添加图片' : '发布中暂不可添加图片'}
               />
             </Suspense>
 

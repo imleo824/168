@@ -6,7 +6,16 @@ import { useConfig } from "@/hooks/useDataConfig";
 import { useLikes, useMyComments, usePosts } from "@/hooks/useDataPosts";
 import { useFans, useFollowingUsers, useUser } from "@/hooks/useDataSocial";
 import SEO from "@/platform/SEO";
-import { apiFetch, updatePaymentPassword, updatePostPublished, deletePost, syncPostToTelegram } from "@/services/api";
+import {
+  apiFetch,
+  updatePaymentPassword,
+  updatePostPublished,
+  deletePost,
+  syncPostToTelegram,
+  updateProfile,
+  updateLoginAccount,
+  updateUserPassword,
+} from "@/services/api";
 import { useQueryClient } from "@tanstack/react-query";
 import { useScrollLock } from "@/utils/scrollLock";
 import ListReturnScrollRestorer from "@/utils/ListReturnScrollRestorer";
@@ -338,22 +347,13 @@ export default function ProfileMobile() {
     }
     setIsSavingLoginAccount(true);
     try {
-      const res = await apiFetch("/api/me/login-account", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ loginAccount: cleanAccount }),
-      });
-      if (res.ok) {
-        await refreshUser(true);
-        queryClient.invalidateQueries({ queryKey: ["user-profile", authUser?.id] });
-        setIsEditingLoginAccount(false);
-        showToast("登录账号修改成功！", "success");
-      } else {
-        const body = await res.json();
-        showToast(body.error || "更新失败", "error");
-      }
-    } catch {
-      showToast("网络连接失败，请稍后重试", "error");
+      await updateLoginAccount({ loginAccount: cleanAccount });
+      await refreshUser(true);
+      queryClient.invalidateQueries({ queryKey: ["user-profile", authUser?.id] });
+      setIsEditingLoginAccount(false);
+      showToast("登录账号修改成功！", "success");
+    } catch (err: any) {
+      showToast(err?.message || "更新失败", "error");
     } finally {
       setIsSavingLoginAccount(false);
     }
@@ -368,24 +368,15 @@ export default function ProfileMobile() {
 
     setIsSavingProfile(true);
     try {
-      const res = await apiFetch('/api/me/profile', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          displayName: cleanName,
-        }),
+      await updateProfile({
+        displayName: cleanName,
       });
-      if (res.ok) {
-        await refreshUser(true);
-        queryClient.invalidateQueries({ queryKey: ['user-profile', authUser?.id] });
-        setIsEditingDisplayName(false);
-        showToast('昵称已更新', 'success');
-      } else {
-        const body = await res.json();
-        showToast(body.error || '更新失败', 'error');
-      }
-    } catch {
-      showToast('网络连接失败，请稍后重试', 'error');
+      await refreshUser(true);
+      queryClient.invalidateQueries({ queryKey: ['user-profile', authUser?.id] });
+      setIsEditingDisplayName(false);
+      showToast('昵称已更新', 'success');
+    } catch (err: any) {
+      showToast(err?.message || '更新失败', 'error');
     } finally {
       setIsSavingProfile(false);
     }
@@ -399,22 +390,13 @@ export default function ProfileMobile() {
     }
     setIsSavingContact(true);
     try {
-      const res = await apiFetch("/api/me/profile", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ contact: cleanContact }),
-      });
-      if (res.ok) {
-        await refreshUser(true);
-        queryClient.invalidateQueries({ queryKey: ["user-profile", authUser?.id] });
-        setIsEditingContact(false);
-        showToast("联系方式保存成功！", "success");
-      } else {
-        const body = await res.json();
-        showToast(body.error || "更新失败", "error");
-      }
-    } catch {
-      showToast("网络连接失败，请稍后重试", "error");
+      await updateProfile({ contact: cleanContact });
+      await refreshUser(true);
+      queryClient.invalidateQueries({ queryKey: ["user-profile", authUser?.id] });
+      setIsEditingContact(false);
+      showToast("联系方式保存成功！", "success");
+    } catch (err: any) {
+      showToast(err?.message || "更新失败", "error");
     } finally {
       setIsSavingContact(false);
     }
@@ -437,24 +419,15 @@ export default function ProfileMobile() {
 
     setIsSavingPassword(true);
     try {
-      const res = await apiFetch("/api/me/password", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(validation.payload),
-      });
-      if (res.ok) {
-        await refreshUser(true);
-        setIsEditingPassword(false);
-        setEditPassword("");
-        setConfirmPassword("");
-        setOldPassword("");
-        showToast(hasExistingPassword ? "密码修改成功！" : "密码设置成功！", "success");
-      } else {
-        const body = await res.json();
-        showToast(body.error || "操作失败", "error");
-      }
-    } catch {
-      showToast("网络连接失败，请稍后重试", "error");
+      await updateUserPassword(validation.payload);
+      await refreshUser(true);
+      setIsEditingPassword(false);
+      setEditPassword("");
+      setConfirmPassword("");
+      setOldPassword("");
+      showToast(hasExistingPassword ? "密码修改成功！" : "密码设置成功！", "success");
+    } catch (err: any) {
+      showToast(err?.message || "操作失败", "error");
     } finally {
       setIsSavingPassword(false);
     }

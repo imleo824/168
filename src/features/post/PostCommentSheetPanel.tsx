@@ -7,7 +7,7 @@ import ActionButton from '@/ui/ActionButton';
 import { StateBlock } from '@/ui/LoadingState';
 import ListLoadMoreState from '@/ui/ListLoadMoreState';
 import AvatarImage from '@/ui/AvatarImage';
-import { apiFetch } from '@/services/api';
+import { getPostCommentsPage, createPostComment, type PostComment, type CommentPage } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import { formatRelativeTime } from '@/utils/time';
@@ -19,6 +19,7 @@ import {
   subscribePostSheetOpen,
 } from './postSheetOpenIntent';
 
+export type { PostComment, CommentPage };
 export type PostCommentUser = {
   id: string;
   displayName?: string | null;
@@ -27,79 +28,12 @@ export type PostCommentUser = {
   userType?: string | null;
 };
 
-export type PostComment = {
-  id: string;
-  postId: string;
-  userId: string;
-  content: string;
-  status?: string;
-  createdAt?: string | Date;
-  updatedAt?: string | Date;
-  user?: PostCommentUser | null;
-};
-
-type CommentPage = {
-  items: PostComment[];
-  total: number;
-  nextCursor: string | null;
-  hasMore: boolean;
-};
-
 export interface PostCommentSheetPanelProps {
   open: boolean;
   postId: string;
   commentCount: number;
   onCommentCountChange?: (count: number) => void;
   onClose: () => void;
-}
-
-async function readApiMessage(response: Response) {
-  try {
-    const payload = await response.json();
-    return String(payload?.error || payload?.message || '').trim() || `Status: ${response.status}`;
-  } catch {
-    return `Status: ${response.status}`;
-  }
-}
-
-async function getPostCommentsPage(params: { postId: string; limit?: number; cursor?: string | null; signal?: AbortSignal }): Promise<CommentPage> {
-  const query = new URLSearchParams();
-  query.set('limit', String(params.limit || 20));
-  if (params.cursor) query.set('cursor', params.cursor);
-  const response = await apiFetch(`/api/posts/${params.postId}/comments?${query.toString()}`, {
-    signal: params.signal,
-    retry: false,
-  });
-  if (!response.ok) throw new Error(await readApiMessage(response));
-  const payload = await response.json();
-  const items = Array.isArray(payload?.items) ? payload.items : [];
-  const totalFromPayload = Number(payload?.total);
-  const totalFromHeader = Number(response.headers.get('X-Total-Count') || '');
-  const total = Number.isFinite(totalFromPayload)
-    ? totalFromPayload
-    : Number.isFinite(totalFromHeader)
-      ? totalFromHeader
-      : items.length;
-  return {
-    items,
-    total: Math.max(0, Math.floor(total)),
-    nextCursor: response.headers.get('X-Next-Cursor') || null,
-    hasMore: response.headers.get('X-Has-More') === 'true',
-  };
-}
-
-async function createPostComment(postId: string, content: string): Promise<{ comment: PostComment; commentCount: number }> {
-  const response = await apiFetch(`/api/posts/${postId}/comments`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ content }),
-  });
-  if (!response.ok) throw new Error(await readApiMessage(response));
-  const payload = await response.json();
-  return {
-    comment: payload.comment,
-    commentCount: Math.max(0, Number(payload.commentCount || 0)),
-  };
 }
 
 function getCommentAuthorName(comment: PostComment) {
@@ -152,8 +86,7 @@ export const PostCommentSheetPanel = memo(function PostCommentSheetPanel({
       postId,
       limit: 20,
       cursor: pageParam as string | null | undefined,
-      signal,
-    }),
+    }, { signal }),
     getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextCursor : undefined,
     initialPageParam: undefined as string | undefined,
     maxPages: 6,
@@ -189,7 +122,7 @@ export const PostCommentSheetPanel = memo(function PostCommentSheetPanel({
   }, [commentsQuery.data?.pages?.length, onCommentCountChange, open, total]);
 
   const createMutation = useMutation({
-    mutationFn: (content: string) => createPostComment(postId, content),
+    mutationFn: (content: string) => createPostComment(postId, { content }),
     onSuccess: (result) => {
       setComposerError('');
       setIsComposerOpen(false);

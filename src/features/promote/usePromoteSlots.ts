@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { useAsyncFlow } from '@/hooks/useAsyncFlow';
-import { apiFetch } from '@/services/api';
+import { getPromotionSlotsBatch } from '@/services/api';
 
 import {
   buildSlotStateMap,
@@ -55,35 +55,16 @@ export function usePromoteSlots({
       throw new Error(slotsPrerequisiteMessage || '排期正在准备，请稍后再试');
     }
 
-    const params = new URLSearchParams({
-      type: selectedType,
-      dates: availableDateKeySignature,
-    });
+    const payload = await getPromotionSlotsBatch(
+      {
+        type: selectedType,
+        dates: availableDateKeySignature,
+        ...(selectedType === 'PIN_CATEGORY' && selectedCategoryId ? { categoryId: selectedCategoryId } : {}),
+      },
+      { signal },
+    );
 
-    if (selectedType === 'PIN_CATEGORY' && selectedCategoryId) {
-      params.set('categoryId', selectedCategoryId);
-    }
-
-    const res = await apiFetch(`/api/promotion/slots-batch?${params.toString()}`, {
-      signal,
-    });
-
-    if (!res.ok) {
-      let message = res.status === 429 ? '请求过于频繁，请稍后再试' : '排期加载失败';
-
-      try {
-        const data = await res.json() as { error?: string };
-        if (data?.error) message = data.error;
-      } catch {
-        // Keep the stable user-facing fallback above.
-      }
-
-      throw new Error(message);
-    }
-
-    const data = await res.json() as SlotsApiPayload;
-
-    return buildSlotStateMap(availableDateKeys, data);
+    return buildSlotStateMap(availableDateKeys, payload as SlotsApiPayload);
   }, [
     availableDateKeys,
     availableDateKeySignature,

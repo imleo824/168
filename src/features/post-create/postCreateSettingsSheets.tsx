@@ -216,7 +216,7 @@ export function PostCreateContactEditorDialog({
         <section data-post-create-stable-focus="true" className="post-create-stable-focus post-create-contact-editor-card">
           <div className="post-create-contact-editor-copy">
             <h2>设置 Telegram 账号</h2>
-            <p>保存后，帖子底部将展示专属联系按钮，方便感兴趣的读者直接与你沟通。</p>
+            <p>保存后，帖子底部将展示专属联系按钮，方便感兴趣的读者直接与你沟通。仅用于本次发布。</p>
           </div>
 
           <label className="post-create-contact-editor-field">

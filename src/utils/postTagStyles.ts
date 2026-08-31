@@ -1,5 +1,5 @@
 import type { PostMetaChipKind } from '@/ui/uiTypes';
-import type { PostStructuredMetaItem } from '@/utils/postStructuredMeta';
+import type { PostStructuredMetaItem } from './postStructuredMeta.ts';
 
 export const POST_TAG_ROW_CLASS = 'post-tag-row';
 

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ChangeEvent } from 'react';
 
-import { apiFetch } from '@/services/api';
+import { updateProfile } from '@/services/api';
 import {
   COVER_UPLOAD_RETRY_OPTIONS,
   getImageValidationError,
@@ -136,24 +136,11 @@ export function useProfileMediaUploads({
 
       setAvatarPreviewUrl(normalizedPhotoUrl);
 
-      const saveRes = await apiFetch('/api/me/profile', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ photoUrl: normalizedPhotoUrl }),
-      });
+      const savedUser = await updateProfile({ photoUrl: normalizedPhotoUrl });
 
       if (sessionId !== avatarUploadTokenRef.current) return;
 
-      if (!saveRes.ok) {
-        const saveMessage = await parseResponseError(saveRes, '头像保存失败');
-        setAvatarPreviewUrl(previousAvatar);
-        patchUser({ photoUrl: previousAvatar || null });
-        showToast(saveMessage, 'error');
-        return;
-      }
-
-      const savedUser = await saveRes.json().catch(() => ({}));
-      const savedPhotoUrl = String(savedUser.photoUrl || finalPhotoUrl).trim();
+      const savedPhotoUrl = String(savedUser?.photoUrl || finalPhotoUrl).trim();
       const normalizedSavedPhoto = normalizePersistentImageUrl(savedPhotoUrl || finalPhotoUrl);
       setAvatarPreviewUrl(normalizedSavedPhoto);
       patchUser({ photoUrl: normalizedSavedPhoto });
@@ -226,24 +213,11 @@ export function useProfileMediaUploads({
 
       setCoverPreviewUrl(normalizedCoverUrl);
 
-      const saveRes = await apiFetch('/api/me/profile', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ coverUrl: normalizedCoverUrl }),
-      });
+      const savedCoverUser = await updateProfile({ coverUrl: normalizedCoverUrl });
 
       if (sessionId !== coverUploadTokenRef.current) return;
 
-      if (!saveRes.ok) {
-        const saveMessage = await parseResponseError(saveRes, '封面保存失败');
-        setCoverPreviewUrl(previousCover);
-        patchUser({ coverUrl: previousCover || null });
-        showToast(saveMessage, 'error');
-        return;
-      }
-
-      const savedCoverUser = await saveRes.json().catch(() => ({ coverUrl: normalizedCoverUrl }));
-      const savedCoverUrl = normalizePersistentImageUrl(String(savedCoverUser.coverUrl || normalizedCoverUrl).trim());
+      const savedCoverUrl = normalizePersistentImageUrl(String(savedCoverUser?.coverUrl || normalizedCoverUrl).trim());
       const nextCoverUrl = savedCoverUrl || normalizedCoverUrl;
 
       setCoverPreviewUrl(nextCoverUrl);

@@ -8,7 +8,7 @@ import AppPage from '@/ui/AppPage';
 import AuthRequiredState from '@/ui/AuthRequiredState';
 import PageHeader from '@/ui/PageHeader';
 import ActionButton from '@/ui/ActionButton';
-import { apiFetch } from '@/services/api';
+import { getRechargeOrders, createRechargeOrder, scanRechargeOrder, getConfig } from '@/services/api';
 import { PaymentInfoSkeleton, Skeleton } from '@/ui/Skeleton';
 import type { RechargeOrder } from '@/types';
 import { InlineSpinner } from '@/ui/LoadingState';
@@ -115,14 +115,7 @@ export default function RechargeMobile() {
     if (!user) return;
 
     try {
-      const res = await apiFetch('/api/me/orders?limit=5', { signal });
-      const raw = await res.text();
-      const payload = raw ? JSON.parse(raw) : null;
-
-      if (!res.ok) {
-        throw new Error(payload?.error || '订单记录加载失败');
-      }
-
+      const payload = await getRechargeOrders({ limit: 5 }, { signal });
       const nextOrders = parseRechargeOrdersPayload(payload);
 
       if (!isActive()) return;
@@ -192,18 +185,7 @@ export default function RechargeMobile() {
     setDepositError('');
 
     try {
-      const res = await apiFetch('/api/me/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ usdtAmount: numericAmount }),
-        signal,
-      });
-      const raw = await res.text();
-      const payload = raw ? JSON.parse(raw) : null;
-
-      if (!res.ok) {
-        throw new Error(payload?.error || '收款信息生成失败，请重试');
-      }
+      const payload = await createRechargeOrder({ usdtAmount: numericAmount }, { signal });
 
       if (!isActive()) return;
 
@@ -238,19 +220,10 @@ export default function RechargeMobile() {
 
     if (currentOrderId) {
       try {
-        const scanRes = await apiFetch(`/api/me/orders/${currentOrderId}/scan`, {
-          method: 'POST',
-          signal,
-        });
-
-        if (!scanRes.ok) {
-          const payloadText = await scanRes.text();
-          const payload = payloadText ? JSON.parse(payloadText) : null;
-          scanError = payload?.error || '到账状态刷新失败，请重试';
-        }
+        await scanRechargeOrder(currentOrderId, { signal });
       } catch (error: any) {
         if (error?.name !== 'AbortError') {
-          scanError = '到账状态刷新失败，请重试';
+          scanError = error?.message || '到账状态刷新失败，请重试';
         } else {
           scanError = '刷新超时，请重试';
         }
@@ -301,11 +274,7 @@ export default function RechargeMobile() {
 
     void (async () => {
       try {
-        const res = await apiFetch('/api/config');
-        const payloadText = await res.text();
-        const payload = payloadText ? JSON.parse(payloadText) : null;
-        if (!res.ok) return;
-
+        const payload = await getConfig();
         setRechargeConfig({
           minUsdt: Number(payload?.tron_deposit_min_usdt || 1),
           pointsPerUsdt: Number(payload?.recharge_points_per_usdt || 10),

@@ -6,7 +6,7 @@ import { APP_ROUTES } from '@/app/routePaths';
 import { useAuth } from '@/context/AuthContext';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import SEO from '@/platform/SEO';
-import { apiFetch } from '@/services/api';
+import { getTuiPlusStatus, mutateTuiPlusLink } from '@/services/api';
 import ActionButton from '@/ui/ActionButton';
 import AppPage from '@/ui/AppPage';
 import PageContentShell from '@/ui/PageContentShell';
@@ -38,7 +38,6 @@ type TargetCopy = {
   tabLabel: string;
   valueLabel: string;
   valuePlaceholder: string;
-  endpoint: string;
   payloadKey: 'contacts' | 'websites' | 'channels';
 };
 
@@ -53,7 +52,7 @@ type ContactMethod = {
 
 type SaveOperation = {
   target: LinkTarget;
-  endpoint: string;
+  id?: string;
   method: 'POST' | 'PATCH' | 'DELETE';
   body?: any;
 };
@@ -87,7 +86,6 @@ const TARGETS: TargetCopy[] = [
     tabLabel: '联系方式',
     valueLabel: '联系方式',
     valuePlaceholder: '@telegram 或 https://t.me/username',
-    endpoint: '/api/tui-plus/contacts',
     payloadKey: 'contacts',
   },
   {
@@ -96,7 +94,6 @@ const TARGETS: TargetCopy[] = [
     tabLabel: '网址',
     valueLabel: '链接',
     valuePlaceholder: 'https://tuitui888.com',
-    endpoint: '/api/tui-plus/websites',
     payloadKey: 'websites',
   },
   {
@@ -105,7 +102,6 @@ const TARGETS: TargetCopy[] = [
     tabLabel: '频道',
     valueLabel: '频道链接',
     valuePlaceholder: '@channel 或 https://t.me/channel',
-    endpoint: '/api/tui-plus/channels',
     payloadKey: 'channels',
   },
 ];
@@ -420,8 +416,7 @@ export default function TuiPlusLinkEditorMobile() {
   }, [patchUser, user?.id]);
 
   const refreshStatus = useCallback(async () => {
-    const res = await apiFetch('/api/tui-plus/status', { cache: 'no-store' });
-    const payload = res.ok ? await readJsonResponse(res).catch((): null => null) : null;
+    const payload = await getTuiPlusStatus({ cache: 'no-store' }).catch((): null => null);
     applyPayload(payload);
     return payload;
   }, [applyPayload]);
@@ -430,8 +425,7 @@ export default function TuiPlusLinkEditorMobile() {
     let cancelled = false;
     void (async () => {
       try {
-        const res = await apiFetch('/api/tui-plus/status', { cache: 'no-store' });
-        const payload = res.ok ? await readJsonResponse(res).catch((): null => null) : null;
+        const payload = await getTuiPlusStatus({ cache: 'no-store' }).catch((): null => null);
         if (!cancelled && payload) applyPayload(payload);
       } catch {
         if (!cancelled) setStatusPayload({ active: false });
@@ -472,7 +466,7 @@ export default function TuiPlusLinkEditorMobile() {
         if (intent.deletedExisting) {
           operations.push({
             target: config.target,
-            endpoint: `${config.endpoint}/${row.id}`,
+            id: row.id,
             method: 'DELETE',
           });
           continue;
@@ -486,7 +480,7 @@ export default function TuiPlusLinkEditorMobile() {
         }
         operations.push({
           target: config.target,
-          endpoint: row.id ? `${config.endpoint}/${row.id}` : config.endpoint,
+          id: row.id,
           method: row.id ? 'PATCH' : 'POST',
           body: makePayload(config.target, intent.cleanValue, intent.cleanTitle, row),
         });
@@ -501,12 +495,7 @@ export default function TuiPlusLinkEditorMobile() {
     setIsSaving(true);
     try {
       for (const operation of operations) {
-        const res = await apiFetch(operation.endpoint, {
-          method: operation.method,
-          headers: operation.method === 'DELETE' ? undefined : { 'Content-Type': 'application/json' },
-          body: operation.method === 'DELETE' ? undefined : JSON.stringify(operation.body),
-        });
-        if (!res.ok) throw new Error(await parseResponseError(res, operation.method === 'DELETE' ? '删除失败' : '保存失败'));
+        await mutateTuiPlusLink(operation.target, operation.id, operation.method, operation.body);
       }
       await refreshStatus();
       if (user?.id) queryClient.invalidateQueries({ queryKey: ['user-profile', user.id] });

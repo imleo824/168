@@ -45,6 +45,7 @@ import { formatRelativeTime } from '@/utils/time';
 const ImageLightbox = React.lazy(() => import('@/ui/ImageLightbox'));
 
 const ANONYMOUS_USER_ID = 'anonymous';
+const POST_PROMOTION_LINK_META_KEY = '__postPromotionLink';
 const CONTENT_WITH_MEDIA_CLAMP_LINES = 4;
 const CONTENT_TEXT_ONLY_CLAMP_LINES = 6;
 const CONTENT_OVERFLOW_MEASURE_MIN_CHARS_PER_LINE = 18;

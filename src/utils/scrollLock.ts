@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
-import { releaseActiveTextEntry } from '@/utils/textEntryFocus';
-import { getVisibleScrollTargets } from '@/utils/scrollTargets';
+import { releaseActiveTextEntry } from './textEntryFocus.ts';
+import { getVisibleScrollTargets } from './scrollTargets.ts';
 
 type ScrollLockOptions = {
   /**

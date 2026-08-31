@@ -25,7 +25,7 @@ mustHave('post contact eligibility service', contactEligibilityService, 'POST_NO
 mustHave('post contact eligibility service', contactEligibilityService, 'canShowContact');
 mustHave('post contact publish guard still enforced', postCreateRoutes, 'await assertCanShowContactOnPost(tx, req.user.id, now)');
 
-mustHave('post create contact click preflight', postCreatePage, "apiFetch('/api/posts/contact-eligibility')");
+mustHave('post create contact click preflight', postCreatePage, "checkPostContactEligibility()");
 mustHave('post create contact click preflight', postCreatePage, "setTuiPlusPromptBenefit('postContact')");
 mustHave('post create contact click preflight', postCreatePage, 'handleOpenContactEditor');
 mustHave('post create contact click preflight', postCreatePage, 'void handleOpenContactEditor()');

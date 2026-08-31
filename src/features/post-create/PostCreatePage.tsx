@@ -12,7 +12,7 @@ import AppPage from '@/ui/AppPage';
 import PageContentShell from '@/ui/PageContentShell';
 import PageHeader from '@/ui/PageHeader';
 import { PageLoader } from '@/ui/PageLoader';
-import { apiFetch, getPost } from '@/services/api';
+import { checkPostContactEligibility, createPost, getPost } from '@/services/api';
 import {
   buildTuiPlusBenefitRouteState,
   isTuiPlusActive,
@@ -480,37 +480,10 @@ export default function PostCreate({
       };
 
       try {
-        const res = await apiFetch('/api/posts', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Idempotency-Key': clientNonce },
-          body: JSON.stringify(payload),
+        const parsed = await createPost(payload, {
+          idempotencyKey: clientNonce,
           signal,
         });
-
-        const responseText = await res.text();
-        let parsed: any = null;
-        try {
-          parsed = responseText ? JSON.parse(responseText) : null;
-        } catch {
-          showToast(
-            res.ok
-              ? '发布成功，但服务返回数据异常，请刷新首页查看'
-              : `服务暂时繁忙 (HTTP ${res.status})，请稍后重试`,
-            'error',
-          );
-          return;
-        }
-
-        if (!res.ok) {
-          const errorMessage = parsed?.error || parsed?.message || `请求失败 (HTTP ${res.status})`;
-          showToast(errorMessage, 'error');
-          if (res.status === 403 && /链接/.test(errorMessage)) {
-            setTuiPlusPromptBenefit('postPromotionLink');
-          } else if (res.status === 403 && /联系方式|Tui Plus|会员/.test(errorMessage)) {
-            setTuiPlusPromptBenefit('postContact');
-          }
-          return;
-        }
 
         if (!parsed?.post || typeof parsed.post.id !== 'string') {
           showToast('发布成功，但返回数据异常，请刷新查看', 'error');
@@ -716,10 +689,7 @@ export default function PostCreate({
     if (!isRobotUser && !isTuiPlusContactUnlimited) {
       setIsCheckingContactEligibility(true);
       try {
-        const res = await apiFetch('/api/posts/contact-eligibility');
-        const text = await res.text();
-        const parsed = text ? JSON.parse(text) : null;
-        if (!res.ok) throw new Error(parsed?.error || parsed?.message || '联系方式权益检查失败');
+        const parsed = await checkPostContactEligibility();
         if (!parsed?.canShowContact) {
           setIsTelegramSettingsOpen(false);
           setTuiPlusPromptBenefit('postContact');

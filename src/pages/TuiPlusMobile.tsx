@@ -6,7 +6,7 @@ import { APP_ROUTES } from '@/app/routePaths';
 import { useAuth } from '@/context/AuthContext';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import SEO from '@/platform/SEO';
-import { apiFetch, ApiError } from '@/services/api';
+import { ApiError, getTuiPlusStatus, purchaseTuiPlus, startTuiPlusTrial } from '@/services/api';
 import type { TuiPlusStatusPayload } from '@/types';
 import ActionButton from '@/ui/ActionButton';
 import AppPage from '@/ui/AppPage';
@@ -164,7 +164,7 @@ function getPlanBadge(plan: PlanCard) {
 }
 
 function getPlanPeriod(plan: PlanCard) {
-  return plan.plan === 'YEARLY' ? '年度会员' : '月度会员';
+  return plan.plan === 'YEARLY' ? '年付' : '月付';
 }
 
 function PlanOptionCard({
@@ -230,8 +230,8 @@ export default function TuiPlusMobile() {
     setIsLoading(true);
     setLoadError('');
     try {
-      const res = await apiFetch('/api/tui-plus/status');
-      const payload = normalizeStatusPayload(await readJsonResponse<TuiPlusStatusPayload>(res));
+      const data = await getTuiPlusStatus();
+      const payload = normalizeStatusPayload(data);
       setStatus(payload);
       patchUser({
         plusStatus: payload.status,
@@ -267,8 +267,7 @@ export default function TuiPlusMobile() {
     if (busyAction) return;
     setBusyAction('trial');
     try {
-      const res = await apiFetch('/api/tui-plus/trial/start', { method: 'POST' });
-      await readJsonResponse(res);
+      await startTuiPlusTrial();
       setStatus({ ...(status || fallbackStatus), trialUsed: true });
       await afterMembershipMutation('免费会员已成功领取，尊享权益已生效');
     } catch (error: any) {
@@ -282,12 +281,7 @@ export default function TuiPlusMobile() {
     if (busyAction || !hasPlans) return;
     setBusyAction(plan);
     try {
-      const res = await apiFetch('/api/tui-plus/purchase', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan }),
-      });
-      await readJsonResponse(res);
+      await purchaseTuiPlus({ plan });
       await afterMembershipMutation(plan === 'YEARLY' ? '已成功开通年度会员，尊享权益已生效' : '已成功开通月度会员，尊享权益已生效');
     } catch (error: any) {
       if (error instanceof ApiError && error.status === 402) {
@@ -332,7 +326,7 @@ export default function TuiPlusMobile() {
         )}
       />
       <PageContentShell as="main" className="tui-plus-main ui-app-page-main">
-        {isLoading ? <LoadingBlock text="正在加载会员权益与方案..." className="tui-plus-loading" /> : loadError ? (
+        {isLoading ? <LoadingBlock text="正在加载会员信息..." className="tui-plus-loading" /> : loadError ? (
           <LoadingBlock text="会员信息加载失败，请稍后重试" className="tui-plus-loading" />
         ) : (
           <>

@@ -18,8 +18,7 @@ import {
   type CategoryMetaFeedFilters,
   type TelegramSyncStatus,
 } from '@/types';
-import { fetcher, pageFetcher, type ApiRequestOptions } from './apiCore';
-
+import { fetcher, pageFetcher, apiFetch, ApiError, type ApiRequestOptions } from './apiCore';
 export { ApiError, apiFetch } from './apiCore';
 
 export type MyCommentItem = {
@@ -63,8 +62,11 @@ function normalizeFeedPageForDisplay(page: { items: Post[]; nextCursor: string |
 }
 
 export const getConfigs = (options?: ApiRequestOptions) => fetcher<SystemConfig>('/api/config', { cache: 'no-store', ...options });
+export const getConfig = getConfigs;
 export const getCategories = (options?: ApiRequestOptions) => fetcher<Category[]>('/api/categories', { cache: 'no-store', ...options });
 export const getHomeBootstrap = (options?: ApiRequestOptions) => fetcher<HomeBootstrap>('/api/home/bootstrap', { cache: 'no-store', ...options });
+
+export { getSessionUser, loginWithPasswordApi, registerWithPasswordApi, logoutApi } from './apiCore';
 export const getChatBootstrap = () => fetcher<ChatBootstrap>('/api/chat/bootstrap');
 export async function getChatMessagesPage(params: { limit?: number; cursor?: string | null } = {}, options?: ApiRequestOptions) {
   const query = new URLSearchParams();
@@ -339,3 +341,259 @@ export const updatePaymentPassword = (payload: { password: string; oldPassword?:
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
   });
+
+export const updateProfile = (payload: Partial<User>) =>
+  fetcher<User>('/api/me/profile', {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+export const updateLoginAccount = (payload: { loginAccount: string }) =>
+  fetcher<{ success: boolean; loginAccount: string }>('/api/me/login-account', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+export const updateUserPassword = (payload: Record<string, any>) =>
+  fetcher<{ success: boolean }>('/api/me/password', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+export const updateUserBio = (payload: { bio: string }) =>
+  fetcher<{ success: boolean; bio: string }>('/api/me/bio', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+export const getTuiPlusStatus = (options?: ApiRequestOptions) =>
+  fetcher<any>('/api/tui-plus/status', options);
+
+export const startTuiPlusTrial = () =>
+  fetcher<any>('/api/tui-plus/trial/start', { method: 'POST' });
+
+export const purchaseTuiPlus = (payload: { plan?: string; planId?: string; paymentPassword?: string }) =>
+  fetcher<any>('/api/tui-plus/purchase', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+export const getTuiPlusContacts = () =>
+  fetcher<{ contacts: any[] }>('/api/tui-plus/contacts');
+
+export const updateTuiPlusContacts = (payload: { contacts: any[] }) =>
+  fetcher<{ success: boolean; contacts: any[] }>('/api/tui-plus/contacts', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+export const getTuiPlusWebsites = () =>
+  fetcher<{ websites: any[] }>('/api/tui-plus/websites');
+
+export const updateTuiPlusWebsites = (payload: { websites: any[] }) =>
+  fetcher<{ success: boolean; websites: any[] }>('/api/tui-plus/websites', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+export const getTuiPlusChannels = () =>
+  fetcher<{ channels: any[] }>('/api/tui-plus/channels');
+
+export const updateTuiPlusChannels = (payload: { channels: any[] }) =>
+  fetcher<{ success: boolean; channels: any[] }>('/api/tui-plus/channels', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+
+export type TuiPlusLinkTarget = 'contact' | 'website' | 'channel';
+
+const TUI_PLUS_ENDPOINTS: Record<TuiPlusLinkTarget, string> = {
+  contact: '/api/tui-plus/contacts',
+  website: '/api/tui-plus/websites',
+  channel: '/api/tui-plus/channels',
+};
+
+export async function mutateTuiPlusLink(
+  target: TuiPlusLinkTarget,
+  id: string | undefined,
+  method: 'POST' | 'PATCH' | 'DELETE',
+  body?: any,
+) {
+  const base = TUI_PLUS_ENDPOINTS[target];
+  const url = id ? `${base}/${id}` : base;
+  return fetcher<any>(url, {
+    method,
+    headers: method === 'DELETE' ? undefined : { 'Content-Type': 'application/json' },
+    body: method === 'DELETE' ? undefined : JSON.stringify(body),
+  });
+}
+
+export type PostComment = {
+  id: string;
+  postId: string;
+  userId: string;
+  content: string;
+  status?: string;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+  user?: {
+    id: string;
+    displayName?: string | null;
+    username?: string | null;
+    photoUrl?: string | null;
+    userType?: string | null;
+  } | null;
+};
+
+export type CommentPage = {
+  items: PostComment[];
+  total: number;
+  nextCursor: string | null;
+  hasMore: boolean;
+};
+
+export async function getPostCommentsPage(
+  params: { postId: string; limit?: number; cursor?: string | null },
+  options?: ApiRequestOptions,
+): Promise<CommentPage> {
+  const query = new URLSearchParams();
+  query.set('limit', String(params.limit || 20));
+  if (params.cursor) query.set('cursor', params.cursor);
+
+  const response = await apiFetch(`/api/posts/${encodeURIComponent(params.postId)}/comments?${query.toString()}`, {
+    signal: options?.signal,
+    retry: options?.retry ?? false,
+  });
+
+  if (!response.ok) {
+    let message = `Status: ${response.status}`;
+    try {
+      const payload = await response.json();
+      message = String(payload?.error || payload?.message || message).trim();
+    } catch {
+      // fallback
+    }
+    throw new ApiError(message, response.status);
+  }
+
+  const payload = await response.json().catch(() => ({}));
+  const items = Array.isArray(payload?.items) ? payload.items : [];
+  const totalFromPayload = Number(payload?.total);
+  const totalFromHeader = Number(response.headers.get('X-Total-Count') || '');
+  const total = Number.isFinite(totalFromPayload)
+    ? totalFromPayload
+    : Number.isFinite(totalFromHeader)
+      ? totalFromHeader
+      : items.length;
+
+  return {
+    items,
+    total: Math.max(0, Math.floor(total)),
+    nextCursor: response.headers.get('X-Next-Cursor') || null,
+    hasMore: response.headers.get('X-Has-More') === 'true',
+  };
+}
+
+export async function createPostComment(
+  postId: string,
+  payload: { content: string; quoteCommentId?: string },
+  options?: ApiRequestOptions,
+): Promise<{ comment: PostComment; commentCount: number }> {
+  const response = await apiFetch(`/api/posts/${encodeURIComponent(postId)}/comments`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    signal: options?.signal,
+  });
+
+  if (!response.ok) {
+    let message = `Status: ${response.status}`;
+    try {
+      const errorPayload = await response.json();
+      message = String(errorPayload?.error || errorPayload?.message || message).trim();
+    } catch {
+      // fallback
+    }
+    throw new ApiError(message, response.status);
+  }
+
+  const result = await response.json();
+  return {
+    comment: result.comment,
+    commentCount: Math.max(0, Number(result.commentCount || 0)),
+  };
+}
+
+export async function getNotificationsList(params: { type?: string; limit?: number; cursor?: string | null } = {}) {
+  const query = new URLSearchParams();
+  if (params.type && params.type !== 'ALL') query.set('type', params.type);
+  if (params.limit) query.set('limit', String(params.limit));
+  if (params.cursor) query.set('cursor', params.cursor);
+  return fetcher<any>(`/api/me/notifications?${query.toString()}`);
+}
+
+export const markAllNotificationsAsRead = () =>
+  fetcher<{ success: boolean }>('/api/me/notifications/read-all', { method: 'POST' });
+
+export const markNotificationAsRead = (notificationId: string) =>
+  fetcher<{ success: boolean }>(`/api/me/notifications/${encodeURIComponent(notificationId)}/read`, { method: 'POST' });
+
+export const getRechargeOrders = (params: { limit?: number; cursor?: string | null } = {}, options?: ApiRequestOptions) => {
+  const query = new URLSearchParams();
+  if (params.limit) query.set('limit', String(params.limit));
+  if (params.cursor) query.set('cursor', params.cursor);
+  return fetcher<any>(`/api/me/orders?${query.toString()}`, options);
+};
+
+export const createRechargeOrder = (payload: { usdtAmount?: number; amountUsdt?: number; chain?: string }, options?: ApiRequestOptions) =>
+  fetcher<any>('/api/me/orders', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    ...(options || {}),
+  });
+
+export const scanRechargeOrder = (orderId: string, options?: ApiRequestOptions) =>
+  fetcher<{ success: boolean; status?: string; order?: RechargeOrder }>(`/api/me/orders/${encodeURIComponent(orderId)}/scan`, {
+    method: 'POST',
+    ...(options || {}),
+  });
+
+export async function getPromotionSlotsBatch(
+  params: { type: string; dates?: string; startDate?: string; endDate?: string; categoryId?: string },
+  options?: ApiRequestOptions,
+) {
+  const query = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (value !== undefined && value !== null && value !== '') query.set(key, String(value));
+  });
+  return fetcher<any>(`/api/promotion/slots-batch?${query.toString()}`, options);
+}
+
+export const checkPostContactEligibility = (options?: ApiRequestOptions) =>
+  fetcher<{ canShowContact: boolean; remainingFreePosts?: number }>('/api/posts/contact-eligibility', options);
+
+export const createPost = (payload: any, options?: ApiRequestOptions & { idempotencyKey?: string }) => {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options?.headers as Record<string, string> || {}),
+  };
+  if (options?.idempotencyKey) {
+    headers['Idempotency-Key'] = options.idempotencyKey;
+  }
+  return fetcher<{ post: Post }>('/api/posts', {
+    method: 'POST',
+    headers,
+    body: JSON.stringify(payload),
+    ...(options || {}),
+  });
+};
+

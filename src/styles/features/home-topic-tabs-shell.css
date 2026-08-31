@@ -29,7 +29,7 @@
     position: relative;
     z-index: var(--ui-z-local-raised);
     width: 100%;
-    max-width: var(--ui-home-desktop-shell-width);
+    max-width: var(--ui-home-desktop-container-width);
     margin-inline: auto;
     padding:
       calc(var(--home-topic-tabs-shell-padding-block) + var(--home-topic-tabs-top-gap))

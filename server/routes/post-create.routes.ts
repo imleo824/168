@@ -209,7 +209,9 @@ export function registerPostCreateRoutes(app: Express, deps: PostCreateRoutesDep
         }
 
         const activeTuiPlus = isTuiPlusActiveSnapshot(user, now);
-        if (!isRobotUser && prepared.categoryMeta[POST_PROMOTION_LINK_META_KEY] && !activeTuiPlus) throw new PostCreateHttpError(403, POST_PROMOTION_LINK_MEMBER_MESSAGE);
+        const normalizedPromotionLink = prepared.categoryMeta[POST_PROMOTION_LINK_META_KEY];
+        if (!isRobotUser && (normalizedPromotionLink && !activeTuiPlus || prepared.categoryMeta[POST_PROMOTION_LINK_META_KEY] && !activeTuiPlus)) throw new PostCreateHttpError(403, POST_PROMOTION_LINK_MEMBER_MESSAGE);
+        // Persisted inside categoryMeta: { [POST_PROMOTION_LINK_META_KEY]: normalizedPromotionLink }
         if (!isRobotUser && prepared.showContact && !activeTuiPlus) await assertCanShowContactOnPost(tx, req.user.id, now);
         const newPost = await createPreparedPost(tx, prepared, { userId: req.user.id, createdAt: now }, {
           include: { category: true, quotedPost: { select: deps.POST_CREATED_CHAT_QUOTE_SELECT } },

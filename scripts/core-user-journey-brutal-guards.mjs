@@ -89,7 +89,7 @@ mustHave('payment password update hashes secret', userProfileSettings, 'const pa
 
 mustHave('auth context removes legacy token storage', authContext, "safeLocalStorage.removeItem('auth_token')");
 mustHave('auth context clears all query caches on logout', authContext, 'queryClient.removeQueries();');
-mustHave('auth context passes invite source on register', authContext, 'body: JSON.stringify({ username, password, inviteCode, inviteSource })');
+mustHave('auth context passes invite source on register', authContext, 'registerWithPasswordApi({ username, password, inviteCode, inviteSource })');
 mustHave('auth modal login submit guarded', authModal, 'useInteractionGuard(submitPasswordLogin');
 mustHave('auth modal register submit guarded', authModal, 'useInteractionGuard(submitPasswordRegister');
 mustHave('auth modal requires agreement', authModal, 'if (!agreementAccepted)');
@@ -108,7 +108,7 @@ mustHave('post create front end sends client nonce', postCreatePage, 'clientNonc
 mustHave('post create front end uses async flow submit guard', postCreatePage, 'run: runSubmit');
 mustHave('post create front end blocks busy submit', postCreatePage, 'disabled={submitDisabled}');
 mustHave('shared async flow drops duplicate runs', asyncFlow, 'if (!mountedRef.current || inFlightRef.current || cooldownRef.current) return undefined;');
-mustHave('post create front end member prompt for link', postCreatePage, "setTuiPlusPromptBenefit('postPromotionLink')");
+mustHave('post create front end member prompt for link', postCreateSections, 'benefit="postPromotionLink"');
 mustHave('post create link editor checks active membership', postCreateSections, 'const tuiPlusActive = isTuiPlusActive(user);');
 
 mustRegisterAuthedRoute('recharge order creation protected', billingRoutes, '/api/me/orders');

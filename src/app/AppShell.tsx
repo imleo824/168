@@ -64,7 +64,7 @@ const DESKTOP_NAV_ITEMS = [
   { to: APP_ROUTES.create, label: '发推', icon: CirclePlus, end: false },
   { to: APP_ROUTES.sponsor, label: '推广', icon: TrendingUp, end: false },
   { to: APP_ROUTES.profile, label: '我的', icon: UserRound, end: false },
-  { to: APP_ROUTES.about, label: '关于推推', icon: Info, end: false },
+  { to: APP_ROUTES.about, label: '关于', icon: Info, end: false },
 ] as const;
 
 const PAGE_OWNED_HEADER_PREFIXES = [

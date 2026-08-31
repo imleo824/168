@@ -47,7 +47,7 @@ mustNotHave('post link editor must not append body line', postCreateSections, 'P
 mustHave('post create structured link payload', postCreatePage, 'promotionLink: hasPromotionLink ? {');
 mustHave('post create structured link payload', postCreatePage, 'promotionLinkTitle');
 mustHave('post create structured link payload', postCreatePage, 'promotionLinkUrl');
-mustHave('post create prompt', postCreatePage, "setTuiPlusPromptBenefit('postPromotionLink')");
+mustHave('post create prompt', postCreateSections, 'benefit="postPromotionLink"');
 
 mustHave('shared post promotion link key', sharedPostPublishing, "export const POST_PROMOTION_LINK_META_KEY = '__postPromotionLink'");
 mustHave('post create backend structured link key', postCreateRoutes, 'POST_PROMOTION_LINK_META_KEY');

@@ -3,7 +3,7 @@ import { User } from '@/types';
 import { AlertCircle, CheckCircle, Info } from 'lucide-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { safeLocalStorage } from '@/utils/storage';
-import { apiFetch } from '@/services/apiCore';
+import { getSessionUser, loginWithPasswordApi, registerWithPasswordApi, logoutApi } from '@/services/apiCore';
 import { publishSignupRewardBadge } from '@/utils/signupRewardBadge';
 import { type ReferralInviteSource } from '../../shared/referral';
 
@@ -184,7 +184,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const reqId = ++refreshSeqRef.current;
     try {
       if (!silent) setLoading(true);
-      const res = await apiFetch('/api/session');
+      const res = await getSessionUser();
       if (res.ok) {
         const data = await res.json();
         if (reqId !== refreshSeqRef.current) return;
@@ -244,11 +244,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (isAuthenticating) return { ok: false, error: '正在登录，请稍候' };
     try {
       setIsAuthenticating(true);
-      const res = await apiFetch('/api/auth/password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-      });
+      const res = await loginWithPasswordApi({ username, password });
       if (res.ok) {
         await refreshUser();
         if (onAuthSuccess) {
@@ -270,11 +266,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (isAuthenticating) return { ok: false, error: '正在注册，请稍候' };
     try {
       setIsAuthenticating(true);
-      const res = await apiFetch('/api/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password, inviteCode, inviteSource }),
-      });
+      const res = await registerWithPasswordApi({ username, password, inviteCode, inviteSource });
       if (res.ok) {
         const payload = await res.json().catch(() => ({}));
         await refreshUser();
@@ -311,7 +303,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
-    await apiFetch('/api/auth/logout', { method: 'POST' }).catch((): null => null);
+    await logoutApi().catch((): null => null);
     setUser(null);
     cacheUserSnapshot(null);
     queryClient.removeQueries();

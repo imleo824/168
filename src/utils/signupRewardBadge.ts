@@ -1,4 +1,4 @@
-import { safeLocalStorage } from '@/utils/storage';
+import { safeLocalStorage } from './storage.ts';
 
 const SIGNUP_REWARD_BADGE_STORAGE_KEY = 'signup_reward_badge_points_v1';
 export const SIGNUP_REWARD_BADGE_EVENT = 'signup-reward-badge-change';

@@ -11,12 +11,12 @@ export const TUI_PLUS_BENEFIT_ITEMS = [
   },
   {
     key: 'postPromotionLink',
-    title: '帖子专属推广外链',
-    description: '帖子可添加跳转链接，直达你的产品或网页',
+    title: '发帖直接设置推广链接',
+    description: '点击到网址注册',
   },
   {
     key: 'promotionBooking',
-    title: '解锁广告置顶权限',
+    title: '会员专属付费广告功能',
     description: '享有首页与分类频道广告置顶购买与投放特权',
   },
   {
