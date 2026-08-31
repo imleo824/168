@@ -8,7 +8,7 @@ import { useInstantPress } from '@/hooks/useInstantPress';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import { primePostCreateComposerFocus } from '@/utils/postCreateFocusPrime';
 import { clearSignupRewardBadge, readSignupRewardBadgePoints, SIGNUP_REWARD_BADGE_EVENT } from '@/utils/signupRewardBadge';
-import { warmupNavigationIntent } from '@/utils/routeWarmups';
+import { warmupNavigationIntent, warmupRoutePath } from '@/utils/routeWarmups';
 import { APP_ROUTES } from '@/app/routePaths';
 
 const DOUBLE_TAP_INTERVAL_MS = 360;
@@ -87,6 +87,7 @@ export default function AppBottomNavigation() {
   };
 
   const goMessages = () => {
+    warmupRoutePath(APP_ROUTES.messages);
     warmupNavigationIntent('auth');
     requireAuth(() => {
       if (pathname === APP_ROUTES.messages) {
@@ -99,6 +100,7 @@ export default function AppBottomNavigation() {
 
   const goCreate = () => {
     if (pathname === APP_ROUTES.create) return;
+    warmupRoutePath(APP_ROUTES.create);
     warmupNavigationIntent('create');
     requireAuth(() => {
       primePostCreateComposerFocus();
@@ -107,6 +109,7 @@ export default function AppBottomNavigation() {
   };
 
   const goSponsor = () => {
+    warmupRoutePath(APP_ROUTES.sponsor);
     warmupNavigationIntent('sponsor');
     requireAuth(() => {
       clearSignupRewardBadge();
@@ -119,6 +122,7 @@ export default function AppBottomNavigation() {
   };
 
   const goProfile = () => {
+    warmupRoutePath(APP_ROUTES.profile);
     warmupNavigationIntent('profile');
     if (pathname === APP_ROUTES.profile) {
       scrollActivePageToTop('smooth');
@@ -164,22 +168,22 @@ export default function AppBottomNavigation() {
           <span className="app-bottom-nav-icon-shell" aria-hidden="true"><House className="app-bottom-nav-icon" /></span>
           <span className="app-bottom-nav-label">首页</span>
         </button>
-        <button type="button" className="app-bottom-nav-item app-bottom-nav-item--messages" data-state={pathname === APP_ROUTES.messages ? 'active' : 'idle'} aria-current={pathname === APP_ROUTES.messages ? 'page' : undefined} aria-label="消息" title="消息" {...messagesPressHandlers}>
+        <button type="button" className="app-bottom-nav-item app-bottom-nav-item--messages" data-state={pathname === APP_ROUTES.messages ? 'active' : 'idle'} aria-current={pathname === APP_ROUTES.messages ? 'page' : undefined} aria-label="消息" title="消息" {...messagesPressHandlers} onPointerEnter={() => warmupRoutePath(APP_ROUTES.messages)} onFocus={() => warmupRoutePath(APP_ROUTES.messages)}>
           <span className="app-bottom-nav-icon-shell" aria-hidden="true"><Bell className="app-bottom-nav-icon" /></span>
           <span className="app-bottom-nav-label">消息</span>
         </button>
-        <button type="button" className="app-bottom-nav-item app-bottom-nav-item--publish" data-state="idle" aria-label="发推" title="发推" {...createPressHandlers}>
+        <button type="button" className="app-bottom-nav-item app-bottom-nav-item--publish" data-state="idle" aria-label="发推" title="发推" {...createPressHandlers} onPointerEnter={() => warmupRoutePath(APP_ROUTES.create)} onFocus={() => warmupRoutePath(APP_ROUTES.create)}>
           <span className="app-bottom-nav-icon-shell" aria-hidden="true"><CirclePlus className="app-bottom-nav-icon" /></span>
           <span className="app-bottom-nav-label">发推</span>
         </button>
-        <button type="button" className="app-bottom-nav-item app-bottom-nav-item--sponsor" data-state={pathname === APP_ROUTES.sponsor ? 'active' : 'idle'} aria-current={pathname === APP_ROUTES.sponsor ? 'page' : undefined} aria-label="推广" title="推广" {...sponsorPressHandlers}>
+        <button type="button" className="app-bottom-nav-item app-bottom-nav-item--sponsor" data-state={pathname === APP_ROUTES.sponsor ? 'active' : 'idle'} aria-current={pathname === APP_ROUTES.sponsor ? 'page' : undefined} aria-label="推广" title="推广" {...sponsorPressHandlers} onPointerEnter={() => warmupRoutePath(APP_ROUTES.sponsor)} onFocus={() => warmupRoutePath(APP_ROUTES.sponsor)}>
           <span className="app-bottom-nav-icon-shell" aria-hidden="true">
             <TrendingUp className="app-bottom-nav-icon" />
             {signupRewardBadgePoints > 0 ? <span className="app-bottom-nav-reward-badge">+{signupRewardBadgePoints}</span> : null}
           </span>
           <span className="app-bottom-nav-label">推广</span>
         </button>
-        <button type="button" className="app-bottom-nav-item app-bottom-nav-item--profile" data-state={pathname === APP_ROUTES.profile ? 'active' : 'idle'} aria-current={pathname === APP_ROUTES.profile ? 'page' : undefined} aria-label="我的" title="我的" {...profilePressHandlers}>
+        <button type="button" className="app-bottom-nav-item app-bottom-nav-item--profile" data-state={pathname === APP_ROUTES.profile ? 'active' : 'idle'} aria-current={pathname === APP_ROUTES.profile ? 'page' : undefined} aria-label="我的" title="我的" {...profilePressHandlers} onPointerEnter={() => warmupRoutePath(APP_ROUTES.profile)} onFocus={() => warmupRoutePath(APP_ROUTES.profile)}>
           <span className={profileIconShellClassName} data-tui-plus={profileIsTuiPlus ? 'true' : undefined} aria-hidden="true">
             {user ? (
               <AvatarImage src={user.photoUrl || ''} name={profileName} id={user.id} alt={profileName} className="app-bottom-nav-avatar" variant="thumb" />

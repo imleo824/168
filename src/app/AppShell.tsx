@@ -19,7 +19,7 @@ import { ErrorBoundary } from '@/ui/ErrorBoundary';
 import { HomePageSkeleton, Skeleton } from '@/ui/Skeleton';
 import AuthRequiredState from '@/ui/AuthRequiredState';
 import PageContentShell from '@/ui/PageContentShell';
-import { warmupNavigationIntent } from '@/utils/routeWarmups';
+import { warmupNavigationIntent, warmupRoutePath } from '@/utils/routeWarmups';
 import AppBottomNavigation from '@/app/AppBottomNavigation';
 import AppRequireAuthRoute from '@/app/AppRequireAuthRoute';
 import AppRequireTuiPlusRoute from '@/app/AppRequireTuiPlusRoute';
@@ -336,6 +336,8 @@ function AppDesktopSidebar() {
               className={({ isActive }) => (
                 `app-desktop-nav-item${isActive ? ' app-desktop-nav-item--active' : ''}`
               )}
+              onPointerEnter={() => warmupRoutePath(item.to)}
+              onFocus={() => warmupRoutePath(item.to)}
             >
               <Icon className="app-desktop-nav-icon" aria-hidden="true" />
               <span>{item.label}</span>

@@ -1,0 +1,45 @@
+/* User-surface interaction contract: visual feedback only, no feature ownership. */
+
+@layer utilities {
+  .app-shell[data-route-surface='user'] :is(button, a, input, select, textarea, [role='button'], [role='tab']) {
+    -webkit-tap-highlight-color: var(--ui-tap-highlight-color);
+  }
+
+  .app-shell[data-route-surface='user'] :is(button, a, [role='button'], [role='tab']):not(:disabled):not([aria-disabled='true']) {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .app-shell[data-route-surface='user'] [aria-busy='true'] {
+    cursor: progress;
+  }
+
+  .home-feed-empty-state--error .home-feed-empty-state__inner {
+    max-width: min(100%, calc(var(--ui-space-8) * 13));
+    border: var(--ui-border-width-hairline) solid var(--ui-refresh-hint-error-border);
+    border-radius: var(--ui-radius-xl);
+    background: var(--ui-surface-card);
+    padding: var(--ui-space-5) var(--ui-space-4);
+    box-shadow: var(--ui-shadow-card);
+  }
+
+  .home-feed-empty-state--error .home-feed-empty-state__action {
+    min-height: var(--ui-control-md);
+    margin-top: var(--ui-space-1);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .app-shell[data-route-surface='user'] :is(button, a, [role='button'], [role='tab']):not(:disabled):not([aria-disabled='true']) {
+      cursor: pointer;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .app-shell[data-route-surface='user'] :is(*, *::before, *::after) {
+      scroll-behavior: auto;
+      animation-duration: 0.01ms;
+      animation-iteration-count: 1;
+      transition-duration: 0.01ms;
+    }
+  }
+}

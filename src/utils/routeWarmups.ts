@@ -5,7 +5,15 @@ type RouteSurfaceWarmupKey =
   | 'postCreate'
   | 'postDetail'
   | 'userSpace'
-  | 'categoryFeed';
+  | 'categoryFeed'
+  | 'messages'
+  | 'promote'
+  | 'recharge'
+  | 'transactions'
+  | 'tuiPlus'
+  | 'referral'
+  | 'notificationSettings'
+  | 'about';
 
 type NavigationIntent = 'auth' | 'profile' | 'sponsor' | 'create';
 
@@ -19,6 +27,28 @@ const routeSurfaceWarmups: Record<RouteSurfaceWarmupKey, () => Promise<unknown>>
   postDetail: () => import('@/pages/PostDetail'),
   userSpace: () => import('@/pages/UserSpace'),
   categoryFeed: () => import('@/pages/CategoryFeedMobile'),
+  messages: () => import('@/pages/MessagesMobile'),
+  promote: () => import('@/pages/PromoteMobile'),
+  recharge: () => import('@/pages/RechargeMobile'),
+  transactions: () => import('@/pages/TransactionHistoryMobile'),
+  tuiPlus: () => import('@/pages/TuiPlusMobile'),
+  referral: () => import('@/pages/ReferralInviteMobile'),
+  notificationSettings: () => import('@/pages/NotificationSettings'),
+  about: () => import('@/pages/BrandAbout'),
+};
+
+const routePathWarmupKeys: Record<string, RouteSurfaceWarmupKey> = {
+  '/messages': 'messages',
+  '/profile': 'profile',
+  '/create': 'postCreate',
+  '/sponsor': 'sponsor',
+  '/invite': 'referral',
+  '/promote': 'promote',
+  '/recharge': 'recharge',
+  '/transactions': 'transactions',
+  '/tui-plus': 'tuiPlus',
+  '/settings/notifications': 'notificationSettings',
+  '/about': 'about',
 };
 
 const routeSurfaceWarmupCache = new Map<RouteSurfaceWarmupKey, Promise<unknown>>();
@@ -52,6 +82,12 @@ export function warmupRouteSurfaces(keys: readonly RouteSurfaceWarmupKey[]) {
   keys.forEach((key) => {
     void warmupRouteSurface(key).catch(ignoreRouteWarmupError);
   });
+}
+
+/** Start loading a user-surface chunk on navigation intent, never on page load. */
+export function warmupRoutePath(pathname: string) {
+  const key = routePathWarmupKeys[pathname];
+  if (key) void warmupRouteSurface(key).catch(ignoreRouteWarmupError);
 }
 
 export function warmupNavigationIntent(intent: NavigationIntent) {

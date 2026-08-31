@@ -46,6 +46,7 @@ const userProfileSettings = read('server/services/user-profile-settings.service.
 const authContext = read('src/context/AuthContext.tsx');
 const authModal = read('src/features/auth/AuthModal.tsx');
 const postCreateRoutes = read('server/routes/post-create.routes.ts');
+const postPublishContract = read('server/services/post/post-publish-contract.ts');
 const postCreatePage = read('src/features/post-create/PostCreatePage.tsx');
 const postCreateSections = read('src/features/post-create/postCreatePageSections.tsx');
 const asyncFlow = read('src/hooks/useAsyncFlow.ts');
@@ -99,9 +100,10 @@ mustRegisterAuthedRoute('post create route protected', postCreateRoutes, '/api/p
 mustHave('post create idempotency nonce normalized', postCreateRoutes, 'normalizePostClientNonce(req.body?.clientNonce || req.get(\'Idempotency-Key\') || req.get(\'X-Idempotency-Key\'))');
 mustHave('post create locks author row', postCreateRoutes, 'FOR UPDATE');
 mustHave('post create blocks disabled author', postCreateRoutes, "throw new PostCreateHttpError(403, '您的账号已被禁用，无法发布信息！')");
-mustHave('post create validates content or image', postCreateRoutes, "if (!normalizedContent && normalizedImages.length === 0)");
-mustHave('post create enforces Tui Plus promotion link', postCreateRoutes, 'normalizedPromotionLink && !activeTuiPlus');
-mustHave('post create stores structured promotion link only', postCreateRoutes, '[POST_PROMOTION_LINK_META_KEY]: normalizedPromotionLink');
+mustHave('post create uses shared publish contract', postCreateRoutes, 'preparePostPublishData({');
+mustHave('post create validates content or image', postPublishContract, "if (!content && images.length === 0) throw new PostPublishError('content_empty'");
+mustHave('post create enforces Tui Plus promotion link', postCreateRoutes, 'prepared.categoryMeta[POST_PROMOTION_LINK_META_KEY] && !activeTuiPlus');
+mustHave('post create stores structured promotion link only', postPublishContract, '[POST_PROMOTION_LINK_META_KEY]: promotionLinkResult.link');
 mustHave('post create front end sends client nonce', postCreatePage, 'clientNonce');
 mustHave('post create front end uses async flow submit guard', postCreatePage, 'run: runSubmit');
 mustHave('post create front end blocks busy submit', postCreatePage, 'disabled={submitDisabled}');
