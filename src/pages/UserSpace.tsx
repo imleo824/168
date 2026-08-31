@@ -607,25 +607,25 @@ export default function UserSpace() {
     <HomeFeedSkeleton count={3} className="user-space-post-list-skeleton" />
   ) : postsError && posts.length === 0 ? (
     <StateBlock
-      title="内容加载失败"
-      description="网络恢复后可重新加载这个用户的内容。"
+      title="动态未能载入"
+      description="网络恢复后可重试加载该用户发布的内容。"
       tone="error"
       compact
       className="user-space-state-block"
       action={
         <ActionButton type="button" variant="muted" disabled={postsRetryBusy} state={postsRetryBusy ? 'loading' : 'idle'} onClick={() => void guardedRefetchUserPosts()}>
-          {postsRetryBusy ? '加载中' : '重新加载'}
+          {postsRetryBusy ? '加载中' : '刷新重试'}
         </ActionButton>
       }
     />
   ) : posts.length === 0 ? (
-    <StateBlock title="暂无内容" tone="empty" compact className="user-space-state-block" />
+    <StateBlock title="暂无发布动态" description="该用户尚未发布公开帖子" tone="empty" compact className="user-space-state-block" />
   ) : (
     <div className={isMobile ? 'user-space-posts-mobile-wrap' : 'user-space-posts-desktop-wrap'}>
       <Suspense fallback={<HomeFeedSkeleton count={3} className="user-space-post-list-skeleton" />}>
         <LazyPostFeedList posts={posts} enableRecommendationControls={currentUser?.id !== safeId} />
       </Suspense>
-      <ListLoadMoreState error={postsLoadMoreError} loading={loadMoreBusy} hasMore={hasMorePosts} onRetry={() => void guardedRequestMorePosts()} onLoadMore={() => void guardedRequestMorePosts()} loadingText="正在加载更多" doneText="已经到底啦" />
+      <ListLoadMoreState error={postsLoadMoreError} loading={loadMoreBusy} hasMore={hasMorePosts} onRetry={() => void guardedRequestMorePosts()} onLoadMore={() => void guardedRequestMorePosts()} loadingText="正在载入更多动态..." doneText="已展示全部发布内容" />
     </div>
   );
 

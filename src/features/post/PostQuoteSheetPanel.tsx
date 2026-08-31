@@ -173,7 +173,7 @@ export const PostQuoteSheetPanel = memo(function PostQuoteSheetPanel({
   return (
     <BottomSheet
       open={open}
-      title={`引用 ${quoteCount || 0}`}
+      title={`引用转发 (${quoteCount || 0})`}
       ariaLabel="帖子引用"
       onClose={onClose}
       panelClassName="ui-sheet-panel post-quote-sheet"
@@ -192,17 +192,17 @@ export const PostQuoteSheetPanel = memo(function PostQuoteSheetPanel({
             className="post-quote-create-action"
           >
             <Quote className="post-quote-create-action-icon" aria-hidden="true" />
-            <span>我要引用发帖</span>
+            <span>引用并发布新帖</span>
           </ActionButton>
         </div>
       )}
       showHandle
     >
       {isLoading ? (
-        <div className="post-quote-sheet-loading">正在加载引用</div>
+        <div className="post-quote-sheet-loading">正在加载引用列表...</div>
       ) : error ? (
         <StateBlock
-          title="引用加载失败"
+          title="引用列表加载失败"
           tone="error"
           compact
           action={(
@@ -214,13 +214,13 @@ export const PostQuoteSheetPanel = memo(function PostQuoteSheetPanel({
               state={retryBusy ? 'loading' : 'idle'}
               onClick={() => void guardedRefetchQuotes()}
             >
-              {retryBusy ? '加载中' : '重新加载'}
+              {retryBusy ? '加载中' : '刷新重试'}
             </ActionButton>
           )}
         />
       ) : quotes.length === 0 ? (
         <StateBlock
-          title="还没有引用"
+          title="暂无关联引用内容"
           tone="empty"
           compact
           icon={<Quote className="post-quote-empty-icon" aria-hidden="true" />}
@@ -239,7 +239,7 @@ export const PostQuoteSheetPanel = memo(function PostQuoteSheetPanel({
             hasMore={Boolean(hasNextPage)}
             onRetry={() => void guardedRefetchQuotes()}
             onLoadMore={() => void guardedFetchNextQuotes()}
-            loadingText="正在加载更多引用"
+            loadingText="正在载入更多引用..."
             doneText=""
           />
         </div>

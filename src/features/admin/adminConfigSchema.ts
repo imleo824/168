@@ -18,14 +18,6 @@ export const getDefaultDateRange = () => {
   };
 };
 
-export const formatAdminInteger = (value: unknown) => Math.round(Number(value) || 0).toLocaleString('zh-CN');
-export const formatAdminPercent = (value: unknown) => `${((Number(value) || 0) * 100).toFixed(1)}%`;
-export const formatAdminDuration = (value: unknown) => {
-  const ms = Math.max(0, Number(value) || 0);
-  if (ms >= 1000) return `${(ms / 1000).toFixed(1)}s`;
-  return `${Math.round(ms)}ms`;
-};
-
 export function normalizeAdminBoolean(raw: unknown, fallback: boolean) {
   if (typeof raw === 'boolean') return raw;
   if (typeof raw === 'number') return raw !== 0;

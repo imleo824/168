@@ -76,9 +76,9 @@ export default function PromotePaymentSheet({
     >
       <PaymentActionSummary
         rows={[
-          { label: '曝光位置', value: promotionTypeLabel(selectedType) },
-          { label: '展示周期', value: `${bookingDays} 天` },
-          { label: '支付积分', value: `${displayTotalPrice} 积分`, tone: 'total' },
+          { label: '广告位置', value: promotionTypeLabel(selectedType) },
+          { label: '投放天数', value: `${bookingDays} 天` },
+          { label: '应付积分', value: `${displayTotalPrice} 积分`, tone: 'total' },
         ]}
       />
 
@@ -93,7 +93,7 @@ export default function PromotePaymentSheet({
               value={newPaymentPassword}
               onChange={(event) => onNewPaymentPasswordChange(event.target.value.replace(/\s/g, ''))}
               disabled={isPaymentBusy}
-              placeholder="设置支付密码，至少 6 位"
+              placeholder="设置 6 位及以上支付密码"
             />
             <PaymentActionInput
               type="password"
@@ -103,12 +103,12 @@ export default function PromotePaymentSheet({
               value={confirmPaymentPassword}
               onChange={(event) => onConfirmPaymentPasswordChange(event.target.value.replace(/\s/g, ''))}
               disabled={isPaymentBusy}
-              placeholder="再次输入支付密码"
+              placeholder="再次确认支付密码"
             />
             {normalizedConfirmPaymentPassword && normalizedNewPaymentPassword !== normalizedConfirmPaymentPassword ? (
-              <PaymentActionHelper tone="error">两次输入不一致</PaymentActionHelper>
+              <PaymentActionHelper tone="error">两次输入的密码不一致</PaymentActionHelper>
             ) : (
-              <PaymentActionHelper>设置完成后，再确认支付。</PaymentActionHelper>
+              <PaymentActionHelper>密码设置完成后，点击下方按钮确认支付</PaymentActionHelper>
             )}
           </PaymentActionPasswordStack>
         ) : (

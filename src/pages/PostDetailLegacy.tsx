@@ -1,6 +1,6 @@
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { lazy, Suspense, useState, useEffect, useCallback, useMemo } from 'react';
-import { MapPin } from 'lucide-react';
+import { Link2, MapPin } from 'lucide-react';
 
 import {
   usePost,
@@ -45,7 +45,12 @@ import {
   NORMAL_TAG_CHIP_CLASS,
   resolvePostMetaChipKind,
 } from '@/utils/postTagStyles';
-import { buildPostStructuredMetaItems, isPostStructuredLocationMeta } from '@/utils/postStructuredMeta';
+import {
+  buildPostStructuredMetaItems,
+  getPostPromotionLink,
+  isPostStructuredLocationMeta,
+  type PostStructuredMetaItem,
+} from '@/utils/postStructuredMeta';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import { useLikeFeedback } from '@/hooks/useLikeFeedback';
 import { useIsDesktopViewport } from '@/hooks/useIsDesktopViewport';
@@ -145,6 +150,7 @@ export default function PostDetail() {
 
   const detailContent = useMemo(() => buildPostDetailContentModel(post), [post]);
   const postImages = detailContent.images;
+  const postPromotionLink = useMemo(() => getPostPromotionLink((post as any)?.categoryMeta), [post]);
   const sourceText = resolveDetailSourceText(post);
   const sharePayload: SharePayload | null = useMemo(() => {
     if (!post?.id) return null;
@@ -210,6 +216,19 @@ export default function PostDetail() {
     220,
   );
   const overlayBackgroundLocation = getOverlayBackgroundLocation(location);
+
+  const handleStructuredMetaClick = useCallback((event: React.MouseEvent, item: PostStructuredMetaItem) => {
+    event.stopPropagation();
+    event.preventDefault();
+    const filters = item.filterValues && Object.keys(item.filterValues).length > 0 ? item.filterValues : { [item.key]: item.rawValue ?? item.value };
+    if (Object.keys(filters).length === 0) return;
+    const params = new URLSearchParams();
+    params.set('view', 'tag');
+    params.set('categoryMetaFilters', JSON.stringify(filters));
+    navigate(`/category/search?${params.toString()}`, {
+      state: { name: item.value, resultType: 'tag', backgroundLocation: overlayBackgroundLocation },
+    });
+  }, [navigate, overlayBackgroundLocation]);
 
   const handleContact = useCallback(() => {
     if (!post) return;
@@ -593,9 +612,17 @@ export default function PostDetail() {
                 {structuredMetaItems.map((item) => {
                   const chipKind = resolvePostMetaChipKind(item);
                   return (
-                    <span key={`meta-${item.key}`} className={`${getPostMetaChipClass(chipKind)} post-tag-chip--meta`} data-chip-kind={chipKind} title={`${item.label}：${item.value}`}>
+                    <button
+                      type="button"
+                      key={`meta-${item.key}`}
+                      onClick={(event) => handleStructuredMetaClick(event, item)}
+                      className={`${getPostMetaChipClass(chipKind)} post-tag-chip--meta`}
+                      data-chip-kind={chipKind}
+                      title={`${item.label}：${item.value}`}
+                      aria-label={`查看${item.label}：${item.value}`}
+                    >
                       <PostStructuredMetaValue item={item} />
-                    </span>
+                    </button>
                   );
                 })}
                 </div>
@@ -608,6 +635,21 @@ export default function PostDetail() {
           {postImages.length > 0 ? (
             <div className="detail-media-wrap">
               <PostMediaGrid images={postImages} onOpen={guardedOpenImage} priority stableAspectRatio />
+            </div>
+          ) : null}
+
+          {postPromotionLink ? (
+            <div className="detail-promotion-link-wrap">
+              <a
+                className="pressable post-card-promotion-link"
+                data-link-type="website"
+                href={postPromotionLink.url}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Link2 className="post-card-promotion-link-icon" aria-hidden="true" />
+                <span className="post-card-promotion-link-label">{postPromotionLink.title}</span>
+              </a>
             </div>
           ) : null}
 

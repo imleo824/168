@@ -3,9 +3,9 @@ import { PromotionType, getPromotionTypeLabel } from '@/types';
 
 export const DAILY_SLOT_INDEX = 0;
 export const HOME_AD_SLOTS = [
-  { index: 0, label: '第1位置', desc: '优先展示' },
-  { index: 1, label: '第2位置', desc: '紧跟首屏' },
-  { index: 2, label: '第3位置', desc: '补充曝光' },
+  { index: 0, label: '第1位置', desc: '顶部核心位' },
+  { index: 1, label: '第2位置', desc: '首屏黄金位' },
+  { index: 2, label: '第3位置', desc: '高频轮播位' },
 ];
 
 export const BOOKING_WINDOW_DAYS = 35;

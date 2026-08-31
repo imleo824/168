@@ -28,20 +28,6 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType>({} as any);
 const AUTH_USER_CACHE_KEY = 'auth_user_snapshot';
-const AUTH_SCOPED_QUERY_KEYS = [
-  ['me'],
-  ['likes'],
-  ['notifications'],
-  ['users', 'following'],
-  ['users', 'fans'],
-  ['follow-status'],
-  ['promotions'],
-  ['transactions'],
-  ['recharge-orders'],
-  ['user-profile'],
-  ['referrals'],
-  ['tui-plus'],
-] as const;
 const noopCallback = () => {};
 
 function readCachedUser() {

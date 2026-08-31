@@ -63,15 +63,6 @@ function areResetKeysEqual(prev?: unknown[], next?: unknown[]) {
   return prev.every((value, index) => Object.is(value, next[index]));
 }
 
-type ErrorBoundaryRuntime = {
-  readonly props: Readonly<Props>;
-  setState: (state: State) => void;
-};
-
-function getRuntime(boundary: ErrorBoundary): ErrorBoundaryRuntime {
-  return boundary as unknown as ErrorBoundaryRuntime;
-}
-
 export class ErrorBoundary extends React.Component<Props, State> {
   state: State = {
     hasError: false,
@@ -84,12 +75,12 @@ export class ErrorBoundary extends React.Component<Props, State> {
 
   componentDidUpdate(prevProps: Props) {
     if (!this.state.hasError) return;
-    if (areResetKeysEqual(prevProps.resetKeys, getRuntime(this).props.resetKeys)) return;
+    if (areResetKeysEqual(prevProps.resetKeys, this.props.resetKeys)) return;
     this.reset();
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    getRuntime(this).props.onError?.(error, errorInfo);
+    this.props.onError?.(error, errorInfo);
     console.error('Error caught by boundary:', error, errorInfo);
 
     if (isRecoverableChunkError(error) && shouldReloadForChunkError()) {
@@ -99,12 +90,12 @@ export class ErrorBoundary extends React.Component<Props, State> {
   }
 
   reset = () => {
-    getRuntime(this).setState({ hasError: false, error: null });
+    this.setState({ hasError: false, error: null });
   };
 
   render() {
     if (this.state.hasError) {
-      const { fallback } = getRuntime(this).props;
+      const { fallback } = this.props;
       if (fallback !== undefined) return fallback;
       return (
         <div className="ui-error-boundary">
@@ -128,6 +119,6 @@ export class ErrorBoundary extends React.Component<Props, State> {
         </div>
       );
     }
-    return getRuntime(this).props.children;
+    return this.props.children;
   }
 }

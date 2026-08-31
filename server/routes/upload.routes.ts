@@ -40,9 +40,9 @@ function getUploadExtension(file: any) {
 }
 
 function imageFileFilter(
-  _req: Request,
+  _req: any,
   file: any,
-  cb: multer.FileFilterCallback,
+  cb: any,
 ) {
   if (!ALLOWED_UPLOAD_MIME.has(file.mimetype)) {
     cb(new Error('仅支持 JPG、PNG、WebP 图片'));

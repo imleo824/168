@@ -75,13 +75,6 @@ export function useAdminSystemConfigEditor({
     setLocationPresets(nextPresets);
   }, [localConfig?.location_presets, setLocationPresets]);
 
-  const setPublishCategorySchema = useCallback((nextSchema: PublishCategoryMetaConfig[]) => {
-    setLocalConfig((prev: any) => ({
-      ...prev,
-      publish_category_schema: nextSchema,
-    }));
-  }, [setLocalConfig]);
-
   const updatePublishCategorySchema = useCallback((updater: (schema: PublishCategoryMetaConfig[]) => PublishCategoryMetaConfig[]) => {
     setLocalConfig((prev: any) => ({
       ...prev,

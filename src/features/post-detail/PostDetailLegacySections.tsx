@@ -137,7 +137,7 @@ export const DetailLikeWall = memo(function DetailLikeWall({
   return (
     <section className="detail-like-wall" aria-labelledby="detail-like-wall-title">
       <div className="detail-like-wall-header">
-        <h2 id="detail-like-wall-title" className="detail-like-wall-title">点赞</h2>
+        <h2 id="detail-like-wall-title" className="detail-like-wall-title">赞过的人</h2>
         <span className="detail-like-wall-count">{countText}</span>
       </div>
       {likers.length > 0 ? (
@@ -161,8 +161,8 @@ export const DetailLikeWall = memo(function DetailLikeWall({
           {remainingLikeCount > 0 ? (
             <span
               className="detail-like-wall-more"
-              title={`还有 ${remainingLikeCount} 人点赞`}
-              aria-label={`还有 ${remainingLikeCount} 人点赞`}
+              title={`共有 ${remainingLikeCount} 位用户赞过`}
+              aria-label={`共有 ${remainingLikeCount} 位用户赞过`}
             >
               +{formatEngagementCount(remainingLikeCount) || remainingLikeCount}
             </span>
@@ -327,7 +327,7 @@ export function DetailBottomBar({
         <div className={isMobile ? 'detail-bottom-actions-grid' : 'detail-bottom-actions-row'}>
           <div
             className={`${bottomActionClass} detail-bottom-action--heat`}
-            aria-label={`热度 ${heatCountText}`}
+            aria-label={`热度指数 ${heatCountText}`}
           >
             <FlameKindling className="feed-action-heat-icon" aria-hidden="true" />
             <BottomActionCount value={heatCountText} />
@@ -338,7 +338,7 @@ export function DetailBottomBar({
             onClick={onLike}
             disabled={likePending}
             className={`${bottomActionClass} ${hasLiked ? 'detail-bottom-action--liked' : 'detail-bottom-action--like'} ${isLikeFeedbackActive ? 'is-like-feedback-active' : ''} ${likePending ? DETAIL_BOTTOM_ACTION_PENDING_CLASS : ''}`}
-            aria-label={hasLiked ? '取消点赞' : '点赞'}
+            aria-label={hasLiked ? '取消点赞' : '点赞表达认可'}
             aria-pressed={hasLiked}
             aria-busy={likePending || undefined}
           >
@@ -350,7 +350,7 @@ export function DetailBottomBar({
             type="button"
             onClick={onOpenCommentSheet}
             className={`${bottomActionClass} detail-bottom-action--comment`}
-            aria-label={`评论，${commentCountText || '0'} 条`}
+            aria-label={`查看评论 (${commentCountText || '0'})`}
           >
             <MessageCircle aria-hidden="true" />
             {commentCountText ? <BottomActionCount value={commentCountText} /> : null}
@@ -361,7 +361,7 @@ export function DetailBottomBar({
             onClick={onShare}
             disabled={isSharing}
             className={`${bottomActionClass} detail-bottom-action--share ${isSharing ? DETAIL_BOTTOM_ACTION_PENDING_CLASS : ''}`}
-            aria-label="分享"
+            aria-label="分享内容"
             aria-busy={isSharing || undefined}
           >
             <Share aria-hidden="true" />
@@ -372,7 +372,7 @@ export function DetailBottomBar({
             type="button"
             onClick={onOpenQuoteSheet}
             className={`${bottomActionClass} detail-bottom-action--quote`}
-            aria-label={`查看引用，${quoteCountText || '0'} 条`}
+            aria-label={`查看引用转发 (${quoteCountText || '0'})`}
           >
             <Quote aria-hidden="true" />
             {quoteCountText ? <BottomActionCount value={quoteCountText} /> : null}

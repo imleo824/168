@@ -1,27 +1,9 @@
 import type { Category } from '@/types';
 import { isDocumentFeedScrollMode, scrollFeedToTop } from '@/utils/feedScroll';
-import type { MainTabId } from './homeTypes';
 
 const HOME_SELECTED_CATEGORY_IDS_KEY_PREFIX = 'home-selected-category-ids';
 const HOME_CATEGORY_COUNTRY_FILTER_KEY_PREFIX = 'home-category-country-filters';
 export const HOME_SELECTED_CATEGORIES_CHANGED_EVENT = 'home-selected-categories-changed';
-
-export function formatCategoryLabel(label: string) {
-  const trimmed = label.trim();
-  if (!trimmed) return '#';
-  return trimmed;
-}
-
-export function isCountryFilterableCategoryName(label: string) {
-  const normalized = String(label || '')
-    .replace(/[\s\u3000#＃_-]+/g, '')
-    .trim()
-    .toLowerCase();
-
-  if (!normalized) return false;
-
-  return /租房|房屋|房产|买房|二手|招聘|求职|工作|岗位|兼职/.test(normalized);
-}
 
 export function getHomeCategoryStorageKey(userId?: string | null) {
   return `${HOME_SELECTED_CATEGORY_IDS_KEY_PREFIX}:${userId || 'guest'}`;
@@ -176,11 +158,6 @@ export function areStringRecordsEqual(left: Record<string, string>, right: Recor
   const rightKeys = Object.keys(right);
   if (leftKeys.length !== rightKeys.length) return false;
   return leftKeys.every((key) => left[key] === right[key]);
-}
-
-export function normalizeMainTab(categoryId: string): MainTabId {
-  if (categoryId === 'following') return 'following';
-  return 'discover';
 }
 
 let homeFeedScrollRoot: HTMLElement | null = null;

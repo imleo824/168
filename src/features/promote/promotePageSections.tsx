@@ -84,7 +84,7 @@ export function PromoteTypeSection({
               <div className={`promote-card-price ${
                 active ? 'promote-card-price-active' : 'promote-card-price-idle'
               }`}>
-                {type.price || 0}积分 / 天
+                {type.price || 0} 积分/天
               </div>
             </button>
           );
@@ -138,7 +138,7 @@ export function PromoteSlotSection({
               <span className={`promote-card-price ${
                 active ? 'promote-card-price-active' : 'promote-card-price-idle'
               }`}>
-                {price || 0}积分 / 天
+                {price || 0} 积分/天
               </span>
             </button>
           );
@@ -178,7 +178,7 @@ export function PromoteCategorySection({
             }`}
           >
             <span className="promote-category-chip-label">{cat.name}</span>
-            <span className="promote-category-chip-value">{priceForCategoryPin(cat.id)}积分/天</span>
+            <span className="promote-category-chip-value">{priceForCategoryPin(cat.id)} 积分/天</span>
           </button>
         ))}
       </div>
@@ -281,10 +281,10 @@ export function PromoteTargetSection({
               {selectedPostHint ||
                 (
                   isVerifyingSelectedPost || isLoadingPromotablePosts
-                    ? '正在加载你的帖子'
+                    ? '正在加载我的帖子...'
                     : promotablePostsCount > 0
-                      ? `可选 ${promotablePostsCount} 条本人帖子`
-                      : '仅可选择本人发布的帖子'
+                      ? `已有 ${promotablePostsCount} 条我的帖子可选`
+                      : '暂无已发布的帖子，去发一条即可推广'
                 )}
             </span>
           </span>
@@ -309,13 +309,13 @@ export function PromoteAdCreativeSection({
       <StepHeader
         step={2}
         title="广告素材"
-        hint="上传双端图片并填写点击后跳转的位置"
+        hint="上传电脑端与移动端广告图，并设置点击跳转链接"
       />
 
       <div className="promote-ad-form">
         <div className="promote-ad-field">
           <span className="promote-ad-field-label">
-            电脑端广告图 · 建议 1920×480，文字居中，避免贴边
+            电脑端广告图（建议尺寸 1920×480，居中展示）
           </span>
 
           <Suspense fallback={<PromoteAdImageUploadFallback variant="desktop" />}>
@@ -331,7 +331,7 @@ export function PromoteAdCreativeSection({
 
         <div className="promote-ad-field">
           <span className="promote-ad-field-label">
-            移动端广告图 · 建议 1080×360，重点信息放中间
+            移动端广告图（建议尺寸 1080×360，居中展示）
           </span>
 
           <Suspense fallback={<PromoteAdImageUploadFallback variant="mobile" />}>
@@ -346,7 +346,7 @@ export function PromoteAdCreativeSection({
         </div>
 
         <div className="promote-ad-field">
-          <span className="promote-ad-field-label">点击跳转地址</span>
+          <span className="promote-ad-field-label">跳转链接</span>
 
           <input
             id="promote-ad-target-url"
@@ -357,7 +357,7 @@ export function PromoteAdCreativeSection({
             autoCorrect="off"
             autoCapitalize="off"
             spellCheck={false}
-            placeholder="填写网址、Telegram 频道、机器人或联系方式"
+            placeholder="输入网址、Telegram 频道、Bot 或联系方式"
             className="ui-control promote-ad-input"
             value={adForm.targetUrl}
             maxLength={2048}

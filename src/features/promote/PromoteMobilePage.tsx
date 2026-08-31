@@ -369,7 +369,7 @@ export default function PromoteMobile() {
 
       if (!isActive()) return;
 
-      showToast(`已支付 ${result.totalPrice} 积分，购买 ${result.bookedCount} 天`, 'success');
+      showToast(`购买成功！已成功预订投放 ${result.bookedCount} 天`, 'success');
 
       setIsBookingModalOpen(false);
       resetPaymentInputs();
@@ -387,7 +387,7 @@ export default function PromoteMobile() {
         visibilityResults.some((item) => item.status === 'rejected')
       ) {
         console.warn('[promote] Booking succeeded but post-booking refresh failed.', visibilityResults);
-        showToast('购买已成功，页面稍后自动同步', 'info');
+        showToast('购买成功，数据稍后自动更新', 'info');
       }
     } catch (err: any) {
       if (!isActive()) return;
@@ -439,21 +439,21 @@ export default function PromoteMobile() {
     (isBannerAdPromotion && Boolean(adCreativeBlockReason));
 
   const bookingButtonLabel = isBooking
-    ? '支付中'
+    ? '正在支付...'
     : isConfirmingAvailability
-      ? '确认日期'
+      ? '正在校验排期...'
       : slotsLoadError
-        ? '日期异常'
+        ? '排期加载异常'
         : !canLoadSlots
           ? slotsPrerequisiteMessage
         : !hasLoadedSlots || isLoadingSlots
-          ? '加载日期'
+          ? '正在加载排期...'
           : !hasSelectedBookableDates
-            ? '请选择日期'
+            ? '请选择投放日期'
             : isPriceInvalid
               ? '价格未配置'
               : isPostPromotion && !canSubmitPromotionTarget
-                ? '请选择要曝光的推'
+                ? '请选择要推广的帖子'
                 : isBannerAdPromotion && adCreativeActionLabel
                   ? adCreativeActionLabel
                   : isInsufficientPoints
@@ -462,14 +462,14 @@ export default function PromoteMobile() {
 
   const dateSelectionLocked = !isSlotAvailabilityTrusted || isLoadingSlots || isPaymentBusy;
   const calendarStatusText = slotsLoadError
-    ? '日期加载失败'
+    ? '排期加载失败'
     : !canLoadSlots
       ? slotsPrerequisiteMessage
     : !hasLoadedSlots || isLoadingSlots
-      ? '正在加载日期'
+      ? '正在加载排期...'
       : selectedDateKeys.size > 0
         ? `已选择 ${selectedDateKeys.size} 天`
-        : '选择投放日期';
+        : '点击日历选择投放日期';
 
   const paymentPanelTitle = needsPaymentPasswordSetup
     ? '设置支付密码'
@@ -478,31 +478,31 @@ export default function PromoteMobile() {
       : '输入支付密码';
 
   const paymentPanelDescription = needsPaymentPasswordSetup
-    ? '设置后不会扣款，下一步再确认支付'
+    ? '首次支付请先设定安全支付密码，下一步确认扣款'
     : paymentPasswordSetupDone
-      ? '支付密码已设置，确认后将扣减积分'
+      ? '支付密码已验证，确认后将自动扣减积分'
       : '';
 
   const confirmPaymentButtonLabel = needsPaymentPasswordSetup
-    ? (isSavingPaymentPassword ? '设置中' : '设置并继续')
+    ? (isSavingPaymentPassword ? '正在设置...' : '设置密码并继续')
     : isConfirmingAvailability
-      ? '确认中'
+      ? '正在确认...'
       : isBooking
-        ? '支付中'
+        ? '正在支付...'
         : '确认支付';
 
   const paymentBusyLabel = isSavingPaymentPassword
-    ? '设置中'
+    ? '正在设置密码...'
     : isConfirmingAvailability
-      ? '确认日期中'
-      : '支付中';
+      ? '正在校验排期...'
+      : '正在支付积分...';
 
   const balanceHint = slotsLoadError
-    ? '日期加载失败，请重试'
+    ? '排期加载失败，请重试'
     : !canLoadSlots
       ? slotsPrerequisiteMessage
     : !hasLoadedSlots || isLoadingSlots
-      ? '正在加载日期'
+      ? '正在加载排期...'
       : !hasSelectedBookableDates
         ? '请选择投放日期'
         : isPriceInvalid
@@ -511,7 +511,7 @@ export default function PromoteMobile() {
             ? adCreativeBlockReason
             : isInsufficientPoints
               ? `还差 ${Math.abs(balanceAfter)} 积分`
-              : `${bookingBreakdown.totalUnits} 天`;
+              : `已选 ${bookingBreakdown.totalUnits} 天`;
 
   const refreshPaymentContextAfterFailure = useCallback(async () => {
     await Promise.allSettled([
@@ -550,7 +550,7 @@ export default function PromoteMobile() {
     }
 
     if (isPostPromotion && !canSubmitPromotionTarget) {
-      showToast('请选择要曝光的推', 'error');
+      showToast('请选择要推广的帖子', 'error');
       return false;
     }
 
@@ -562,7 +562,7 @@ export default function PromoteMobile() {
     }
 
     if (isInsufficientPoints) {
-      showToast(`积分不足，本次需要 ${totalPrice} 积分`, 'error');
+      showToast(`积分余额不足，本次投放需要 ${totalPrice} 积分`, 'error');
       return false;
     }
 
@@ -667,10 +667,10 @@ export default function PromoteMobile() {
       onBlurCapture={handlePromoteBlurCapture}
       className="promote-mobile-page promote-page surface-page"
     >
-      <SEO title="推广｜推推" description="在推推推广首页横幅、热门置顶和分类置顶，让内容更容易被看到。" />
+      <SEO title="广告推广｜推推" description="在推推购买首页横幅广告、热门置顶与分类置顶，提升内容曝光度与触达转化。" />
 
       <PageHeader
-        title="推广"
+        title="广告推广"
         onBack={handleBack}
       />
 

@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { Prisma } from '@prisma/client';
 
-import prisma from '../db';
+import prisma, { isDbConfigured } from '../db';
 
 export type AutomationModuleName = 'auto_like' | 'quote_publish' | 'comment_publish' | 'auto_post' | 'auto_crawl' | 'chat_bot';
 export type AutomationHeartbeatTrigger = 'STARTUP_HEALTH_CHECK' | 'SCHEDULED_TICK' | 'MANUAL_DEBUG' | 'MAINTENANCE';
@@ -52,6 +52,7 @@ function durationMs(startedAt: Date, finishedAt: Date) {
 }
 
 export async function recordAutomationHeartbeat(input: RecordHeartbeatInput) {
+  if (!isDbConfigured()) return;
   const startedAt = input.startedAt || new Date();
   const finishedAt = input.finishedAt || new Date();
   const id = `automation_heartbeat_${randomUUID()}`;
@@ -77,11 +78,13 @@ export async function recordAutomationHeartbeat(input: RecordHeartbeatInput) {
       )
     `);
   } catch (error: any) {
+    if (!isDbConfigured()) return;
     console.warn('[automation-heartbeat] write failed:', error?.message || error);
   }
 }
 
 export async function listAutomationHeartbeats(options: { module?: AutomationModuleName; limit?: number } = {}) {
+  if (!isDbConfigured()) return [];
   const limit = Math.min(100, Math.max(1, Math.floor(Number(options.limit || 50))));
   const moduleName = options.module || null;
   return prisma.$queryRaw<AutomationHeartbeatRecord[]>(Prisma.sql`

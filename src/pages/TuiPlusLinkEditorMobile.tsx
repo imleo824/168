@@ -529,10 +529,10 @@ export default function TuiPlusLinkEditorMobile() {
   if (!statusReady) {
     return (
       <AppPage mobileAddressBarScroll bottomSafe className="tui-plus-link-editor-page surface-page">
-        <SEO title="添加链接｜Tui Plus" noindex />
-        <PageHeader title="添加链接" showBack titleAlign="center" />
+        <SEO title="会员主页外链｜推推" noindex />
+        <PageHeader title="会员主页外链" showBack titleAlign="center" />
         <PageContentShell as="main" className="tui-plus-link-editor-main ui-app-page-main">
-          <LoadingBlock text="正在校验会员权益" />
+          <LoadingBlock text="正在校验会员权益..." />
         </PageContentShell>
       </AppPage>
     );
@@ -541,10 +541,10 @@ export default function TuiPlusLinkEditorMobile() {
   if (!activeMember) {
     return (
       <AppPage mobileAddressBarScroll bottomSafe className="tui-plus-link-editor-page surface-page">
-        <SEO title="添加链接｜Tui Plus" noindex />
-        <PageHeader title="添加链接" showBack titleAlign="center" />
+        <SEO title="会员主页外链｜推推" noindex />
+        <PageHeader title="会员主页外链" showBack titleAlign="center" />
         <PageContentShell as="main" className="ui-auth-required-wrap ui-app-page-main">
-          <Suspense fallback={<LoadingBlock text="正在加载会员权益" />}>
+          <Suspense fallback={<LoadingBlock text="正在加载会员权益..." />}>
             <LazyTuiPlusBenefitPromptDialog
               open
               benefit="profileLinks"
@@ -559,8 +559,8 @@ export default function TuiPlusLinkEditorMobile() {
 
   return (
     <AppPage mobileAddressBarScroll bottomSafe className="tui-plus-link-editor-page surface-page">
-      <SEO title="添加链接｜Tui Plus" noindex />
-      <PageHeader title="添加链接" showBack titleAlign="center" />
+      <SEO title="会员主页外链｜推推" noindex />
+      <PageHeader title="会员主页外链" showBack titleAlign="center" />
       <PageContentShell as="main" className="tui-plus-link-editor-main ui-app-page-main">
         <section className="tui-plus-link-editor-card" aria-label="添加链接">
           <div className="tui-plus-link-editor-tabs" role="tablist" aria-label="选择链接类型">

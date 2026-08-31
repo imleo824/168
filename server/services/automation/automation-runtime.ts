@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
+import { isDbConfigured } from '../../db';
 import type { AutomationHeartbeatStatus, AutomationModuleName } from '../automation-health.service';
 import type { AutomationRuntimeModule, StopAutomationRuntime } from './automation-module';
 
@@ -98,11 +99,13 @@ function setManagedTimeout(callback: () => void | Promise<void>, delayMs: number
 }
 
 async function resolveNextDelayMs(module: AutomationRuntimeModule) {
-  if (!module.nextIntervalMs) return safeDelayMs(module.fallbackIntervalMs, MIN_RUNTIME_DELAY_MS);
+  if (!isDbConfigured() || !module.nextIntervalMs) return safeDelayMs(module.fallbackIntervalMs, MIN_RUNTIME_DELAY_MS);
   try {
     return safeDelayMs(await module.nextIntervalMs(), module.fallbackIntervalMs);
   } catch (error) {
-    console.warn(`[automation-runtime] ${module.module} interval resolution failed:`, error instanceof Error ? error.message : error);
+    if (isDbConfigured()) {
+      console.warn(`[automation-runtime] ${module.module} interval resolution failed:`, error instanceof Error ? error.message : error);
+    }
     return safeDelayMs(module.fallbackIntervalMs, MIN_RUNTIME_DELAY_MS);
   }
 }
@@ -189,6 +192,13 @@ async function runWithTimeout(module: AutomationRuntimeModule, input: { trigger:
 
 async function runModuleTick(module: AutomationRuntimeModule, startup: boolean, plannedDelayMs: number) {
   if (stopped) return;
+  if (!isDbConfigured()) {
+    const state = getState(module.module);
+    state.status = 'SKIPPED';
+    state.lastReason = 'database_not_configured';
+    await scheduleModule(module, false);
+    return;
+  }
   const state = getState(module.module);
   const runId = `runtime_${module.module}_${randomUUID()}`;
   const startedAt = new Date();
@@ -236,7 +246,9 @@ async function runModuleTick(module: AutomationRuntimeModule, startup: boolean, 
   if (timedOut) {
     console.warn(`[automation-runtime] ${module.module} timed out after ${timeoutMs}ms; next tick will be scheduled and task lock should prevent duplicate writes.`);
   } else if (error) {
-    console.warn(`[automation-runtime] ${module.module} tick failed:`, error instanceof Error ? error.message : error);
+    if (isDbConfigured()) {
+      console.warn(`[automation-runtime] ${module.module} tick failed:`, error instanceof Error ? error.message : error);
+    }
   }
 
   await scheduleModule(module, false);

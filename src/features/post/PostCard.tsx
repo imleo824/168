@@ -29,7 +29,13 @@ import { clampMediaIndex, dedupeUnique, normalizeImageList } from '@/utils/media
 import { withCurrentBackground } from '@/utils/navigationState';
 import { resolveUserAvatarUrl } from '@/utils/avatarResolver';
 import { buildDisplayLocationTags, isLocationTag, normalizeLocationName, normalizeTagName, stripInlineHashtags, toLocationCategoryId } from '@/utils/postPresentation';
-import { buildPostStructuredMetaItems, isPostStructuredLocationMeta, type PostStructuredMetaItem } from '@/utils/postStructuredMeta';
+import {
+  buildPostStructuredMetaItems,
+  getPostPromotionLink,
+  isPostStructuredLocationMeta,
+  type PostPromotionLink,
+  type PostStructuredMetaItem,
+} from '@/utils/postStructuredMeta';
 import { getPostMetaChipClass, LOCATION_TAG_CHIP_CLASS, NORMAL_TAG_CHIP_CLASS, POST_TAG_ROW_CLASS, resolvePostMetaChipKind } from '@/utils/postTagStyles';
 import { rememberListReturnPosition } from '@/utils/listReturnScroll';
 import { resolveVisiblePostText } from '@/utils/postDisplayText';
@@ -43,7 +49,6 @@ const CONTENT_WITH_MEDIA_CLAMP_LINES = 4;
 const CONTENT_TEXT_ONLY_CLAMP_LINES = 6;
 const CONTENT_OVERFLOW_MEASURE_MIN_CHARS_PER_LINE = 18;
 const POST_DETAIL_PREFETCH_DELAY = 120;
-const POST_PROMOTION_LINK_META_KEY = '__postPromotionLink';
 
 const FEED_CONTENT_WITH_MEDIA_STYLE = {
   '--x-card-content-clamp-lines': CONTENT_WITH_MEDIA_CLAMP_LINES,
@@ -53,7 +58,6 @@ const FEED_CONTENT_TEXT_ONLY_STYLE = {
 } as CSSProperties;
 
 type ExpandedContentStatus = 'idle' | 'loading' | 'loaded' | 'error';
-type PostPromotionLink = { title: string; url: string };
 
 const CARD_NESTED_INTERACTIVE_SELECTOR = [
   'a[href]',
@@ -247,27 +251,6 @@ function normalizePostTelegramSyncStatus(post: Pick<FeedPost, 'telegramSyncStatu
   const status = cleanString(post.telegramSyncStatus).toUpperCase();
   if (status === 'PENDING' || status === 'SENT' || status === 'FAILED' || status === 'NONE') return status;
   return post.syncToTelegram === true ? 'SENT' : 'NONE';
-}
-
-function normalizePromotionUrl(raw: unknown) {
-  const value = cleanString(raw);
-  if (!value) return '';
-  try {
-    const url = new URL(/^https?:\/\//i.test(value) ? value : `https://${value}`);
-    if (!['http:', 'https:'].includes(url.protocol) || !url.hostname.includes('.')) return '';
-    return url.toString().replace(/\/$/, '');
-  } catch {
-    return '';
-  }
-}
-
-function getPostPromotionLink(categoryMeta: unknown): PostPromotionLink | null {
-  if (!categoryMeta || typeof categoryMeta !== 'object' || Array.isArray(categoryMeta)) return null;
-  const raw = (categoryMeta as Record<string, unknown>)[POST_PROMOTION_LINK_META_KEY];
-  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
-  const title = cleanString((raw as Record<string, unknown>).title).slice(0, 40);
-  const url = normalizePromotionUrl((raw as Record<string, unknown>).url);
-  return title && url ? { title, url } : null;
 }
 
 function dedupeTagItems(items: Array<{ id: string; name: string }>): Array<{ id: string; name: string }> {
@@ -531,17 +514,17 @@ const PostCard = memo(function PostCard({ post: inputPost, isOwner = false, show
   const hasBodyContent = Boolean(displayText || hasVisibleTags || post.quotedPost);
   const { toggleLike, isPending, hasLiked, likeCount, viewCount } = usePostStats(postId, { hasLiked: !!post.hasLiked, likeCount: post.likeCount || 0, viewCount: post.viewCount || 0 });
   const { isLikeFeedbackActive, triggerLikeFeedback } = useLikeFeedback();
-  const likeLock = useActionLock(async () => { await toggleLike(); }, { cooldownMs: 220, mode: 'drop', onError: () => showToast('点赞失败，请稍后重试', 'error') });
+  const likeLock = useActionLock(async () => { await toggleLike(); }, { cooldownMs: 220, mode: 'drop', onError: () => showToast('点赞未能完成，请稍后重试', 'error') });
   const shareLock = useActionLock(async () => {
     const sharePayload = buildPostShareText(post);
     if (navigator.share) await navigator.share(sharePayload);
     else {
       await copyToClipboard(`${sharePayload.title}\n\n${sharePayload.text}\n\n${sharePayload.url}`);
-      showToast('分享内容已复制', 'success');
+      showToast('链接及摘要已复制到剪贴板', 'success');
     }
     setLocalShareCount((count) => count + 1);
-  }, { cooldownMs: 1200, mode: 'drop', onError: (error) => { if (error instanceof DOMException && error.name === 'AbortError') return; showToast('分享失败，请稍后重试', 'error'); } });
-  const telegramSyncLock = useActionLock(async () => { if (!onTelegramSync) return; await onTelegramSync(inputPost); setIsTelegramSyncConfirmOpen(false); }, { cooldownMs: 1200, mode: 'drop', onError: (error: any) => showToast(error?.message || '同步提交失败，请稍后重试', 'error') });
+  }, { cooldownMs: 1200, mode: 'drop', onError: (error) => { if (error instanceof DOMException && error.name === 'AbortError') return; showToast('分享取消或未完成，请稍后重试', 'error'); } });
+  const telegramSyncLock = useActionLock(async () => { if (!onTelegramSync) return; await onTelegramSync(inputPost); setIsTelegramSyncConfirmOpen(false); }, { cooldownMs: 1200, mode: 'drop', onError: (error: any) => showToast(error?.message || '频道同步请求提交失败，请重试', 'error') });
   const telegramSyncStatus = normalizePostTelegramSyncStatus(post);
   const currentUserTuiPlusActive = isTuiPlusUserLike(currentUser);
   const baseTelegramSyncPrice = Number.isFinite(Number(config?.prices?.telegram_sync)) ? Math.max(0, Math.floor(Number(config?.prices?.telegram_sync))) : 0;
@@ -566,7 +549,7 @@ const PostCard = memo(function PostCard({ post: inputPost, isOwner = false, show
   const handleShare = useCallback((event: React.MouseEvent) => { stopAndPrevent(event); void shareLock.run(); }, [shareLock]);
   const openQuoteSheet = useCallback(() => { setIsCommentSheetOpen(false); setIsQuoteSheetOpen(true); }, []);
   const handleCloseQuoteSheet = useCallback(() => setIsQuoteSheetOpen(false), []);
-  const requestTelegramSync = useCallback(() => { if (!canShowTelegramSync) return; if (telegramSyncStatus === 'SENT') { showToast('已成功同步1次', 'success'); return; } if (telegramSyncStatus === 'PENDING') { showToast('已提交同步', 'success'); return; } if (!canAffordTelegramSync) { showToast(`积分不足，需 ${telegramSyncPrice} 积分，当前剩余 ${currentPoints} 积分`, 'error'); return; } requireAuth(() => { setIsTelegramSyncConfirmOpen(true); }); }, [canAffordTelegramSync, canShowTelegramSync, currentPoints, requireAuth, showToast, telegramSyncPrice, telegramSyncStatus]);
+  const requestTelegramSync = useCallback(() => { if (!canShowTelegramSync) return; if (telegramSyncStatus === 'SENT') { showToast('已成功同步1次', 'success'); return; } if (telegramSyncStatus === 'PENDING') { showToast('频道同步请求正在处理中', 'success'); return; } if (!canAffordTelegramSync) { showToast(`积分不足，发起同步需 ${telegramSyncPrice} 积分，当前余量 ${currentPoints} 积分`, 'error'); return; } requireAuth(() => { setIsTelegramSyncConfirmOpen(true); }); }, [canAffordTelegramSync, canShowTelegramSync, currentPoints, requireAuth, showToast, telegramSyncPrice, telegramSyncStatus]);
   const handleTelegramSync = useCallback((event: React.MouseEvent) => { stopAndPrevent(event); requestTelegramSync(); }, [requestTelegramSync]);
   const handleCloseTelegramSyncConfirm = useCallback(() => { if (telegramSyncLock.isPending) return; setIsTelegramSyncConfirmOpen(false); }, [telegramSyncLock.isPending]);
   const handleConfirmTelegramSync = useCallback(() => { if (!canAffordTelegramSync) { showToast(`积分不足，需 ${telegramSyncPrice} 积分，当前剩余 ${currentPoints} 积分`, 'error'); return; } void telegramSyncLock.run(); }, [canAffordTelegramSync, currentPoints, showToast, telegramSyncLock, telegramSyncPrice]);

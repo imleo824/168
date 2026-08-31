@@ -113,6 +113,11 @@
     overflow-anchor: none;
   }
 
+  .detail-promotion-link-wrap {
+    padding: var(--ui-detail-article-padding-mobile);
+    padding-top: var(--ui-space-none);
+  }
+
   .detail-article[data-detail-content-kind='media-only'] .detail-media-wrap,
   .detail-article[data-detail-content-kind='quote-only'] .detail-quoted-post,
   .detail-article[data-has-quote-preview='true'] .detail-quoted-post {

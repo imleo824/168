@@ -267,23 +267,6 @@ export function usePostStats(postId: string, initialStats?: { hasLiked: boolean,
   return { toggleLike: guardedToggleLike, isPending: toggle.isPending, hasLiked, likeCount, viewCount };
 }
 
-export function useInfiniteFollowingPosts(enabled: boolean = true, scopeKey: string = 'anonymous') {
-  return useInfiniteQuery({
-    queryKey: ['posts', 'following', 'infinite', scopeKey],
-    queryFn: ({ pageParam, signal }) => api.getFollowingPostsPage({
-      limit: FEED_PAGE_SIZE,
-      cursor: pageParam as string | undefined,
-    }, { signal }),
-    maxPages: 8,
-    getNextPageParam: (lastPage) => lastPage.hasMore ? lastPage.nextCursor : undefined,
-    initialPageParam: undefined as string | undefined,
-    placeholderData: keepPreviousData,
-    staleTime: LIST_STALE_TIME,
-    gcTime: LIST_GC_TIME,
-    enabled,
-  });
-}
-
 export function useLikes(enabled: boolean = true) {
   return useQuery({
     queryKey: ['likes'],

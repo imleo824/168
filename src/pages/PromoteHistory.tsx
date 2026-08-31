@@ -141,14 +141,14 @@ export default function PromoteHistory() {
         ));
       });
 
-      showToast('广告信息已更新', 'success');
+      showToast('广告素材已修改成功', 'success');
       setEditingGroup(null);
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ['promotions'] }),
         queryClient.refetchQueries({ queryKey: ['promotions', 'home-ads'], type: 'active' }),
       ]);
     } catch (err: any) {
-      showToast(err?.message || '广告更新失败', 'error');
+      showToast(err?.message || '广告素材更新失败，请重试', 'error');
     } finally {
       setIsSaving(false);
     }
@@ -186,7 +186,7 @@ export default function PromoteHistory() {
   const handleCopyPromotionRecordId = useCallback((value: string) => {
     if (!value) return;
     void navigator.clipboard.writeText(value).then(
-      () => showToast('单号已复制', 'success'),
+      () => showToast('订单号已复制', 'success'),
       () => showToast('复制失败，请手动复制', 'error'),
     );
   }, [showToast]);
@@ -288,10 +288,10 @@ export default function PromoteHistory() {
             <SurfaceSectionCard className="promote-history-edit-card">
               <section className="promote-history-edit-section" aria-labelledby="promote-history-edit-images-title">
                 <h2 id="promote-history-edit-images-title" className="promote-history-edit-section-title">广告图片</h2>
-                <Suspense fallback={<PageLoadingState text="正在加载上传组件" className="record-state-block" />}>
+                <Suspense fallback={<PageLoadingState text="正在加载素材组件..." className="record-state-block" />}>
                   <div key={`${editingGroup.key}-desktop`} className="promote-history-field">
                     <span className="promote-history-label">电脑端广告图</span>
-                    <span className="promote-history-help">建议 1920×480 或 1440×360</span>
+                    <span className="promote-history-help">建议 1920×480，文字居中</span>
                     <LazyImageUpload
                       onImagesChange={(urls) => setEditForm((prev) => ({ ...prev, desktopImageUrl: urls[0] || '' }))}
                       maxCount={1}
@@ -303,7 +303,7 @@ export default function PromoteHistory() {
 
                   <div key={`${editingGroup.key}-mobile`} className="promote-history-field">
                     <span className="promote-history-label">移动端广告图</span>
-                    <span className="promote-history-help">建议 1080×360 或 750×250</span>
+                    <span className="promote-history-help">建议 1080×360，重点集中</span>
                     <LazyImageUpload
                       onImagesChange={(urls) => setEditForm((prev) => ({ ...prev, mobileImageUrl: urls[0] || '' }))}
                       maxCount={1}
@@ -326,7 +326,7 @@ export default function PromoteHistory() {
                   spellCheck={false}
                   value={editForm.targetUrl}
                   maxLength={2048}
-                  placeholder="支持网址、飞机频道、飞机机器人、飞机联系方式等"
+                  placeholder="输入网址、Telegram 频道、Bot 或联系方式"
                   onChange={(event) => setEditForm((prev) => ({ ...prev, targetUrl: event.target.value }))}
                   className="ui-control promote-history-target-input"
                 />
@@ -341,13 +341,13 @@ export default function PromoteHistory() {
                   state={saveBusy ? 'loading' : 'idle'}
                   className="promote-history-save-action"
                 >
-                  {saveBusy ? '保存中' : '保存修改'}
+                  {saveBusy ? '正在保存...' : '保存修改'}
                 </ActionButton>
               </div>
             </SurfaceSectionCard>
           </div>
         ) : isLoading || isAuthLoading ? (
-          <PageLoadingState text="正在加载推广记录" className="record-state-block" />
+          <PageLoadingState text="正在加载推广记录..." className="record-state-block" />
         ) : isPromotionsError ? (
           <StateBlock
             title="加载失败"
@@ -355,13 +355,13 @@ export default function PromoteHistory() {
             tone="error"
             action={
               <ActionButton type="button" variant="muted" size="sm" disabled={retryBusy} state={retryBusy ? 'loading' : 'idle'} onClick={() => void guardedRefetchPromotions()}>
-                {retryBusy ? '加载中' : '重新加载'}
+                {retryBusy ? '正在重新加载...' : '重新加载'}
               </ActionButton>
             }
             className="record-state-block"
           />
         ) : visibleGroups.length > 0 ? (
-          <Suspense fallback={<PageLoadingState text="正在加载推广记录" className="record-state-block" />}>
+          <Suspense fallback={<PageLoadingState text="正在加载推广记录..." className="record-state-block" />}>
             <div className="record-list">
               {visibleGroups.map((group) => (
                 <LazyPromotionRecordCard
@@ -380,7 +380,7 @@ export default function PromoteHistory() {
             compact
             action={
               <ActionButton type="button" variant="muted" size="sm" onClick={() => void guardedGoPromote()}>
-                去推广
+                去购买推广
               </ActionButton>
             }
           />

@@ -30,7 +30,7 @@ type ProfileStatItem = {
 
 function getTuiPlusProfileLabel(user: any) {
   if (isTuiPlusActive(user)) {
-    return user?.plusStatus === 'TRIALING' ? 'Tui Plus 试用中' : 'Tui Plus';
+    return user?.plusStatus === 'TRIALING' ? '会员试用中' : '推推会员';
   }
   return user?.plusTrialUsed ? '续费会员' : '免费试用7天';
 }
@@ -372,8 +372,8 @@ export function ProfileListSection({
   );
 
   if (activeTab === 'POSTS') {
-    if (postsLoading) return <>{renderLoading('正在加载发布')}</>;
-    if (posts.length === 0) return <EmptyStateCard title="还没有发布内容" />;
+    if (postsLoading) return <>{renderLoading('正在加载动态内容...')}</>;
+    if (posts.length === 0) return <EmptyStateCard title="暂无发布内容" description="您发布的帖子动态将在此展示" />;
     return renderPostFeed(posts);
   }
 
@@ -382,14 +382,14 @@ export function ProfileListSection({
   }
 
   if (activeTab === 'QUOTES') {
-    if (quotePostsLoading) return <>{renderLoading('正在加载引用')}</>;
+    if (quotePostsLoading) return <>{renderLoading('正在加载引用内容...')}</>;
     if (quotePosts.length === 0) return <EmptyStateCard title="暂无引用内容" />;
     return renderPostFeed(quotePosts);
   }
 
   if (activeTab === 'LIKED') {
-    if (likedLoading) return <>{renderLoading('正在加载点赞')}</>;
-    if (likedPosts.length === 0) return <EmptyStateCard title="暂无点赞内容" />;
+    if (likedLoading) return <>{renderLoading('正在加载赞过的内容...')}</>;
+    if (likedPosts.length === 0) return <EmptyStateCard title="暂无点赞内容" description="您表达赞赏的帖子将在此展示" />;
     return renderPostFeed(likedPosts, { onStatusChange: undefined, onDelete: undefined, onTelegramSync: undefined, telegramChannelUrl: undefined });
   }
 
@@ -399,8 +399,8 @@ export function ProfileListSection({
         users={followingUsers}
         loading={followingLoading || isFetchingNextFollowingUsers}
         hasMore={hasMoreFollowingUsers}
-        loadingText="正在加载关注"
-        emptyTitle="暂无关注"
+        loadingText="正在加载关注列表..."
+        emptyTitle="暂无关注用户"
         onLoadMore={onFetchNextFollowingUsers}
         onOpenUser={onOpenUser}
       />
@@ -412,8 +412,8 @@ export function ProfileListSection({
       users={fans}
       loading={fansLoading || isFetchingNextFans}
       hasMore={hasMoreFans}
-      loadingText="正在加载粉丝"
-      emptyTitle="暂无粉丝"
+      loadingText="正在加载粉丝列表..."
+      emptyTitle="暂无粉丝关注"
       onLoadMore={onFetchNextFans}
       onOpenUser={onOpenUser}
     />

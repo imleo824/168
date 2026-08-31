@@ -16,10 +16,32 @@
     font-size: var(--ui-text-sm);
     font-weight: var(--ui-font-weight-strong);
     line-height: var(--ui-line-none);
+    transition:
+      background-color var(--ui-duration-base) var(--ease-standard),
+      color var(--ui-duration-base) var(--ease-standard),
+      transform var(--ui-duration-press) var(--ease-standard);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .ui-record-more-link:hover {
+      color: var(--ui-brand-strong);
+    }
   }
 
   .ui-record-more-link:active {
     background: var(--ui-brand-soft-10);
+    transform: scale(var(--ui-motion-press-scale));
+  }
+
+  .ui-record-more-link:focus-visible {
+    outline: var(--ui-outline-none);
+    box-shadow: var(--ui-focus-outline-shadow);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-record-more-link:active {
+      transform: var(--ui-transform-none);
+    }
   }
 
   .ui-record-more-link-icon {

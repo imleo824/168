@@ -146,9 +146,9 @@ function formatDate(value?: string | null) {
 }
 
 function statusLabel(status: TuiPlusStatusPayload, trialDays: number) {
-  if (!status.active) return status.trialUsed ? '已过期，可随时续费' : `可试用 ${trialDays} 天`;
-  if (status.status === 'TRIALING') return `试用中${status.expiresAt ? ` · ${formatDate(status.expiresAt)} 到期` : ''}`;
-  return `生效中${status.expiresAt ? ` · ${formatDate(status.expiresAt)} 到期` : ''}`;
+  if (!status.active) return status.trialUsed ? '已到期 · 随时续费' : `可免费试用 ${trialDays} 天`;
+  if (status.status === 'TRIALING') return `免费试用中${status.expiresAt ? ` · ${formatDate(status.expiresAt)} 到期` : ''}`;
+  return `会员生效中${status.expiresAt ? ` · ${formatDate(status.expiresAt)} 到期` : ''}`;
 }
 
 async function readJsonResponse<T>(res: Response): Promise<T> {
@@ -159,12 +159,12 @@ async function readJsonResponse<T>(res: Response): Promise<T> {
 }
 
 function getPlanBadge(plan: PlanCard) {
-  if (plan.plan === 'YEARLY') return plan.discountPercent ? `省 ${plan.discountPercent}%` : '推荐';
+  if (plan.plan === 'YEARLY') return plan.discountPercent ? `立省 ${plan.discountPercent}%` : '推荐';
   return '';
 }
 
 function getPlanPeriod(plan: PlanCard) {
-  return plan.plan === 'YEARLY' ? '年付' : '月付';
+  return plan.plan === 'YEARLY' ? '年度会员' : '月度会员';
 }
 
 function PlanOptionCard({
@@ -220,7 +220,7 @@ export default function TuiPlusMobile() {
   const currentStatus = status || fallbackStatus;
   const canStartTrial = !isLoading && !loadError && hasPlans && !currentStatus.active && !currentStatus.trialUsed;
   const shouldShowCheckout = !isLoading && Boolean(status);
-  const primaryActionLabel = currentStatus.active ? `续费${selectedPlanConfig.label}` : `订阅并支付`;
+  const primaryActionLabel = currentStatus.active ? `续费${selectedPlanConfig.label}` : '立即开通';
   const trialBusy = busyAction === 'trial';
   const planBusy = busyAction === selectedPlan;
   const actionLocked = Boolean(busyAction);
@@ -244,7 +244,7 @@ export default function TuiPlusMobile() {
         tuiPlusContacts: payload.contacts || [],
       });
     } catch (error: any) {
-      const message = error?.message || '会员信息加载失败';
+      const message = error?.message || '会员信息加载失败，请重试';
       setStatus(null);
       setLoadError(message);
       showToast(message, 'error');
@@ -270,9 +270,9 @@ export default function TuiPlusMobile() {
       const res = await apiFetch('/api/tui-plus/trial/start', { method: 'POST' });
       await readJsonResponse(res);
       setStatus({ ...(status || fallbackStatus), trialUsed: true });
-      await afterMembershipMutation('免费会员已领取成功');
+      await afterMembershipMutation('免费会员已成功领取，尊享权益已生效');
     } catch (error: any) {
-      showToast(error?.message || '开启试用失败', 'error');
+      showToast(error?.message || '开启试用遇到问题，请重试', 'error');
     } finally {
       setBusyAction(null);
     }
@@ -288,11 +288,13 @@ export default function TuiPlusMobile() {
         body: JSON.stringify({ plan }),
       });
       await readJsonResponse(res);
-      await afterMembershipMutation(plan === 'YEARLY' ? '会员年付已开通成功' : '会员月付已开通成功');
+      await afterMembershipMutation(plan === 'YEARLY' ? '已成功开通年度会员，尊享权益已生效' : '已成功开通月度会员，尊享权益已生效');
     } catch (error: any) {
-      showToast(error?.message || '开通失败', 'error');
       if (error instanceof ApiError && error.status === 402) {
+        showToast('积分余额不足，正在前往充值', 'info');
         navigate(APP_ROUTES.recharge, { state: { from: APP_ROUTES.tuiPlus, returnState: { from: APP_ROUTES.tuiPlus } } });
+      } else {
+        showToast(error?.message || '开通会员遇到问题，请重试', 'error');
       }
     } finally {
       setBusyAction(null);
@@ -316,21 +318,21 @@ export default function TuiPlusMobile() {
 
   return (
     <AppPage mobileAddressBarScroll bottomSafe className="tui-plus-page surface-page">
-      <SEO title="推推会员" description="开通推推会员，获得更多曝光、主页展示和会员身份权益。" noindex />
+      <SEO title="开通推推会员｜推推" description="开通推推会员，立享全站曝光提权、主页专属外链、无限制联系方式及频道自动同步等多项尊享特权。" noindex />
       <PageHeader
-        title="会员"
+        title="推推会员"
         showBack
         titleAlign="center"
         className="tui-plus-topbar"
         titleNode={(
           <span className="tui-plus-topbar-title-node">
             <Crown aria-hidden="true" />
-            <span>会员</span>
+            <span>推推会员</span>
           </span>
         )}
       />
       <PageContentShell as="main" className="tui-plus-main ui-app-page-main">
-        {isLoading ? <LoadingBlock text="正在加载会员信息" className="tui-plus-loading" /> : loadError ? (
+        {isLoading ? <LoadingBlock text="正在加载会员权益与方案..." className="tui-plus-loading" /> : loadError ? (
           <LoadingBlock text="会员信息加载失败，请稍后重试" className="tui-plus-loading" />
         ) : (
           <>

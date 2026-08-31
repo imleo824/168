@@ -2,42 +2,42 @@ export const TUI_PLUS_BENEFIT_ITEMS = [
   {
     key: 'rankingBoost',
     title: '内容曝光权重提升',
-    description: '推荐权重按会员配置提升',
+    description: '发布帖子的算法推荐权重提升，获得更多流量曝光',
   },
   {
     key: 'postContact',
-    title: '发帖直接绑定联系方式',
-    description: '可以无限次数绑定',
+    title: '无限制绑定联系方式',
+    description: '发布帖子可不限次数附加 Telegram 沟通入口',
   },
   {
     key: 'postPromotionLink',
-    title: '发帖直接设置推广链接',
-    description: '点击到网址注册',
+    title: '帖子专属推广外链',
+    description: '帖子可添加跳转链接，直达你的产品或网页',
   },
   {
     key: 'promotionBooking',
-    title: '会员专属付费广告功能',
-    description: '选择各种置顶功能',
+    title: '解锁广告置顶权限',
+    description: '享有首页与分类频道广告置顶购买与投放特权',
   },
   {
     key: 'profileWebsite',
-    title: '主页展示你的专属网站',
-    description: '访客直接点击访问',
+    title: '主页展示专属网站',
+    description: '在个人主页挂载独立网站链接，访客一键直达',
   },
   {
     key: 'profileTelegramChannel',
-    title: '主页展示你的飞机频道',
-    description: '访客直接点击打开',
+    title: '主页挂载 Telegram 频道',
+    description: '在个人主页展示 Telegram 频道，实现引流沉淀',
   },
   {
     key: 'officialTelegramSync',
-    title: '自动同步官方飞机频道',
-    description: '进一步提升曝光量',
+    title: '自动同步官方 Telegram 频道',
+    description: '发布的帖子自动一键同步推送到官方频道',
   },
   {
     key: 'memberIdentity',
-    title: '会员拥有专属身份标识',
-    description: '进一步提升关注度',
+    title: '尊享会员专属身份标识',
+    description: '全站亮起尊贵会员标识，显著提升关注与信任度',
   },
 ];
 

@@ -31,7 +31,7 @@ const AUTH_ROUTE_META: Record<string, AuthRouteMeta> = {
   [APP_ROUTES.recharge]: { documentTitle: '登录后充值积分｜推推', pageTitle: '充值积分', showBack: true },
   [APP_ROUTES.transactions]: { documentTitle: '登录后查看交易记录｜推推', pageTitle: '交易记录', showBack: true },
   [APP_ROUTES.tuiPlus]: { documentTitle: '登录后开通推推会员｜推推', pageTitle: '推推会员', showBack: true },
-  [APP_ROUTES.tuiPlusLinkEditor]: { documentTitle: '登录后编辑会员链接｜推推', pageTitle: '会员链接', showBack: true },
+  [APP_ROUTES.tuiPlusLinkEditor]: { documentTitle: '登录后管理会员主页外链｜推推', pageTitle: '会员主页外链', showBack: true },
   [APP_ROUTES.notificationSettings]: { documentTitle: '登录后管理通知｜推推', pageTitle: '通知设置', showBack: true },
 };
 

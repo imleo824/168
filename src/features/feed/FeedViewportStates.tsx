@@ -65,36 +65,36 @@ export const FeedFooter = memo(function FeedFooter({
       aria-live="polite"
       aria-label={
         isLoadingMore
-          ? '正在加载'
+          ? '正在加载更多内容...'
           : loadMoreError
-            ? '加载更多失败'
+            ? '加载出现异常，请重试'
             : hasMore
-              ? '继续下滑加载更多'
-              : '已浏览全部内容'
+              ? '上滑继续探索更多'
+              : '已为您展示全部推荐内容'
       }
     >
       {loadMoreError ? (
         <PlainFeedState
-          text="加载失败"
-          subtext="网络不稳定，点一下重试"
-          actionLabel="重试"
+          text="内容加载出现问题"
+          subtext="网络连接较慢，点击重试"
+          actionLabel="重新加载"
           onAction={onRetryLoadMore}
           className="ui-feed-footer-plain-state ui-feed-footer-plain-state--error"
         />
       ) : isLoadingMore ? (
-        <PlainFeedState text="正在加载" busy className="ui-feed-footer-plain-state" />
+        <PlainFeedState text="正在载入更多..." busy className="ui-feed-footer-plain-state" />
       ) : hasMore ? (
         <PlainFeedState
-          text="继续下滑加载更多"
-          subtext="也可以点这里手动加载"
+          text="上滑继续探索更多"
+          subtext="也可点击手动加载"
           actionLabel="加载更多"
           onAction={onRetryLoadMore}
           className="ui-feed-footer-plain-state"
         />
       ) : (
         <PlainFeedState
-          text="已浏览全部内容"
-          actionLabel="回到全部"
+          text="已为您展示全部推荐内容"
+          actionLabel="返回顶部刷新"
           onAction={onBrowseAll}
           className="ui-feed-footer-plain-state"
         />
@@ -115,11 +115,11 @@ export const EmptyState = memo(function EmptyState({
   return (
     <section className="home-feed-empty-state ui-feed-empty-plain-state" role="status" aria-live="polite">
       <div className="home-feed-empty-state__inner">
-        <h3 className="home-feed-empty-state__title">暂无内容</h3>
-        <p className="home-feed-empty-state__copy">可以切回全部看看最新内容</p>
+        <h3 className="home-feed-empty-state__title">暂无相关内容</h3>
+        <p className="home-feed-empty-state__copy">您可以切换分类频道，或稍后再来探索</p>
         {onBrowseAll ? (
           <button type="button" className="home-feed-empty-state__action pressable" onClick={onBrowseAll}>
-            查看全部
+            查看最新推荐
           </button>
         ) : null}
       </div>
@@ -128,7 +128,7 @@ export const EmptyState = memo(function EmptyState({
 });
 
 export const RefreshingState = memo(function RefreshingState() {
-  return <LoadingBlock text="正在刷新内容" compact className="ui-feed-footer-state" />;
+  return <LoadingBlock text="正在获取最新动态..." compact className="ui-feed-footer-state" />;
 });
 
 export const ErrorState = memo(function ErrorState({
@@ -141,11 +141,11 @@ export const ErrorState = memo(function ErrorState({
   return (
     <section className="home-feed-empty-state home-feed-empty-state--error" role="alert" aria-live="polite">
       <div className="home-feed-empty-state__inner">
-        <h3 className="home-feed-empty-state__title">{message || '加载失败，稍后再试'}</h3>
-        {onRetry ? <p className="home-feed-empty-state__copy">点一下重新加载</p> : null}
+        <h3 className="home-feed-empty-state__title">{message || '动态加载出现异常，请稍后重试'}</h3>
+        {onRetry ? <p className="home-feed-empty-state__copy">点击下方按钮重新尝试加载</p> : null}
         {onRetry ? (
           <button type="button" className="home-feed-empty-state__action pressable" onClick={onRetry}>
-            重试
+            重新加载
           </button>
         ) : null}
       </div>

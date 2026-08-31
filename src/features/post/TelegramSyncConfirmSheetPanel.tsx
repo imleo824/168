@@ -33,14 +33,14 @@ export default function TelegramSyncConfirmSheetPanel({
     ? Math.max(0, Math.floor(telegramSyncPrice as number))
     : 0;
   const copy = normalizedPrice > 0
-    ? `需消耗${normalizedPrice}积分，确认后会发布到官方飞机频道，成功发送后该帖子不能再次同步。`
-    : '确认后会发布到官方飞机频道，成功发送后该帖子不能再次同步。';
+    ? `需消耗 ${normalizedPrice} 积分。确认后将提交至 Telegram 官方频道同步队列，发布成功后该内容不可重复同步。`
+    : '确认后将提交至 Telegram 官方频道同步队列，发布成功后该内容不可重复同步。';
 
   return (
     <BottomSheet
       open={open}
-      title="同步到频道"
-      ariaLabel="同步到频道确认"
+      title="同步至 Telegram 频道"
+      ariaLabel="同步至 Telegram 频道确认"
       onClose={onClose}
       overlayClassName="ui-sheet-overlay-contact"
       panelClassName="ui-sheet-panel telegram-sync-confirm-sheet"
@@ -64,7 +64,7 @@ export default function TelegramSyncConfirmSheetPanel({
             disabled={isSubmitting || isInsufficientBalance}
             aria-busy={isSubmitting || undefined}
           >
-            {isSubmitting ? '提交中' : '确认同步'}
+            {isSubmitting ? '同步提交中...' : '确认提交同步'}
           </ActionButton>
         </div>
       )}

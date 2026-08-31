@@ -75,7 +75,7 @@ function CategoryMetaFieldRow({
             className="post-create-meta-picker-button"
             onClick={() => onOpenLocation(fieldKey, fieldLabel)}
           >
-            <span>{summary || `选择${fieldLabel}`}</span>
+            <span>{summary || `请选择${fieldLabel}`}</span>
             <MapPin className="post-create-meta-control-icon" aria-hidden="true" />
           </button>
         ) : null}
@@ -89,7 +89,7 @@ function CategoryMetaFieldRow({
             onChange={(event) => {
               onChange(fieldKey, event.target.value.slice(0, field.maxLength || CATEGORY_META_TEXT_MAX_LENGTH));
             }}
-            placeholder={`填写${fieldLabel}`}
+            placeholder={`请输入${fieldLabel}`}
             autoCapitalize="off"
             autoCorrect="off"
             spellCheck={false}
@@ -106,7 +106,7 @@ function CategoryMetaFieldRow({
               className="post-create-meta-inline-input post-create-meta-inline-input--number"
               value={value}
               onChange={(event) => onChange(fieldKey, event.target.value)}
-              placeholder="数字"
+              placeholder="0"
               min={Number.isFinite(field.min as number) ? field.min : undefined}
               max={Number.isFinite(field.max as number) ? field.max : undefined}
             />
@@ -143,7 +143,7 @@ function CategoryMetaFieldRow({
             onClick={() => onOpenSelect(fieldKey, fieldLabel, selectOptions)}
             disabled={selectOptions.length === 0}
           >
-            <span>{summary || `选择${fieldLabel}`}</span>
+            <span>{summary || `请选择${fieldLabel}`}</span>
             <ChevronRight className="post-create-meta-control-icon" aria-hidden="true" />
           </button>
         ) : null}

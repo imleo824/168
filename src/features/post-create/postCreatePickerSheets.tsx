@@ -136,7 +136,7 @@ export function PostCreateCategoryPickerSheet({
   return (
     <PostCreatePickerPageShell
       title="选择分类"
-      description="选择一个最适合当前内容的分类"
+      description="选择合适的分类，内容将展示在对应专属频道"
       ariaLabel="选择分类"
       onClose={onClose}
       rightAction={(
@@ -156,7 +156,7 @@ export function PostCreateCategoryPickerSheet({
         {selectedCategoryLabel ? (
           <div className="post-create-category-current-card" aria-live="polite">
             <div className="post-create-category-current-copy">
-              <span className="post-create-category-current-kicker">当前分类</span>
+              <span className="post-create-category-current-kicker">已选分类</span>
               <strong className="post-create-category-current-name">{selectedCategoryLabel}</strong>
             </div>
             <button
@@ -164,7 +164,7 @@ export function PostCreateCategoryPickerSheet({
               onClick={onClear}
               className="post-create-category-clear-button"
             >
-              移除分类
+              清除分类
             </button>
           </div>
         ) : null}
@@ -182,7 +182,7 @@ export function PostCreateCategoryPickerSheet({
               ))}
             </div>
           ) : (
-            <div className="post-create-location-empty">暂无可选分类</div>
+            <div className="post-create-location-empty">暂无可用的分类</div>
           )}
         </div>
       </div>
@@ -232,7 +232,7 @@ export function PostCreateLocationPickerSheet({
   return (
     <PostCreatePickerPageShell
       title={title}
-      description="可以选择国家，也可以继续选择城市"
+      description="选择所在国家及城市，方便同城用户发现"
       ariaLabel={ariaLabel}
       onClose={onClose}
     >
@@ -240,7 +240,7 @@ export function PostCreateLocationPickerSheet({
         {selectedValue ? (
           <div className="post-create-category-current-card" aria-live="polite">
             <div className="post-create-category-current-copy">
-              <span className="post-create-category-current-kicker">当前地点</span>
+              <span className="post-create-category-current-kicker">已选地点</span>
               <strong className="post-create-category-current-name">{selectedLabel || '已选地点'}</strong>
             </div>
             <button
@@ -248,7 +248,7 @@ export function PostCreateLocationPickerSheet({
               onClick={onClear}
               className="post-create-category-clear-button"
             >
-              移除地点
+              清除地点
             </button>
           </div>
         ) : null}
@@ -303,7 +303,7 @@ export function PostCreateLocationPickerSheet({
               </div>
             </>
           ) : (
-            <div className="post-create-location-empty">暂无可选地点</div>
+            <div className="post-create-location-empty">暂无可用的地点选项</div>
           )}
         </div>
       </div>
@@ -333,7 +333,7 @@ export function PostCreateCategorySelectSheet({
   return (
     <PostCreatePickerPageShell
       title={title}
-      description="选择一个选项"
+      description="请选择符合的一项"
       ariaLabel={ariaLabel}
       onClose={onClose}
     >
@@ -392,7 +392,7 @@ export function PostCreateCategoryMetaSheet({
   return (
     <PostCreatePickerPageShell
       title={`${categoryLabel}信息`}
-      description="补充这个分类需要的关键信息"
+      description="完善分类属性，帮助读者更快获取关键信息"
       ariaLabel={`${categoryLabel}信息`}
       onClose={onClose}
       rightAction={(

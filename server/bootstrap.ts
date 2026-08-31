@@ -290,11 +290,11 @@ if (process.env.NODE_ENV !== 'production' || process.env.HTTP_ACCESS_LOGS === '1
 }
 
 app.use(compression({
-  filter: (req, res) => {
+  filter: (req: any, res: any) => {
     if (shouldSkipCompression(req as Request)) return false;
     return compression.filter(req, res);
   },
-}));
+}) as any);
 app.use(express.json({ limit: '1mb' })); // Prevent large payload attacks
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(cookieParser());

@@ -20,15 +20,6 @@ export type CategoryMetaValidationResult = {
   fieldErrors: Record<string, string>;
 };
 
-export type CategoryMetaCompletion = {
-  completed: number;
-  total: number;
-  missingRequired: number;
-  firstErrorKey: string;
-  label: string;
-  tone: 'empty' | 'partial' | 'complete' | 'error';
-};
-
 export function parseCategoryMetaFieldNumber(raw: string, field: PublishCategoryMetaConfig['fields'][number]) {
   const next = Number(raw);
   if (!Number.isFinite(next)) return { error: '请输入数字' as const };
@@ -103,49 +94,6 @@ export function summarizeCategoryMetaValue(field: PublishCategoryMetaConfig['fie
     return /\$$/.test(value) ? value : `${value}$`;
   }
   return value;
-}
-
-export function getCategoryMetaCompletion(
-  fields: PublishCategoryMetaConfig['fields'],
-  rawMeta: Record<string, string>,
-  fieldErrors: Record<string, string>,
-): CategoryMetaCompletion {
-  const validFields = fields.filter((field) => Boolean(getCategoryMetaFieldKey(field)));
-  const total = validFields.length;
-  let completed = 0;
-  let missingRequired = 0;
-  let firstErrorKey = '';
-
-  validFields.forEach((field) => {
-    const key = getCategoryMetaFieldKey(field);
-    const hasValue = hasCategoryMetaFieldValue(field, rawMeta[key]);
-    const hasError = Boolean(fieldErrors[key]);
-    if (hasValue && !hasError) completed += 1;
-    if (field.required && (!hasValue || hasError)) {
-      missingRequired += 1;
-      if (!firstErrorKey) firstErrorKey = key;
-    } else if (hasError && !firstErrorKey) {
-      firstErrorKey = key;
-    }
-  });
-
-  const tone = firstErrorKey
-    ? 'error'
-    : total > 0 && completed === total
-      ? 'complete'
-      : completed > 0
-        ? 'partial'
-        : 'empty';
-  const label = total > 0 ? `${completed}/${total} 已填` : '无需补充';
-
-  return {
-    completed,
-    total,
-    missingRequired,
-    firstErrorKey,
-    label,
-    tone,
-  };
 }
 
 export function validatePublishCategoryMetaPayload(

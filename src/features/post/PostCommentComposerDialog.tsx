@@ -95,7 +95,7 @@ const PostCommentComposerDialog = memo(function PostCommentComposerDialog({
   return (
     <ProfileDialog
       open={open}
-      title="写评论"
+      title="发表评论"
       onClose={handleClose}
     >
       <textarea
@@ -104,10 +104,10 @@ const PostCommentComposerDialog = memo(function PostCommentComposerDialog({
         value={draft}
         onChange={(event) => setDraft(event.target.value)}
         className="profile-bio-editor"
-        placeholder="说点什么..."
+        placeholder="分享你的观点和看法..."
         maxLength={COMMENT_MAX_LENGTH + 20}
         disabled={isSubmitting}
-        aria-label="评论内容"
+        aria-label="评论内容输入框"
         autoFocus
       />
       {errorText ? (
@@ -132,7 +132,7 @@ const PostCommentComposerDialog = memo(function PostCommentComposerDialog({
           onClick={handleSubmit}
           className="ui-dialog-action-min"
         >
-          {isSubmitting ? '发表中' : '发表'}
+          {isSubmitting ? '发布中...' : '发表评论'}
         </ActionButton>
       </div>
     </ProfileDialog>

@@ -53,18 +53,6 @@ const routePathWarmupKeys: Record<string, RouteSurfaceWarmupKey> = {
 
 const routeSurfaceWarmupCache = new Map<RouteSurfaceWarmupKey, Promise<unknown>>();
 
-export const primaryInteractionWarmupKeys = [
-  'authModal',
-  'profile',
-  'postCreate',
-] as const satisfies readonly RouteSurfaceWarmupKey[];
-
-export const secondaryRouteWarmupKeys = [
-  'postDetail',
-  'userSpace',
-  'categoryFeed',
-] as const satisfies readonly RouteSurfaceWarmupKey[];
-
 export function warmupRouteSurface(key: RouteSurfaceWarmupKey) {
   const cached = routeSurfaceWarmupCache.get(key);
   if (cached) return cached;

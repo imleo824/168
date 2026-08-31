@@ -6,7 +6,6 @@ import {
   getFansPage,
   getFollowStatus,
   getFollowingUsersPage,
-  getJoinedTopics,
   getTopicJoinStatus,
   getUser,
   joinTopic,
@@ -17,7 +16,6 @@ import type { JoinedTopic } from '@/types';
 
 import { flattenPageItems } from './useDataCache';
 
-const FEED_PAGE_SIZE = 20;
 const USER_LIST_PAGE_SIZE = 30;
 const LIST_STALE_TIME = 1000 * 60;
 const LIST_GC_TIME = 1000 * 60 * 25;
@@ -56,17 +54,6 @@ export function useFollowUser(targetUserId: string) {
       queryClient.invalidateQueries({ queryKey: ['users', 'following'] });
       queryClient.invalidateQueries({ queryKey: ['users', 'fans'] });
     },
-  });
-}
-
-export function useJoinedTopics(enabled: boolean = true, scopeKey: string = 'anonymous') {
-  return useQuery({
-    queryKey: ['topics', 'joined', scopeKey],
-    queryFn: getJoinedTopics,
-    enabled,
-    staleTime: LIST_STALE_TIME,
-    gcTime: LIST_GC_TIME,
-    refetchOnWindowFocus: false,
   });
 }
 

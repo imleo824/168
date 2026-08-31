@@ -15,8 +15,8 @@ export function PromoteAuthRequiredPage({
 }) {
   return (
     <AppPage bottomSafe className="promote-mobile-page promote-page surface-page">
-      <SEO title="推广｜推推" description="登录后在推推预约曝光位置。" />
-      <PageHeader title="推广" onBack={onBack} />
+      <SEO title="广告推广｜推推" description="登录推推账号后，即可选择广告位置、绑定帖子并预约投放日期。" />
+      <PageHeader title="广告推广" onBack={onBack} />
 
       <PageContentShell as="main" className="ui-auth-required-wrap ui-app-page-main">
         <AuthRequiredState
@@ -24,8 +24,8 @@ export function PromoteAuthRequiredPage({
           context="promote"
           tone="panel"
           density="compact"
-          title="登录后推广"
-          description="登录后选择投放位置、帖子和日期。"
+          title="登录后开启广告推广"
+          description="登录推推账号后，即可选择广告位置、绑定帖子并预约投放日期。"
           actionLabel="登录 / 注册"
           onAction={onLogin}
         />

@@ -7,17 +7,31 @@ const isProduction = process.env.NODE_ENV === 'production';
 const hasLoggedDatabaseUrlWarning = Symbol.for('tuitui.prisma.databaseUrlWarning');
 
 export const isDbConfigured = () => {
-  return !!process.env.DATABASE_URL && process.env.DATABASE_URL !== FALLBACK_DATABASE_URL;
+  const url = process.env.DATABASE_URL;
+  if (!url || url === FALLBACK_DATABASE_URL) return false;
+  const lower = url.toLowerCase();
+  if (
+    lower.includes('aws-region') ||
+    lower.includes('placeholder') ||
+    lower.includes('dummy:dummy') ||
+    lower.includes('your_') ||
+    lower.includes('<your') ||
+    lower.includes('[') ||
+    lower.includes('example.com')
+  ) {
+    return false;
+  }
+  return true;
 };
 
 function warnIfDatabaseUrlLooksUnsafe() {
   const globalState = globalThis as any;
   if (globalState[hasLoggedDatabaseUrlWarning]) return;
   globalState[hasLoggedDatabaseUrlWarning] = true;
-  if (!process.env.DATABASE_URL) return;
+  if (!isDbConfigured()) return;
 
   try {
-    const parsed = new URL(process.env.DATABASE_URL);
+    const parsed = new URL(process.env.DATABASE_URL!);
     const hostname = parsed.hostname.toLowerCase();
     const port = parsed.port || '5432';
     const usesSupabasePooler = hostname.includes('.pooler.supabase.com');
@@ -45,7 +59,9 @@ function warnIfDatabaseUrlLooksUnsafe() {
 }
 
 const prismaClientSingleton = () => {
-  warnIfDatabaseUrlLooksUnsafe();
+  if (isDbConfigured()) {
+    warnIfDatabaseUrlLooksUnsafe();
+  }
   return new PrismaClient({
     errorFormat: isProduction ? 'minimal' : 'pretty',
     log: process.env.PRISMA_QUERY_LOGS === '1'
@@ -55,7 +71,7 @@ const prismaClientSingleton = () => {
         : ['warn', 'error'],
     datasources: {
       db: {
-        url: DATABASE_URL
+        url: isDbConfigured() ? DATABASE_URL : FALLBACK_DATABASE_URL
       }
     }
   });

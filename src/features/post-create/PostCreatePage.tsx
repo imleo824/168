@@ -29,6 +29,11 @@ import {
   POST_CREATE_TITLE_MAX_LENGTH,
 } from './postCreateConstants';
 import {
+  clearPostCreateDraft,
+  loadPostCreateDraft,
+  savePostCreateDraft,
+} from './postCreateDraft';
+import {
   POST_CREATE_LOCATION_PRESETS,
   buildLocationPresetValueSet,
   formatCreateLocationCity,
@@ -216,11 +221,13 @@ export default function PostCreate({
   const [isPromoteChoiceOpen, setIsPromoteChoiceOpen] = useState(false);
   const [publishedPostId, setPublishedPostId] = useState('');
   const [tuiPlusPromptBenefit, setTuiPlusPromptBenefit] = useState<TuiPlusBenefitKey | null>(null);
+  const [hasRestoredDraft, setHasRestoredDraft] = useState(false);
   const defaultFormUserIdRef = useRef('');
   const defaultAnonymousIntentRef = useRef('');
   const submitNonceRef = useRef('');
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const focusedComposerLocationKeyRef = useRef('');
+  const hasLoadedDraftRef = useRef(false);
 
   const patchForm = useCallback(<K extends keyof PostCreateFormState>(key: K, value: PostCreateFormState[K]) => {
     submitNonceRef.current = '';
@@ -257,6 +264,8 @@ export default function PostCreate({
       defaultFormUserIdRef.current = '';
       defaultAnonymousIntentRef.current = '';
       submitNonceRef.current = '';
+      hasLoadedDraftRef.current = false;
+      setHasRestoredDraft(false);
       setForm(INITIAL_FORM);
       return;
     }
@@ -265,17 +274,52 @@ export default function PostCreate({
       defaultFormUserIdRef.current = user.id;
       defaultAnonymousIntentRef.current = '';
       submitNonceRef.current = '';
-      setForm({
-        ...INITIAL_FORM,
-        contact: normalizeTelegramContactHandle(user.contact || '') || '',
-        isAnonymous: defaultAnonymous && user.userType !== 'ROBOT',
-      });
+
+      const draft = !quotePostId ? loadPostCreateDraft(user.id) : null;
+      if (draft) {
+        hasLoadedDraftRef.current = true;
+        setHasRestoredDraft(true);
+        setForm({
+          ...INITIAL_FORM,
+          ...draft,
+          contact: draft.contact || normalizeTelegramContactHandle(user.contact || '') || '',
+          isAnonymous: typeof draft.isAnonymous === 'boolean' ? draft.isAnonymous : defaultAnonymous && user.userType !== 'ROBOT',
+        });
+      } else {
+        hasLoadedDraftRef.current = true;
+        setHasRestoredDraft(false);
+        setForm({
+          ...INITIAL_FORM,
+          contact: normalizeTelegramContactHandle(user.contact || '') || '',
+          isAnonymous: defaultAnonymous && user.userType !== 'ROBOT',
+        });
+      }
       return;
     }
 
     const nextContact = normalizeTelegramContactHandle(user.contact || '') || '';
     setForm((prev) => prev.contact === nextContact ? prev : { ...prev, contact: nextContact });
-  }, [defaultAnonymous, user?.contact, user?.id, user?.userType]);
+  }, [defaultAnonymous, quotePostId, user?.contact, user?.id, user?.userType]);
+
+  // Auto-save draft on form change (debounced)
+  useEffect(() => {
+    if (!user?.id || !hasLoadedDraftRef.current || quotePostId || publishedPostId) return;
+    const timer = setTimeout(() => {
+      savePostCreateDraft(form, user.id);
+    }, 400);
+    return () => clearTimeout(timer);
+  }, [form, publishedPostId, quotePostId, user?.id]);
+
+  const handleClearDraft = useCallback(() => {
+    clearPostCreateDraft();
+    setHasRestoredDraft(false);
+    setForm({
+      ...INITIAL_FORM,
+      contact: normalizeTelegramContactHandle(user?.contact || '') || '',
+      isAnonymous: defaultAnonymous && user?.userType !== 'ROBOT',
+    });
+    showToast('已清除未保存的草稿', 'info');
+  }, [defaultAnonymous, showToast, user?.contact, user?.userType]);
 
   useEffect(() => {
     if (!user?.id || !defaultAnonymous || isRobotUser) return;
@@ -384,17 +428,17 @@ export default function PostCreate({
       if (!isActive()) return;
 
       if (isUploadingImages) {
-        showToast('图片仍在上传，请等待上传完成后再发布', 'error');
+        showToast('图片正在上传中，请稍候完成即可发布', 'error');
         return;
       }
 
       if (!hasResolvedContent) {
-        showToast(isQuoteMode ? '引用发帖需要填写文字内容' : '请输入文字或添加图片', 'error');
+        showToast(isQuoteMode ? '请输入引用评述内容' : '请分享些文字或上传图片后再发布', 'error');
         return;
       }
 
       if (isQuoteMode && !quoteIsReady) {
-        showToast('引用的帖子不可用，请重新选择', 'error');
+        showToast('被引用的帖子已失效或被删除', 'error');
         return;
       }
 
@@ -451,7 +495,7 @@ export default function PostCreate({
           showToast(
             res.ok
               ? '发布成功，但服务返回数据异常，请刷新首页查看'
-              : `发布服务暂时不可用 (HTTP ${res.status})，请稍后重试`,
+              : `服务暂时繁忙 (HTTP ${res.status})，请稍后重试`,
             'error',
           );
           return;
@@ -469,7 +513,7 @@ export default function PostCreate({
         }
 
         if (!parsed?.post || typeof parsed.post.id !== 'string') {
-          showToast('发布成功，但返回数据异常，请刷新首页查看', 'error');
+          showToast('发布成功，但返回数据异常，请刷新查看', 'error');
           return;
         }
 
@@ -477,8 +521,10 @@ export default function PostCreate({
 
         submitNonceRef.current = '';
         const createdPostId = parsed.post.id;
+        clearPostCreateDraft();
+        setHasRestoredDraft(false);
         setPublishedPostId(createdPostId);
-        showToast('内容发布成功', 'success');
+        showToast('发布成功', 'success');
         void refreshUser(true).catch((error) => console.warn('[PostCreate] 刷新用户数据失败', error));
         void queryClient.invalidateQueries({ queryKey: ['posts'] });
         void queryClient.invalidateQueries({ queryKey: ['notifications', 'feed-counts'] });
@@ -493,7 +539,7 @@ export default function PostCreate({
       } catch (error: any) {
         if (!isActive()) return;
         if (isProbablyNetworkError(error)) {
-          showToast(error?.name === 'AbortError' ? '请求已取消' : '网络异常，请重试', 'error');
+          showToast(error?.name === 'AbortError' ? '操作已取消' : '网络连接异常，请检查后重试', 'error');
           return;
         }
         if (error instanceof SyntaxError) {
@@ -501,7 +547,7 @@ export default function PostCreate({
           return;
         }
         console.error('[PostCreate] 发布失败', error);
-        showToast(error?.message || '发布失败，请重试', 'error');
+        showToast(error?.message || '发布遇到问题，请重试', 'error');
       }
     },
     {
@@ -512,7 +558,7 @@ export default function PostCreate({
 
   const isPublishingLocked = isSubmitting;
   const notifyPublishingNavigationBlocked = useCallback(() => {
-    showToast('内容正在发布，请稍等完成后再离开', 'info');
+    showToast('内容正在提交中，请稍候...', 'info');
   }, [showToast]);
   usePublishingNavigationGuard(isPublishingLocked, notifyPublishingNavigationBlocked);
   const isSubmitBusy = isSubmitting || (isQuoteMode && isQuoteLoading);
@@ -805,6 +851,9 @@ export default function PostCreate({
             warmPostCreateSettingsSheets();
             setIsTelegramSettingsOpen(true);
           }}
+          onSubmitShortcut={() => void runSubmit()}
+          hasRestoredDraft={hasRestoredDraft}
+          onClearDraft={handleClearDraft}
         />
       </PageContentShell>
 

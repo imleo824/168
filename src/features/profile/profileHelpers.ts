@@ -5,7 +5,6 @@ import {
   validateLoginPasswordForWrite,
 } from '@/utils/accountCredentials';
 
-export const DEFAULT_PROFILE_COVER_URL = 'https://images.unsplash.com/photo-1557683316-973673baf926?q=80&w=1000';
 export { LOGIN_PASSWORD_MIN_LENGTH, LOGIN_PASSWORD_MAX_LENGTH };
 
 export function removePostFromCachedData(old: any, postId: string) {

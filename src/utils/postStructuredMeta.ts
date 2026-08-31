@@ -8,6 +8,11 @@ export type PostStructuredMetaItem = {
   filterValues?: Record<string, unknown>;
 };
 
+export type PostPromotionLink = {
+  title: string;
+  url: string;
+};
+
 const POST_PROMOTION_LINK_META_KEY = '__postPromotionLink';
 
 const STRUCTURED_META_LABELS: Record<string, string> = {
@@ -181,3 +186,25 @@ export function buildPostStructuredMetaItems(
     .map(({ item }) => item)
     .slice(0, maxItems);
 }
+
+function normalizePromotionUrl(raw: unknown): string {
+  const value = normalizeText(raw, 500);
+  if (!value) return '';
+  try {
+    const url = new URL(/^https?:\/\//i.test(value) ? value : `https://${value}`);
+    if (!['http:', 'https:'].includes(url.protocol) || !url.hostname.includes('.')) return '';
+    return url.toString().replace(/\/$/, '');
+  } catch {
+    return '';
+  }
+}
+
+export function getPostPromotionLink(categoryMeta: unknown): PostPromotionLink | null {
+  if (!categoryMeta || typeof categoryMeta !== 'object' || Array.isArray(categoryMeta)) return null;
+  const raw = (categoryMeta as Record<string, unknown>)[POST_PROMOTION_LINK_META_KEY];
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null;
+  const title = normalizeText((raw as Record<string, unknown>).title, 40);
+  const url = normalizePromotionUrl((raw as Record<string, unknown>).url);
+  return title && url ? { title, url } : null;
+}
+

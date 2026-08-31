@@ -209,7 +209,7 @@ export const PostCommentSheetPanel = memo(function PostCommentSheetPanel({
       queryClient.setQueryData(['post', postId], (old: any) => old ? { ...old, commentCount: result.commentCount } : old);
       queryClient.setQueriesData({ queryKey: ['posts'] }, (old: any) => patchPostCommentCount(old, postId, result.commentCount));
       onCommentCountChange?.(result.commentCount);
-      showToast('评论已发表', 'success');
+      showToast('评论已成功发表', 'success');
     },
     onError: (error) => {
       const message = error instanceof Error ? error.message : '评论发表失败，请稍后重试';
@@ -269,7 +269,7 @@ export const PostCommentSheetPanel = memo(function PostCommentSheetPanel({
     <>
       <BottomSheet
         open={open}
-        title={`评论 ${titleCount}`}
+        title={`评论 (${titleCount})`}
         ariaLabel="帖子评论"
         onClose={onClose}
         panelClassName="ui-sheet-panel post-quote-sheet post-comment-sheet"
@@ -289,17 +289,17 @@ export const PostCommentSheetPanel = memo(function PostCommentSheetPanel({
               className="post-quote-create-action post-comment-create-action"
             >
               <MessageCircle className="post-quote-create-action-icon post-comment-create-action-icon" aria-hidden="true" />
-              <span>我要评论</span>
+              <span>发表评论</span>
             </ActionButton>
           </div>
         )}
         showHandle
       >
         {commentsQuery.isLoading ? (
-          <div className="post-quote-sheet-loading post-comment-sheet-loading">正在加载评论</div>
+          <div className="post-quote-sheet-loading post-comment-sheet-loading">正在加载评论列表...</div>
         ) : commentsQuery.error ? (
           <StateBlock
-            title="评论加载失败"
+            title="评论暂无法加载"
             tone="error"
             compact
             action={(
@@ -311,13 +311,13 @@ export const PostCommentSheetPanel = memo(function PostCommentSheetPanel({
                 state={retryBusy ? 'loading' : 'idle'}
                 onClick={() => void guardedRefetchComments()}
               >
-                {retryBusy ? '加载中' : '重新加载'}
+                {retryBusy ? '加载中' : '刷新重试'}
               </ActionButton>
             )}
           />
         ) : comments.length === 0 ? (
           <StateBlock
-            title="还没有评论"
+            title="暂无评论，来发表第一条观点吧"
             tone="empty"
             compact
             icon={<MessageCircle className="post-quote-empty-icon post-comment-empty-icon" aria-hidden="true" />}
@@ -333,7 +333,7 @@ export const PostCommentSheetPanel = memo(function PostCommentSheetPanel({
               hasMore={Boolean(commentsQuery.hasNextPage)}
               onRetry={() => void guardedRefetchComments()}
               onLoadMore={() => void guardedFetchNextComments()}
-              loadingText="正在加载更多评论"
+              loadingText="正在载入更多评论..."
               doneText=""
             />
           </div>

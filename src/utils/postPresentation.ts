@@ -186,24 +186,6 @@ export function buildDisplayLocationTags(location?: string | null): PostTagItem[
   }];
 }
 
-export function buildDisplayTags(tags: PostTagItem[] = [], location?: string | null): PostTagItem[] {
-  const locationTags = buildDisplayLocationTags(location);
-  const seen = new Set(locationTags.map((tag) => normalizeTagName(tag.name).toLowerCase()));
-  const visibleTags = sortTagsWithLocationFirst(tags)
-    .map((tag) => ({
-      ...tag,
-      name: normalizeTagName(tag.name),
-    }))
-    .filter((tag) => {
-      if (!tag.name || isLocationTag(tag)) return false;
-      const key = tag.name.toLowerCase();
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-  return [...locationTags, ...visibleTags];
-}
-
 export function toLocationCategoryId(location: string): string {
   return `${LOCATION_TAG_PREFIX}${encodeURIComponent(normalizeStoredLocation(location))}`;
 }

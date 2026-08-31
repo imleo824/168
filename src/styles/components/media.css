@@ -78,7 +78,14 @@
     touch-action: pan-x pan-y;
     transition:
       transform var(--ui-duration-press) var(--ease-standard),
+      filter var(--ui-duration-base) var(--ease-standard),
       box-shadow var(--ui-duration-base) var(--ease-standard);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .media-carousel-slide:hover {
+      filter: saturate(1.04);
+    }
   }
 
   .ui-media-grid-item {

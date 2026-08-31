@@ -82,13 +82,6 @@ function normalizeLimit(limit?: number) {
   return Math.min(Math.max(Math.floor(limit as number), 1), MAX_PAGE_SIZE);
 }
 
-function clampNumber(value: number, min: number, max: number) {
-  if (!Number.isFinite(value)) return min;
-  if (value < min) return min;
-  if (value > max) return max;
-  return value;
-}
-
 function normalizeSearchText(raw: unknown, maxLength = 80) {
   if (Array.isArray(raw)) return normalizeSearchText(raw[0], maxLength);
   if (typeof raw !== 'string') return '';

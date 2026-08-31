@@ -63,14 +63,14 @@ export function PostCreateAuthRequiredState({ onAction }: { onAction: () => void
       context="create"
       tone="panel"
       density="compact"
-      title="登录后发一条推推"
-      description="补充分类、地点和联系方式，让合适的人更快找到你。"
+      title="登录后开始发布"
+      description="选择分类、地点与展示偏好，让你的内容被更精准地看到。"
       actionLabel="登录 / 注册"
       previewItems={[
-        { icon: <Hash aria-hidden="true" />, label: '选好分类', description: '让内容进入对应频道，被需要的人看到' },
-        { icon: <MapPin aria-hidden="true" />, label: '补充地点', description: '写清城市或区域，减少来回沟通' },
-        { icon: <LockKeyhole aria-hidden="true" />, label: '控制展示', description: '发布前确认公开、匿名和联系方式' },
-        { icon: <Send aria-hidden="true" />, label: '保留联系入口', description: '需要时展示 Telegram，其他信息可隐藏' },
+        { icon: <Hash aria-hidden="true" />, label: '选好分类', description: '精准归类到对应频道，让关注该话题的用户更快发现' },
+        { icon: <MapPin aria-hidden="true" />, label: '补充地点', description: '标注所属城市或区域，提升同城与附近曝光效率' },
+        { icon: <LockKeyhole aria-hidden="true" />, label: '控制展示', description: '自由切换公开或匿名，灵活掌控个人隐私与展示方式' },
+        { icon: <Send aria-hidden="true" />, label: '保留联系入口', description: '一键公开或隐藏 Telegram 账号，方便读者直接沟通' },
       ]}
       onAction={onAction}
     />
@@ -100,6 +100,9 @@ export function PostCreateComposerSection({
   onOpenPrivacy,
   onOpenTelegram,
   onOpenPromotionLink,
+  onSubmitShortcut,
+  hasRestoredDraft = false,
+  onClearDraft,
 }: {
   form: PostCreateFormState;
   textareaRef: (node: HTMLTextAreaElement | null) => void;
@@ -123,6 +126,9 @@ export function PostCreateComposerSection({
   onOpenPrivacy: () => void;
   onOpenTelegram: () => void;
   onOpenPromotionLink?: () => void;
+  onSubmitShortcut?: () => void;
+  hasRestoredDraft?: boolean;
+  onClearDraft?: () => void;
 }) {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -171,11 +177,11 @@ export function PostCreateComposerSection({
   const savePromotionLink = useCallback(() => {
     const safeTitle = cleanPostPromotionLinkTitle(draftLinkTitle);
     if (!safeTitle) {
-      setLinkError('请输入标题');
+      setLinkError('请输入链接标题（最多40字）');
       return;
     }
     if (!normalizedDraftLinkUrl) {
-      setLinkError('请输入正确的网址链接');
+      setLinkError('请输入有效的网址链接（以 http:// 或 https:// 开头）');
       return;
     }
     onPromotionLinkChange?.({ title: safeTitle, url: normalizedDraftLinkUrl });
@@ -194,17 +200,38 @@ export function PostCreateComposerSection({
       <div className="post-create-shell post-create-shell-card ui-page-card-shell">
         <div className="post-create-composer">
           <section className="post-create-input-section post-create-input-section-pad">
+            {hasRestoredDraft ? (
+              <div className="post-create-draft-banner" role="status">
+                <span className="post-create-draft-banner-text">已自动恢复上次未发布的草稿</span>
+                {onClearDraft ? (
+                  <button
+                    type="button"
+                    className="post-create-draft-clear-button"
+                    onClick={onClearDraft}
+                  >
+                    放弃草稿
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
+
             <textarea
               ref={textareaRef}
               autoFocus
               rows={4}
-              placeholder="这一刻，想说点什么…"
+              placeholder="分享新鲜事、交流心得或发布需求…"
               maxLength={POST_CONTENT_MAX_LENGTH}
               className="post-create-textarea"
               value={form.content}
               disabled={isPublishingLocked}
               aria-busy={isPublishingLocked}
               onChange={(event) => onContentChange(event.target.value.slice(0, POST_CONTENT_MAX_LENGTH))}
+              onKeyDown={(event) => {
+                if ((event.metaKey || event.ctrlKey) && event.key === 'Enter') {
+                  event.preventDefault();
+                  onSubmitShortcut?.();
+                }
+              }}
             />
 
             <Suspense fallback={<PostCreateImageUploadFallback />}>
@@ -216,7 +243,7 @@ export function PostCreateComposerSection({
                 layout="field"
                 tileClassName="post-create-image-preview-tile"
                 disabled={isQuoteMode || isPublishingLocked}
-                disabledReason={isQuoteMode ? '引用发布暂不添加图片' : '发布中暂不可添加图片'}
+                disabledReason={isQuoteMode ? '引用模式下暂不支持添加图片' : '发布中，请稍候...'}
               />
             </Suspense>
 
@@ -229,7 +256,7 @@ export function PostCreateComposerSection({
                 <MapPin className="post-create-tool-icon" aria-hidden="true" />
                 {toolSummary.location.isVisible ? <span className="post-create-tool-summary">{toolSummary.location.label}</span> : null}
               </button>
-              <button type="button" className="post-create-tool-button" data-tool="link" data-state={linkSummary.state} aria-label={linkSummary.isVisible ? '推广链接：链接' : '添加推广链接'} title={linkSummary.isVisible ? '推广链接：链接' : '添加推广链接'} disabled={isPublishingLocked} {...linkPressHandlers}>
+              <button type="button" className="post-create-tool-button" data-tool="link" data-state={linkSummary.state} aria-label={linkSummary.isVisible ? '推广链接：已添加' : '添加推广链接'} title={linkSummary.isVisible ? '推广链接：已添加' : '添加推广链接'} disabled={isPublishingLocked} {...linkPressHandlers}>
                 <LinkIcon className="post-create-tool-icon" aria-hidden="true" />
                 {linkSummary.isVisible ? <span className="post-create-tool-summary">链接</span> : null}
               </button>
@@ -243,10 +270,27 @@ export function PostCreateComposerSection({
               </button>
             </div>
 
+            {form.content.length > 0 ? (
+              <div className="post-create-footer-meta">
+                <span
+                  className={`post-create-char-counter ${
+                    form.content.length >= POST_CONTENT_MAX_LENGTH
+                      ? 'is-limit'
+                      : form.content.length >= POST_CONTENT_MAX_LENGTH * 0.9
+                      ? 'is-warning'
+                      : ''
+                  }`}
+                  aria-live="polite"
+                >
+                  {form.content.length}/{POST_CONTENT_MAX_LENGTH}
+                </span>
+              </div>
+            ) : null}
+
             {isQuoteMode ? (
               <div className="post-create-quoted-post-wrap" aria-live="polite">
                 {isQuoteLoading && !quotedPost ? (
-                  <div className="post-create-quote-loading">正在载入引用帖子</div>
+                  <div className="post-create-quote-loading">正在加载被引用的帖子...</div>
                 ) : (
                   <QuotedPostPreviewCard post={quotedPost || { id: quotePostId, unavailable: true, isPublished: false }} className="post-create-quoted-post" />
                 )}
@@ -258,17 +302,17 @@ export function PostCreateComposerSection({
 
       {isLinkEditorOpen ? (
         <AppPage className="post-create-page post-create-contact-editor-page post-create-link-editor-page" bottomSafe>
-          <PageHeader title="添加链接" showBack onBack={() => setIsLinkEditorOpen(false)} right={<ActionButton type="button" variant="brand" size="header" disabled={promotionLinkSaveDisabled} state={savePromotionLinkPending ? 'loading' : 'idle'} onClick={() => void guardedSavePromotionLink()}>{savePromotionLinkPending ? '保存中' : '保存'}</ActionButton>} />
+          <PageHeader title="添加推广链接" showBack onBack={() => setIsLinkEditorOpen(false)} right={<ActionButton type="button" variant="brand" size="header" disabled={promotionLinkSaveDisabled} state={savePromotionLinkPending ? 'loading' : 'idle'} onClick={() => void guardedSavePromotionLink()}>{savePromotionLinkPending ? '保存中' : '保存'}</ActionButton>} />
           <PageContentShell bottomSafe className="post-create-contact-editor-main ui-app-page-main">
             <section data-post-create-stable-focus="true" className="post-create-stable-focus post-create-contact-editor-card post-create-link-editor-card">
               <label className="post-create-contact-editor-field">
-                <span className="post-create-contact-editor-label">标题</span>
+                <span className="post-create-contact-editor-label">链接标题</span>
                 <span className="post-create-contact-input-wrap">
-                  <input autoFocus value={draftLinkTitle} onChange={(event) => { setDraftLinkTitle(event.target.value); setLinkError(''); }} placeholder="点击到网址注册" maxLength={POST_PROMOTION_LINK_TITLE_MAX_LENGTH} className="post-create-contact-input" autoComplete="off" />
+                  <input autoFocus value={draftLinkTitle} onChange={(event) => { setDraftLinkTitle(event.target.value); setLinkError(''); }} placeholder="例如：查看详情 / 立即访问" maxLength={POST_PROMOTION_LINK_TITLE_MAX_LENGTH} className="post-create-contact-input" autoComplete="off" />
                 </span>
               </label>
               <label className="post-create-contact-editor-field">
-                <span className="post-create-contact-editor-label">网址链接</span>
+                <span className="post-create-contact-editor-label">目标网址</span>
                 <span className="post-create-contact-input-wrap">
                   <input value={draftLinkUrl} onChange={(event) => { setDraftLinkUrl(event.target.value); setLinkError(''); }} placeholder="https://example.com" className="post-create-contact-input" inputMode="url" autoCapitalize="none" autoCorrect="off" spellCheck={false} />
                 </span>
@@ -302,10 +346,10 @@ function PostCreateImageUploadFallback() {
 
 export function PostCreatePublishingLock() {
   return (
-    <div className="post-create-publishing-lock" role="status" aria-live="polite" aria-label="正在发布，请先别离开">
+    <div className="post-create-publishing-lock" role="status" aria-live="polite" aria-label="正在发布，请稍候...">
       <div className="post-create-publishing-lock-panel">
         <span className="post-create-publishing-lock-spinner" aria-hidden="true" />
-        <span className="post-create-publishing-lock-text">正在发布，请先别离开</span>
+        <span className="post-create-publishing-lock-text">正在发布，请稍候...</span>
       </div>
     </div>
   );

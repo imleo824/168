@@ -59,8 +59,8 @@ export function PostCreatePrivacySettingsContent({
         className="post-create-settings-row"
       >
         <span className="post-create-settings-copy">
-          <span className="post-create-settings-title">公开发推</span>
-          <span className="post-create-settings-value">{isPublicPublish ? '公开' : '匿名'}</span>
+          <span className="post-create-settings-title">公开身份发布</span>
+          <span className="post-create-settings-value">{isPublicPublish ? '公开（展示昵称与头像）' : '匿名（隐藏个人信息）'}</span>
         </span>
         <PostCreateSwitch checked={isPublicPublish} />
       </button>
@@ -93,8 +93,8 @@ export function PostCreateTelegramSettingsSheet({
   return (
     <BottomSheet
       open={open}
-      title="联系方式"
-      ariaLabel="联系方式"
+      title="联系方式设置"
+      ariaLabel="联系方式设置"
       onClose={onClose}
       overlayClassName="ui-sheet-overlay-contact"
       panelClassName="ui-sheet-panel post-create-sheet post-create-contact-sheet post-create-contact-picker-sheet"
@@ -142,8 +142,8 @@ export function PostCreateContactSettingsContent({
           className={`post-create-settings-row${showContactButton ? ' post-create-settings-row--before-followup' : ''}`}
         >
           <span className="post-create-settings-copy">
-            <span className="post-create-settings-title">公开联系方式</span>
-            <span className="post-create-settings-value">{showContactButton ? '显示' : '隐藏'}</span>
+            <span className="post-create-settings-title">在帖子中展示联系按钮</span>
+            <span className="post-create-settings-value">{showContactButton ? '已开启' : '已关闭'}</span>
           </span>
           <PostCreateSwitch checked={showContactButton} />
         </button>
@@ -156,11 +156,11 @@ export function PostCreateContactSettingsContent({
           className="post-create-settings-row post-create-settings-row--link"
         >
           <span className="post-create-settings-copy">
-            <span className="post-create-settings-title">联系方式</span>
+            <span className="post-create-settings-title">Telegram 账号</span>
             <span className={`post-create-settings-value ${
               customContact ? 'post-create-settings-value-filled' : 'post-create-settings-value-error'
             }`}>
-              {customContact ? contactDisplay : '未设置'}
+              {customContact ? contactDisplay : '未设置（点击添加）'}
             </span>
           </span>
           <span className="post-create-edit-icon" aria-hidden="true">
@@ -195,7 +195,7 @@ export function PostCreateContactEditorDialog({
   return (
     <AppPage className="post-create-page post-create-contact-editor-page" bottomSafe>
       <PageHeader
-        title="添加联系方式"
+        title="设置 Telegram 账号"
         showBack
         onBack={onClose}
         right={(
@@ -215,8 +215,8 @@ export function PostCreateContactEditorDialog({
       <PageContentShell bottomSafe className="post-create-contact-editor-main ui-app-page-main">
         <section data-post-create-stable-focus="true" className="post-create-stable-focus post-create-contact-editor-card">
           <div className="post-create-contact-editor-copy">
-            <h2>添加联系方式</h2>
-            <p>仅用于本次发布。保存后，这条内容会展示联系按钮。</p>
+            <h2>设置 Telegram 账号</h2>
+            <p>保存后，帖子底部将展示专属联系按钮，方便感兴趣的读者直接与你沟通。</p>
           </div>
 
           <label className="post-create-contact-editor-field">
@@ -227,7 +227,7 @@ export function PostCreateContactEditorDialog({
                 autoFocus
                 value={editContact}
                 onChange={(event) => onEditContactChange(event.target.value)}
-                placeholder="username"
+                placeholder="your_username"
                 className="post-create-contact-input"
                 inputMode="text"
                 autoCapitalize="none"
@@ -239,11 +239,11 @@ export function PostCreateContactEditorDialog({
 
           {hasInvalidEditingContact ? (
             <p className="post-create-option-error">
-              仅支持 Telegram 用户名：5-32位，字母开头，可含数字或下划线
+              格式错误：Telegram 用户名为 5-32 位，需以字母开头，可包含数字与下划线
             </p>
           ) : (
             <p className="post-create-option-hint">
-              不填写则无法展示联系按钮，读者不能直接联系你
+              支持 5-32 位字母、数字与下划线，无需输入 @ 符号
             </p>
           )}
         </section>
@@ -264,8 +264,8 @@ export function PostCreatePromoteChoiceSheet({
   return (
     <BottomSheet
       open={open}
-      title="已发出"
-      ariaLabel="已发出"
+      title="发布成功"
+      ariaLabel="发布成功"
       onClose={onSkip}
       overlayClassName="ui-sheet-overlay-contact"
       panelClassName="ui-sheet-panel post-create-sheet post-create-contact-sheet post-create-contact-picker-sheet"
@@ -277,9 +277,9 @@ export function PostCreatePromoteChoiceSheet({
     >
       <div className="post-create-promote-choice">
         <div className="post-create-promote-handle ui-sheet-handle" aria-hidden="true" />
-        <h2 className="post-create-promote-title">已发出</h2>
+        <h2 className="post-create-promote-title">发布成功</h2>
         <p className="post-create-promote-copy">
-          要不要推广？推广后更容易被看到。
+          你的内容已成功发出！是否需要推广置顶，让更多人第一时间看到？
         </p>
         <div className="post-create-promote-actions">
           <ActionButton
@@ -289,7 +289,7 @@ export function PostCreatePromoteChoiceSheet({
             onClick={onSkip}
             className="post-create-promote-action"
           >
-            先不了
+            返回首页
           </ActionButton>
           <ActionButton
             type="button"
@@ -298,7 +298,7 @@ export function PostCreatePromoteChoiceSheet({
             onClick={onGoPromote}
             className="post-create-promote-action"
           >
-            推广
+            立即推广
           </ActionButton>
         </div>
       </div>

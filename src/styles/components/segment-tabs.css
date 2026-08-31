@@ -57,16 +57,30 @@
     transition:
       background-color var(--ui-duration-fast) var(--ease-standard),
       color var(--ui-duration-fast) var(--ease-standard),
-      box-shadow var(--ui-duration-fast) var(--ease-standard);
+      box-shadow var(--ui-duration-fast) var(--ease-standard),
+      transform var(--ui-duration-press) var(--ease-standard);
   }
 
-  .ui-page-tabs-bar .ui-segment-tab:hover,
-  .ui-page-tabs-bar .ui-segment-tab:active {
+  .ui-page-tabs-bar .ui-segment-tab:hover {
     background: var(--ui-state-hover);
     color: var(--ui-text-primary);
     box-shadow: var(--ui-shadow-none);
     filter: var(--ui-filter-none);
     transform: var(--ui-transform-none);
+  }
+
+  .ui-page-tabs-bar .ui-segment-tab:active {
+    background: var(--ui-state-hover);
+    color: var(--ui-text-primary);
+    box-shadow: var(--ui-shadow-none);
+    filter: var(--ui-filter-none);
+    transform: scale(var(--ui-motion-press-scale));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-page-tabs-bar .ui-segment-tab:active {
+      transform: var(--ui-transform-none);
+    }
   }
 
   .ui-page-tabs-bar .ui-segment-tab:focus-visible {

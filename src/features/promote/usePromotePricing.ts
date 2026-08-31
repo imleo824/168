@@ -61,23 +61,23 @@ export function usePromotePricing({
   );
 
   const checkoutContextLabel = selectedType === PromotionType.PIN_CATEGORY
-    ? `${selectedCategoryLabel || '分类置顶'} · ${pricePerSlot || 0}积分/天`
-    : `${promotionTypeLabel(selectedType)} · ${pricePerSlot || 0}积分/天`;
+    ? `${selectedCategoryLabel || '分类置顶'} · ${pricePerSlot || 0} 积分/天`
+    : `${promotionTypeLabel(selectedType)} · ${pricePerSlot || 0} 积分/天`;
 
   const promotionTypeChoices: PromotionTypeChoice[] = [
     {
       id: 'PIN_HOME',
-      desc: '展示在首页热门位置',
+      desc: '首页热门置顶',
       price: normalizePromotionPointPrice(config?.prices?.pin_home),
     },
     {
       id: 'PIN_CATEGORY',
-      desc: '展示在指定分类顶部',
+      desc: '分类频道置顶',
       price: priceForCategoryPin(selectedCategoryId || rootCategories[0]?.id),
     },
     {
       id: 'AD_HOME',
-      desc: '展示在首页顶部横幅',
+      desc: '首页顶部横幅',
       price: priceForHomeAdSlot(selectedHomeAdSlot),
     },
   ];

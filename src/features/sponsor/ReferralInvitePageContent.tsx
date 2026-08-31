@@ -106,7 +106,6 @@ export default function ReferralInvitePageContent({ isRulesOpen, onCloseRules }:
   const baseConversionBusy = convertMutation.isPending;
 
   function resetWithdrawInputs() { setWithdrawAmount(''); setWithdrawAddress(''); setPaymentPassword(''); setNewPaymentPassword(''); setConfirmPaymentPassword(''); setPaymentError(''); setPaymentPasswordSetupDone(false); }
-  const warmReferralRulesSheet = () => { void loadReferralRulesSheet(); };
   const warmReferralInviteSheets = () => { void loadReferralInviteSheets(); };
   const openWithdrawSheet = () => { warmReferralInviteSheets(); if (!summary || summary.availableCommission <= 0) return showToast('暂无可提现返佣', 'info'); if (summary.availableCommission < summary.settings.minWithdrawAmount) return showToast(`最低提现 ${formatMoney(summary.settings.minWithdrawAmount)}U，当前可提现 ${formatMoney(summary.availableCommission)}U`, 'info'); setPaymentError(''); setWithdrawAmount(''); setIsWithdrawSheetOpen(true); };
   const openConvertSheet = () => { warmReferralInviteSheets(); if (!summary || summary.availableCommission <= 0) return showToast('暂无可转换返佣', 'info'); setConvertError(''); setConvertAmount(''); setIsConvertSheetOpen(true); };

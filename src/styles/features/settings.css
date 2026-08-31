@@ -14,10 +14,31 @@
 
   button.setting-row {
     padding: var(--ui-space-half);
+    transition:
+      background-color var(--ui-duration-base) var(--ease-standard),
+      transform var(--ui-duration-press) var(--ease-standard);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    button.setting-row:hover {
+      background: var(--ui-state-hover);
+    }
   }
 
   button.setting-row:active {
-    background: var(--ui-state-hover);
+    background: var(--ui-surface-pressed);
+    transform: scale(var(--ui-motion-press-scale));
+  }
+
+  button.setting-row:focus-visible {
+    outline: var(--ui-outline-none);
+    box-shadow: var(--ui-focus-outline-shadow);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    button.setting-row:active {
+      transform: var(--ui-transform-none);
+    }
   }
 
   .setting-row-content {

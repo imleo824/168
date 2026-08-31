@@ -24,8 +24,8 @@ export default function PromotePostPickerSheet({
   return (
     <BottomSheet
       open={open}
-      title="选择要曝光的推"
-      ariaLabel="选择要曝光的推"
+      title="选择要推广的帖子"
+      ariaLabel="选择要推广的帖子"
       onClose={onClose}
       panelClassName="ui-sheet-panel promote-picker-sheet"
       bodyClassName="promote-picker-body"
@@ -54,8 +54,8 @@ export default function PromotePostPickerSheet({
         ) : (
           <div className="promote-picker-empty">
             <div className="promote-picker-empty-copy-group">
-              <p className="promote-picker-empty-title">暂无可曝光的推</p>
-              <p className="promote-picker-empty-copy">发一条推后，就可以回来推广。</p>
+              <p className="promote-picker-empty-title">暂无已发布的帖子</p>
+              <p className="promote-picker-empty-copy">发布新帖子后，即可选择并开启广告推广。</p>
             </div>
             <ActionButton
               type="button"
@@ -63,9 +63,9 @@ export default function PromotePostPickerSheet({
               size="sm"
               onClick={onCreatePost}
               className="promote-picker-empty-action"
-              aria-label="去发推"
+              aria-label="去发帖"
             >
-              去发推
+              去发帖
             </ActionButton>
           </div>
         )}

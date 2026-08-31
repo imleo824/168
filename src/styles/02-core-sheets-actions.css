@@ -9,6 +9,7 @@
     justify-content: center;
     overflow: hidden;
     overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
     background: var(--ui-sheet-overlay-background, var(--ui-overlay-sheet));
     padding-block-start: calc(env(safe-area-inset-top) + var(--ui-space-4));
     padding-block-end: var(--ui-keyboard-inset);
