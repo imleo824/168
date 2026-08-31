@@ -340,7 +340,7 @@ function AppDesktopSidebar() {
               onFocus={() => warmupRoutePath(item.to)}
             >
               <Icon className="app-desktop-nav-icon" aria-hidden="true" />
-              <span>{item.label}</span>
+              <span className="app-desktop-nav-label">{item.label}</span>
             </NavLink>
           );
         })}
