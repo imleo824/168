@@ -1,9 +1,0 @@
-/* Route-owned promote workspace styles.
-   These are intentionally kept out of global first-paint CSS. */
-
-@import "../../styles/features/promote-page-foundation.css";
-@import "../../styles/features/promote-page-keyboard.css";
-@import "../../styles/features/promote-layout.css";
-@import "../../styles/features/promote-history.css";
-@import "../../styles/features/promotion-effects-history.css";
-@import "../../styles/features/promote-history-edit.css";

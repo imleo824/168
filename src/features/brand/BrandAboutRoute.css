@@ -1,6 +1,0 @@
-/* About route-only stylesheet.
- * Loaded by the lazy About page so ordinary feed startup does not download
- * brand/about presentation rules.
- */
-
-@import "../../styles/features/brand.css";

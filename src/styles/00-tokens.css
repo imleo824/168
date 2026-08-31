@@ -1,7 +1,0 @@
-/* Canonical design token facade. Keep order stable: theme, foundation, layout/component contracts, feature contracts, social contracts. */
-
-@import "./tokens/theme.css";
-@import "./tokens/foundation.css";
-@import "./tokens/layout-components.css";
-@import "./tokens/feature-contracts.css";
-@import "./tokens/social-contracts.css";

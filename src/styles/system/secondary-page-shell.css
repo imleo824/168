@@ -1,9 +1,0 @@
-/* Secondary page shell contract facade.
- *
- * AppPage + PageHeader pages share topbar and fixed-action stability rules.
- * Keep each ownership area in a focused contract file so later
- * page fixes do not depend on broad selector patching.
- */
-
-@import "./secondary-page-topbar.css";
-@import "./secondary-page-actions.css";

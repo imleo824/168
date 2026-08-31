@@ -1,7 +1,0 @@
-@import "tailwindcss";
-
-@import "./styles/layers/foundation.css";
-@import "./styles/layers/system-core.css";
-@import "./styles/layers/components.css";
-@import "./styles/layers/features.css";
-@import "./styles/layers/contracts.css";

@@ -1,7 +1,0 @@
-/* Shared profile header CSS facade.
- * Own profile (/profile) and user space (/user/:id) share cover and identity primitives.
- */
-
-@import "./profile-shared-cover.css";
-@import "./profile-shared-identity.css";
-@import "./profile-shared-avatar-stroke.css";
