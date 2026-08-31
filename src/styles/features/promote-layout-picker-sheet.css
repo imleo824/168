@@ -13,6 +13,17 @@
     background: var(--ui-surface-card);
   }
 
+  /* Desktop PC adaptation: transform sheet into a well-proportioned modal dialog */
+  @media (min-width: 640px) {
+    .promote-mobile-page .promote-picker-sheet,
+    .promote-picker-sheet {
+      max-width: min(calc(100vw - 32px), 640px);
+      max-height: min(80vh, 640px);
+      border-radius: var(--ui-radius-2xl, 1.25rem);
+      box-shadow: var(--ui-shadow-panel);
+    }
+  }
+
   .promote-mobile-page .promote-picker-action-label {
     min-width: 0;
     overflow: hidden;
@@ -26,5 +37,12 @@
       calc(var(--ui-promote-picker-sheet-max-height) - var(--ui-topbar-height) - env(safe-area-inset-bottom)),
       calc(var(--ui-visual-viewport-height) - var(--ui-topbar-height) - env(safe-area-inset-bottom))
     );
+  }
+
+  @media (min-width: 640px) {
+    .promote-mobile-page .promote-picker-scroll,
+    .promote-picker-sheet .promote-picker-scroll {
+      max-height: min(calc(80vh - var(--ui-topbar-height) - 24px), 560px);
+    }
   }
 }

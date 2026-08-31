@@ -195,6 +195,16 @@
     .ui-sheet-overlay {
       align-items: center;
       padding-inline: var(--ui-space-4);
+      padding-block-start: var(--ui-space-6);
+      padding-block-end: var(--ui-space-6);
+    }
+
+    .ui-sheet-panel {
+      max-width: min(calc(100vw - 32px), var(--ui-social-sheet-width, 560px));
+      border-radius: var(--ui-layer-panel-radius, 1.25rem);
+      border: var(--ui-border-width-hairline) solid var(--ui-layer-panel-border);
+      max-height: min(85vh, 720px);
+      box-shadow: var(--ui-shadow-panel);
     }
   }
 

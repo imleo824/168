@@ -333,6 +333,13 @@
     background: var(--ui-surface-card);
   }
 
+  @media (min-width: 640px) {
+    .promote-picker-sheet {
+      max-width: min(calc(100vw - 32px), 640px);
+      border-radius: var(--ui-radius-2xl, 1rem);
+    }
+  }
+
   .promote-picker-sheet .promote-picker-body {
     min-height: 0;
     overflow: hidden;
@@ -405,6 +412,33 @@
     line-height: var(--ui-line-compact);
     text-overflow: ellipsis;
     white-space: nowrap;
+  }
+
+  .promote-picker-sheet .promote-post-card-date {
+    min-width: 0;
+    color: var(--ui-text-muted);
+    font-size: var(--ui-text-xs);
+    line-height: var(--ui-line-compact);
+  }
+
+  .promote-picker-sheet .promote-post-card-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ui-space-1);
+    padding-inline: var(--ui-space-2);
+    padding-block: var(--ui-space-half);
+    border-radius: var(--ui-radius-full);
+    background: var(--ui-action-primary-soft);
+    color: var(--ui-brand-strong, var(--ui-brand));
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-strong);
+    flex-shrink: 0;
+  }
+
+  .promote-picker-sheet .promote-post-card-badge-icon {
+    width: var(--ui-control-icon-xs, 0.875rem);
+    height: var(--ui-control-icon-xs, 0.875rem);
+    flex-shrink: 0;
   }
 
   .promote-picker-sheet .promote-post-card-media-wrap {

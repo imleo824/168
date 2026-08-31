@@ -1,6 +1,6 @@
 import { lazy, Suspense, type ReactNode } from 'react';
 import { format } from 'date-fns';
-import { ChevronRight, Pin } from 'lucide-react';
+import { CheckCircle2, ChevronRight, Pin } from 'lucide-react';
 
 import OptimizedImage from '@/ui/OptimizedImage';
 import { InlineSpinner } from '@/ui/LoadingState';
@@ -198,6 +198,7 @@ export function PromotePostCard({
   const postThumb = getPostThumbnail(post);
   const isSelected = selectedPostId === post.id;
   const bodyText = String(post.content || post.title || '无标题内容').trim();
+  const formattedDate = post.createdAt ? format(new Date(post.createdAt), 'yyyy-MM-dd HH:mm') : null;
 
   return (
     <button
@@ -223,8 +224,18 @@ export function PromotePostCard({
 
         <span className="promote-post-card-body">
           <span className="promote-post-card-title">{bodyText}</span>
+          {formattedDate ? (
+            <span className="promote-post-card-date">{formattedDate}</span>
+          ) : null}
         </span>
       </span>
+
+      {isSelected ? (
+        <span className="promote-post-card-badge">
+          <CheckCircle2 className="promote-post-card-badge-icon" />
+          <span>已选择</span>
+        </span>
+      ) : null}
     </button>
   );
 }
