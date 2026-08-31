@@ -15,8 +15,11 @@
   }
 
   @media (min-width: 1024px) {
-    .app-shell[data-route-surface='user'] :is(.messages-page, .notification-settings-page) {
+    .app-shell[data-route-surface='user'] .messages-page {
       --ui-message-settings-content-max: var(--app-desktop-page-content-width);
+    }
+    .app-shell[data-route-surface='user'] .notification-settings-page {
+      --ui-message-settings-content-max: var(--ui-page-narrow);
     }
   }
 

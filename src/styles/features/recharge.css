@@ -31,6 +31,12 @@
       padding-top: var(--ui-space-4);
     }
 
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-form-card {
+      max-width: var(--ui-page-narrow);
+      width: 100%;
+      margin-inline: auto;
+    }
+
     .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-step--amount {
       display: grid;
       grid-template-columns: minmax(0, 1.35fr) minmax(calc(var(--ui-space-8) * 4), 0.65fr);
