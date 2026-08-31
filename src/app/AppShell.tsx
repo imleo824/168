@@ -15,7 +15,7 @@ import PageHeader from '@/ui/PageHeader';
 import ProfileIconButton from '@/ui/ProfileIconButton';
 import PublishIconButton from '@/ui/PublishIconButton';
 import { PageLoader } from '@/ui/PageLoader';
-import { ErrorBoundary } from '@/ui/ErrorBoundary';
+import { RecoveryGuard } from '@/ui/RecoveryGuard';
 import { HomePageSkeleton, Skeleton } from '@/ui/Skeleton';
 import AuthRequiredState from '@/ui/AuthRequiredState';
 import PageContentShell from '@/ui/PageContentShell';
@@ -305,11 +305,11 @@ function GlobalAuthOverlay() {
   const { isAuthenticating, showAuthModal, closeAuthModal } = useAuth();
   if (!showAuthModal) return null;
   return (
-    <ErrorBoundary resetKeys={[showAuthModal]}>
+    <RecoveryGuard resetKeys={[showAuthModal]}>
       <Suspense fallback={<AuthModalFallback />}>
         <AuthModal isOpen={showAuthModal} onClose={closeAuthModal} isAuthenticating={isAuthenticating} />
       </Suspense>
-    </ErrorBoundary>
+    </RecoveryGuard>
   );
 }
 
@@ -452,7 +452,7 @@ function AppLayout() {
           data-bottom-nav-visible={isUserSurface ? 'true' : undefined}
           data-route-overlay-active={isRouteOverlay ? 'true' : undefined}
         >
-          <ErrorBoundary resetKeys={[location.key, location.pathname]}>
+          <RecoveryGuard resetKeys={[location.key, location.pathname]}>
             <Suspense fallback={location.pathname === APP_ROUTES.home ? <HomePageSkeleton /> : <PageLoader />}>
               <Routes location={location}>
                 <Route path={APP_ROUTES.home} element={<Home />} />
@@ -482,7 +482,7 @@ function AppLayout() {
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </Suspense>
-          </ErrorBoundary>
+          </RecoveryGuard>
         </div>
         {isUserSurface ? <AppBottomNavigation /> : null}
         <GlobalAuthOverlay />

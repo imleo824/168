@@ -10,7 +10,7 @@
       calc(var(--ui-visual-viewport-height) - env(safe-area-inset-top))
     );
     border-radius: var(--ui-sheet-radius) var(--ui-sheet-radius) var(--ui-radius-none) var(--ui-radius-none);
-    background: var(--ui-surface-card);
+    background: var(--ui-layer-panel-surface);
   }
 
   /* Desktop PC adaptation: transform sheet into a well-proportioned modal dialog */

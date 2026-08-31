@@ -1,13 +1,13 @@
-/* Error boundary visual contract.
+/* Recovery guard visual contract.
  *
- * This styles the current ErrorBoundary DOM without depending on route-specific
- * pages. Recovery logic stays in src/ui/ErrorBoundary.tsx; this file only makes
+ * This styles the current RecoveryGuard DOM without depending on route-specific
+ * pages. Recovery logic stays in src/ui/RecoveryGuard.tsx; this file only makes
  * the fallback usable and visually consistent when a runtime or chunk issue is
  * caught.
  */
 
 @layer utilities {
-  .ui-error-boundary {
+  .ui-recovery-guard {
     box-sizing: border-box;
     display: flex;
     width: min(calc(100% - var(--ui-space-6)), var(--ui-error-boundary-max-width));
@@ -26,13 +26,13 @@
     box-shadow: var(--ui-section-card-shadow, none);
   }
 
-  .ui-error-boundary-icon-svg {
+  .ui-recovery-guard-icon-svg {
     width: var(--ui-control-icon-md);
     height: var(--ui-control-icon-md);
     stroke-width: var(--ui-icon-stroke);
   }
 
-  .ui-error-boundary :is(h1, h2) {
+  .ui-recovery-guard :is(h1, h2) {
     margin: var(--ui-space-none);
     color: var(--ui-text-strong);
     font-size: var(--ui-text-title);
@@ -40,7 +40,7 @@
     line-height: var(--ui-line-tight);
   }
 
-  .ui-error-boundary p {
+  .ui-recovery-guard p {
     max-width: calc(var(--ui-space-8) * 9);
     margin-inline: auto;
     color: var(--ui-text-muted);
@@ -48,12 +48,12 @@
     line-height: var(--ui-line-readable);
   }
 
-  .ui-error-boundary .ui-state-actions {
+  .ui-recovery-guard .ui-state-actions {
     width: 100%;
     gap: var(--ui-space-2);
   }
 
-  .ui-error-boundary :is(.ui-action, .ui-button) {
+  .ui-recovery-guard :is(.ui-action, .ui-button) {
     box-sizing: border-box;
     min-width: calc(var(--ui-space-8) * 3 + var(--ui-space-2));
     min-height: var(--ui-control-md);
@@ -66,44 +66,44 @@
     box-shadow: var(--ui-shadow-none);
   }
 
-  .ui-error-boundary :is(.ui-button-primary, .ui-button[data-action-variant='primary'], .ui-button[data-action-variant='brand']) {
+  .ui-recovery-guard :is(.ui-button-primary, .ui-button[data-action-variant='primary'], .ui-button[data-action-variant='brand']) {
     border-color: var(--ui-brand);
     background: var(--ui-brand);
     color: var(--ui-color-white);
   }
 
-  .ui-error-boundary .ui-button[data-action-variant='muted'] {
+  .ui-recovery-guard .ui-button[data-action-variant='muted'] {
     border-color: var(--ui-line-soft);
     background: var(--ui-surface-card);
     color: var(--ui-text-strong);
   }
 
-  .ui-error-boundary :is(.ui-action, .ui-button):hover {
+  .ui-recovery-guard :is(.ui-action, .ui-button):hover {
     border-color: var(--ui-line-medium);
     background: var(--ui-state-hover);
     color: var(--ui-text-strong);
   }
 
-  .ui-error-boundary :is(.ui-button-primary, .ui-button[data-action-variant='primary'], .ui-button[data-action-variant='brand']):hover {
+  .ui-recovery-guard :is(.ui-button-primary, .ui-button[data-action-variant='primary'], .ui-button[data-action-variant='brand']):hover {
     border-color: var(--ui-brand-hover);
     background: var(--ui-brand-hover);
     color: var(--ui-color-white);
   }
 
-  .ui-error-boundary :is(.ui-action, .ui-button) svg {
+  .ui-recovery-guard :is(.ui-action, .ui-button) svg {
     width: var(--ui-control-icon-sm);
     height: var(--ui-control-icon-sm);
     stroke-width: var(--ui-icon-stroke);
   }
 
   @media (max-width: 480px) {
-    .ui-error-boundary {
+    .ui-recovery-guard {
       width: calc(100% - var(--ui-space-4));
       margin-block: var(--ui-space-8);
       padding: var(--ui-space-6) var(--ui-space-4);
     }
 
-    .ui-error-boundary :is(.ui-action, .ui-button) {
+    .ui-recovery-guard :is(.ui-action, .ui-button) {
       flex: 1 1 calc(50% - var(--ui-space-2));
       min-width: calc(var(--ui-space-8) * 3);
     }

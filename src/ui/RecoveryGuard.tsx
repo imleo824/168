@@ -63,7 +63,7 @@ function areResetKeysEqual(prev?: unknown[], next?: unknown[]) {
   return prev.every((value, index) => Object.is(value, next[index]));
 }
 
-export class ErrorBoundary extends React.Component<Props, State> {
+export class RecoveryGuard extends React.Component<Props, State> {
   state: State = {
     hasError: false,
     error: null,
@@ -81,7 +81,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     this.props.onError?.(error, errorInfo);
-    console.error('Error caught by boundary:', error, errorInfo);
+    console.error('Error caught by recovery guard:', error, errorInfo);
 
     if (isRecoverableChunkError(error) && shouldReloadForChunkError()) {
       markChunkReload();
@@ -98,12 +98,12 @@ export class ErrorBoundary extends React.Component<Props, State> {
       const { fallback } = this.props;
       if (fallback !== undefined) return fallback;
       return (
-        <div className="ui-error-boundary">
+        <div className="ui-recovery-guard">
           <StateBlock
             title="出错了"
             description="页面遇到了意外错误，可以重试或刷新页面。"
             tone="error"
-            icon={<AlertCircle className="ui-error-boundary-icon-svg" />}
+            icon={<AlertCircle className="ui-recovery-guard-icon-svg" />}
             action={
               <ActionButton type="button" onClick={this.reset} variant="muted">
                 重试

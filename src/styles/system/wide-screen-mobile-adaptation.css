@@ -346,7 +346,7 @@
     .app-desktop-sidebar-context {
       display: grid;
       gap: var(--ui-space-4);
-      margin-top: var(--ui-space-4);
+      margin-top: auto;
       padding-top: var(--ui-space-4);
       border-top: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
     }

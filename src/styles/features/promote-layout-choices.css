@@ -330,7 +330,7 @@
     width: 100%;
     max-width: min(100%, var(--ui-promote-page-content-max));
     border-radius: var(--ui-sheet-radius) var(--ui-sheet-radius) 0 0;
-    background: var(--ui-surface-card);
+    background: var(--ui-layer-panel-surface);
   }
 
   @media (min-width: 640px) {
