@@ -1,5 +1,5 @@
 import { BrowserRouter as Router, Navigate, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
 import { lazy, Suspense, useEffect, useMemo, type ReactNode } from 'react';
 import { Bell, CirclePlus, House, Info, ShieldCheck, TrendingUp, UserRound } from 'lucide-react';
@@ -10,6 +10,7 @@ import { useIsDesktopViewport } from '@/hooks/useIsDesktopViewport';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import { useScrollLock } from '@/utils/scrollLock';
 import { primePostCreateComposerFocus } from '@/utils/postCreateFocusPrime';
+import { getNotificationsList } from '@/services/api';
 import { ApiError } from '@/services/apiCore';
 import PageHeader from '@/ui/PageHeader';
 import ProfileIconButton from '@/ui/ProfileIconButton';
@@ -320,6 +321,24 @@ function AppDesktopSidebar() {
   const location = useLocation();
   const { onlineCountText } = useOnlinePresence();
 
+  const notificationsQuery = useQuery({
+    queryKey: ['me', 'notifications', 'ALL'],
+    queryFn: () => getNotificationsList({ limit: 1 }),
+    enabled: Boolean(user?.id),
+    staleTime: 30_000,
+  });
+  const unreadCount = notificationsQuery.data?.unreadCount || 0;
+
+  const desktopNavItems = useMemo(() => {
+    if (user?.role === 'ADMIN') {
+      return [
+        ...DESKTOP_NAV_ITEMS,
+        { to: '/168wc', label: '管理后台', icon: ShieldCheck, end: false },
+      ];
+    }
+    return DESKTOP_NAV_ITEMS;
+  }, [user?.role]);
+
   const handleQuickPost = () => {
     if (location.pathname === APP_ROUTES.create) return;
     warmupNavigationIntent('create');
@@ -342,8 +361,9 @@ function AppDesktopSidebar() {
           </span>
         </NavLink>
         <nav className="app-desktop-nav flex flex-col gap-1" aria-label="桌面导航">
-          {DESKTOP_NAV_ITEMS.map((item) => {
+          {desktopNavItems.map((item) => {
             const Icon = item.icon;
+            const isMessages = item.to === APP_ROUTES.messages;
             return (
               <NavLink
                 key={item.to}
@@ -358,7 +378,12 @@ function AppDesktopSidebar() {
                 <span className="app-desktop-nav-icon-container flex items-center justify-center">
                   <Icon className="app-desktop-nav-icon" aria-hidden="true" />
                 </span>
-                <span className="app-desktop-nav-label">{item.label}</span>
+                <span className="app-desktop-nav-label flex-1">{item.label}</span>
+                {isMessages && unreadCount > 0 ? (
+                  <span className="app-desktop-nav-badge" aria-label={`${unreadCount}条未读消息`}>
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                ) : null}
               </NavLink>
             );
           })}

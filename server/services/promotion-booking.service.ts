@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { randomUUID } from 'crypto';
 
 import prisma, { isDbConfigured } from '../db';

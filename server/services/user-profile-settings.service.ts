@@ -1,4 +1,4 @@
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import prisma, { isDbConfigured } from '../db';
 
 export async function updateUserBio(userId: string, bio: string) {

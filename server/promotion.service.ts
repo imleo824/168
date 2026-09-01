@@ -1,5 +1,5 @@
 import prisma, { isDbConfigured } from './db';
-import bcrypt from 'bcrypt';
+import bcrypt from 'bcryptjs';
 import { randomUUID } from 'crypto';
 import { PromotionType, TransactionAction, getPromotionTypeLabel } from '../shared/domain';
 import { PLATFORM_TIMEZONE } from './platform-time';

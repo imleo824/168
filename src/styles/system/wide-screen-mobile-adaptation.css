@@ -437,6 +437,23 @@
       text-overflow: ellipsis;
     }
 
+    .app-desktop-nav-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 1.25rem;
+      height: 1.25rem;
+      padding-inline: 0.375rem;
+      border-radius: var(--ui-radius-full);
+      background: var(--ui-brand);
+      color: var(--ui-color-white);
+      font-size: var(--ui-text-2xs);
+      font-weight: var(--ui-font-weight-display);
+      line-height: 1;
+      flex-shrink: 0;
+      margin-left: auto;
+    }
+
     .app-desktop-nav-item:hover {
       background: var(--ui-state-hover);
       color: var(--ui-text-strong);
