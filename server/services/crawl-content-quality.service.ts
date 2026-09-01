@@ -106,6 +106,18 @@ function canonicalContent(raw: unknown) {
   return compact(cleanCrawlContent(raw));
 }
 
+const DIRECT_REJECT_KEYWORDS = ['官网', '网址', '.com', '下载', 'TRX', '注册'];
+
+function checkAdKeywords(raw: string): { isAd: boolean; keyword?: string } {
+  const text = String(raw || '');
+  for (const keyword of DIRECT_REJECT_KEYWORDS) {
+    if (text.includes(keyword)) {
+      return { isAd: true, keyword };
+    }
+  }
+  return { isAd: false };
+}
+
 function checkDefinitiveSpam(raw: string): { isSpam: boolean; reason: string } {
   const text = String(raw || '');
   for (const entry of DEFINITIVE_SPAM_PATTERNS) {
@@ -234,7 +246,7 @@ function shouldStartTail(line: string, index: number, total: number, keptCount: 
 function isPromoLine(line: string) {
   const value = compact(line);
   if (!value) return true;
-  if (/^(?:广告合作|商务合作|投稿|投稿联系|爆料投稿|免费发布|推广|置顶|互推|频道合作|频道导航|资源群|交流群|官方群|加入频道|订阅频道|进群交流)[:：\s]/i.test(value)) return true;
+  if (/^(?:广告合作|商务合作|投稿|投稿联系|爆料投稿|免费发布|推广|置顶|互推|频道合作|频道导航|频道矩阵|频道客服|官方客服|资源群|交流群|官方群|加入频道|订阅频道|进群交流)[:：\s]/i.test(value)) return true;
   if (/^(?:点击|扫码|长按|复制链接|打开链接|关注|订阅|进群|加群|认准唯一).{0,60}$/i.test(value)) return true;
   return false;
 }
@@ -245,7 +257,7 @@ function isBoilerplateLine(line: string, hasContentAbove: boolean) {
   if (isTelegramUiLine(value)) return true;
   if (/^(?:VIEW IN TELEGRAM|Please open Telegram|查看原文|打开 Telegram).*$/i.test(value)) return true;
   if (hasContentAbove && /^(?:@[A-Za-z0-9_]{4,64}|https?:\/\/\S+|t\.me\/\S+)$/i.test(value)) return true;
-  if (/(?:认准唯一|绝无小号|没有任何小号|防假冒|防冒充|谨防冒充|谨防上当|唯一客服|唯一账号|唯一联系方式|广告位出租|招租联系)/i.test(value)) return true;
+  if (/(?:认准唯一|绝无小号|没有任何小号|防假冒|防冒充|谨防冒充|谨防上当|唯一客服|唯一账号|唯一联系方式|广告位出租|招租联系|频道客服|官方客服|频道导航|频道矩阵)/i.test(value)) return true;
   if (hasContentAbove && /^(?:资金交易.*注意甄别|二手物品.*私下交易|切勿私下交易|本群不做担保|本频道不承担|免责声明).*$/i.test(value)) return true;
   return false;
 }
@@ -283,7 +295,7 @@ function cleanBody(rawContent: string): BodyCleanResult {
       tailLines += 1;
       continue;
     }
-    if (isSeparatorLine(rawLine)) {
+    if (isSeparatorLine(rawLine) || isTelegramUiLine(rawLine)) {
       boilerplateLines += 1;
       continue;
     }
@@ -291,7 +303,7 @@ function cleanBody(rawContent: string): BodyCleanResult {
       promoLines += 1;
       continue;
     }
-    if (!contact && !isBoilerplateLine(rawLine, kept.length > 0)) {
+    if (!contact) {
       contact = detectContactFromLine(rawLine);
     }
 
@@ -375,6 +387,22 @@ export function filterCrawlContentBeforePublish<T extends {
       cleanedContent: '',
       contact: '',
       flags: ['definitive_spam_detected', `reason:${spamCheck.reason}`],
+      removed: { emojiCount: 0, emojiRatio: 0, contactLines: 0, promoLines: 0, boilerplateLines: 0, tailLines: 0, duplicateLines: 0 },
+      diagnostics: { canonicalLength: textLength(canonical), cleanedLength: 0, imageCount, rawLineCount: canonical.split('\n').filter(Boolean).length, keptLineCount: 0, removedLineRatio: 1, repeatedLineRatio: 0 },
+    };
+  }
+
+  // 1.5. Direct ad keyword check
+  const adCheck = checkAdKeywords(combinedText);
+  if (adCheck.isAd) {
+    return {
+      shouldPublish: false,
+      reason: 'ad_keyword',
+      score: 0,
+      cleanedTitle: cleanTitle(rawTitle, canonical),
+      cleanedContent: '',
+      contact: '',
+      flags: ['direct_reject_keyword', `keyword:${adCheck.keyword}`],
       removed: { emojiCount: 0, emojiRatio: 0, contactLines: 0, promoLines: 0, boilerplateLines: 0, tailLines: 0, duplicateLines: 0 },
       diagnostics: { canonicalLength: textLength(canonical), cleanedLength: 0, imageCount, rawLineCount: canonical.split('\n').filter(Boolean).length, keptLineCount: 0, removedLineRatio: 1, repeatedLineRatio: 0 },
     };

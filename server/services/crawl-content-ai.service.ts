@@ -328,7 +328,7 @@ export async function buildCrawlExtract(input: {
   const fallbackTitle = originalTitle || '自动抓取内容';
   const detectedContact = cleanString(input.detectedContact, 120);
   const system = '你是分类信息平台的高级编辑与结构化提取器。数据库 Category 是分类唯一事实源，后台 Meta Schema 是 Meta 唯一事实源。主要任务是精准提取发布者联系方式和符合 Schema 规范的 Meta 属性；若原文缺乏标题时则生成精炼标题。不得修改分类；不得新增未配置的 Meta 字段；只输出合法的纯 JSON 对象，不要 Markdown 格式。';
-  const user = `输出 JSON 字段包含：
+  const user = `输出字段只能是 title、contact、meta：
 1. "title": 若原内容缺乏有效标题，请提炼精炼自然标题（10-40字）；若原内容已有明确标题可直接输出原标题。
 2. "contact": 仅提取该条信息真正发布者（如HR、房东、卖家）的联系方式（优先提取 @telegram_handle、WhatsApp、微信、电话）；严格排除频道管理、频道机器人、投稿入口、广告赞助商的联系方式；若无明确发布者联系方式则输出空字符串 ""。
 3. "meta": 严格符合后台 Meta Schema 的字段键值对对象。
@@ -337,7 +337,7 @@ export async function buildCrawlExtract(input: {
 Schema版本：${context.schema?.schemaVersion ?? null}
 ${schemaInstruction(context)}
 
-SOURCE_DATA 是经过质量清洗的标题与正文；meta 只能基于 SOURCE_DATA 进行语义提炼。
+SOURCE_DATA 是经过质量清洗的标题与正文；title 和 meta 只能基于 SOURCE_DATA 判断进行语义提炼。
 正文内容由系统保留，禁止输出 content、category、categoryName 或 location 等外层未定义字段。
 来源渠道：${input.sourceName || ''}
 <SOURCE_DATA>
@@ -396,9 +396,8 @@ ${sourceContent}
   const contact = aiContact || detectedContact;
   const contactSource = aiContact ? 'ai' : detectedContact ? 'quality_raw_contact' : 'none';
   const meta = normalized.meta as Prisma.InputJsonObject;
-  const finalTitle = originalTitle || cleanString(parsed?.title, 80) || '自动抓取内容';
   return {
-    title: finalTitle,
+    title: cleanString(parsed?.title, 80) || fallbackTitle,
     content: publishContent,
     categoryName: context.category.name,
     location: locationFromMeta(normalized.meta, context.schema),

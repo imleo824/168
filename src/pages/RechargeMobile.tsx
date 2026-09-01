@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Copy, CheckCircle2, ArrowRight } from 'lucide-react';
+import { Copy, CheckCircle2, ArrowRight, Coins, History, ShieldCheck, Zap, RefreshCw } from 'lucide-react';
 import { useAsyncFlow } from '@/hooks/useAsyncFlow';
 
 import SEO from '@/platform/SEO';
@@ -63,6 +63,39 @@ function normalizeReturnPath(value: unknown) {
   return path.startsWith('/') ? path : null;
 }
 
+function getOrderStatusBadge(status: RechargeOrder['status']) {
+  switch (status) {
+    case 'CREDITED':
+      return { label: '已到账', className: 'recharge-status-badge--success' };
+    case 'WAITING_PAYMENT':
+      return { label: '待转账', className: 'recharge-status-badge--warning' };
+    case 'MANUAL_REVIEW':
+      return { label: '审核中', className: 'recharge-status-badge--info' };
+    case 'BELOW_MINIMUM':
+      return { label: '低于最小额', className: 'recharge-status-badge--danger' };
+    case 'EXPIRED':
+    case 'CANCELLED':
+    case 'FAILED':
+    default:
+      return { label: '已失效', className: 'recharge-status-badge--muted' };
+  }
+}
+
+function formatOrderTime(timeStr?: string) {
+  if (!timeStr) return '';
+  try {
+    const d = new Date(timeStr);
+    if (isNaN(d.getTime())) return timeStr;
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return `${month}-${day} ${hours}:${minutes}`;
+  } catch {
+    return timeStr;
+  }
+}
+
 export default function RechargeMobile() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -92,6 +125,7 @@ export default function RechargeMobile() {
   const [loadingDeposit, setLoadingDeposit] = useState(false);
   const [rechargeConfig, setRechargeConfig] = useState({ minUsdt: 1, pointsPerUsdt: 10 });
   const [currentOrderId, setCurrentOrderId] = useState('');
+  const [orders, setOrders] = useState<RechargeOrder[]>([]);
   const knownOrderStatusRef = useRef(new Map<string, string>());
   const hasLoadedOrdersRef = useRef(false);
   const copiedResetTimerRef = useRef<number | null>(null);
@@ -115,10 +149,12 @@ export default function RechargeMobile() {
     if (!user) return;
 
     try {
-      const payload = await getRechargeOrders({ limit: 5 }, { signal });
+      const payload = await getRechargeOrders({ limit: 10 }, { signal });
       const nextOrders = parseRechargeOrdersPayload(payload);
 
       if (!isActive()) return;
+
+      setOrders(nextOrders);
 
       if (nextOrders.length > 0 && !depositError) {
         setDepositError('');
@@ -256,6 +292,24 @@ export default function RechargeMobile() {
     void runRefreshOrderStatus();
   }, [createOrderBusy, currentFlowBusy, runCreateOrder, runRefreshOrderStatus, step]);
 
+  const resumeActiveOrder = useCallback((order: RechargeOrder) => {
+    setCurrentOrderId(order.id);
+    setAmount(String(order.usdtAmount));
+    if (order.toAddress) {
+      setDepositInfo((prev) => ({
+        address: order.toAddress!,
+        chain: order.chain || 'TRON',
+        token: order.token || 'USDT',
+        network: 'TRC20',
+        contractAddress: '',
+        pointsPerUsdt: currentPointsPerUsdt,
+        minUsdt: currentMinUsdt,
+        ...prev,
+      }));
+    }
+    setStep('INSTRUCTIONS');
+  }, [currentMinUsdt, currentPointsPerUsdt]);
+
   useEffect(() => {
     return () => {
       if (copiedResetTimerRef.current) {
@@ -341,6 +395,7 @@ export default function RechargeMobile() {
       }
 
       setCopied(true);
+      showToast('收款地址已复制到剪贴板', 'success');
       copiedResetTimerRef.current = window.setTimeout(() => {
         setCopied(false);
         copiedResetTimerRef.current = null;
@@ -358,6 +413,8 @@ export default function RechargeMobile() {
     setAmount(value.toString());
   };
 
+  const presetAmounts = [10, 50, 100, 500, 1000, 2000];
+
   return (
     <AppPage mobileAddressBarScroll className="recharge-page">
       <SEO title="充积分｜推推" description="推推充积分，支持通过 TRC-20 USDT 兑换积分。" noindex />
@@ -368,6 +425,49 @@ export default function RechargeMobile() {
       />
 
       <PageContentShell className="recharge-shell ui-app-page-main">
+        {/* 顶部账户积分与汇率概览 */}
+        <SurfaceSectionCard
+          as="section"
+          tone="solid"
+          paddingClassName="recharge-balance-card-surface"
+          className="recharge-balance-card"
+          ariaLabel="当前账户积分"
+        >
+          <div className="recharge-balance-header">
+            <div className="recharge-balance-info">
+              <div className="recharge-balance-label-row">
+                <Coins className="recharge-balance-icon" aria-hidden="true" />
+                <span className="recharge-balance-label">当前账户积分</span>
+              </div>
+              <div className="recharge-balance-value">
+                {user.points !== undefined ? user.points.toLocaleString() : 0}
+                <span className="recharge-balance-unit">积分</span>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => navigate('/transaction-history')}
+              className="recharge-balance-records-link"
+            >
+              <History className="recharge-records-icon" aria-hidden="true" />
+              <span>积分明细</span>
+            </button>
+          </div>
+
+          <div className="recharge-balance-meta">
+            <div className="recharge-meta-item">
+              <Zap className="recharge-meta-icon" aria-hidden="true" />
+              <span>1 USDT = {currentPointsPerUsdt} 积分</span>
+            </div>
+            <div className="recharge-meta-item">
+              <ShieldCheck className="recharge-meta-icon" aria-hidden="true" />
+              <span>TRC-20 自动秒级到账</span>
+            </div>
+          </div>
+        </SurfaceSectionCard>
+
+        {/* 充值主表单 / 步骤区域 */}
         <SurfaceSectionCard
           as="section"
           tone="solid"
@@ -380,8 +480,8 @@ export default function RechargeMobile() {
               <div className="recharge-step recharge-step--amount">
                 <div className="recharge-field">
                   <div className="recharge-section-heading">
-                    <label className="recharge-label">充值金额</label>
-                    <span className="recharge-section-hint">{currentPointsPerUsdt} 积分 / USDT</span>
+                    <label className="recharge-label">充值金额 (USDT)</label>
+                    <span className="recharge-section-hint">最低 {currentMinUsdt} USDT</span>
                   </div>
 
                   <div className="recharge-amount-field">
@@ -400,39 +500,48 @@ export default function RechargeMobile() {
                     {amount && (
                       <div className="recharge-estimate">
                         <span className="recharge-estimate-value">
-                          +{Math.floor(parseFloat(amount) * currentPointsPerUsdt)}
+                          +{Math.floor(parseFloat(amount) * currentPointsPerUsdt).toLocaleString()}
                         </span>
-                        <span className="recharge-estimate-label">预计获得</span>
+                        <span className="recharge-estimate-label">预计获得积分</span>
                       </div>
                     )}
                   </div>
                 </div>
 
-                <div className="recharge-preset-grid" aria-label="快捷金额">
-                  {[100, 500, 1000].map((val) => (
-                    <button
-                      key={val}
-                      type="button"
-                      onClick={() => quickSelectAmount(val)}
-                      disabled={createOrderBusy}
-                      className={`ui-amount-option ${amount === val.toString() ? 'ui-amount-option-active' : 'ui-amount-option-idle'}`}
-                    >
-                      {val} U
-                    </button>
-                  ))}
+                <div className="recharge-preset-section">
+                  <span className="recharge-preset-label">快捷选择数量</span>
+                  <div className="recharge-preset-grid" aria-label="快捷金额">
+                    {presetAmounts.map((val) => {
+                      const isActive = amount === val.toString();
+                      return (
+                        <button
+                          key={val}
+                          type="button"
+                          onClick={() => quickSelectAmount(val)}
+                          disabled={createOrderBusy}
+                          className={`ui-amount-option ${isActive ? 'ui-amount-option-active' : 'ui-amount-option-idle'}`}
+                        >
+                          <span className="ui-amount-val">{val} U</span>
+                          <span className="ui-amount-pts">+{val * currentPointsPerUsdt} 积分</span>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
 
-                <p className="recharge-note">仅支持 TRC-20 USDT，请确认金额和网络。</p>
+                <div className="recharge-notice-box">
+                  <p className="recharge-note">仅支持 TRON (TRC-20) USDT 转账，请确认转账网络及金额。</p>
+                </div>
 
                 <ActionButton disabled={currentFlowBusy || createOrderBusy} type="submit" variant="brand" className="recharge-submit">
                   {createOrderBusy ? (
                     <span className="recharge-action-status">
                       <InlineSpinner size="md" className="recharge-action-spinner" />
-                      生成中
+                      生成收款信息...
                     </span>
                   ) : (
                     <>
-                      <span>生成收款信息</span>
+                      <span>生成专属收款地址</span>
                       <ArrowRight className="recharge-submit-icon" />
                     </>
                   )}
@@ -452,9 +561,14 @@ export default function RechargeMobile() {
                         </span>
                         <span className="ui-token-panel-unit">USDT</span>
                       </div>
-                      <span className="recharge-token-network-badge">
-                        TRC-20
-                      </span>
+                      <div className="recharge-token-side">
+                        <span className="recharge-token-points-badge">
+                          +{Math.floor(parseFloat(amount || '0') * currentPointsPerUsdt).toLocaleString()} 积分
+                        </span>
+                        <span className="recharge-token-network-badge">
+                          TRC-20
+                        </span>
+                      </div>
                     </div>
                   </div>
 
@@ -476,30 +590,51 @@ export default function RechargeMobile() {
                           </div>
                         )}
                       </div>
-                      <p className="recharge-network-note">扫码或复制地址完成转账</p>
+                      <p className="recharge-network-note">扫码或复制下方地址完成转账</p>
                     </div>
 
-                    <div className="recharge-address-row">
-                      <div className="ui-mono-value recharge-address-value">
-                        {depositError || usdtAddress || '暂无可用收款地址'}
+                    <div className="recharge-address-wrap">
+                      <label className="recharge-address-label">专属 TRC-20 收款地址</label>
+                      <div className="recharge-address-row">
+                        <div className="ui-mono-value recharge-address-value">
+                          {depositError || usdtAddress || '暂无可用收款地址'}
+                        </div>
+                        <ActionButton
+                          type="button"
+                          onClick={handleCopy}
+                          disabled={!usdtAddress || Boolean(depositError)}
+                          variant={usdtAddress && !depositError ? 'primary' : 'disabled'}
+                          size="sm"
+                          className="recharge-copy-button"
+                          aria-label={copied ? '收款地址已复制' : '复制收款地址'}
+                        >
+                          {copied ? (
+                            <>
+                              <CheckCircle2 className="recharge-copy-icon recharge-copy-icon--success" />
+                              <span>已复制</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="recharge-copy-icon" />
+                              <span>复制</span>
+                            </>
+                          )}
+                        </ActionButton>
                       </div>
-                      <ActionButton
-                        type="button"
-                        onClick={handleCopy}
-                        disabled={!usdtAddress || Boolean(depositError)}
-                        variant={usdtAddress && !depositError ? 'primary' : 'disabled'}
-                        size="sm"
-                        className="recharge-copy-button recharge-copy-button--icon-only"
-                        aria-label={copied ? '收款地址已复制' : '复制收款地址'}
-                        title={copied ? '收款地址已复制' : '复制收款地址'}
-                      >
-                        {copied ? <CheckCircle2 className="recharge-copy-icon recharge-copy-icon--success" /> : <Copy className="recharge-copy-icon" />}
-                      </ActionButton>
                     </div>
                   </div>
                 </div>
 
-                <div className="recharge-footer-action">
+                <div className="recharge-actions-row">
+                  <button
+                    type="button"
+                    onClick={() => setStep('AMOUNT')}
+                    className="recharge-change-amount-btn"
+                    disabled={currentFlowBusy}
+                  >
+                    更换充值金额
+                  </button>
+
                   <ActionButton
                     disabled={currentFlowBusy}
                     type="submit"
@@ -509,16 +644,91 @@ export default function RechargeMobile() {
                     {currentFlowBusy ? (
                       <span className="recharge-action-status">
                         <InlineSpinner size="md" className="recharge-action-spinner" />
-                        查询中
+                        查询区块确认中...
                       </span>
-                    ) : '刷新到账状态'}
+                    ) : (
+                      <>
+                        <RefreshCw className="recharge-submit-icon" />
+                        <span>刷新到账状态</span>
+                      </>
+                    )}
                   </ActionButton>
                 </div>
               </div>
             )}
           </form>
         </SurfaceSectionCard>
+
+        {/* 最近充值订单历史记录 */}
+        {orders.length > 0 ? (
+          <SurfaceSectionCard
+            as="section"
+            tone="solid"
+            paddingClassName="recharge-orders-card-surface"
+            className="recharge-orders-card"
+            ariaLabel="最近充值记录"
+          >
+            <div className="recharge-orders-header">
+              <div className="recharge-orders-title-wrap">
+                <History className="recharge-orders-title-icon" aria-hidden="true" />
+                <h3 className="recharge-orders-title">最近充值订单</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => void loadOrders({ showBusyHint: true })}
+                disabled={isLoadingOrders}
+                className="recharge-orders-refresh-btn"
+                title="刷新订单列表"
+              >
+                <RefreshCw className={`recharge-orders-refresh-icon ${isLoadingOrders ? 'animate-spin' : ''}`} />
+                <span>刷新</span>
+              </button>
+            </div>
+
+            <div className="recharge-orders-list">
+              {orders.map((ord) => {
+                const badge = getOrderStatusBadge(ord.status);
+                const isActive = isRechargeOrderActive(ord);
+
+                return (
+                  <div key={ord.id} className="recharge-order-item">
+                    <div className="recharge-order-main">
+                      <div className="recharge-order-primary">
+                        <span className="recharge-order-amount">{ord.usdtAmount} USDT</span>
+                        <span className="recharge-order-pts">+{ord.pointsGained} 积分</span>
+                      </div>
+                      <div className="recharge-order-sub">
+                        <span className="recharge-order-time">{formatOrderTime(ord.createdAt)}</span>
+                        {ord.txHash ? (
+                          <span className="recharge-order-hash" title={ord.txHash}>
+                            Hash: {ord.txHash.slice(0, 6)}...{ord.txHash.slice(-4)}
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+
+                    <div className="recharge-order-side">
+                      <span className={`recharge-status-badge ${badge.className}`}>
+                        {badge.label}
+                      </span>
+                      {isActive && step === 'AMOUNT' ? (
+                        <button
+                          type="button"
+                          onClick={() => resumeActiveOrder(ord)}
+                          className="recharge-order-resume-btn"
+                        >
+                          查看二维码
+                        </button>
+                      ) : null}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </SurfaceSectionCard>
+        ) : null}
       </PageContentShell>
     </AppPage>
   );
 }
+

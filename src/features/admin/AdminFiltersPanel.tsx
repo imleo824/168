@@ -97,14 +97,17 @@ export function AdminFiltersPanel({
   const renderMobileSearchHeader = () => {
     if (!hasSearchKeyword) return null;
 
-    let placeholder = "搜索...";
-    if (activeTab === 'content') placeholder = "搜索标题或正文";
-    else if (activeTab === 'users') placeholder = "搜索昵称或ID";
-    else if (activeTab === 'orders') placeholder = "搜索用户/订单/哈希";
-    else if (activeTab === 'deposit-addresses' && activeDepositAddressSection === 'list') placeholder = "搜索地址、用户或ID";
-    else if (activeTab === 'promotions') placeholder = "搜索ID/用户/跳转链接";
-    else if (activeTab === 'transactions') placeholder = "搜索交易说明或用户";
-    else if (activeTab === 'chat') placeholder = "搜索消息、昵称或用户ID";
+    const placeholderMap: Record<string, string> = {
+      content: '搜索标题或正文',
+      users: '搜索昵称或ID',
+      orders: '搜索用户/订单/哈希',
+      promotions: '搜索ID/用户/跳转链接',
+      transactions: '搜索交易说明或用户',
+      chat: '搜索消息、昵称或用户ID',
+    };
+    const placeholder = (activeTab === 'deposit-addresses' && activeDepositAddressSection === 'list')
+      ? '搜索地址、用户或ID'
+      : (placeholderMap[activeTab] || '搜索...');
 
     return (
       <div className="flex items-center gap-2 w-full lg:hidden mb-2">

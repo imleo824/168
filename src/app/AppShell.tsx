@@ -10,8 +10,8 @@ import { useIsDesktopViewport } from '@/hooks/useIsDesktopViewport';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import { useScrollLock } from '@/utils/scrollLock';
 import { primePostCreateComposerFocus } from '@/utils/postCreateFocusPrime';
+import { ApiError, fetcher } from '@/services/apiCore';
 import { getNotificationsList } from '@/services/api';
-import { ApiError } from '@/services/apiCore';
 import PageHeader from '@/ui/PageHeader';
 import ProfileIconButton from '@/ui/ProfileIconButton';
 import PublishIconButton from '@/ui/PublishIconButton';
@@ -399,7 +399,7 @@ function AppDesktopSidebar() {
           <span>立即发推</span>
         </button>
       </div>
-      <section className="app-desktop-sidebar-context flex flex-col gap-3" aria-label="用户与状态">
+      <section className="app-desktop-sidebar-context" aria-label="当前在线">
         {user ? (
           <NavLink
             to={APP_ROUTES.profile}

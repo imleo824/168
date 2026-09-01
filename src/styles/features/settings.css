@@ -126,4 +126,233 @@
     height: var(--ui-icon-action-sm-icon-size);
     stroke-width: var(--ui-icon-action-stroke);
   }
+
+  /* 通知设置扩展页面样式 */
+  .notification-settings-page {
+    min-height: var(--app-layout-vh);
+    background: var(--ui-surface-page);
+    color: var(--ui-text-primary);
+  }
+
+  .notification-settings-main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-4);
+    max-width: var(--ui-page-narrow, 640px);
+    margin-inline: auto;
+    padding-inline: var(--ui-page-padding-x);
+    padding-top: var(--ui-space-2);
+    padding-bottom: var(--ui-page-bottom-safe);
+  }
+
+  /* 状态 Banner 卡片 */
+  .notification-status-banner {
+    border-radius: var(--ui-radius-2xl, 1rem);
+    background: linear-gradient(135deg, var(--ui-surface-card) 0%, var(--ui-surface-card-solid, var(--ui-surface-card)) 100%);
+    border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+  }
+
+  .notification-status-banner-surface {
+    padding: var(--ui-space-4);
+  }
+
+  .notification-status-header {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-3);
+  }
+
+  .notification-status-icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: var(--ui-radius-xl);
+    background: var(--ui-social-surface-muted, var(--ui-surface-muted));
+    flex-shrink: 0;
+  }
+
+  .notification-status-icon {
+    width: 1.35rem;
+    height: 1.35rem;
+    color: var(--ui-text-muted);
+  }
+
+  .notification-status-icon--active {
+    color: var(--ui-brand);
+    animation: pulse 2s infinite;
+  }
+
+  .notification-status-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .notification-status-title {
+    margin: var(--ui-space-none);
+    color: var(--ui-text-strong);
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-tight);
+  }
+
+  .notification-status-desc {
+    margin: var(--ui-space-none);
+    color: var(--ui-text-subtle);
+    font-size: var(--ui-text-xs);
+    line-height: var(--ui-line-compact);
+  }
+
+  .notification-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.625rem;
+    border-radius: var(--ui-radius-full);
+    background: var(--ui-social-surface-muted, var(--ui-surface-muted));
+    color: var(--ui-text-muted);
+    font-size: var(--ui-text-2xs);
+    font-weight: var(--ui-font-weight-strong);
+    flex-shrink: 0;
+  }
+
+  .notification-status-pill--active {
+    background: var(--ui-success-bg);
+    color: var(--ui-success);
+  }
+
+  .notification-pill-icon {
+    width: 0.75rem;
+    height: 0.75rem;
+  }
+
+  /* 分组卡片与标题 */
+  .notification-settings-section {
+    border-radius: var(--ui-radius-2xl, 1rem);
+    border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+  }
+
+  .notification-settings-section-surface {
+    padding: var(--ui-space-3) var(--ui-space-4);
+  }
+
+  .notification-group-title {
+    margin: var(--ui-space-none) var(--ui-space-none) var(--ui-space-2) var(--ui-space-none);
+    color: var(--ui-text-muted);
+    font-size: var(--ui-text-2xs);
+    font-weight: var(--ui-font-weight-strong);
+    text-transform: uppercase;
+    letter-spacing: var(--ui-tracking-wide);
+  }
+
+  .notification-settings-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-1);
+  }
+
+  .notification-settings-item {
+    padding-block: var(--ui-space-2);
+  }
+
+  .notification-settings-item-content {
+    gap: var(--ui-space-3);
+  }
+
+  .notification-settings-item-title {
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-medium);
+  }
+
+  .notification-settings-item-description {
+    font-size: var(--ui-text-xs);
+    color: var(--ui-text-subtle);
+  }
+
+  /* 各类型通知图标 Badge 背景 */
+  .notification-icon-badge {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--ui-radius-lg);
+    flex-shrink: 0;
+  }
+
+  .notification-icon-svg {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
+  .notif-icon-blue { background: var(--ui-brand-soft-10); color: var(--ui-brand); }
+  .notif-icon-purple { background: var(--ui-brand-soft-10); color: var(--ui-brand); }
+  .notif-icon-green { background: var(--ui-success-bg); color: var(--ui-success); }
+  .notif-icon-rose { background: var(--ui-brand-soft-10); color: var(--ui-danger); }
+  .notif-icon-emerald { background: var(--ui-success-bg); color: var(--ui-success); }
+  .notif-icon-amber { background: var(--ui-warning-bg); color: var(--ui-warning); }
+  .notif-icon-indigo { background: var(--ui-brand-soft-10); color: var(--ui-brand); }
+
+  /* 优雅的 Toggle 开关 */
+  .notification-settings-switch {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    width: 2.75rem;
+    height: 1.5rem;
+    border-radius: var(--ui-radius-full);
+    background: var(--ui-line-medium);
+    padding: 2px;
+    cursor: pointer;
+    transition: background-color var(--ui-duration-fast) var(--ease-standard);
+  }
+
+  .notification-settings-switch--sm {
+    width: 2.35rem;
+    height: 1.35rem;
+  }
+
+  .notification-settings-switch[data-checked="true"] {
+    background: var(--ui-brand);
+  }
+
+  .notification-settings-switch-thumb {
+    display: block;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: var(--ui-radius-full);
+    background: var(--ui-color-white);
+    box-shadow: var(--ui-shadow-card);
+    transition: transform var(--ui-duration-fast) var(--ease-standard);
+  }
+
+  .notification-settings-switch--sm .notification-settings-switch-thumb {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+
+  .notification-settings-switch[data-checked="true"] .notification-settings-switch-thumb {
+    transform: translateX(1.25rem);
+  }
+
+  .notification-settings-switch--sm[data-checked="true"] .notification-settings-switch-thumb {
+    transform: translateX(1rem);
+  }
+
+  /* Desktop PC Workspace Responsive Grid */
+  @media (min-width: 1024px) {
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .notification-settings-page .notification-settings-main {
+      max-width: var(--app-desktop-page-content-width, 960px);
+      gap: var(--ui-space-5);
+      padding-top: var(--ui-space-4);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .notification-settings-section-surface {
+      padding: var(--ui-space-4) var(--ui-space-5);
+    }
+  }
 }

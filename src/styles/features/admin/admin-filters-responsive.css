@@ -402,7 +402,7 @@
     }
 
     .admin-mobile-list {
-      display: none !important;
+      display: none;
     }
 
     .admin-sidebar {

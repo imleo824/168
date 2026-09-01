@@ -1,10 +1,13 @@
 import { useCallback, useEffect, useState } from 'react';
 import {
+  Bell,
+  BellRing,
   Heart,
   Megaphone,
   MessageCircle,
   Pin,
   Repeat2,
+  ShieldCheck,
   UserPlus,
   WalletCards,
   type LucideIcon,
@@ -28,19 +31,44 @@ type PreferenceKey = keyof Pick<
   'commentEnabled' | 'followEnabled' | 'quoteEnabled' | 'likeEnabled' | 'systemEnabled' | 'rechargeEnabled' | 'promotionEnabled'
 >;
 
-const PREFERENCE_ITEMS: Array<{
-  key: PreferenceKey;
-  title: string;
-  description: string;
-  icon: LucideIcon;
-}> = [
-  { key: 'commentEnabled', title: '评论', description: '有人评论你', icon: MessageCircle },
-  { key: 'followEnabled', title: '关注', description: '有人关注你', icon: UserPlus },
-  { key: 'quoteEnabled', title: '引用', description: '内容被引用', icon: Repeat2 },
-  { key: 'systemEnabled', title: '平台', description: '公告与账号提醒', icon: Megaphone },
-  { key: 'rechargeEnabled', title: '充值', description: '到账与积分变动', icon: WalletCards },
-  { key: 'promotionEnabled', title: '推广', description: '推广状态变化', icon: Pin },
-  { key: 'likeEnabled', title: '点赞', description: '默认关闭', icon: Heart },
+interface PreferenceGroup {
+  id: string;
+  groupTitle: string;
+  items: Array<{
+    key: PreferenceKey;
+    title: string;
+    description: string;
+    icon: LucideIcon;
+    colorClass: string;
+  }>;
+}
+
+const PREFERENCE_GROUPS: PreferenceGroup[] = [
+  {
+    id: 'interactions',
+    groupTitle: '互动消息提醒',
+    items: [
+      { key: 'commentEnabled', title: '评论通知', description: '当有人评论你的帖子时提醒', icon: MessageCircle, colorClass: 'notif-icon-blue' },
+      { key: 'quoteEnabled', title: '引用通知', description: '当你的内容被他人引用或转发时提醒', icon: Repeat2, colorClass: 'notif-icon-purple' },
+      { key: 'followEnabled', title: '关注通知', description: '当有新用户关注你时提醒', icon: UserPlus, colorClass: 'notif-icon-green' },
+      { key: 'likeEnabled', title: '点赞通知', description: '当有人点赞你的动态时提醒', icon: Heart, colorClass: 'notif-icon-rose' },
+    ],
+  },
+  {
+    id: 'assets',
+    groupTitle: '资产与业务变动',
+    items: [
+      { key: 'rechargeEnabled', title: '充值与积分', description: '积分到账及余额变动提醒', icon: WalletCards, colorClass: 'notif-icon-emerald' },
+      { key: 'promotionEnabled', title: '推广状态', description: '推广上线、置顶及套餐状态更新', icon: Pin, colorClass: 'notif-icon-amber' },
+    ],
+  },
+  {
+    id: 'system',
+    groupTitle: '平台与系统通告',
+    items: [
+      { key: 'systemEnabled', title: '平台公告', description: '重要官方通告与账号安全提醒', icon: Megaphone, colorClass: 'notif-icon-indigo' },
+    ],
+  },
 ];
 
 export default function NotificationSettings() {
@@ -132,15 +160,49 @@ export default function NotificationSettings() {
         className="notification-settings-topbar ui-layer-header"
       />
       <PageContentShell as="main" className="notification-settings-main ui-app-page-main">
+        {/* 设备与推送状态概览 */}
+        <SurfaceSectionCard
+          as="section"
+          tone="solid"
+          paddingClassName="notification-status-banner-surface"
+          className="notification-status-banner"
+          ariaLabel="通知服务状态"
+        >
+          <div className="notification-status-header">
+            <div className="notification-status-icon-wrap">
+              {displayedEnabled ? (
+                <BellRing className="notification-status-icon notification-status-icon--active" />
+              ) : (
+                <Bell className="notification-status-icon" />
+              )}
+            </div>
+            <div className="notification-status-text">
+              <h3 className="notification-status-title">
+                {displayedEnabled ? '全站系统提醒已激活' : '全站系统提醒已关闭'}
+              </h3>
+              <p className="notification-status-desc">
+                {displayedEnabled
+                  ? '推送服务运行正常，重要业务、社交流水与互动将实时送达'
+                  : '开启后，您将不会错过互动评论、充值到账与推广状态更新'}
+              </p>
+            </div>
+            <span className={`notification-status-pill ${displayedEnabled ? 'notification-status-pill--active' : ''}`}>
+              <ShieldCheck className="notification-pill-icon" />
+              <span>{displayedEnabled ? '接收中' : '未开启'}</span>
+            </span>
+          </div>
+        </SurfaceSectionCard>
+
+        {/* 总开关卡片 */}
         <SurfaceSectionCard
           as="section"
           tone="solid"
           paddingClassName="notification-settings-section-surface"
-          className="notification-settings-section notification-settings-section--single"
-          ariaLabel="通知设置"
+          className="notification-settings-section"
+          ariaLabel="总设置"
         >
           <SettingRow
-            title="系统提醒"
+            title="系统提醒总开关"
             description="开启后，重要消息会收到系统提醒。"
             className="notification-settings-item notification-settings-item--master pressable"
             disabled={!canUse || settingsBusy}
@@ -156,46 +218,62 @@ export default function NotificationSettings() {
               'data-pending': settingsBusy ? 'true' : 'false',
             }}
             trailing={(
-              <span className="notification-settings-switch notification-settings-switch--sm" data-checked={displayedEnabled ? 'true' : 'false'} aria-hidden="true">
+              <span className="notification-settings-switch" data-checked={displayedEnabled ? 'true' : 'false'} aria-hidden="true">
                 <span className="notification-settings-switch-thumb" />
               </span>
             )}
           />
-
-          <div className="notification-settings-list" role="list">
-            {PREFERENCE_ITEMS.map((item) => {
-              const Icon = item.icon;
-              const checked = Boolean(displayedPreference?.[item.key]);
-              return (
-                <SettingRow
-                  key={item.key}
-                  title={item.title}
-                  description={item.description}
-                  icon={<Icon />}
-                  iconClassName="notification-settings-item-icon"
-                  className="notification-settings-item pressable"
-                  disabled={!displayedPreference || settingsBusy}
-                  onClick={() => void guardedPreferenceToggle(item.key)}
-                  contentClassName="notification-settings-item-content"
-                  titleClassName="notification-settings-item-title"
-                  descriptionClassName="notification-settings-item-description"
-                  showChevron={false}
-                  buttonProps={{
-                    role: 'switch',
-                    'aria-checked': checked,
-                    'aria-disabled': !displayedPreference || settingsBusy,
-                    'data-pending': settingsBusy ? 'true' : 'false',
-                  }}
-                  trailing={(
-                    <span className="notification-settings-switch notification-settings-switch--sm" data-checked={checked ? 'true' : 'false'} aria-hidden="true">
-                      <span className="notification-settings-switch-thumb" />
-                    </span>
-                  )}
-                />
-              );
-            })}
-          </div>
         </SurfaceSectionCard>
+
+        {/* 分组细节设置 */}
+        {PREFERENCE_GROUPS.map((group) => (
+          <SurfaceSectionCard
+            key={group.id}
+            as="section"
+            tone="solid"
+            paddingClassName="notification-settings-section-surface"
+            className="notification-settings-section"
+            ariaLabel={group.groupTitle}
+          >
+            <h4 className="notification-group-title">{group.groupTitle}</h4>
+            <div className="notification-settings-list" role="list">
+              {group.items.map((item) => {
+                const Icon = item.icon;
+                const checked = Boolean(displayedPreference?.[item.key]);
+                return (
+                  <SettingRow
+                    key={item.key}
+                    title={item.title}
+                    description={item.description}
+                    icon={(
+                      <span className={`notification-icon-badge ${item.colorClass}`}>
+                        <Icon className="notification-icon-svg" />
+                      </span>
+                    )}
+                    className="notification-settings-item pressable"
+                    disabled={!displayedPreference || settingsBusy}
+                    onClick={() => void guardedPreferenceToggle(item.key)}
+                    contentClassName="notification-settings-item-content"
+                    titleClassName="notification-settings-item-title"
+                    descriptionClassName="notification-settings-item-description"
+                    showChevron={false}
+                    buttonProps={{
+                      role: 'switch',
+                      'aria-checked': checked,
+                      'aria-disabled': !displayedPreference || settingsBusy,
+                      'data-pending': settingsBusy ? 'true' : 'false',
+                    }}
+                    trailing={(
+                      <span className="notification-settings-switch notification-settings-switch--sm" data-checked={checked ? 'true' : 'false'} aria-hidden="true">
+                        <span className="notification-settings-switch-thumb" />
+                      </span>
+                    )}
+                  />
+                );
+              })}
+            </div>
+          </SurfaceSectionCard>
+        ))}
       </PageContentShell>
     </AppPage>
   );
