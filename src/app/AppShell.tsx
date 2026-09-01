@@ -19,6 +19,7 @@ import { RecoveryGuard } from '@/ui/RecoveryGuard';
 import { HomePageSkeleton, Skeleton } from '@/ui/Skeleton';
 import AuthRequiredState from '@/ui/AuthRequiredState';
 import PageContentShell from '@/ui/PageContentShell';
+import AvatarImage from '@/ui/AvatarImage';
 import { warmupNavigationIntent, warmupRoutePath } from '@/utils/routeWarmups';
 import AppBottomNavigation from '@/app/AppBottomNavigation';
 import AppRequireAuthRoute from '@/app/AppRequireAuthRoute';
@@ -314,40 +315,106 @@ function GlobalAuthOverlay() {
 }
 
 function AppDesktopSidebar() {
+  const { user, requireAuth } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const { onlineCountText } = useOnlinePresence();
+
+  const handleQuickPost = () => {
+    if (location.pathname === APP_ROUTES.create) return;
+    warmupNavigationIntent('create');
+    requireAuth(() => {
+      primePostCreateComposerFocus();
+      navigate(APP_ROUTES.create);
+    });
+  };
+
+  const displayName = user?.displayName || user?.username || (user?.id ? `推友_${user.id.slice(0, 4)}` : '未登录用户');
 
   return (
     <aside className="app-desktop-sidebar" aria-label="桌面主导航">
-      <NavLink className="app-desktop-brand flex flex-row items-center gap-3" to={APP_ROUTES.home} aria-label="返回首页">
-        <span className="app-desktop-brand-mark flex items-center justify-center">T</span>
-        <span className="app-desktop-brand-copy flex flex-col">
-          <span className="app-desktop-brand-name">推推</span>
-          <span className="app-desktop-brand-subtitle">匿名分类信息网</span>
-        </span>
-      </NavLink>
-      <nav className="app-desktop-nav flex flex-col gap-1" aria-label="桌面导航">
-        {DESKTOP_NAV_ITEMS.map((item) => {
-          const Icon = item.icon;
-          return (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              className={({ isActive }) => (
-                `app-desktop-nav-item flex flex-row items-center gap-3${isActive ? ' app-desktop-nav-item--active' : ''}`
-              )}
-              onPointerEnter={() => warmupRoutePath(item.to)}
-              onFocus={() => warmupRoutePath(item.to)}
-            >
-              <span className="app-desktop-nav-icon-container flex items-center justify-center">
-                <Icon className="app-desktop-nav-icon" aria-hidden="true" />
+      <div className="flex flex-col gap-2">
+        <NavLink className="app-desktop-brand flex flex-row items-center gap-3" to={APP_ROUTES.home} aria-label="返回首页">
+          <span className="app-desktop-brand-mark flex items-center justify-center">T</span>
+          <span className="app-desktop-brand-copy flex flex-col">
+            <span className="app-desktop-brand-name">推推</span>
+            <span className="app-desktop-brand-subtitle">匿名分类信息网</span>
+          </span>
+        </NavLink>
+        <nav className="app-desktop-nav flex flex-col gap-1" aria-label="桌面导航">
+          {DESKTOP_NAV_ITEMS.map((item) => {
+            const Icon = item.icon;
+            return (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                className={({ isActive }) => (
+                  `app-desktop-nav-item flex flex-row items-center gap-3${isActive ? ' app-desktop-nav-item--active' : ''}`
+                )}
+                onPointerEnter={() => warmupRoutePath(item.to)}
+                onFocus={() => warmupRoutePath(item.to)}
+              >
+                <span className="app-desktop-nav-icon-container flex items-center justify-center">
+                  <Icon className="app-desktop-nav-icon" aria-hidden="true" />
+                </span>
+                <span className="app-desktop-nav-label">{item.label}</span>
+              </NavLink>
+            );
+          })}
+        </nav>
+        <button
+          type="button"
+          className="app-desktop-post-action pressable flex flex-row items-center justify-center gap-2"
+          onClick={handleQuickPost}
+          aria-label="快速发推"
+          title="快速发推"
+        >
+          <CirclePlus className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
+          <span>立即发推</span>
+        </button>
+      </div>
+      <section className="app-desktop-sidebar-context flex flex-col gap-3" aria-label="用户与状态">
+        {user ? (
+          <NavLink
+            to={APP_ROUTES.profile}
+            className="app-desktop-user-card flex flex-row items-center gap-2.5"
+            aria-label="查看个人主页"
+            title="查看个人主页"
+          >
+            <AvatarImage
+              src={user.photoUrl || ''}
+              name={displayName}
+              id={user.id}
+              alt={displayName}
+              className="w-9 h-9 rounded-full flex-shrink-0"
+              variant="thumb"
+              isTuiPlus={isTuiPlusActive(user)}
+            />
+            <div className="app-desktop-user-info flex flex-col min-w-0 flex-1">
+              <span className="app-desktop-user-name truncate">{displayName}</span>
+              <span className="app-desktop-user-role">
+                {isTuiPlusActive(user) ? '推推+ 尊享会员' : (user.role === 'ADMIN' ? '平台管理员' : '已登录推友')}
               </span>
-              <span className="app-desktop-nav-label">{item.label}</span>
-            </NavLink>
-          );
-        })}
-      </nav>
-      <section className="app-desktop-sidebar-context" aria-label="当前在线">
+            </div>
+          </NavLink>
+        ) : (
+          <button
+            type="button"
+            className="app-desktop-user-card flex flex-row items-center gap-2.5 text-left w-full pressable"
+            onClick={() => requireAuth(() => {})}
+            aria-label="登录或注册账号"
+            title="登录或注册账号"
+          >
+            <span className="app-desktop-guest-avatar flex items-center justify-center flex-shrink-0">
+              <UserRound className="app-desktop-nav-icon" aria-hidden="true" />
+            </span>
+            <div className="app-desktop-user-info flex flex-col min-w-0 flex-1">
+              <span className="app-desktop-user-name">登录 / 注册</span>
+              <span className="app-desktop-user-role">解锁完整发布与互动</span>
+            </div>
+          </button>
+        )}
         <div className="app-desktop-context-card">
           <div className="app-desktop-context-kicker">当前在线</div>
           <div className="app-desktop-context-metric">
