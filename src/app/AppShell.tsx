@@ -318,14 +318,14 @@ function AppDesktopSidebar() {
 
   return (
     <aside className="app-desktop-sidebar" aria-label="桌面主导航">
-      <NavLink className="app-desktop-brand" to={APP_ROUTES.home} aria-label="返回首页">
-        <span className="app-desktop-brand-mark">T</span>
-        <span className="app-desktop-brand-copy">
+      <NavLink className="app-desktop-brand flex flex-row items-center gap-3" to={APP_ROUTES.home} aria-label="返回首页">
+        <span className="app-desktop-brand-mark flex items-center justify-center">T</span>
+        <span className="app-desktop-brand-copy flex flex-col">
           <span className="app-desktop-brand-name">推推</span>
           <span className="app-desktop-brand-subtitle">匿名分类信息网</span>
         </span>
       </NavLink>
-      <nav className="app-desktop-nav" aria-label="桌面导航">
+      <nav className="app-desktop-nav flex flex-col gap-1" aria-label="桌面导航">
         {DESKTOP_NAV_ITEMS.map((item) => {
           const Icon = item.icon;
           return (
@@ -334,7 +334,7 @@ function AppDesktopSidebar() {
               to={item.to}
               end={item.end}
               className={({ isActive }) => (
-                `app-desktop-nav-item${isActive ? ' app-desktop-nav-item--active' : ''}`
+                `app-desktop-nav-item flex flex-row items-center gap-3${isActive ? ' app-desktop-nav-item--active' : ''}`
               )}
               onPointerEnter={() => warmupRoutePath(item.to)}
               onFocus={() => warmupRoutePath(item.to)}

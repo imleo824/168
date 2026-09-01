@@ -144,6 +144,10 @@
       --app-desktop-page-target-width: var(--app-desktop-utility-main-width);
     }
 
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] {
+      --app-desktop-page-target-width: var(--app-desktop-workspace-main-width);
+    }
+
     .app-shell[data-route-surface='user'] {
       display: grid;
       width: 100%;
