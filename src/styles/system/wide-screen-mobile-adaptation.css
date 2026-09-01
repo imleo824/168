@@ -301,6 +301,173 @@
       padding-inline-end: var(--ui-space-3);
       border-inline-end: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
     }
+
+    .app-desktop-brand {
+      padding: var(--ui-space-2) var(--ui-space-3);
+      border-radius: var(--ui-radius-xl);
+      transition: background-color var(--ui-duration-base) var(--ease-standard);
+    }
+
+    .app-desktop-brand:hover {
+      background-color: var(--ui-state-hover);
+    }
+
+    .app-desktop-brand-mark {
+      width: var(--ui-control-hit);
+      height: var(--ui-control-hit);
+      border-radius: var(--ui-radius-xl);
+      background: var(--ui-brand);
+      color: var(--ui-color-white);
+      font-weight: var(--ui-font-weight-display);
+      font-size: var(--ui-text-xl);
+    }
+
+    .app-desktop-brand-name {
+      font-size: var(--ui-text-page-title);
+      font-weight: var(--ui-font-weight-display);
+      color: var(--ui-text-primary);
+      line-height: var(--ui-line-tight);
+    }
+
+    .app-desktop-brand-subtitle {
+      font-size: var(--ui-text-xs);
+      color: var(--ui-text-muted);
+    }
+
+    .app-desktop-nav-item {
+      padding: var(--ui-space-2) var(--ui-space-3);
+      border-radius: var(--ui-radius-xl);
+      color: var(--ui-text-secondary);
+      font-weight: var(--ui-font-weight-medium);
+      font-size: var(--ui-text-md);
+      transition: background-color var(--ui-duration-base) var(--ease-standard), color var(--ui-duration-base) var(--ease-standard);
+    }
+
+    .app-desktop-nav-item:hover {
+      background-color: var(--ui-state-hover);
+      color: var(--ui-text-primary);
+    }
+
+    .app-desktop-nav-item--active {
+      background-color: var(--ui-brand-soft-15);
+      color: var(--ui-brand);
+      font-weight: var(--ui-font-weight-strong);
+    }
+
+    .app-desktop-nav-icon-container {
+      width: var(--ui-control-md);
+      height: var(--ui-control-md);
+    }
+
+    .app-desktop-nav-icon {
+      width: var(--ui-control-icon-md);
+      height: var(--ui-control-icon-md);
+      stroke-width: var(--ui-icon-stroke);
+    }
+
+    .app-desktop-nav-item--active .app-desktop-nav-icon {
+      stroke-width: calc(var(--ui-icon-stroke) + var(--ui-icon-stroke-emphasis-delta));
+      color: var(--ui-brand);
+    }
+
+    .app-desktop-nav-label {
+      font-size: var(--ui-text-md);
+      line-height: var(--ui-line-tight);
+    }
+
+    .app-desktop-nav-badge {
+      padding: var(--ui-space-quarter) var(--ui-space-2);
+      border-radius: var(--ui-radius-full);
+      background-color: var(--ui-brand);
+      color: var(--ui-color-white);
+      font-size: var(--ui-text-xs);
+      font-weight: var(--ui-font-weight-strong);
+      line-height: var(--ui-line-none);
+    }
+
+    .app-desktop-post-action {
+      margin-top: var(--ui-space-2);
+      width: 100%;
+      height: var(--ui-control-lg);
+      border-radius: var(--ui-radius-full);
+      background: var(--ui-brand);
+      color: var(--ui-color-white);
+      font-size: var(--ui-text-md);
+      font-weight: var(--ui-font-weight-strong);
+      transition: background-color var(--ui-duration-base) var(--ease-standard);
+    }
+
+    .app-desktop-post-action:hover {
+      background: var(--ui-brand-hover);
+    }
+
+    .app-desktop-sidebar-context {
+      margin-top: auto;
+      display: flex;
+      flex-direction: column;
+      gap: var(--ui-space-3);
+      padding-top: var(--ui-space-3);
+      border-top: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+    }
+
+    .app-desktop-user-card {
+      padding: var(--ui-space-2) var(--ui-space-3);
+      border-radius: var(--ui-radius-xl);
+      transition: background-color var(--ui-duration-base) var(--ease-standard);
+    }
+
+    .app-desktop-user-card:hover {
+      background-color: var(--ui-state-hover);
+    }
+
+    .app-desktop-guest-avatar {
+      width: var(--ui-control-lg);
+      height: var(--ui-control-lg);
+      border-radius: var(--ui-radius-full);
+      background: var(--ui-surface-muted);
+      color: var(--ui-text-secondary);
+    }
+
+    .app-desktop-user-name {
+      font-size: var(--ui-text-sm);
+      font-weight: var(--ui-font-weight-strong);
+      color: var(--ui-text-primary);
+      line-height: var(--ui-line-normal);
+    }
+
+    .app-desktop-user-role {
+      font-size: var(--ui-text-xs);
+      color: var(--ui-text-muted);
+    }
+
+    .app-desktop-context-card {
+      padding: var(--ui-space-2) var(--ui-space-3);
+      border-radius: var(--ui-radius-lg);
+      background: var(--ui-surface-muted);
+      border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+    }
+
+    .app-desktop-context-kicker {
+      font-size: var(--ui-text-2xs);
+      color: var(--ui-text-muted);
+      font-weight: var(--ui-font-weight-medium);
+    }
+
+    .app-desktop-context-metric {
+      display: flex;
+      align-items: center;
+      gap: var(--ui-space-2);
+      font-size: var(--ui-text-sm);
+      font-weight: var(--ui-font-weight-strong);
+      color: var(--ui-text-primary);
+    }
+
+    .app-desktop-context-dot {
+      width: var(--ui-space-2);
+      height: var(--ui-space-2);
+      border-radius: var(--ui-radius-full);
+      background: var(--ui-success);
+    }
   }
 
   @media (min-width: 1024px) and (max-width: 1179px) {

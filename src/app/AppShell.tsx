@@ -10,7 +10,7 @@ import { useIsDesktopViewport } from '@/hooks/useIsDesktopViewport';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import { useScrollLock } from '@/utils/scrollLock';
 import { primePostCreateComposerFocus } from '@/utils/postCreateFocusPrime';
-import { ApiError, fetcher } from '@/services/apiCore';
+import { ApiError } from '@/services/apiCore';
 import { getNotificationsList } from '@/services/api';
 import PageHeader from '@/ui/PageHeader';
 import ProfileIconButton from '@/ui/ProfileIconButton';
