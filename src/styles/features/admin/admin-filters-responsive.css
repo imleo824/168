@@ -207,10 +207,15 @@
 
   .admin-mobile-list {
     display: none;
+    flex-direction: column;
     gap: var(--ui-space-3);
     min-width: 0;
     background: var(--ui-admin-mobile-list-surface);
     padding: var(--ui-space-3);
+  }
+
+  .admin-responsive-desktop-list {
+    display: none;
   }
 
   .admin-mobile-list-item {
@@ -396,8 +401,8 @@
       display: block;
     }
 
-    .admin-responsive-mobile-list {
-      display: none;
+    .admin-mobile-list {
+      display: none !important;
     }
 
     .admin-sidebar {

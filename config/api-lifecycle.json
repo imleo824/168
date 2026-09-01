@@ -55,6 +55,14 @@
     {
       "prefix": "/api/webhooks",
       "reason": "Webhook endpoints are authenticated by provider-specific signatures instead of user sessions."
+    },
+    {
+      "prefix": "/api/rum",
+      "reason": "Real User Monitoring endpoints accept anonymous metrics reporting from visitor browsers."
+    },
+    {
+      "prefix": "/api/internal",
+      "reason": "Internal routes are executed by system cron jobs and background workers with internal auth validation."
     }
   ]
 }

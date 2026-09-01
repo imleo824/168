@@ -85,16 +85,6 @@ type AdminDataPanelProps = {
   localConfig: any;
 };
 
-const ADMIN_MEMBER_FILTER_OPTIONS = [
-  { value: '', label: '全部会员状态' },
-  { value: 'TUI_PLUS_ACTIVE', label: '会员用户' },
-  { value: 'TUI_PLUS_INACTIVE', label: '非会员用户' },
-];
-
-function isMemberFilterValue(value: string) {
-  return value === 'TUI_PLUS_ACTIVE' || value === 'TUI_PLUS_INACTIVE';
-}
-
 export function AdminDataPanel({
   activeTab,
   activeDepositAddressSection,
@@ -178,9 +168,6 @@ export function AdminDataPanel({
     calculateDisplayRechargePoints(item as RechargeOrder, getRechargePointsPerUsdt())
   );
 
-  const userTypeSelectValue = isMemberFilterValue(userTypeFilter) ? '' : userTypeFilter;
-  const memberSelectValue = isMemberFilterValue(userTypeFilter) ? userTypeFilter : '';
-
   return (
     <>
       {activeTab === 'referral-withdrawals' && <AdminReferralWithdrawalPanel />}
@@ -196,96 +183,40 @@ export function AdminDataPanel({
             />
           )}
 
-          {activeTab === 'users' ? (
-            <div className="admin-filter-bar">
-              <div className="admin-filter-grid admin-filter-grid--four">
-                <input
-                  type="text"
-                  className="admin-filter-control"
-                  value={searchKeyword}
-                  onChange={(e) => setSearchKeyword(e.target.value)}
-                  placeholder="搜索昵称或ID"
-                />
-                <select
-                  className="admin-filter-control"
-                  value={userTypeSelectValue}
-                  onChange={(e) => {
-                    setUserTypeFilter(e.target.value);
-                    applyFilterChange();
-                  }}
-                >
-                  {ADMIN_USER_TYPE_FILTER_OPTIONS.map((option) => (
-                    <option key={option.value || 'all'} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
-                <select
-                  className="admin-filter-control"
-                  value={memberSelectValue}
-                  onChange={(e) => {
-                    setUserTypeFilter(e.target.value);
-                    applyFilterChange();
-                  }}
-                >
-                  {ADMIN_MEMBER_FILTER_OPTIONS.map((option) => (
-                    <option key={option.value || 'all-member'} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
-                <input
-                  type="date"
-                  className="admin-filter-control"
-                  value={startDate}
-                  onChange={(e) => {
-                    setStartDate(e.target.value);
-                    applyFilterChange();
-                  }}
-                />
-                <input
-                  type="date"
-                  className="admin-filter-control"
-                  value={endDate}
-                  onChange={(e) => {
-                    setEndDate(e.target.value);
-                    applyFilterChange();
-                  }}
-                />
-              </div>
-            </div>
-          ) : (
-            <AdminFiltersPanel
-              activeTab={activeTab}
-              activeDepositAddressSection={activeDepositAddressSection}
-              categories={categories}
-              searchKeyword={searchKeyword}
-              setSearchKeyword={setSearchKeyword}
-              categoryFilter={categoryFilter}
-              setCategoryFilter={setCategoryFilter}
-              publishFilter={publishFilter}
-              setPublishFilter={setPublishFilter}
-              userTypeFilter={userTypeFilter}
-              setUserTypeFilter={setUserTypeFilter}
-              statusFilter={statusFilter}
-              setStatusFilter={setStatusFilter}
-              promotionTypeFilter={promotionTypeFilter}
-              setPromotionTypeFilter={setPromotionTypeFilter}
-              actionFilter={actionFilter}
-              setActionFilter={setActionFilter}
-              startDate={startDate}
-              setStartDate={setStartDate}
-              endDate={endDate}
-              setEndDate={setEndDate}
-              depositAddressStats={depositAddressStats}
-              isCreatingSweepJob={isCreatingSweepJob}
-              createSweepJob={createSweepJob}
-              fetchDepositAddressStats={fetchDepositAddressStats}
-              isImportingAddresses={isImportingAddresses}
-              addressImportText={addressImportText}
-              setAddressImportText={setAddressImportText}
-              handleImportAddresses={handleImportAddresses}
-              isLoadingList={isLoadingList}
-              fetchData={submitListQuery}
-              applyFilterChange={applyFilterChange}
-            />
-          )}
+          <AdminFiltersPanel
+            activeTab={activeTab}
+            activeDepositAddressSection={activeDepositAddressSection}
+            categories={categories}
+            searchKeyword={searchKeyword}
+            setSearchKeyword={setSearchKeyword}
+            categoryFilter={categoryFilter}
+            setCategoryFilter={setCategoryFilter}
+            publishFilter={publishFilter}
+            setPublishFilter={setPublishFilter}
+            userTypeFilter={userTypeFilter}
+            setUserTypeFilter={setUserTypeFilter}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            promotionTypeFilter={promotionTypeFilter}
+            setPromotionTypeFilter={setPromotionTypeFilter}
+            actionFilter={actionFilter}
+            setActionFilter={setActionFilter}
+            startDate={startDate}
+            setStartDate={setStartDate}
+            endDate={endDate}
+            setEndDate={setEndDate}
+            depositAddressStats={depositAddressStats}
+            isCreatingSweepJob={isCreatingSweepJob}
+            createSweepJob={createSweepJob}
+            fetchDepositAddressStats={fetchDepositAddressStats}
+            isImportingAddresses={isImportingAddresses}
+            addressImportText={addressImportText}
+            setAddressImportText={setAddressImportText}
+            handleImportAddresses={handleImportAddresses}
+            isLoadingList={isLoadingList}
+            fetchData={submitListQuery}
+            applyFilterChange={applyFilterChange}
+          />
 
           {(activeTab !== 'deposit-addresses' || activeDepositAddressSection === 'list') && (
             <div>

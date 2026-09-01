@@ -411,6 +411,15 @@
         transform var(--ui-duration-base) var(--ease-standard);
     }
 
+    .app-desktop-nav-icon-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      width: var(--ui-control-lg);
+      height: var(--ui-control-lg);
+    }
+
     .app-desktop-nav-icon {
       display: block;
       flex-shrink: 0;

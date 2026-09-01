@@ -67,12 +67,12 @@ function toFeedUpdateQuery(params: { followingSince?: string; discoverSince?: st
 
 export const getFeedUpdateCounts = (params: { followingSince?: string; discoverSince?: string }) => {
   const suffix = toFeedUpdateQuery(params);
-  return fetcher<FeedBadgeCounts>(`/api/notifications/feed-counts${suffix ? `?${suffix}` : ''}`);
+  return fetcher<FeedBadgeCounts>('/api/notifications/feed-counts' + (suffix ? '?' + suffix : ''));
 };
 
 export const getHomeNotificationSummary = (params: { followingSince?: string; discoverSince?: string }) => {
   const suffix = toFeedUpdateQuery(params);
-  return fetcher<HomeNotificationSummary>(`/api/notifications/home-summary${suffix ? `?${suffix}` : ''}`);
+  return fetcher<HomeNotificationSummary>('/api/notifications/home-summary' + (suffix ? '?' + suffix : ''));
 };
 
 export const recordPostViews = (

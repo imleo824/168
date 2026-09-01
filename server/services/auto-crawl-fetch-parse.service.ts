@@ -114,6 +114,29 @@ function elementHtmlByClass(html: string, classToken: string) {
   return html.slice(bodyStart);
 }
 
+function cleanTelegramMessageHtml(rawHtml: string) {
+  if (!rawHtml) return '';
+  return rawHtml
+    // Strip quoted reply box in Telegram preview
+    .replace(/<div\b[^>]*class=["'][^"']*\btgme_widget_message_reply\b[^"']*["'][^>]*>[\s\S]*?<\/div>/gi, '')
+    .replace(/<a\b[^>]*class=["'][^"']*\btgme_widget_message_reply\b[^"']*["'][^>]*>[\s\S]*?<\/a>/gi, '')
+    // Strip forwarded from banner in Telegram preview
+    .replace(/<div\b[^>]*class=["'][^"']*\btgme_widget_message_forwarded_from\b[^"']*["'][^>]*>[\s\S]*?<\/div>/gi, '')
+    // Strip round voice / video notes player markup artifacts
+    .replace(/<div\b[^>]*class=["'][^"']*\btgme_widget_message_roundvideo_player\b[^"']*["'][^>]*>[\s\S]*?<\/div>/gi, '');
+}
+
+function isTelegramServiceOrSponsoredBlock(block: string) {
+  if (!block) return true;
+  if (/class=["'][^"']*\b(?:tgme_widget_message_service|tgme_widget_message_ad|tgme_widget_message_sponsored)\b/i.test(block)) {
+    return true;
+  }
+  if (/(?:Sponsored Message|Promoted channel|Sponsored|广告)\s*<\/div>/i.test(block)) {
+    return true;
+  }
+  return false;
+}
+
 function normalizeHttpUrl(raw: unknown, baseUrl = '') {
   let url = decode(String(raw || '').trim()).replace(/^[ '\"]+|[ '\"]+$/g, '').replace(/\\u0026/g, '&');
   if (!url) return '';
@@ -175,30 +198,92 @@ function extractTelegramBodyImages(block: string) {
 }
 
 export function parseTelegram(html: string): AutoCrawlItem[] {
-  return splitTelegramBlocks(html)
-    .map((block) => {
-      const postPath = attr(block, 'data-post');
-      const id = postPath.split('/').pop() || '';
-      const text = stripHtml(elementHtmlByClass(block, 'tgme_widget_message_text'));
-      const images = extractTelegramBodyImages(block);
-      const rawDate = attr(block, 'datetime') || block.match(/<time[^>]+datetime=["']([^"']+)["']/i)?.[1] || '';
-      const timestamp = timestampOf(rawDate);
-      const cursorNumber = Number(id || 0);
-      return {
-        id: id || hash(`${postPath}:${text}`).slice(0, 24),
-        title: titleOf('', text),
-        content: sanitizeDatabaseText(text, 100_000),
-        rawText: sanitizeDatabaseText(text, 100_000),
-        link: postPath ? `https://t.me/${postPath}` : '',
-        timestamp: timestamp || Date.now(),
-        datetime: rawDate && timestamp ? rawDate : safeIso(timestamp),
-        cursorValue: id || String(cursorNumber || 0),
-        cursorNumber: Number.isFinite(cursorNumber) ? cursorNumber : 0,
-        images,
-      };
-    })
-    .filter((item) => item.id && (item.content || item.images.length))
-    .sort((left, right) => left.cursorNumber - right.cursorNumber);
+  const blocks = splitTelegramBlocks(html);
+  const rawItems: Array<AutoCrawlItem & { isGrouped?: boolean }> = [];
+
+  for (const block of blocks) {
+    if (isTelegramServiceOrSponsoredBlock(block)) continue;
+    const postPath = attr(block, 'data-post');
+    const id = postPath.split('/').pop() || '';
+    const rawHtml = elementHtmlByClass(block, 'tgme_widget_message_text');
+    const cleanedHtml = cleanTelegramMessageHtml(rawHtml);
+    const text = stripHtml(cleanedHtml);
+    const images = extractTelegramBodyImages(block);
+    const rawDate = attr(block, 'datetime') || block.match(/<time[^>]+datetime=["']([^"']+)["']/i)?.[1] || '';
+    const timestamp = timestampOf(rawDate);
+    const cursorNumber = Number(id || 0);
+    const isGrouped = /class=["'][^"']*\b(?:tgme_widget_message_grouped|tgme_widget_message_grouped_wrap)\b/i.test(block);
+
+    rawItems.push({
+      id: id || hash(`${postPath}:${text}`).slice(0, 24),
+      title: titleOf('', text),
+      content: sanitizeDatabaseText(text, 100_000),
+      rawText: sanitizeDatabaseText(text, 100_000),
+      link: postPath ? `https://t.me/${postPath}` : '',
+      timestamp: timestamp || Date.now(),
+      datetime: rawDate && timestamp ? rawDate : safeIso(timestamp),
+      cursorValue: id || String(cursorNumber || 0),
+      cursorNumber: Number.isFinite(cursorNumber) ? cursorNumber : 0,
+      images,
+      isGrouped,
+    });
+  }
+
+  // Coalesce album messages:
+  // When a Telegram album is posted, Telegram generates multiple consecutive message elements.
+  // The first element carries the caption text; subsequent elements have empty text and 1 image each.
+  // We merge all images from the album into the main post item and advance the cursorNumber.
+  const coalesced: AutoCrawlItem[] = [];
+  for (let i = 0; i < rawItems.length; i += 1) {
+    const current = rawItems[i];
+    if (!current.id) continue;
+
+    // Check if subsequent items are part of the same album (empty text, has images, near timestamp/consecutive ID)
+    let j = i + 1;
+    while (j < rawItems.length) {
+      const next = rawItems[j];
+      const isConsecutiveId = next.cursorNumber > 0 && current.cursorNumber > 0 && Math.abs(next.cursorNumber - current.cursorNumber) <= (j - i);
+      const isTimeNear = Math.abs(next.timestamp - current.timestamp) <= 120_000;
+      const isNextEmptyText = !next.content.trim() || next.content.trim() === current.content.trim();
+      const isAlbumSibling = next.images.length > 0 && isNextEmptyText && (next.isGrouped || isConsecutiveId || isTimeNear);
+
+      if (isAlbumSibling) {
+        // Merge images into current
+        for (const img of next.images) {
+          if (!current.images.includes(img) && current.images.length < MAX_IMAGES_PER_ITEM) {
+            current.images.push(img);
+          }
+        }
+        // Advance cursor
+        if (next.cursorNumber > current.cursorNumber) {
+          current.cursorNumber = next.cursorNumber;
+          current.cursorValue = next.cursorValue;
+        }
+        j += 1;
+      } else {
+        break;
+      }
+    }
+
+    // Skip the merged child items
+    i = j - 1;
+    if (current.content || current.images.length) {
+      coalesced.push({
+        id: current.id,
+        title: current.title,
+        content: current.content,
+        rawText: current.rawText,
+        link: current.link,
+        timestamp: current.timestamp,
+        datetime: current.datetime,
+        cursorValue: current.cursorValue,
+        cursorNumber: current.cursorNumber,
+        images: current.images,
+      });
+    }
+  }
+
+  return coalesced.sort((left, right) => left.cursorNumber - right.cursorNumber);
 }
 
 function xmlTag(raw: string, tag: string) {

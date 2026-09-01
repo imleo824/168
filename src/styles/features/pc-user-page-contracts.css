@@ -195,6 +195,8 @@
     }
 
     .app-shell[data-route-surface='user'] :is(.payment-action-sheet, .ui-sheet-panel) {
+      max-width: min(100%, var(--app-desktop-page-content-width));
+      margin-inline: auto;
       border-radius: var(--ui-radius-2xl);
       border: var(--ui-border-width-hairline) solid var(--ui-pc-line);
       box-shadow: var(--ui-shadow-panel);
@@ -202,6 +204,36 @@
 
     .app-shell[data-route-surface='user'] :is(.payment-action-handle, .ui-sheet-handle) {
       display: none;
+    }
+
+    .app-shell[data-route-surface='user'] :is(
+      .profile-dialog-panel,
+      .ui-modal-panel,
+      .auth-modal-card
+    ) {
+      border-radius: var(--ui-radius-2xl);
+      border: var(--ui-border-width-hairline) solid var(--ui-pc-line);
+      box-shadow: var(--ui-shadow-panel);
+    }
+
+    .app-shell[data-route-surface='user'] :is(
+      .ui-button,
+      .ui-action,
+      button.pressable
+    ) {
+      min-height: var(--ui-pc-control-height);
+    }
+
+    .app-shell[data-route-surface='user'] :is(
+      .ui-segment-tab,
+      .home-topic-tab,
+      .messages-tab,
+      .profile-tab,
+      .referral-record-tab
+    ) {
+      min-height: var(--ui-control-lg);
+      font-size: var(--ui-text-sm);
+      cursor: pointer;
     }
   }
 
@@ -230,7 +262,9 @@
       .record-card,
       .messages-list-item,
       .notification-settings-row,
-      .profile-relation-list-item
+      .profile-relation-list-item,
+      .profile-comment-card,
+      .surface-card.ui-user-list-row
     ):hover {
       background: var(--ui-state-hover);
     }
@@ -241,7 +275,9 @@
       .recharge-payment-panel,
       .tui-plus-link-editor-card,
       .promote-history-edit-card,
-      .referral-share-card
+      .referral-share-card,
+      .admin-section-card,
+      .admin-data-panel
     ) {
       transition:
         border-color var(--ui-duration-base) var(--ease-standard),
@@ -254,7 +290,9 @@
       .recharge-payment-panel,
       .tui-plus-link-editor-card,
       .promote-history-edit-card,
-      .referral-share-card
+      .referral-share-card,
+      .admin-section-card,
+      .admin-data-panel
     ):hover {
       border-color: var(--ui-line-medium);
     }
@@ -266,9 +304,19 @@
       .promotion-effects-date-input,
       .tui-plus-link-editor-field input,
       .tui-plus-link-editor-field textarea,
-      .profile-bio-editor-input
+      .profile-bio-editor-input,
+      .profile-dialog-panel :is(input, textarea)
     ):hover:not(:disabled):not(:focus-visible) {
       border-color: var(--ui-line-strong);
+    }
+
+    .app-shell[data-route-surface='user'] :is(
+      .ui-button,
+      .ui-action,
+      .topbar-icon-button,
+      .app-desktop-nav-item
+    ):hover {
+      cursor: pointer;
     }
   }
 }

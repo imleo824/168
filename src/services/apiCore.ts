@@ -39,7 +39,7 @@ function isApiRequest(url: string) {
 
 function isReferenceApiRequest(url: string) {
   const path = url.startsWith('http') ? new URL(url).pathname : url.split('?')[0];
-  return path === '/api/home/bootstrap' || path === '/api/config' || path === '/api/categories' || path === '/api/promotions/home-ads' || path === '/api/promotions/chat-ads';
+  return path === '/api/home/bootstrap' || path === '/api/config' || path === '/api/categories' || path === '/api/promotions/home-ads';
 }
 
 function resolveRequestCacheMode(url: string, method: string, explicitCache?: RequestCache) {

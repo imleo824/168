@@ -339,7 +339,9 @@ function AppDesktopSidebar() {
               onPointerEnter={() => warmupRoutePath(item.to)}
               onFocus={() => warmupRoutePath(item.to)}
             >
-              <Icon className="app-desktop-nav-icon" aria-hidden="true" />
+              <span className="app-desktop-nav-icon-container flex items-center justify-center">
+                <Icon className="app-desktop-nav-icon" aria-hidden="true" />
+              </span>
               <span className="app-desktop-nav-label">{item.label}</span>
             </NavLink>
           );

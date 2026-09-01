@@ -211,11 +211,11 @@ function toFeedUpdateQuery(params: { followingSince?: string; discoverSince?: st
 }
 export const getFeedUpdateCounts = (params: { followingSince?: string; discoverSince?: string }) => {
   const suffix = toFeedUpdateQuery(params);
-  return fetcher<FeedBadgeCounts>(`/api/notifications/feed-counts${suffix ? `?${suffix}` : ''}`);
+  return fetcher<FeedBadgeCounts>('/api/notifications/feed-counts' + (suffix ? '?' + suffix : ''));
 };
 export const getHomeNotificationSummary = (params: { followingSince?: string; discoverSince?: string }) => {
   const suffix = toFeedUpdateQuery(params);
-  return fetcher<HomeNotificationSummary>(`/api/notifications/home-summary${suffix ? `?${suffix}` : ''}`);
+  return fetcher<HomeNotificationSummary>('/api/notifications/home-summary' + (suffix ? '?' + suffix : ''));
 };
 export async function getFansPage(params: { limit?: number; cursor?: string | null } = {}, options?: ApiRequestOptions) {
   const query = new URLSearchParams();
@@ -244,7 +244,7 @@ export const getPostLikers = (postId: string, params: { limit?: number } = {}) =
   const query = new URLSearchParams();
   if (params.limit) query.set('limit', String(params.limit));
   const suffix = query.toString();
-  return fetcher<PostLikeSummary>(`/api/posts/${postId}/likes${suffix ? `?${suffix}` : ''}`);
+  return fetcher<PostLikeSummary>(`/api/posts/${postId}/likes` + (suffix ? '?' + suffix : ''));
 };
 
 export const updatePostPublished = (id: string, isPublished: boolean) =>
@@ -296,7 +296,6 @@ export const recordPostViews = (
 });
 
 export const getHomeAds = (options?: RequestInit) => fetcher<PromotionBooking[]>('/api/promotions/home-ads', options);
-export const getChatAds = (options?: RequestInit) => fetcher<PromotionBooking[]>('/api/promotions/chat-ads', options);
 
 export const getMyPromotions = () => fetcher<PromotionBooking[]>('/api/me/promotions');
 
@@ -306,7 +305,7 @@ export const getMyPromotionEffects = (params: { startDate?: string; endDate?: st
   if (params.endDate) query.set('endDate', params.endDate);
   if (params.includeItems === false) query.set('includeItems', 'false');
   const suffix = query.toString();
-  return fetcher<PromotionEffectAnalysis>(`/api/me/promotion-effects${suffix ? `?${suffix}` : ''}`);
+  return fetcher<PromotionEffectAnalysis>('/api/me/promotion-effects' + (suffix ? '?' + suffix : ''));
 };
 
 export const updatePromotionAdCreative = (bookingId: string, payload: {
