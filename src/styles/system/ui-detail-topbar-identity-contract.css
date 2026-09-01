@@ -1,0 +1,47 @@
+/* Detail topbar identity contract. */
+
+@layer utilities {
+  .detail-page .detail-page-topbar.ui-topbar {
+    position: sticky;
+    top: var(--ui-space-none);
+    z-index: var(--ui-z-sticky, var(--ui-z-header));
+    background: var(--ui-topbar-surface-detail);
+    transform: var(--ui-transform-none);
+    backface-visibility: visible;
+    contain: var(--ui-contain-none);
+    will-change: auto;
+  }
+
+  .detail-page-topbar {
+    --ui-topbar-icon-stroke: var(--ui-topbar-back-icon-stroke);
+    --ui-detail-topbar-avatar-size: var(--ui-detail-topbar-avatar-size-compact);
+  }
+
+  .detail-page--mobile .detail-page-topbar.ui-topbar {
+    position: relative;
+    inset: auto;
+    z-index: var(--ui-z-page-header);
+    width: 100%;
+    min-width: 0;
+    flex: 0 0 auto;
+    padding-top: var(--ui-space-none);
+    transform: var(--ui-transform-none);
+  }
+
+  .detail-page[data-route-overlay] .detail-page-topbar.ui-topbar {
+    top: var(--ui-space-none);
+  }
+
+  .detail-page-topbar .ui-topbar-back-button .ui-topbar-back-icon {
+    width: var(--ui-topbar-icon-size);
+    height: var(--ui-topbar-icon-size);
+    stroke-width: var(--ui-topbar-icon-stroke);
+    transform: translateX(var(--ui-topbar-back-icon-offset-x));
+  }
+
+  @media (min-width: 1024px) {
+    .app-shell[data-route-surface='user'][data-desktop-surface='detail'] .detail-page--desktop .detail-page-topbar.ui-topbar {
+      top: var(--ui-space-none);
+    }
+  }
+}

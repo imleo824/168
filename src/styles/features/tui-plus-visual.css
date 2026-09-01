@@ -1,0 +1,516 @@
+/* Tui Plus visual polish: shared blue ring, membership page, and link editor actions. */
+
+@layer utilities {
+  :where(.profile-avatar-button[data-tui-plus='true'], .app-bottom-nav-avatar-shell[data-tui-plus='true'], .tui-plus-x-mark) {
+    --tui-plus-ring-gradient: var(--ui-tui-plus-ring-gradient);
+  }
+
+  .ins-post-card .feed-card-author-avatar-link[data-tui-plus='true'] {
+    --ui-avatar-tui-plus-ring-gap: var(--ui-space-half);
+    --ui-avatar-tui-plus-ring-size: var(--ui-border-width-hairline);
+    --ui-avatar-tui-plus-ring-color: var(--ui-brand);
+    --ui-avatar-tui-plus-ring-surface: var(--ui-surface-card);
+    overflow: visible;
+    background: var(--ui-avatar-tui-plus-ring-surface);
+    box-shadow:
+      0 0 0 var(--ui-avatar-tui-plus-ring-gap) var(--ui-avatar-tui-plus-ring-surface),
+      0 0 0 calc(var(--ui-avatar-tui-plus-ring-gap) + var(--ui-avatar-tui-plus-ring-size)) var(--ui-avatar-tui-plus-ring-color);
+  }
+
+  .ins-post-card .feed-card-author-avatar-link[data-tui-plus='true'] .feed-card-author-avatar {
+    box-shadow: var(--ui-shadow-none);
+  }
+
+  .tui-plus-page,
+  .tui-plus-link-editor-page {
+    background: var(--ui-tui-plus-page-surface);
+  }
+
+  .tui-plus-main,
+  .tui-plus-link-editor-main {
+    gap: var(--ui-space-3);
+    padding-top: var(--ui-space-2);
+  }
+
+  .tui-plus-topbar-title {
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ui-space-1);
+    border: var(--ui-border-width-hairline) solid var(--ui-tui-plus-topbar-title-border);
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-tui-plus-topbar-title-surface);
+    color: var(--ui-brand-strong);
+    padding: var(--ui-space-1) var(--ui-space-3);
+    box-shadow: var(--ui-tui-plus-topbar-title-shadow);
+  }
+
+  .tui-plus-topbar-title-icon {
+    display: inline-flex;
+    width: var(--ui-control-icon-xs);
+    height: var(--ui-control-icon-xs);
+    align-items: center;
+    justify-content: center;
+    color: var(--ui-brand-strong);
+  }
+
+  .tui-plus-topbar-title-icon svg {
+    width: 100%;
+    height: 100%;
+    stroke-width: var(--ui-icon-stroke);
+  }
+
+  .tui-plus-x-hero {
+    display: grid;
+    position: relative;
+    justify-items: start;
+    gap: var(--ui-space-2);
+    overflow: hidden;
+    border: var(--ui-border-width-hairline) solid var(--ui-tui-plus-hero-border);
+    border-radius: var(--ui-radius-2xl);
+    background: var(--ui-tui-plus-hero-surface);
+    padding: var(--ui-space-4);
+    box-shadow: var(--ui-shadow-card);
+    text-align: left;
+  }
+
+  .tui-plus-x-hero::before {
+    content: var(--ui-content-empty);
+    pointer-events: none;
+    position: absolute;
+    inset: var(--ui-inset-none);
+    background: var(--ui-tui-plus-hero-overlay);
+  }
+
+  .tui-plus-x-brand-row,
+  .tui-plus-x-mark,
+  .tui-plus-x-eyebrow,
+  .tui-plus-x-hero h1,
+  .tui-plus-x-status {
+    position: relative;
+    z-index: var(--ui-z-local-raised);
+  }
+
+  .tui-plus-x-brand-row {
+    display: inline-flex;
+    max-width: 100%;
+    align-items: center;
+    gap: var(--ui-space-2);
+  }
+
+  .tui-plus-x-mark {
+    display: inline-flex;
+    width: var(--ui-control-lg);
+    height: var(--ui-control-lg);
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--ui-radius-pill);
+    background: var(--tui-plus-ring-gradient);
+    color: var(--ui-color-white);
+    box-shadow: var(--ui-tui-plus-mark-shadow-compact);
+  }
+
+  .tui-plus-x-mark svg {
+    width: var(--ui-control-icon-md);
+    height: var(--ui-control-icon-md);
+    stroke-width: var(--ui-icon-stroke);
+  }
+
+  .tui-plus-x-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-tui-plus-eyebrow-surface);
+    color: var(--ui-brand-strong);
+    padding: var(--ui-space-1) var(--ui-space-2);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-strong);
+    letter-spacing: var(--ui-tracking-wide);
+    line-height: var(--ui-line-none);
+  }
+
+  .tui-plus-x-hero h1 {
+    max-width: calc(var(--ui-space-8) * 10);
+    margin: var(--ui-space-none);
+    color: var(--ui-text-strong);
+    font-size: calc(var(--ui-text-xl) + var(--ui-space-half));
+    font-weight: var(--ui-font-weight-display);
+    line-height: var(--ui-line-tight);
+    letter-spacing: var(--ui-tracking-tight);
+  }
+
+  .tui-plus-x-status {
+    display: inline-flex;
+    width: fit-content;
+    max-width: 100%;
+    align-items: center;
+    overflow: hidden;
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-tui-plus-status-surface);
+    color: var(--ui-brand-strong);
+    margin: var(--ui-space-none);
+    padding: var(--ui-space-1) var(--ui-space-2);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-tight);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .tui-plus-x-benefits {
+    display: grid;
+    gap: var(--ui-space-2);
+    overflow: hidden;
+    border: var(--ui-border-width-hairline) solid var(--ui-line-subtle);
+    border-radius: var(--ui-radius-2xl);
+    background: var(--ui-tui-plus-benefits-surface);
+    padding: var(--ui-space-3);
+    box-shadow: var(--ui-shadow-card);
+  }
+
+  .tui-plus-x-benefits-heading {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ui-space-2);
+  }
+
+  .tui-plus-x-benefits h2 {
+    min-width: 0;
+    margin: var(--ui-space-none);
+    color: var(--ui-text-strong);
+    font-size: var(--ui-text-title);
+    font-weight: var(--ui-font-weight-display);
+    line-height: var(--ui-line-tight);
+  }
+
+  .tui-plus-x-benefits-heading .tui-plus-x-status {
+    flex: 0 1 auto;
+    max-width: min(62%, calc(var(--ui-space-8) * 8));
+  }
+
+  .tui-plus-x-benefit-list,
+  .tui-plus-x-benefit-grid {
+    display: grid;
+    gap: var(--ui-space-1);
+  }
+
+  .tui-plus-x-benefit-item {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: var(--ui-space-2);
+    border: var(--ui-border-width-hairline) solid transparent;
+    border-radius: var(--ui-radius-xl);
+    background: var(--ui-tui-plus-benefit-item-surface);
+    padding: var(--ui-space-2);
+  }
+
+  .tui-plus-x-benefit-item:hover {
+    border-color: var(--ui-tui-plus-benefit-item-hover-border);
+    background: var(--ui-tui-plus-benefit-item-hover-surface);
+  }
+
+  .tui-plus-x-benefit-icon {
+    display: inline-flex;
+    width: var(--ui-control-md);
+    height: var(--ui-control-md);
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-tui-plus-benefit-icon-surface-soft);
+    color: var(--ui-brand-strong);
+  }
+
+  .tui-plus-x-benefit-icon svg,
+  .tui-plus-x-benefit-item h3 svg {
+    width: var(--ui-control-icon-sm);
+    height: var(--ui-control-icon-sm);
+    stroke-width: var(--ui-icon-stroke);
+  }
+
+  .tui-plus-x-benefit-item h3,
+  .tui-plus-x-benefit-item p,
+  .tui-plus-x-benefit-item strong,
+  .tui-plus-x-benefit-item small {
+    margin: var(--ui-space-none);
+  }
+
+  .tui-plus-x-benefit-item h3,
+  .tui-plus-x-benefit-item strong {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: var(--ui-space-1);
+    color: var(--ui-text-strong);
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-tight);
+  }
+
+  .tui-plus-x-benefit-item h3 svg {
+    flex: 0 0 auto;
+    color: var(--ui-success-strong, var(--ui-brand-strong));
+  }
+
+  .tui-plus-x-benefit-item p,
+  .tui-plus-x-benefit-item small {
+    margin-top: var(--ui-space-half);
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-text-xs);
+    line-height: var(--ui-line-tight);
+  }
+
+  .tui-plus-x-toggle {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ui-space-1);
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-tui-plus-toggle-surface);
+    padding: var(--ui-space-1);
+  }
+
+  .tui-plus-x-toggle button {
+    display: inline-flex;
+    min-height: var(--ui-control-sm);
+    align-items: center;
+    justify-content: center;
+    gap: var(--ui-space-1);
+    border: var(--ui-border-none);
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-surface-transparent);
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-strong);
+  }
+
+  .tui-plus-x-toggle button[data-state='active'] {
+    background: var(--ui-surface-card);
+    color: var(--ui-brand-strong);
+    box-shadow: var(--ui-shadow-hairline);
+  }
+
+  .tui-plus-x-toggle span {
+    color: var(--ui-brand-strong);
+    font-size: var(--ui-text-2xs);
+  }
+
+  .tui-plus-x-price-stack,
+  .tui-plus-link-editor-save-summary {
+    display: grid;
+    min-width: 0;
+    gap: var(--ui-space-half);
+  }
+
+  .tui-plus-x-plan-name,
+  .tui-plus-link-editor-save-summary span {
+    color: var(--ui-text-soft);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-tight);
+  }
+
+  .tui-plus-x-price-stack strong,
+  .tui-plus-link-editor-save-summary strong {
+    color: var(--ui-text-strong);
+    font-size: var(--ui-text-title);
+    font-weight: var(--ui-font-weight-title);
+    line-height: var(--ui-line-tight);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tui-plus-x-points-price {
+    display: inline-flex;
+    width: fit-content;
+    max-width: 100%;
+    align-items: center;
+    overflow: hidden;
+    border: var(--ui-border-width-hairline) solid var(--ui-tui-plus-price-badge-border);
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-tui-plus-price-badge-surface);
+    color: var(--ui-text-secondary);
+    padding: var(--ui-space-none) var(--ui-space-2);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-control-sm);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .tui-plus-x-action-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--ui-space-1);
+  }
+
+  .tui-plus-x-action,
+  .tui-plus-x-primary,
+  .tui-plus-link-editor-save {
+    width: 100%;
+    min-width: 0;
+    min-height: var(--ui-control-lg);
+    justify-content: center;
+    box-shadow: var(--ui-shadow-none);
+    white-space: nowrap;
+  }
+
+  .tui-plus-link-editor-card {
+    display: grid;
+    gap: var(--ui-space-3);
+    border: var(--ui-border-none);
+    background: var(--ui-surface-transparent);
+    padding: var(--ui-space-none);
+    box-shadow: var(--ui-shadow-none);
+  }
+
+  .tui-plus-link-editor-section {
+    display: grid;
+    gap: var(--ui-space-2);
+    overflow: hidden;
+    border: var(--ui-border-width-hairline) solid var(--ui-tui-plus-link-section-border);
+    border-radius: var(--ui-radius-2xl);
+    background: var(--ui-tui-plus-link-section-surface);
+    padding: var(--ui-space-3);
+    box-shadow: var(--ui-shadow-card);
+  }
+
+  .tui-plus-link-editor-section-header {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ui-space-2);
+  }
+
+  .tui-plus-link-editor-section-header strong {
+    color: var(--ui-text-strong);
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-title);
+    line-height: var(--ui-line-tight);
+  }
+
+  .tui-plus-link-editor-section-header span {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-tui-plus-link-section-badge-surface);
+    color: var(--ui-brand-strong);
+    padding: var(--ui-space-none) var(--ui-space-2);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-control-xs, var(--ui-control-sm));
+    white-space: nowrap;
+  }
+
+  .tui-plus-link-editor-slots {
+    display: grid;
+    gap: var(--ui-space-2);
+  }
+
+  .tui-plus-link-editor-slot {
+    display: grid;
+    grid-template-columns: var(--ui-control-sm) minmax(0, 1fr);
+    gap: var(--ui-space-2);
+    align-items: start;
+    border: var(--ui-border-width-hairline) solid var(--ui-line-subtle);
+    border-radius: var(--ui-radius-xl);
+    background: var(--ui-surface-card);
+    padding: var(--ui-space-2);
+    box-shadow: var(--ui-shadow-hairline);
+  }
+
+  .tui-plus-link-editor-slot[data-filled='true'] {
+    border-color: var(--ui-tui-plus-link-slot-filled-border);
+    background: var(--ui-tui-plus-link-slot-filled-surface);
+  }
+
+  .tui-plus-link-editor-slot[data-dirty='true'] {
+    border-color: var(--ui-tui-plus-link-slot-dirty-border);
+    background: var(--ui-tui-plus-link-slot-dirty-surface);
+  }
+
+  .tui-plus-link-editor-slot-index {
+    display: inline-flex;
+    width: var(--ui-control-sm);
+    height: var(--ui-control-sm);
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-tui-plus-link-slot-index-surface);
+    color: var(--ui-brand-strong);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-strong);
+    box-shadow: var(--ui-shadow-hairline);
+  }
+
+  .tui-plus-link-editor-slot-fields {
+    display: grid;
+    gap: var(--ui-space-2);
+  }
+
+  .tui-plus-link-editor-field {
+    display: grid;
+    gap: var(--ui-space-1);
+  }
+
+  .tui-plus-link-editor-field span {
+    color: var(--ui-text-soft);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-tight);
+  }
+
+  .tui-plus-link-editor-field input {
+    width: 100%;
+    min-height: var(--ui-control-lg);
+    border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+    border-radius: var(--ui-radius-xl);
+    background: var(--ui-surface-base);
+    color: var(--ui-text-strong);
+    padding: var(--ui-space-none) var(--ui-space-3);
+    font-size: var(--ui-root-font-size);
+    outline: var(--ui-outline-none);
+    scroll-margin-block: var(--ui-form-scroll-margin-top-extra) var(--ui-form-scroll-margin-bottom);
+    touch-action: manipulation;
+  }
+
+  .tui-plus-link-editor-field input:focus {
+    border-color: var(--ui-brand);
+    background: var(--ui-surface-focus);
+    box-shadow: var(--ui-tui-plus-link-field-focus-shadow);
+  }
+
+  .tui-plus-link-editor-check {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+    min-height: var(--ui-control-lg);
+    border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+    border-radius: var(--ui-radius-xl);
+    background: var(--ui-surface-muted);
+    color: var(--ui-text-strong);
+    padding: var(--ui-space-2) var(--ui-space-3);
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-tight);
+  }
+
+  .tui-plus-link-editor-check input {
+    width: var(--ui-control-icon-sm);
+    height: var(--ui-control-icon-sm);
+    flex: 0 0 auto;
+    accent-color: var(--ui-brand);
+  }
+
+  .profile-tui-plus-chip-icon {
+    width: var(--ui-control-icon-xs);
+    height: var(--ui-control-icon-xs);
+    flex: 0 0 auto;
+    color: currentColor;
+    stroke-width: var(--ui-icon-stroke);
+  }
+}

@@ -1,0 +1,557 @@
+/* Wide-screen automatic adaptation for the user mobile-first app.
+ * Contract: mobile keeps its current behavior; desktop uses a real app frame
+ * with persistent navigation and context rails instead of scaling a phone canvas.
+ * Admin and non-user surfaces must not receive these variables or layout rules.
+ */
+
+@layer utilities {
+  .app-shell[data-route-surface='user'] {
+    --app-mobile-canvas-width: var(--ui-viewport-width);
+    --app-shell-viewport-width: var(--ui-viewport-width);
+    --app-shell-viewport-height: var(--app-layout-vh);
+    --app-desktop-sidebar-width: calc(var(--ui-space-8) * 7 + var(--ui-space-4));
+    --app-desktop-feed-main-width: calc(var(--ui-space-8) * 26);
+    --app-desktop-reading-main-width: var(--app-desktop-feed-main-width);
+    --app-desktop-detail-main-width: calc(
+      var(--app-desktop-reading-main-width) +
+      (var(--ui-app-shell-desktop-padding-x) * 2)
+    );
+    --app-desktop-conversation-main-width: calc(var(--ui-space-8) * 26 + var(--ui-space-2));
+    --app-desktop-conversation-frame-padding: var(--ui-space-2);
+    --app-desktop-profile-main-width: calc(var(--ui-space-8) * 27 + var(--ui-space-4));
+    --app-desktop-compose-main-width: calc(var(--ui-space-8) * 28 + var(--ui-space-4));
+    --app-desktop-workspace-main-width: calc(var(--ui-space-8) * 29 + var(--ui-space-4));
+    --app-desktop-content-main-width: calc(var(--ui-space-8) * 29 + var(--ui-space-4));
+    --app-desktop-utility-main-width: calc(var(--ui-space-8) * 24 + var(--ui-space-4));
+    --app-desktop-main-width: var(--app-desktop-workspace-main-width);
+    --app-desktop-page-target-width: calc(
+      var(--app-desktop-workspace-main-width) -
+      (var(--ui-app-shell-desktop-padding-x) * 2)
+    );
+    --app-desktop-shell-gap: var(--ui-space-6);
+    --app-desktop-shell-padding-x: var(--ui-space-6);
+    --app-desktop-shell-padding-y: var(--ui-space-3);
+    --app-desktop-frame-width: calc(
+      var(--app-desktop-sidebar-width) +
+      var(--app-desktop-workspace-main-width) +
+      (var(--app-desktop-shell-gap) * 2)
+    );
+    --app-desktop-shell-width: var(--app-desktop-frame-width);
+    --app-adaptive-canvas-border: var(--ui-border-none);
+    --app-adaptive-canvas-shadow: var(--ui-shadow-none);
+    --app-adaptive-page-bg: var(--ui-surface-card);
+  }
+
+  .app-shell[data-route-surface='admin'],
+  .app-shell[data-route-surface='admin'] .app-shell-main {
+    width: 100%;
+    max-width: var(--ui-max-width-none);
+    min-height: var(--app-shell-viewport-height, var(--app-layout-vh));
+    margin: var(--ui-space-none);
+    overflow: visible;
+    border: var(--ui-border-none);
+    background: var(--ui-surface-page);
+    box-shadow: var(--ui-shadow-none);
+    transform: none;
+  }
+
+  .app-shell[data-route-surface='admin'] {
+    display: block;
+  }
+
+  .app-shell[data-route-surface='user'] .app-shell-main {
+    width: 100%;
+    min-height: var(--app-shell-viewport-height);
+    margin-inline: auto;
+    background: var(--ui-surface-page);
+  }
+
+  .app-desktop-sidebar {
+    display: none;
+  }
+
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .app-shell[data-route-surface='user'] {
+      --app-mobile-canvas-width: min(100%, calc(var(--ui-space-8) * 24));
+      --app-adaptive-canvas-border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+      --app-adaptive-canvas-shadow: 0 var(--ui-space-6) calc(var(--ui-space-8) * 2 + var(--ui-space-4)) color-mix(in srgb, var(--ui-color-black) 10%, transparent);
+      --app-adaptive-page-bg:
+        radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--ui-brand) 8%, transparent), transparent 32%),
+        var(--ui-surface-page);
+      display: flex;
+      min-height: var(--app-shell-viewport-height);
+      justify-content: center;
+      overflow-x: hidden;
+      background: var(--app-adaptive-page-bg);
+    }
+
+    .app-shell[data-route-surface='user'] .app-shell-main {
+      position: relative;
+      width: var(--app-mobile-canvas-width);
+      max-width: var(--app-mobile-canvas-width);
+      min-height: var(--app-shell-viewport-height);
+      flex: 0 0 var(--app-mobile-canvas-width);
+      padding-block-start: var(--ui-space-none);
+      padding-inline: var(--ui-space-none);
+      border-inline: var(--app-adaptive-canvas-border);
+      background: var(--ui-surface-page);
+      box-shadow: var(--app-adaptive-canvas-shadow);
+      transform: none;
+      transform-origin: initial;
+    }
+
+    .app-shell[data-route-surface='user'] .app-bottom-nav {
+      right: auto;
+      left: 50%;
+      width: var(--app-mobile-canvas-width);
+      max-width: var(--app-mobile-canvas-width);
+      transform: translateX(-50%) translateZ(var(--ui-space-none));
+      transform-origin: bottom center;
+    }
+
+    .app-shell[data-route-surface='user'] .app-bottom-nav-inner {
+      width: 100%;
+      max-width: 100%;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .app-shell[data-route-surface='user'][data-desktop-surface='feed'] {
+      --app-desktop-page-target-width: var(--app-desktop-feed-main-width);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='detail'] {
+      --app-desktop-page-target-width: var(--app-desktop-reading-main-width);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='conversation'] {
+      --app-desktop-page-target-width: var(--app-desktop-conversation-main-width);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='profile'] {
+      --app-desktop-page-target-width: var(--app-desktop-profile-main-width);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='compose'] {
+      --app-desktop-page-target-width: var(--app-desktop-compose-main-width);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='content'] {
+      --app-desktop-page-target-width: var(--app-desktop-content-main-width);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='utility'] {
+      --app-desktop-page-target-width: var(--app-desktop-utility-main-width);
+    }
+
+    .app-shell[data-route-surface='user'] {
+      display: grid;
+      width: 100%;
+      min-height: var(--app-shell-viewport-height);
+      --app-desktop-balance-spacer-width: var(--ui-space-none);
+      --app-desktop-shell-active-width: min(
+        var(--app-desktop-frame-width),
+        calc(var(--app-shell-viewport-width) - (var(--app-desktop-shell-padding-x) * 2))
+      );
+      --app-desktop-shell-left: calc((var(--app-shell-viewport-width) - var(--app-desktop-shell-active-width)) / 2);
+      --app-desktop-shell-content-height: calc(var(--app-shell-viewport-height) - (var(--app-desktop-shell-padding-y) * 2));
+      --app-desktop-main-side-gap-total: var(--app-desktop-shell-gap);
+      --app-desktop-main-left: calc(var(--app-desktop-shell-left) + var(--app-desktop-sidebar-width) + var(--app-desktop-shell-gap));
+      --app-desktop-main-active-width: min(
+        var(--app-desktop-main-width),
+        max(
+          var(--ui-space-none),
+          calc(
+            var(--app-desktop-shell-active-width) -
+            var(--app-desktop-sidebar-width) -
+            var(--app-desktop-main-side-gap-total) -
+            var(--app-desktop-balance-spacer-width)
+          )
+        )
+      );
+      grid-template-columns:
+        minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
+        minmax(0, var(--app-desktop-main-active-width));
+      gap: var(--app-desktop-shell-gap);
+      align-items: start;
+      justify-content: center;
+      height: var(--app-shell-viewport-height);
+      min-height: var(--app-shell-viewport-height);
+      overflow: hidden;
+      padding: var(--app-desktop-shell-padding-y) var(--app-desktop-shell-padding-x);
+      background: var(--ui-surface-page);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='feed'] {
+      --app-desktop-main-side-gap-total: var(--app-desktop-shell-gap);
+      --app-desktop-balance-spacer-width: var(--ui-space-none);
+      align-items: stretch;
+      grid-template-columns:
+        minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
+        minmax(0, var(--app-desktop-main-active-width));
+    }
+
+    .app-shell[data-route-surface='user'] > .ui-layer-header {
+      display: none;
+    }
+
+    .app-shell[data-route-surface='user']:not([data-desktop-surface='feed']) {
+      --app-desktop-main-side-gap-total: var(--app-desktop-shell-gap);
+      --app-desktop-balance-spacer-width: var(--ui-space-none);
+      grid-template-columns:
+        minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
+        minmax(0, var(--app-desktop-main-active-width));
+    }
+
+    .app-shell[data-route-surface='user']:not([data-desktop-surface='feed'])::after {
+      display: none;
+      content: none;
+    }
+
+    .app-shell[data-route-surface='user'] .app-shell-main {
+      --app-desktop-page-content-width: min(
+        var(--app-desktop-page-target-width),
+        calc(var(--app-desktop-main-active-width) - (var(--ui-app-shell-desktop-padding-x) * 2))
+      );
+      --app-desktop-main-content-height: calc(
+        var(--app-desktop-shell-content-height) -
+        (var(--ui-border-width-hairline) * 2) -
+        var(--ui-app-shell-desktop-padding-y) -
+        var(--ui-bottom-nav-page-bottom-space)
+      );
+      --ui-topbar-content-max-width: var(--app-desktop-page-content-width);
+      --ui-page-tabs-max-width: var(--app-desktop-page-content-width);
+
+      position: relative;
+      width: 100%;
+      max-width: var(--ui-max-width-none);
+      height: var(--app-desktop-shell-content-height);
+      min-height: var(--ui-space-none);
+      max-height: var(--app-desktop-shell-content-height);
+      flex: initial;
+      overflow-x: hidden;
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+      border-radius: var(--ui-radius-2xl);
+      background: var(--ui-surface-page);
+      box-shadow: var(--ui-shadow-card);
+      transform: none;
+      transform-origin: initial;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: var(--ui-line-medium) var(--ui-surface-transparent);
+    }
+
+    .app-shell[data-route-surface='user'] .app-shell-main::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    .app-shell[data-route-surface='user'] .app-shell-main::-webkit-scrollbar-track {
+      background: var(--ui-surface-transparent);
+    }
+
+    .app-shell[data-route-surface='user'] .app-shell-main::-webkit-scrollbar-thumb {
+      background: var(--ui-line-medium);
+      border-radius: var(--ui-radius-full);
+      transition: background-color var(--ui-duration-base) var(--ease-standard);
+    }
+
+    .app-shell[data-route-surface='user'] .app-shell-main::-webkit-scrollbar-thumb:hover {
+      background: var(--ui-text-muted);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='feed'] .app-shell-main {
+      overflow: hidden;
+      border: var(--ui-border-none);
+      border-radius: var(--ui-radius-none);
+      box-shadow: var(--ui-shadow-none);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='conversation'] .app-shell-main {
+      padding: var(--app-desktop-conversation-frame-padding);
+    }
+
+    .app-shell[data-route-surface='user'] .app-shell-main > :is(.ui-app-page, .ui-page, .surface-page) {
+      min-height: var(--app-desktop-main-content-height);
+      max-height: var(--ui-max-height-none);
+    }
+
+    .app-shell[data-route-surface='user'] .app-shell-main > :is(.ui-app-page, .ui-page, .surface-page) > .ui-topbar {
+      width: 100%;
+      max-width: var(--app-desktop-page-content-width);
+      margin-inline: auto;
+    }
+
+    .app-shell[data-route-surface='user'] .app-bottom-nav {
+      display: none;
+    }
+
+    .app-desktop-sidebar {
+      position: sticky;
+      top: var(--app-desktop-shell-padding-y);
+      display: flex;
+      min-width: var(--ui-space-none);
+      max-height: var(--app-desktop-shell-content-height);
+      flex-direction: column;
+      gap: var(--ui-space-4);
+      width: 100%;
+      align-self: stretch;
+      padding-inline-end: var(--ui-space-3);
+      border-inline-end: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+    }
+
+    .app-desktop-brand,
+    .app-desktop-nav-item,
+    .app-desktop-context-card {
+      min-width: var(--ui-space-none);
+      border: var(--ui-border-none);
+      background: var(--ui-surface-transparent);
+      box-shadow: var(--ui-shadow-none);
+    }
+
+    .app-desktop-brand {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: var(--ui-space-3);
+      padding: var(--ui-space-3) var(--ui-space-4);
+      border-radius: var(--ui-radius-xl);
+      color: var(--ui-text-strong);
+      text-decoration: var(--ui-text-decoration-none);
+      transition: transform var(--ui-duration-base) var(--ease-standard);
+    }
+
+    .app-desktop-brand:hover {
+      transform: translateY(-1px);
+    }
+
+    .app-desktop-brand-mark {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      width: var(--ui-control-lg);
+      height: var(--ui-control-lg);
+      border-radius: var(--ui-radius-lg);
+      background: var(--ui-brand);
+      color: var(--ui-color-white);
+      font-size: var(--ui-text-title);
+      font-weight: var(--ui-font-weight-display);
+      line-height: var(--ui-line-none);
+      box-shadow: var(--ui-shadow-card);
+      transition: box-shadow var(--ui-duration-base) var(--ease-standard);
+    }
+
+    .app-desktop-brand:hover .app-desktop-brand-mark {
+      box-shadow: var(--ui-shadow-card-hover);
+    }
+
+    .app-desktop-brand-copy {
+      display: flex;
+      flex-direction: column;
+      min-width: var(--ui-space-none);
+      gap: var(--ui-space-half);
+    }
+
+    .app-desktop-brand-name {
+      font-size: var(--ui-text-title);
+      font-weight: var(--ui-font-weight-display);
+      line-height: var(--ui-line-tight);
+      white-space: nowrap;
+    }
+
+    .app-desktop-brand-subtitle {
+      color: var(--ui-text-muted);
+      font-size: var(--ui-text-xs);
+      font-weight: var(--ui-font-weight-medium);
+      line-height: var(--ui-line-tight);
+      white-space: nowrap;
+    }
+
+    .app-desktop-nav {
+      display: flex;
+      flex-direction: column;
+      gap: var(--ui-space-1);
+    }
+
+    .app-desktop-sidebar-context {
+      display: flex;
+      flex-direction: column;
+      gap: var(--ui-space-4);
+      margin-top: auto;
+      padding-top: var(--ui-space-4);
+      border-top: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+    }
+
+    .app-desktop-nav-item {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: var(--ui-control-hit);
+      gap: var(--ui-space-3);
+      padding: var(--ui-space-2.5) var(--ui-space-4);
+      color: var(--ui-text-secondary);
+      font-size: var(--ui-text-sm);
+      font-weight: var(--ui-font-weight-strong);
+      line-height: var(--ui-line-tight);
+      text-decoration: var(--ui-text-decoration-none);
+      border-radius: var(--ui-radius-xl);
+      white-space: nowrap;
+      transition:
+        background-color var(--ui-duration-base) var(--ease-standard),
+        border-color var(--ui-duration-base) var(--ease-standard),
+        color var(--ui-duration-base) var(--ease-standard),
+        transform var(--ui-duration-base) var(--ease-standard);
+    }
+
+    .app-desktop-nav-icon {
+      display: block;
+      flex-shrink: 0;
+      width: var(--ui-control-icon-md);
+      height: var(--ui-control-icon-md);
+      stroke-width: var(--ui-icon-stroke);
+      transition: transform var(--ui-duration-fast) var(--ease-standard);
+    }
+
+    .app-desktop-nav-label {
+      flex: 1;
+      min-width: var(--ui-space-none);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .app-desktop-nav-item:hover {
+      background: var(--ui-state-hover);
+      color: var(--ui-text-strong);
+      transform: translateX(2px);
+    }
+
+    .app-desktop-nav-item:hover .app-desktop-nav-icon {
+      transform: scale(1.1);
+    }
+
+    .app-desktop-nav-item--active,
+    .app-desktop-nav-item--active:hover {
+      background: var(--ui-state-selected);
+      color: var(--ui-brand-strong);
+      font-weight: var(--ui-font-weight-display);
+      transform: translateX(0);
+    }
+
+    .app-desktop-nav-item--active .app-desktop-nav-icon {
+      stroke: var(--ui-brand-strong);
+    }
+
+    .app-desktop-nav-item:focus-visible,
+    .app-desktop-brand:focus-visible {
+      outline: var(--ui-outline-width) solid var(--ui-focus-outline);
+      outline-offset: var(--ui-focus-ring-width);
+    }
+
+    .app-desktop-context-card {
+      padding: var(--ui-space-4);
+      border-radius: var(--ui-radius-xl);
+      background: var(--ui-surface-card);
+      border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+      transition: background-color var(--ui-duration-base) var(--ease-standard);
+    }
+
+    .app-desktop-context-card:hover {
+      background: var(--ui-surface-card);
+    }
+
+    .app-desktop-context-kicker {
+      color: var(--ui-text-muted);
+      font-size: var(--ui-text-xs);
+      font-weight: var(--ui-font-weight-strong);
+      line-height: var(--ui-line-tight);
+      letter-spacing: var(--ui-tracking-normal);
+    }
+
+    .app-desktop-context-metric {
+      display: flex;
+      align-items: center;
+      gap: var(--ui-space-2);
+      margin-top: var(--ui-space-2);
+      color: var(--ui-text-strong);
+      font-size: var(--ui-type-xl-size);
+      font-weight: var(--ui-font-weight-display);
+      line-height: var(--ui-line-tight);
+    }
+
+    .app-desktop-context-dot {
+      width: var(--ui-space-2);
+      height: var(--ui-space-2);
+      border-radius: var(--ui-radius-full);
+      background: var(--ui-brand);
+      box-shadow: var(--ui-focus-ring);
+      animation: app-bottom-nav-online-breathe 2.4s ease-in-out infinite;
+    }
+
+  }
+
+  @media (min-width: 1024px) and (max-width: 1179px) {
+    .app-shell[data-route-surface='user'] {
+      --app-desktop-balance-spacer-width: var(--ui-space-none);
+      --app-desktop-main-width: var(--app-desktop-workspace-main-width);
+      --app-desktop-main-side-gap-total: var(--app-desktop-shell-gap);
+      grid-template-columns:
+        minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
+        minmax(0, var(--app-desktop-main-active-width));
+      justify-content: center;
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='feed'] {
+      --app-desktop-main-width: var(--app-desktop-workspace-main-width);
+      --app-desktop-main-side-gap-total: var(--app-desktop-shell-gap);
+      grid-template-columns:
+        minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
+        minmax(0, var(--app-desktop-main-active-width));
+    }
+
+    .app-shell[data-route-surface='user']:not([data-desktop-surface='feed']) {
+      --app-desktop-balance-spacer-width: var(--ui-space-none);
+      --app-desktop-main-side-gap-total: var(--app-desktop-shell-gap);
+      grid-template-columns:
+        minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
+        minmax(0, var(--app-desktop-main-active-width));
+    }
+
+    .app-shell[data-route-surface='user']:not([data-desktop-surface='feed'])::after {
+      display: none;
+      content: none;
+    }
+  }
+
+  @media (min-width: 96rem) {
+    .app-shell[data-route-surface='user']:not([data-desktop-surface='feed']) {
+      --app-desktop-main-side-gap-total: var(--app-desktop-shell-gap);
+      --app-desktop-balance-spacer-width: var(--ui-space-none);
+      grid-template-columns:
+        minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
+        minmax(0, var(--app-desktop-main-active-width));
+    }
+
+    .app-shell[data-route-surface='user']:not([data-desktop-surface='feed'])::after {
+      display: none;
+      content: none;
+    }
+
+  }
+
+  @media (max-width: 767px) {
+    .app-shell[data-route-surface='user'] .app-shell-main {
+      width: 100%;
+      max-width: var(--ui-max-width-none);
+      min-height: var(--app-shell-viewport-height);
+      margin-inline: var(--ui-space-none);
+      border-inline: var(--ui-border-none);
+      box-shadow: var(--ui-shadow-none);
+      transform: none;
+    }
+  }
+}

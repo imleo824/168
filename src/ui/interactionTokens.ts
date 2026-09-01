@@ -1,0 +1,2 @@
+export const UI_BACK_NAVIGATION_FALLBACK_MS = 320;
+export const UI_BACK_NAVIGATION_LOCK_MS = 380;

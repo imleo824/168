@@ -1,0 +1,166 @@
+/* Profile security account information rows and values. */
+
+@layer utilities {
+  .profile-security-overlay .account-info-row {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    min-height: var(--ui-account-info-row-min-height);
+    border: var(--ui-border-width-hairline) solid var(--ui-profile-security-row-border);
+    border-radius: var(--ui-radius-2xl);
+    padding: var(--ui-account-info-row-padding-y) var(--ui-account-info-row-padding-x);
+    background: var(--ui-surface-card);
+    box-shadow: var(--ui-section-card-shadow, none);
+  }
+
+  .profile-security-overlay .account-info-row .setting-row-content {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .profile-security-overlay .account-info-row .setting-row-trailing {
+    min-width: max-content;
+  }
+
+  .profile-security-overlay .account-info-row-avatar {
+    align-items: center;
+  }
+
+  .profile-security-overlay .account-info-avatar-action,
+  .profile-security-overlay .account-info-avatar-image,
+  .profile-security-overlay .account-info-avatar-action :is(.ui-avatar, .ui-avatar-fallback, .optimized-image, img) {
+    width: var(--ui-profile-user-list-avatar-size);
+    height: var(--ui-profile-user-list-avatar-size);
+    min-width: var(--ui-profile-user-list-avatar-size);
+    min-height: var(--ui-profile-user-list-avatar-size);
+    max-width: var(--ui-profile-user-list-avatar-size);
+    max-height: var(--ui-profile-user-list-avatar-size);
+    flex: 0 0 var(--ui-profile-user-list-avatar-size);
+    overflow: hidden;
+    border-radius: var(--ui-radius-pill);
+    object-fit: cover;
+  }
+
+  .profile-security-overlay .account-info-avatar-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: var(--ui-border-none);
+    background: var(--ui-surface-transparent);
+    padding: var(--ui-space-none);
+    box-shadow: var(--ui-shadow-none);
+  }
+
+  .profile-security-overlay .account-info-label {
+    margin-bottom: var(--ui-account-info-label-gap);
+    letter-spacing: var(--ui-letter-spacing-wide);
+    line-height: var(--ui-line-tight);
+    text-transform: var(--ui-text-transform-none);
+  }
+
+  .profile-security-overlay .account-info-row .ui-action {
+    border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+    background: var(--ui-social-surface-muted, var(--ui-surface-muted));
+    box-shadow: var(--ui-shadow-none);
+  }
+
+  .account-info-header-title {
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+    gap: var(--ui-space-2);
+  }
+
+  .account-info-header-icon,
+  .account-info-close-icon {
+    width: var(--ui-control-icon-md);
+    height: var(--ui-control-icon-md);
+    flex: 0 0 var(--ui-control-icon-md);
+    stroke-width: var(--ui-icon-stroke);
+  }
+
+  .account-info-header-icon {
+    color: var(--ui-text-strong);
+  }
+
+  .account-info-avatar-row {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: var(--ui-space-3);
+  }
+
+  .account-info-avatar-copy {
+    min-width: 0;
+    flex: 1 1 auto;
+    text-align: left;
+  }
+
+  .account-info-hint,
+  .account-info-footnote {
+    color: var(--ui-text-soft);
+    font-size: var(--ui-text-xs);
+    line-height: var(--ui-line-meta);
+  }
+
+  .account-info-value,
+  .account-info-status {
+    min-width: 0;
+    color: var(--ui-text-strong);
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-meta);
+  }
+
+  .account-info-value--truncate,
+  .account-info-status--truncate,
+  .account-info-status-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .account-info-status,
+  .account-info-status-state {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ui-space-1);
+  }
+
+  .account-info-status--strong {
+    color: var(--ui-text-strong);
+  }
+
+  .account-info-status-state {
+    min-width: 0;
+    font-weight: var(--ui-font-weight-strong);
+  }
+
+  .account-info-status-state--success,
+  .account-info-status-icon--success {
+    color: var(--ui-success);
+  }
+
+  .account-info-status-state--warning {
+    color: var(--ui-warning);
+  }
+
+  .account-info-status-icon {
+    width: var(--ui-control-icon-xs);
+    height: var(--ui-control-icon-xs);
+    flex: 0 0 var(--ui-control-icon-xs);
+    stroke-width: var(--ui-icon-stroke);
+  }
+
+  .account-info-action {
+    flex: 0 0 auto;
+    color: var(--ui-text-strong);
+  }
+
+  .account-info-footnote {
+    max-width: var(--ui-page-narrow);
+    margin-inline: auto;
+    text-align: left;
+  }
+}

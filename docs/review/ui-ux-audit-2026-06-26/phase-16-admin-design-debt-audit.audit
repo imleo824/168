@@ -1,0 +1,409 @@
+# UI/UE 深度审计 Phase 16 - Admin 设计债专项审计
+
+日期: 2026-06-26
+
+目标: 补齐全站目标中 `/168wc` 后台页面的专项审计。此前多个 Phase 已反复标记 Admin 是最大硬编码风险，但还没有单独展开。Phase 16 将 Admin 从 C 端 P0 中拆出，明确后台可以拥有独立密度和管理台语言，但不能继续由 TSX utility 主导最终像素。
+
+## 本阶段读取证据
+
+页面与组件:
+
+- `src/features/admin/AdminPage.tsx`
+- `src/features/admin/adminChrome.tsx`
+- `src/features/admin/AdminFiltersPanel.tsx`
+- `src/features/admin/AdminPaginationBar.tsx`
+- `src/features/admin/AdminTableHeader.tsx`
+- `src/features/admin/AdminChatPanel.tsx`
+- `src/features/admin/SystemConfigHeader.tsx`
+- `src/features/admin/adminMeta.tsx`
+- `src/features/admin/adminConfigSchema.ts`
+
+样式:
+
+- `src/styles/features/admin.css`
+
+静态计数:
+
+- Admin TSX utility-risk matches: 1913。
+- Admin CSS local px/rem matches: 23。
+
+说明:
+
+- `admin.css` 已经有 token 化方向，这是优点。
+- 但 TSX 中 utility class 数量非常高，说明最终视觉仍主要由页面 JSX 直接决定。
+- `AdminPage.tsx` 文件巨大，终端输出被截断；本阶段结论来自主文件片段、拆分组件、样式文件和 utility 风险统计共同证据。
+
+## 总体判断
+
+Admin 当前不是缺样式，而是缺后台组件合同。
+
+后台已经有一些正向基础:
+
+- `admin.css` 定义了 `admin-console-page`、`admin-sidebar`、`admin-section-card`、`admin-data-panel`、`admin-mobile-tabstrip` 等语义类。
+- 后台主导航和移动 tabstrip 已经抽到 `adminChrome.tsx`。
+- 筛选、分页、表头、聊天配置、系统配置 header 已经拆分成组件。
+- Admin 允许比 C 端更高密度，这一点方向正确。
+
+但主要问题依然很重:
+
+- `AdminPage.tsx` 仍大量内联 Tailwind utility。
+- 拆分组件如 `AdminFiltersPanel`、`AdminPaginationBar`、`AdminTableHeader`、`AdminChatPanel`、`SystemConfigHeader` 仍大量使用 `text-[...]`、`bg-gray-*`、`rounded-*`、`px-*`、`py-*`、`h-*`。
+- `admin.css` 反过来用 `.admin-console-page .font-black`、`.rounded-xl`、`.text-lg` 等全局兜底覆盖 utility，这属于 CSS 强压信号。
+- Admin icon size 在 `adminMeta.tsx`、`adminChrome.tsx` 中通过 `icon(size = 16)`、`icon(18)`、`icon(21)` 等数字传递，尚未纳入 IconAction 合同。
+
+## P0: TSX 主导最终视觉
+
+证据:
+
+- Admin TSX utility-risk matches: 1913。
+- `AdminPage.tsx` 中大量 `text-[10px]`、`text-[11px]`、`font-black`、`bg-gray-*`、`rounded-xl`、`h-9`、`px-3`、`py-2`。
+- `AdminFiltersPanel.tsx` 中大量重复 input/select/button 类。
+- `AdminPaginationBar.tsx` 中分页控件直接写高度、边框、圆角、间距。
+- `AdminTableHeader.tsx` 中 `headerCellClass = 'px-6 py-4 text-[10px] font-black uppercase tracking-widest text-gray-400'`。
+
+影响:
+
+- 后台每一个列表项、按钮、输入框、表头都可能有微小像素漂移。
+- 后续要提升精致感时，很容易继续补 utility，而不是收敛合同。
+- 目前很难证明“不硬编码、不临时方式、不 CSS 强压”。
+
+建议:
+
+建立 AdminDesignDebtContract，先抽以下 primitives:
+
+- `AdminButton`
+- `AdminInput`
+- `AdminSelect`
+- `AdminBadge`
+- `AdminMetricCard`
+- `AdminPanel`
+- `AdminTable`
+- `AdminMobileRecordCard`
+- `AdminSectionHeader`
+- `AdminActionGroup`
+
+验收:
+
+- Admin TSX utility-risk matches 显著下降。
+- 表格、筛选、移动卡片不再直接写核心视觉 utility。
+- Admin 仍保持高密度，但视觉由 token 和组件决定。
+
+## P0: CSS 兜底覆盖 utility 是强压信号
+
+证据:
+
+`admin.css` 包含:
+
+```text
+.admin-console-page .font-black
+.admin-console-page .font-bold
+.admin-console-page .tracking-widest
+.admin-console-page .tracking-wider
+.admin-console-page .rounded-2xl
+.admin-console-page .rounded-xl
+.admin-console-page .text-lg
+```
+
+问题:
+
+这说明当前 CSS 正在尝试“驯服”TSX 里散落的 utility，而不是由组件合同生成正确样式。
+
+影响:
+
+- 后续新增 utility 可能被全局后台 CSS 意外影响。
+- CSS 选择器越来越宽，维护风险上升。
+- 看似 token 化，实则仍依赖页面 utility。
+
+建议:
+
+迁移策略:
+
+1. 保留这些兜底选择器作为短期兼容。
+2. 新增 Admin primitive 后逐步移除。
+3. 禁止新增 `.admin-console-page .some-tailwind-class` 形式的兜底覆盖。
+
+验收:
+
+- Admin CSS 不再需要覆盖 `.font-black`、`.rounded-xl` 等通用 class。
+- 所有视觉差异通过 `data-admin-*` 或语义类表达。
+
+## P0: 筛选区缺少 AdminField 合同
+
+证据:
+
+`AdminFiltersPanel.tsx` 中重复出现:
+
+```text
+w-full h-11 bg-white border border-gray-200 rounded-xl px-4 text-sm font-bold outline-none
+```
+
+问题:
+
+筛选 input、select、date、search、status filter 属于同一控件家族，却在 TSX 中重复写视觉。
+
+影响:
+
+- 筛选区是后台高频入口，细节漂移会放大。
+- 移动端一旦需要调密度，会出现大量重复修改。
+
+建议:
+
+新增:
+
+- `AdminField`
+- `AdminFilterBar`
+- `AdminFilterGrid`
+- `AdminFilterActions`
+
+API 建议:
+
+```text
+density: compact | regular
+layout: single | two | three | four | auto
+state: idle | active | disabled | error
+```
+
+验收:
+
+- `AdminFiltersPanel.tsx` 不再出现重复 input/select 视觉 class。
+- 筛选区移动和桌面布局由 `AdminFilterGrid` 管理。
+
+## P0: 表格和移动记录卡是两套视觉
+
+证据:
+
+- `AdminTableHeader.tsx` 直接定义 `headerCellClass`。
+- `AdminPage.tsx` 内移动卡片为每个 tab 写大量独立 `space-y-3`、`text-[11px]`、`rounded-xl`、`bg-gray-50`。
+- `admin.css` 有 table th/td token 化，但移动卡片大多仍在 TSX。
+
+问题:
+
+桌面 table 和移动 card 本质上是同一记录的两种呈现，但没有共享 Record contract。
+
+影响:
+
+- 内容管理、广告管理、用户管理、充值管理、地址管理、聊天管理、交易管理会各自漂移。
+- 移动端更难保证信息扫描和间距一致。
+
+建议:
+
+新增:
+
+- `AdminTable`
+- `AdminTableHeaderCell`
+- `AdminRecordCard`
+- `AdminRecordMeta`
+- `AdminRecordStatus`
+- `AdminRecordActions`
+
+验收:
+
+- 每个 tab 只声明字段，不直接写视觉。
+- 桌面 table 和移动 card 共用 label、status、action token。
+
+## P1: Admin visual density 可以独立，但不能割裂 foundation
+
+证据:
+
+- `admin.css` 已经有 `--ui-admin-*` token。
+- Admin sidebar、panel、nav、mobile tabstrip 有独立语言。
+- 但大量 TSX utility 仍使用 gray/slate/emerald/rose/amber/indigo 这类颜色类。
+
+问题:
+
+Admin 有独立子主题是合理的，但应该继承 foundation tokens，而不是直接在 TSX 选择 Tailwind palette。
+
+建议:
+
+建立 Admin 子主题:
+
+```text
+AdminDensity
+AdminSurface
+AdminTone
+AdminStatusTone
+AdminControlSize
+AdminRecordDensity
+```
+
+颜色 tone:
+
+- neutral
+- success
+- danger
+- warning
+- info
+- brand
+
+验收:
+
+- `bg-emerald-50 text-emerald-600` 这类组合迁移到 `AdminBadge tone="success"`。
+- `bg-rose-50 text-rose-500` 迁移到 `tone="danger"`。
+- `bg-gray-100 text-gray-700` 迁移到 `tone="neutral"`。
+
+## P1: Icon 和 action size 分散
+
+证据:
+
+- `adminMeta.tsx` 中 icon factory 默认 `size = 16` 或 `17`。
+- `adminChrome.tsx` 中调用 `tab.icon(18)`、`activeTabMeta.icon?.(21)`。
+- 多处按钮 icon 写 `RefreshCcw size={15}`、`ChevronLeft size={18}`。
+
+问题:
+
+Admin 图标也应进入 IconActionContract 或 AdminIconActionContract。当前数字不多，但散在多个文件。
+
+建议:
+
+Release 2 IconAction 时同步纳入 Admin:
+
+- `AdminIcon`
+- `AdminIconAction`
+- `AdminNavIcon`
+
+验收:
+
+- Admin icon size 不再由调用点裸传数字。
+
+## P1: Admin 页面功能密度太高，需要信息分组合同
+
+证据:
+
+- `AdminPage.tsx` 同时承载运营报表、内容、广告、用户、订单、交易、聊天、广告配置、Telegram、运营配置、地址池。
+- 配置页中有多层 `space-y-*`、`grid-cols-*`、`rounded-xl`。
+
+问题:
+
+文件复杂度与视觉复杂度互相放大。后台功能多是合理的，但需要 section/panel/record 合同支撑。
+
+建议:
+
+先不拆业务逻辑，先抽视觉 primitives:
+
+- `AdminSection`
+- `AdminConfigSection`
+- `AdminConfigGroup`
+- `AdminConfigRow`
+- `AdminInlineHelp`
+
+后续再考虑业务拆分。
+
+验收:
+
+- 配置页只声明 section/group/field，不直接写边框、背景、间距。
+
+## P2: CSS 中仍有少量非 token 尺寸
+
+证据:
+
+- Admin CSS local px/rem matches: 23。
+- `.admin-user-list-avatar` 仍写 `32px`、移动态写 `36px`。
+- glyph 字号写 `0.82rem`。
+- `.admin-mobile-name { max-width: 10ch; }`。
+
+判断:
+
+这些比 TSX utility 债轻很多，但仍应该进入 Admin avatar/name token。
+
+建议:
+
+新增:
+
+```text
+--ui-admin-avatar-size
+--ui-admin-avatar-size-mobile
+--ui-admin-avatar-glyph-size
+--ui-admin-mobile-name-max
+```
+
+验收:
+
+- `admin.css` 中非 token `px/rem/ch` 显著减少。
+
+## 对标原则映射
+
+Apple:
+
+- 后台也需要 clarity 和 consistency。
+- 高密度不是拥挤，应该是可扫描的信息结构。
+
+X/Threads:
+
+- 内容列表、状态、审核 action 仍应轻，不要每条记录都像重卡片。
+
+Instagram:
+
+- 用户、头像、关系和内容资产在 Admin 里仍要清楚可辨。
+
+本项目落点:
+
+- Admin 可以有比 C 端更高 density。
+- Admin 不应该追求社交 feed 的轻盈度，但必须有一致的 table、card、field、badge、action 合同。
+
+## 推荐实施顺序
+
+第 1 步: Admin field 和 button primitive
+
+- `AdminInput`
+- `AdminSelect`
+- `AdminButton`
+- `AdminActionGroup`
+
+原因:
+
+- 筛选区、配置区、分页区重复最高。
+
+第 2 步: Admin badge/status primitive
+
+- `AdminBadge`
+- `AdminStatusTone`
+
+原因:
+
+- 状态颜色和文字组合散落最明显。
+
+第 3 步: Admin table 和 mobile record contract
+
+- `AdminTable`
+- `AdminRecordCard`
+- `AdminRecordMeta`
+- `AdminRecordActions`
+
+原因:
+
+- 桌面和移动两套结构需要统一字段语义。
+
+第 4 步: Admin section/panel primitive
+
+- `AdminSection`
+- `AdminPanel`
+- `AdminMetricCard`
+- `AdminConfigGroup`
+
+原因:
+
+- 配置页、报表页、地址池页需要统一分组。
+
+第 5 步: 清理 admin CSS 兜底覆盖
+
+- 移除或降级 `.admin-console-page .font-black` 等选择器。
+
+原因:
+
+- 等 primitives 替代 utility 后再清，不要先删兼容层。
+
+## 验收门槛
+
+Admin 专项完成至少需要:
+
+1. `/168wc` desktop 截图。
+2. `/168wc` mobile 截图。
+3. Admin report、content、users、orders、deposit-addresses、chat 至少各一个核心状态截图。
+4. Admin TSX utility-risk matches 明显下降。
+5. Admin CSS 不再靠 `.admin-console-page .font-black` 这类兜底选择器控制主视觉。
+6. 表格、筛选、分页、移动记录卡、状态 badge 有组件合同。
+7. Admin 动态验证覆盖 Tab 顺序、移动 overflow、长 ID/地址、状态颜色对比。
+
+## 本阶段结论
+
+Admin 是当前全站“不硬编码、不临时、不 CSS 强压”约束下最大的未治理风险。它不应该阻塞 C 端 Release 1，但必须作为独立阶段纳入全站目标。后台可以保持高信息密度和管理台气质，但需要 Admin primitives 和 Admin 子主题，而不是继续让 `AdminPage.tsx` 与拆分组件里的 utility class 主导最终像素。

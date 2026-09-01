@@ -1,0 +1,491 @@
+# UI/UE 深度审计 Phase 20 - 推广投放与支付信任感专项审计
+
+日期: 2026-06-26
+
+目标: 补齐 `/promote` 和 `/promote/history` 的推广投放、广告素材、排期、结算、支付确认和投放记录体验审计。此阶段重点不是“更花哨”，而是让用户在付出积分前后感到清楚、可信、低焦虑，并继续满足“不硬编码、不临时方式、不 CSS 强压”的约束。
+
+## 本阶段读取证据
+
+页面与组件:
+
+- `src/features/promote/PromoteMobilePage.tsx`
+- `src/features/promote/promoteComponents.tsx`
+- `src/features/promote/promoteBookingUtils.ts`
+- `src/features/promote/promotionDisplayUtils.ts`
+- `src/pages/PromoteHistory.tsx`
+
+样式:
+
+- `src/styles/00-promote-tokens.css`
+- `src/styles/features/promote-layout.css`
+- `src/styles/features/promote-layout-shell.css`
+- `src/styles/features/promote-layout-choices.css`
+- `src/styles/features/promote-layout-calendar.css`
+- `src/styles/features/promote-layout-checkout.css`
+- `src/styles/features/create-promote-records.css`
+
+静态计数:
+
+- Promote TSX/CSS utility-risk matches: 171。
+
+局部值与强压信号:
+
+- `PAYMENT_FOCUS_STABILIZE_DELAYS = [120, 280, 460]`
+- `topLimit + 16`
+- `bottomLimit - 24`
+- `animate-[fadeIn_160ms_ease-out]`
+- `animate-[sheet-up-in_200ms_ease-out]`
+- `relative max-w-md space-y-4 overflow-y-auto p-5`
+- `h-11 w-full rounded-xl px-3`
+- `inline-flex w-5`
+- `h-11 flex-1`
+- 图片建议文案 `1920×480`、`1440×360`、`1080×360`、`750×250`
+- `--ui-promote-category-chip-max: 260px`
+- `--ui-promote-category-price-max-width: 5.25rem`
+
+证据边界:
+
+- 本阶段是静态源码和样式审计，没有运行支付流程。
+- 不声称验证了真实扣款、并发抢占排期、键盘弹起和焦点 trap。
+
+## 总体判断
+
+推广主流程已经具备比较好的设计系统方向，但支付确认层仍是最大体验债。
+
+正向基础:
+
+- `promote-layout-*` 已经按 shell、choices、calendar、checkout 分层。
+- `00-promote-tokens.css` 已有推广专属 token。
+- 推广位置、横幅位置、分类、帖子选择、广告素材、投放日期、底部结算条都有语义类。
+- 日期排期有 `排期加载失败`、`正在加载排期`、`已选择 N 天`、`可预约/已预约` 等状态反馈。
+- 结算条固定在底部，并考虑 `env(safe-area-inset-bottom)` 与 `--ui-keyboard-inset`。
+- 投放历史页复用了 record card、status pill、empty/loading/error 状态。
+
+主要风险:
+
+- 支付面板 `PromotePaymentSheet` 仍大量使用 Tailwind utility 和 animation arbitrary class。
+- 支付 sheet 是资金/积分确认关键节点，却没有完全复用 BottomSheet/Dialog 合同。
+- 支付表单高度、间距、错误、按钮、busy overlay 还不是专属 `promote-payment-*` 合同。
+- 广告素材尺寸建议散落在文案里，没有和上传组件、校验、预览形成同一份 Creative Spec。
+- 推广价格与余额虽然显示清楚，但“单价、天数、总价、余额变化”还可以更像 checkout summary，而不是普通表单摘要。
+
+## P0: 支付面板必须退出 utility 驱动
+
+证据:
+
+`PromotePaymentSheet` 中:
+
+```text
+ui-modal-scrim ui-modal-scrim-strong animate-[fadeIn_160ms_ease-out]
+ui-sheet-panel promote-payment-sheet relative max-w-md animate-[sheet-up-in_200ms_ease-out] space-y-4 overflow-y-auto p-5
+mx-auto h-1 w-12 rounded-full ui-bg-weak
+mt-1 x-caption font-semibold ui-text-soft
+promote-payment-summary space-y-2 p-4 x-meta
+flex justify-between gap-4
+ui-control h-11 w-full rounded-xl px-3 x-meta outline-none
+rounded-xl ui-bg-danger-soft px-3 py-2
+flex gap-3
+h-11 flex-1
+inline-flex w-5 items-center justify-center
+```
+
+问题:
+
+支付确认是全流程最高信任节点，但视觉合同反而最不干净。它同时使用 `promote-payment-*` 语义类和大量 utility class，后续要提升像素精致度时很容易继续补 patch。
+
+影响:
+
+- 难以证明“不硬编码、不临时方式、不 CSS 强压”。
+- 支付 sheet 与全站 BottomSheet/ActionButton/Input 的密度可能漂移。
+- 键盘打开时的布局稳定依赖 JS 手动修正和局部 utility，维护风险高。
+
+建议:
+
+新增 PromotePayment Contract:
+
+```text
+PromotePaymentSheet
+PromotePaymentHandle
+PromotePaymentHeader
+PromotePaymentSummary
+PromotePaymentSummaryRow
+PromotePaymentInput
+PromotePaymentError
+PromotePaymentActions
+PromotePaymentBusyOverlay
+```
+
+DOM/状态建议:
+
+```text
+data-payment-state="idle | setup | confirm | busy | error"
+data-payment-keyboard="idle | active"
+data-payment-mode="setup-password | confirm-password | confirm-deduction"
+```
+
+验收:
+
+- `promoteComponents.tsx` 中支付 sheet 不再拼 `h-11/px-3/p-5/space-y/animate-[...]`。
+- 动画、sheet padding、输入高度、按钮高度、busy overlay 都由 token 管理。
+- 支付面板和全站 sheet/dialog 的圆角、动效、安全区一致。
+
+## P0: 支付确认需要更强的费用解释合同
+
+证据:
+
+主流程已计算:
+
+- `bookingBreakdown.totalUnits`
+- `totalPrice`
+- `pricePerSlot`
+- `balanceAfter`
+- `balanceHint`
+- `checkoutContextLabel`
+
+支付面板展示:
+
+```text
+广告类型
+展示周期
+扣减费用
+```
+
+问题:
+
+当前信息够用，但还不够像“付款确认”。用户需要在确认前明确看到:
+
+- 推广位置。
+- 单价。
+- 天数。
+- 总扣减。
+- 当前余额或扣后余额。
+- 排期是否刚刚二次确认过。
+
+建议:
+
+建立 Checkout Summary Contract:
+
+```text
+item: 推广位置 / 广告位
+unitPrice: N 积分 / 天
+quantity: N 天
+total: N 积分
+balanceBefore: N 积分
+balanceAfter: N 积分
+availabilityCheckedAt: 刚刚确认排期
+```
+
+验收:
+
+- 支付确认页的 `确认支付` 不是盲点按钮。
+- 积分不足、价格未配置、排期异常分别有不同 tone。
+- 设置支付密码和实际扣款是两步，文案始终不混淆。
+
+## P0: 支付 Sheet 可访问性需要完整验证
+
+证据:
+
+`PromotePaymentSheet` 自建:
+
+- `role="dialog"`
+- `aria-modal="true"`
+- `aria-labelledby`
+- `aria-describedby`
+- overlay button 关闭。
+- 初始 focus 到输入框。
+- 手动 `ensurePaymentInputVisible`。
+
+未从静态证据证明:
+
+- Escape 关闭。
+- 焦点 trap。
+- 关闭后焦点返回底部预约按钮。
+- busy 时焦点不可逃逸。
+
+问题:
+
+资金确认类弹层必须比普通 sheet 更严格。当前有一部分可访问性语义，但还没有完整 Dialog Contract。
+
+建议:
+
+复用或对齐全站 Dialog/BottomSheet:
+
+```text
+closeOnEscape
+trapFocus
+returnFocusRef
+initialFocusRef
+busyFocusPolicy
+```
+
+验收:
+
+- 打开支付 sheet 后焦点进入第一个有效输入或确认按钮。
+- Tab/Shift+Tab 不逃出面板。
+- Escape 在非 busy 状态关闭。
+- busy 状态禁止重复关闭或重复支付，并有 `aria-busy` 和可见 busy 文案。
+
+## P0: 广告素材规格需要从文案升级为 Creative Spec
+
+证据:
+
+主流程和历史编辑都出现:
+
+- `电脑端广告图，建议 1920×480 或 1440×360`
+- `移动端广告图，建议 1080×360 或 750×250`
+- `ad-upload-tile--desktop { aspect-ratio: 4 / 1 }`
+- `ad-upload-tile--mobile { aspect-ratio: 3 / 1 }`
+
+问题:
+
+素材规格现在是文案 + upload tile aspect ratio。它还不是完整的 Creative Spec，用户无法确认:
+
+- 最小尺寸。
+- 推荐尺寸。
+- 裁切方式。
+- 文件大小。
+- 预览位置。
+- 桌面/移动端是否都必填。
+
+建议:
+
+新增 AdCreativeSpec:
+
+```text
+placement: home | chat
+variant: desktop | mobile
+recommendedSize
+minimumSize
+aspectRatio
+resizeMode
+required
+previewSlot
+```
+
+验收:
+
+- `ImageUpload` 的校验、提示、tile 比例、最终 payload 用同一份 spec。
+- 上传失败/尺寸不合适/缺少某端图片都有清楚错误。
+- 历史编辑页和新建推广页共用同一份素材规格文案。
+
+## P1: 推广类型和广告位卡片还应组件化
+
+证据:
+
+`PromoteMobilePage.tsx` 中推广类型卡片仍拼接:
+
+```text
+pressable promote-type-card ...
+promote-type-card-icon ...
+min-w-0
+block truncate x-caption font-bold text-current
+```
+
+广告位卡片同样拼接 active/idle class。
+
+问题:
+
+主视觉虽然由 CSS 管理，但页面仍承担太多“状态到 class”映射。
+
+建议:
+
+抽象:
+
+```text
+PromoteOptionCard
+PromoteSlotCard
+PromoteCategoryChip
+```
+
+props:
+
+```text
+active
+disabled
+label
+description
+priceLabel
+icon
+```
+
+验收:
+
+- `PromoteMobilePage.tsx` 只声明数据和状态，不拼布局 utility。
+- 所有价格显示走 `PromotePriceLabel`。
+- active/disabled/loading 状态由 data attribute 控制。
+
+## P1: 排期日历需要更清楚的图例
+
+证据:
+
+日期 cell 状态:
+
+- `可预约`
+- `已选择预约`
+- `已预约`
+- `我的预约`
+- `排期加载中`
+- `排期加载失败`
+
+问题:
+
+每个格子有状态，但没有看到独立图例。用户可能需要点格子才理解颜色语义，尤其是 `已预约` 与 `我的预约`。
+
+建议:
+
+新增 Calendar Legend:
+
+```text
+可预约
+已选择
+已被预约
+我的预约
+加载中/不可用
+```
+
+验收:
+
+- 用户不需要试错也能理解颜色。
+- 色彩不是唯一信息，文字/aria 都能表达。
+- 已被预约不可点击和我的预约不可点击有不同文案。
+
+## P1: 底部 checkout bar 方向正确，但需要更强的“扣款前确认”语气
+
+证据:
+
+`PromoteCheckoutBar` 显示:
+
+- 总价。
+- 积分。
+- `balanceHint`。
+- `checkoutContextLabel`。
+- 主按钮 label。
+
+优点:
+
+- 固定底部条符合移动端付款路径。
+- 状态 label 覆盖了 `请选择日期`、`积分不足`、`价格未配置`、`排期异常`、`预约并支付`。
+
+问题:
+
+底部条是入口，不应承担全部付款解释。它应该清楚告诉用户“下一步会进入确认”，而不是看起来点击就扣款。
+
+建议:
+
+按钮文案区分:
+
+```text
+未进入支付 sheet: 继续确认
+支付 sheet 内: 确认支付
+```
+
+或在按钮下/上下文中加入“下一步输入支付密码”。
+
+验收:
+
+- 用户不会误以为底部按钮直接扣款。
+- 打开支付 sheet 前二次排期确认有可见状态。
+
+## P1: 投放历史页结构健康，但编辑态需要和新建态共享素材合同
+
+证据:
+
+`PromoteHistory.tsx` 编辑态包含:
+
+- 广告图片。
+- 电脑端广告图。
+- 移动端广告图。
+- 跳转地址。
+- 保存/取消 sticky actions。
+
+优点:
+
+- 记录卡片、状态 pill、订单号复制、金额、日期都较清楚。
+- 编辑态独立出来，不在列表中原地塞复杂表单。
+
+问题:
+
+编辑页素材文案和新建页重复。`ImageUpload` 用法相同，但没有可见共享 Creative Spec。
+
+建议:
+
+复用:
+
+```text
+AdCreativeFields
+AdCreativeSpecHint
+AdTargetUrlField
+PromoteHistoryEditActions
+```
+
+验收:
+
+- 新建推广和编辑广告素材使用完全一致的字段、提示、校验、错误。
+- 保存中状态清楚，避免重复提交。
+
+## P2: Token 与局部值清理
+
+需要治理:
+
+- `PAYMENT_FOCUS_STABILIZE_DELAYS` 应命名为支付键盘稳定策略，并说明为什么是 120/280/460。
+- `topLimit + 16`、`bottomLimit - 24` 应改为 token，如 `--promote-payment-focus-top-padding`。
+- `animate-[fadeIn_160ms_ease-out]`、`animate-[sheet-up-in_200ms_ease-out]` 应进入全站 motion token。
+- `--ui-promote-category-chip-max: 260px` 和 `5.25rem` 如果保留，应补语义命名和来源说明。
+- icon size `16`、`13`、`12`、`24` 应走 icon size token 或 IconAction contract。
+
+## Benchmark 映射
+
+Apple:
+
+- 付款确认必须清楚、稳定、可预期。
+- Sheet/键盘/焦点/安全区不能让用户感到“页面在躲键盘”。
+
+Threads/X:
+
+- 推广入口应低噪声，信息清楚，不用营销式重卡片压迫用户。
+- 状态、价格、排期应该可扫读。
+
+Instagram:
+
+- 广告素材上传必须对尺寸、裁切、预览有明确规范。
+- 图片资产是投放效果核心，不能只靠一句建议尺寸。
+
+## 动态验证门禁
+
+后续要证明推广体验完成，需要补:
+
+1. 未登录进入推广页。
+2. 选择热门置顶、分类置顶、聊天室广告、首页横幅。
+3. 分类超长名称、价格为 0、价格未配置。
+4. 无可推广帖子、选择帖子、更换帖子。
+5. 广告素材缺桌面图、缺移动图、跳转地址错误、上传失败。
+6. 排期加载中、加载失败、重试、已被预约、我的预约、多天选择。
+7. 积分不足、价格异常、排期二次确认失败。
+8. 首次设置支付密码。
+9. 已有支付密码确认支付。
+10. 支付 busy 时重复点击、关闭、返回。
+11. 支付 sheet 键盘打开后的滚动、焦点、关闭后焦点返回。
+12. 投放历史空态、加载失败、筛选、编辑素材、保存失败。
+13. 360/390/430 移动宽度和桌面宽度。
+
+建议命令:
+
+```text
+npm run test:goal-168-ui
+npm run lint:ui-hardcoding
+```
+
+说明: 本阶段未运行这些命令；它们是后续验收门禁，不是本阶段完成证据。
+
+## 结论
+
+推广页不是视觉从零开始的问题。主流程已经有清晰的分层和 token 基础，真正的短板集中在“支付信任层”和“广告素材规格层”。
+
+下一步应优先做:
+
+1. `PromotePaymentSheet` 退出 utility，进入完整支付 sheet 合同。
+2. Checkout summary 补足单价、天数、总价、余额/扣后余额、排期确认。
+3. 广告素材文案、校验、上传 tile、历史编辑统一为 AdCreativeSpec。
+4. 日历补状态图例，减少用户试错。
+
+这会直接提升推广路径的精致感、呼吸感、简约感，也能降低用户在付费前的焦虑。

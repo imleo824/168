@@ -1,0 +1,274 @@
+/* User-surface desktop consistency contract. Feature styles keep mobile ownership. */
+
+@layer utilities {
+  .app-shell[data-route-surface='user'] {
+    --ui-user-page-section-gap: var(--ui-space-4);
+    --ui-user-page-toolbar-gap: var(--ui-space-2);
+    --ui-user-page-control-height: var(--ui-control-md);
+    --ui-user-page-surface-radius: var(--ui-radius-lg);
+    --ui-user-page-line: var(--ui-line-hairline);
+  }
+
+  .app-shell[data-route-surface='user'] :is(
+    button,
+    a,
+    input,
+    select,
+    textarea
+  ):focus-visible {
+    outline: var(--ui-outline-width) solid var(--ui-focus-outline);
+    outline-offset: var(--ui-focus-ring-width);
+  }
+
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .app-shell[data-route-surface='user'] {
+      --ui-app-page-main-gap: var(--ui-space-5);
+      --ui-page-edge-padding-x: var(--ui-space-5);
+    }
+
+    .app-shell[data-route-surface='user'] :is(
+      .ui-app-page-main,
+      .ui-page-content-shell,
+      .ui-topbar-inner,
+      .ui-page-tabs-bar
+    ) {
+      min-width: var(--ui-space-none);
+    }
+
+    .app-shell[data-route-surface='user'] :is(
+      .ui-section-card,
+      .post-create-shell-card,
+      .recharge-form-card,
+      .recharge-payment-panel,
+      .notification-settings-section
+    ) {
+      border-radius: var(--ui-user-page-surface-radius);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .app-shell[data-route-surface='user'] {
+      --ui-pc-page-block: var(--ui-space-5);
+      --ui-pc-section-gap: var(--ui-user-page-section-gap);
+      --ui-pc-toolbar-gap: var(--ui-user-page-toolbar-gap);
+      --ui-pc-control-height: var(--ui-user-page-control-height);
+      --ui-pc-surface-radius: var(--ui-user-page-surface-radius);
+      --ui-pc-line: var(--ui-user-page-line);
+    }
+
+    .app-shell[data-route-surface='user'] .ui-app-page-main {
+      width: 100%;
+      max-width: var(--app-desktop-page-content-width);
+      margin-inline: auto;
+      padding-top: var(--ui-pc-page-block);
+      padding-bottom: var(--ui-pc-page-block);
+    }
+
+    .app-shell[data-route-surface='user'] :is(
+      .ui-page-tabs-bar,
+      .messages-tabbar,
+      .profile-tabs,
+      .tui-plus-link-editor-tabs,
+      .referral-record-tabbar
+    ) {
+      min-height: var(--ui-pc-control-height);
+      gap: var(--ui-pc-toolbar-gap);
+    }
+
+    .app-shell[data-route-surface='user'] :is(
+      .record-list,
+      .messages-list,
+      .notification-settings-list,
+      .profile-relation-list-shell,
+      .user-space-posts-panel,
+      .referral-record-list
+    ) {
+      gap: var(--ui-space-none);
+      border-top: var(--ui-border-width-hairline) solid var(--ui-pc-line);
+      border-bottom: var(--ui-border-width-hairline) solid var(--ui-pc-line);
+      background: var(--ui-surface-card);
+    }
+
+    .app-shell[data-route-surface='user'] :is(
+      .record-card,
+      .messages-list-item,
+      .notification-settings-row,
+      .profile-relation-list-item
+    ) {
+      border-width: 0 0 var(--ui-border-width-hairline);
+      border-color: var(--ui-pc-line);
+      border-radius: var(--ui-radius-none);
+      background: var(--ui-surface-card);
+      box-shadow: var(--ui-shadow-none);
+      transition: background-color var(--ui-duration-base) var(--ease-standard);
+    }
+
+    .app-shell[data-route-surface='user'] :is(
+      .record-card:last-child,
+      .messages-list-item:last-child,
+      .notification-settings-row:last-child,
+      .profile-relation-list-item:last-child
+    ) {
+      border-bottom: var(--ui-border-none);
+    }
+
+    .app-shell[data-route-surface='user'] :is(
+      .post-create-shell-card,
+      .post-create-contact-editor-card,
+      .profile-bio-editor-card,
+      .tui-plus-link-editor-card,
+      .tui-plus-link-editor-section,
+      .recharge-form-card,
+      .recharge-payment-panel,
+      .promote-history-edit-card,
+      .promote-calendar-card,
+      .promotion-effects-date-panel,
+      .referral-share-card,
+      .notification-settings-section
+    ) {
+      border-color: var(--ui-pc-line);
+      border-radius: var(--ui-pc-surface-radius);
+      background: var(--ui-surface-card);
+      box-shadow: var(--ui-shadow-none);
+    }
+
+    .app-shell[data-route-surface='user'] :is(
+      .promote-checkout-shell,
+      .recharge-footer-action,
+      .promote-history-actions,
+      .tui-plus-link-editor-sticky-action
+    ) {
+      border-top: var(--ui-border-width-hairline) solid var(--ui-pc-line);
+      background: var(--ui-surface-card);
+      box-shadow: var(--ui-shadow-none);
+    }
+
+    .app-shell[data-route-surface='user'] :is(
+      .ui-control,
+      .recharge-amount-input,
+      .promote-history-target-input,
+      .promotion-effects-date-input,
+      .tui-plus-link-editor-field input,
+      .tui-plus-link-editor-field textarea,
+      .profile-bio-editor-input
+    ) {
+      min-height: var(--ui-pc-control-height);
+      border-color: var(--ui-line-medium);
+      border-radius: var(--ui-radius-md);
+      font-size: var(--ui-text-sm);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='detail'] :is(
+      .detail-page-main,
+      .detail-page-content,
+      .post-detail-content
+    ) {
+      max-width: var(--app-desktop-page-content-width);
+      margin-inline: auto;
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='profile'] :is(
+      .profile-modern-main,
+      .user-space-body
+    ) {
+      gap: var(--ui-pc-section-gap);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] :is(
+      .sponsor-workbench,
+      .referral-page-main,
+      .promote-content-shell,
+      .promote-history-shell,
+      .record-page-shell,
+      .recharge-shell,
+      .tui-plus-main,
+      .tui-plus-link-editor-main,
+      .profile-bio-editor-main
+    ) {
+      max-width: var(--app-desktop-page-content-width);
+      margin-inline: auto;
+    }
+
+    .app-shell[data-route-surface='user'] :is(.payment-action-overlay, .ui-sheet-overlay) {
+      align-items: center;
+      padding: var(--ui-space-6) var(--ui-space-4);
+    }
+
+    .app-shell[data-route-surface='user'] :is(.payment-action-sheet, .ui-sheet-panel) {
+      border-radius: var(--ui-radius-2xl);
+      border: var(--ui-border-width-hairline) solid var(--ui-pc-line);
+      box-shadow: var(--ui-shadow-panel);
+    }
+
+    .app-shell[data-route-surface='user'] :is(.payment-action-handle, .ui-sheet-handle) {
+      display: none;
+    }
+  }
+
+  @media (min-width: 1180px) {
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] :is(
+      .recharge-step--amount,
+      .promotion-effects-date-fields,
+      .promote-history-edit-section,
+      .tui-plus-link-editor-slots
+    ) {
+      column-gap: var(--ui-space-5);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='compose'] :is(
+      .post-create-composer,
+      .post-create-meta-card,
+      .post-create-settings-list
+    ) {
+      max-width: var(--app-desktop-page-content-width);
+      margin-inline: auto;
+    }
+  }
+
+  @media (hover: hover) and (pointer: fine) and (min-width: 1024px) {
+    .app-shell[data-route-surface='user'] :is(
+      .record-card,
+      .messages-list-item,
+      .notification-settings-row,
+      .profile-relation-list-item
+    ):hover {
+      background: var(--ui-state-hover);
+    }
+
+    .app-shell[data-route-surface='user'] :is(
+      .post-create-shell-card,
+      .recharge-form-card,
+      .recharge-payment-panel,
+      .tui-plus-link-editor-card,
+      .promote-history-edit-card,
+      .referral-share-card
+    ) {
+      transition:
+        border-color var(--ui-duration-base) var(--ease-standard),
+        box-shadow var(--ui-duration-base) var(--ease-standard);
+    }
+
+    .app-shell[data-route-surface='user'] :is(
+      .post-create-shell-card,
+      .recharge-form-card,
+      .recharge-payment-panel,
+      .tui-plus-link-editor-card,
+      .promote-history-edit-card,
+      .referral-share-card
+    ):hover {
+      border-color: var(--ui-line-medium);
+    }
+
+    .app-shell[data-route-surface='user'] :is(
+      .ui-control,
+      .recharge-amount-input,
+      .promote-history-target-input,
+      .promotion-effects-date-input,
+      .tui-plus-link-editor-field input,
+      .tui-plus-link-editor-field textarea,
+      .profile-bio-editor-input
+    ):hover:not(:disabled):not(:focus-visible) {
+      border-color: var(--ui-line-strong);
+    }
+  }
+}

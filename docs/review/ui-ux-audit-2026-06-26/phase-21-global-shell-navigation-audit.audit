@@ -1,0 +1,398 @@
+# Phase 21 - Global Shell, Navigation, Safe Area, and Page Chrome Audit
+
+Date: 2026-06-26
+Scope: App shell, primary bottom navigation, shared topbar, page content shell, home shell helper, layout/z-index tokens.
+Goal lens: refined, breathable, simple. No hardcoded layout decisions, no temporary CSS pressure, no page-by-page overrides.
+Benchmark lens: X, Threads, Instagram, and Apple-style product chrome: stable primary navigation, quiet page chrome, predictable safe-area behavior, semantic components owning pixels.
+Evidence type: static source and style contract audit. This phase does not claim fresh rendered visual validation.
+
+## Files inspected
+
+- `src/App.tsx`
+- `src/ui/PageHeader.tsx`
+- `src/ui/PageContentShell.tsx`
+- `src/features/home/HomeTopbar.tsx`
+- `src/features/home/homeLayout.ts`
+- `src/styles/components/bottom-nav.css`
+- `src/styles/components/topbar.css`
+- `src/styles/components/topbar-system.css`
+- `src/styles/system/secondary-page-shell.css`
+- `src/styles/system/ui-primitives-layout.css`
+- `src/styles/tokens/layout-components.css`
+- `src/styles/01-base.css`
+
+## Executive summary
+
+The global chrome is halfway to a mature design system. The bottom navigation and topbar already use semantic classes, CSS variables, safe-area awareness, focus states, and reduced-motion handling. That is the right direction.
+
+The main issue is not visual taste in one component. The issue is ownership. App-level layout, desktop width, route full-bleed decisions, route warmup timing, double-tap gesture thresholds, fallback auth/admin states, and home shell spacing still live in TSX utility strings or local constants. That makes the app feel good in many screenshots, but fragile when pages are added or when narrow mobile, desktop, overlay, keyboard, and logged-out states collide.
+
+The next design-system maturity step should be an `AppShell Contract`: one semantic layer that owns root surface, main width, route mode, bottom-nav clearance, topbar relationship, and overlay behavior.
+
+## Overall health
+
+Score: 7.1 / 10
+
+Strengths:
+
+- Bottom navigation is already tokenized and safe-area aware: `--ui-bottom-nav-height`, `--ui-bottom-nav-reserved-space`, and `--ui-bottom-nav-page-bottom-space` in `src/styles/components/bottom-nav.css:5-10`.
+- Bottom navigation uses a real five-column grid and semantic active state: `grid-template-columns: repeat(5, minmax(0, 1fr))` in `src/styles/components/bottom-nav.css:59-68`, active state selectors in `src/styles/components/bottom-nav.css:110-120`.
+- Topbar exposes meaningful state through data attributes: `data-topbar-variant`, `data-title-align`, `data-leading-kind`, and `data-action-kind` in `src/ui/PageHeader.tsx:153-162`.
+- PageHeader has a centralized back behavior and fallback route, reducing per-page navigation hacks: `src/ui/PageHeader.tsx:88-118`.
+- Root base CSS already defines scroll padding for topbar and safe area: `src/styles/01-base.css:21-29`.
+- Route overlay background uses inert and content visibility, which is a strong interaction foundation: `src/App.tsx:650-660` and `src/styles/system/ui-primitives-layout.css:97-108`.
+
+Primary risk:
+
+- The app shell still depends on raw utility classes and route-specific conditionals inside `src/App.tsx:773-792`. That means page chrome is not a component contract yet.
+
+## P0 findings
+
+### P0-1 - App shell layout is still owned by TSX utility strings
+
+Evidence:
+
+- Root shell uses `className="min-h-screen ui-bg-card ui-text-strong font-sans flex flex-col"` in `src/App.tsx:773-778`.
+- Main shell uses utility classes and breakpoint decisions directly in JSX: `flex-1 w-full flex flex-col relative pb-0`, `sm:max-w-none sm:px-0 lg:px-0`, `sm:mx-auto sm:max-w-[var(--ui-layout-max)] sm:px-6 lg:px-8`, `pt-0 sm:pt-6` in `src/App.tsx:783-792`.
+- Route-specific full-bleed logic is hard-coded in the app entry: admin, chat, and home are full bleed in `src/App.tsx:590-594`.
+
+Why this hurts refinement:
+
+- Every page inherits spacing from a mixed source: some pixels come from tokens, some from Tailwind utilities, some from route conditionals.
+- Desktop breathing depends on `sm:px-6 lg:px-8` rather than a named app-shell gutter contract.
+- Future pages can accidentally become too narrow, too wide, or misaligned with bottom navigation because the shell contract is implicit.
+
+Recommendation:
+
+- Introduce a semantic `AppShell` or equivalent CSS contract with `.ui-app-shell`, `.ui-app-main`, and route mode attributes such as `data-route-mode="standard|full-bleed|overlay"`.
+- Move desktop max-width, side gutters, top breathing, bottom breathing, and full-bleed behavior into CSS variables.
+- Keep `App.tsx` responsible for route state only, not final pixels.
+
+Acceptance gate:
+
+- `src/App.tsx` should no longer contain layout utility strings for root or main shell.
+- All app-wide shell decisions should be expressed through semantic classes and data attributes.
+
+### P0-2 - PageContentShell is too thin to guarantee safe-area and bottom-nav breathing
+
+Evidence:
+
+- `PageContentShell` only switches between `ui-shell-fluid` and `ui-shell-narrow`, then accepts arbitrary `className` in `src/ui/PageContentShell.tsx:19-23`.
+- Bottom navigation reserves space through CSS tokens in `src/styles/components/bottom-nav.css:5-10`, but pages opt into page spacing through scattered class names such as `ui-app-page-main`.
+- `RequireAuthRoute` manually passes `ui-auth-required-wrap ui-app-page-main` in `src/App.tsx:563-571`.
+
+Why this hurts refinement:
+
+- Page bottom clearance is not guaranteed by the shell itself.
+- The same page can look correct with bottom nav visible and cramped when it has a fixed action bar or keyboard state.
+- Designers cannot reason about page rhythm from one contract.
+
+Recommendation:
+
+- Expand `PageContentShell` props into a true layout contract, for example `variant`, `surface`, `topbarMode`, `bottomInset`, and `density`.
+- Suggested `bottomInset` values: `none`, `bottom-nav`, `fixed-action`, `keyboard-aware`, `sheet`.
+- Map those values to CSS variables, not page-level padding overrides.
+
+Acceptance gate:
+
+- Main pages should express bottom clearance through `PageContentShell`, not ad hoc class combinations.
+- Mobile screenshots with bottom nav should never require page-specific padding patches to avoid covered content.
+
+### P0-3 - Global fallback states still bypass the design system
+
+Evidence:
+
+- Auth modal fallback uses arbitrary animation and utility classes, surfaced by static search at `src/App.tsx:347-349`.
+- Admin unauthorized state uses utility classes for spacing, radius, typography, icon size, and button shape in `src/App.tsx:529-542`.
+
+Why this hurts refinement:
+
+- These states are rare, so they are easy to miss in pixel review, but they are trust-critical.
+- A polished product cannot have the main flow tokenized while auth/admin blockers look like local one-off UI.
+- Utility fallback states are exactly where CSS pressure tends to accumulate later.
+
+Recommendation:
+
+- Convert fallback auth/admin states to shared primitives: `CenteredState`, `StateIcon`, `PrimaryAction`, and `AuthPanelFallback`.
+- Motion should use named animation tokens/classes, not `animate-[...]` strings.
+- Icon sizing should use semantic icon-size tokens.
+
+Acceptance gate:
+
+- No arbitrary animation class remains in global fallback states.
+- Auth/admin fallback screens use the same state component system as empty/error/loading states.
+
+## P1 findings
+
+### P1-1 - Bottom navigation is visually clean, but label strategy is implicit
+
+Evidence:
+
+- Bottom nav renders five controls in `src/App.tsx:247-329`.
+- CSS hides labels visually with a screen-reader-only style in `src/styles/components/bottom-nav.css:186-194`.
+- The label text still exists in each button and `aria-label` is set in `src/App.tsx:250-325`.
+
+Design read:
+
+- Icon-only nav matches Instagram/X minimalism, but this app has less universally recognized destinations such as `推广` and `我的`.
+- A top-tier pattern can still be icon-only, but the choice should be a named product decision, not an incidental CSS clip.
+
+Recommendation:
+
+- Add a bottom-nav label mode contract, for example `data-label-mode="icon-only|compact-label|adaptive"`.
+- For first-use, logged-out, or sponsor/reward moments, consider compact labels if testing shows ambiguity.
+- Keep labels hidden only when the contract explicitly says icon-only.
+
+Acceptance gate:
+
+- Product can switch label visibility without editing low-level clipping CSS.
+- Accessibility names, visible labels, and route labels stay in one source of truth.
+
+### P1-2 - PageHeader is structurally strong, but too open to page-level slot overrides
+
+Evidence:
+
+- `PageHeader` accepts `className`, `contentClassName`, `titleClassName`, `leftClassName`, and `rightClassName` in `src/ui/PageHeader.tsx:20-24`.
+- Those classes are applied directly to key slots in `src/ui/PageHeader.tsx:153-180`.
+- Topbar CSS already has strong slot semantics and data attributes in `src/styles/components/topbar.css:75-123` and `src/styles/components/topbar.css:197-214`.
+
+Why this matters:
+
+- The component has a good internal model, but pages can still override the important slots directly.
+- Over time, each page can create a slightly different topbar rhythm, especially for centered titles and action-heavy headers.
+
+Recommendation:
+
+- Keep escape hatches, but move common page needs into named props or variants.
+- Suggested props: `leadingMode`, `actionDensity`, `titlePriority`, `surface`, `collapseMode`.
+- Reserve raw slot class props for exceptional cases and document them as escape hatches.
+
+Acceptance gate:
+
+- New page headers should not need custom `titleClassName`, `rightClassName`, or `contentClassName` for ordinary layouts.
+
+### P1-3 - Z-index scale is named, but the values suggest layer drift risk
+
+Evidence:
+
+- Layout tokens define `--ui-z-modal: 9999`, `--ui-z-popover: 10002`, `--ui-z-lightbox: 10020`, `--ui-z-toast: 9999`, `--ui-z-auth: 20000`, and route/header layers in `src/styles/tokens/layout-components.css:79-95`.
+- Bottom nav uses `--ui-z-page-header` in `src/styles/components/bottom-nav.css:45`.
+- Topbar uses `var(--z-topbar, 120)` in `src/styles/components/topbar.css:44-49`.
+
+Why this matters:
+
+- Naming is good, but large unrelated numeric jumps make it harder to reason about overlay priority.
+- `toast` and `modal` sharing the same value can create accidental stacking conflicts depending on DOM order.
+- A global auth layer at `20000` can mask other escape states unless the taxonomy is explicit.
+
+Recommendation:
+
+- Define a documented layer ladder: base, sticky, header, bottom-nav, route-overlay, sheet, dialog, toast, auth, lightbox.
+- Avoid equal z-index values for different semantic layers unless DOM order is intentionally part of the contract.
+- Make bottom nav its own layer token instead of borrowing page header.
+
+Acceptance gate:
+
+- Every fixed/sticky global surface maps to one named layer token.
+- No two semantic overlay layers share a z-index unless documented.
+
+### P1-4 - Gesture and timing constants are hardcoded in component files
+
+Evidence:
+
+- Double-tap gesture constants live in `src/App.tsx:82-87`: `96`, `360`, `28`, `1200`, and `420`.
+- Back navigation timing constants live in `src/ui/PageHeader.tsx:9-10`: `320` and `380`.
+
+Why this matters:
+
+- Gesture zones and timings shape perceived polish as much as color and spacing.
+- When timing lives in TSX constants, design cannot tune motion/interaction consistently across the product.
+
+Recommendation:
+
+- Move interaction constants into a named interaction contract, for example `interactionTokens.ts` or CSS custom properties consumed through a small utility.
+- Name the behavior, not the number: `doubleTapTopZone`, `doubleTapInterval`, `backNavigationLock`, `routeWarmupDelay`.
+
+Acceptance gate:
+
+- Static search should show no raw gesture/timing constants in `App.tsx` or `PageHeader.tsx` except imports from the contract.
+
+### P1-5 - Home shell helper returns utility classes instead of semantic shell modes
+
+Evidence:
+
+- Mobile home shell returns `home-mobile-shell home-document-scroll-shell home-has-sticky-topic-tabs w-full` in `src/features/home/homeLayout.ts:10-12`.
+- Desktop home shell returns `home-desktop-shell w-full pb-32` in `src/features/home/homeLayout.ts:14`.
+
+Why this matters:
+
+- `pb-32` is a layout decision hidden in a helper, not a tokenized page rhythm contract.
+- Home is the highest-traffic surface, so utility layout here sets a precedent for other pages.
+
+Recommendation:
+
+- Return only semantic classes from `homeLayout.ts`.
+- Move desktop bottom breathing into `.home-desktop-shell` using `--ui-home-desktop-bottom-space`.
+- Move `w-full` into the shell class itself.
+
+Acceptance gate:
+
+- `homeLayout.ts` contains no utility classes.
+- Home shell spacing can be tuned from CSS tokens only.
+
+## P2 findings
+
+### P2-1 - A few global CSS literals should become explicit tokens
+
+Evidence:
+
+- Bottom nav uses `width: 100vw` in `src/styles/components/bottom-nav.css:47`.
+- Bottom nav desktop hide breakpoint uses `@media (min-width: 768px)` in `src/styles/components/bottom-nav.css:229-233`.
+- Topbar has fallback `var(--z-topbar, 120)` in `src/styles/components/topbar.css:44-49`.
+- Layout token file includes canonical values like `blur(12px)`, `blur(18px)`, `120ms`, and `1.5px` in `src/styles/tokens/layout-components.css:161-172`.
+
+Recommendation:
+
+- Keep literal values in token files when they are the canonical source.
+- Replace component-level literals with token references: breakpoint token, viewport-width strategy, z-index token fallback removal.
+- Prefer `inline-size: 100%` with fixed inset for bottom nav if horizontal viewport jitter appears on desktop-like mobile browsers.
+
+### P2-2 - Home brand lockup doubles as navigation and heading content
+
+Evidence:
+
+- Home brand renders as a link to `/about` in `src/features/home/HomeTopbar.tsx:62-77`.
+- The same visual lockup is passed as `titleNode` to `PageHeader` in `src/features/home/HomeTopbar.tsx:108-119`.
+
+Why this matters:
+
+- This is visually charming, but heading semantics and navigation semantics are blended.
+- Screen reader naming may become noisier than intended because the heading contains a navigational link with its own label.
+
+Recommendation:
+
+- Keep the visual brand lockup, but separate heading semantics from the about navigation if accessibility testing confirms duplicate naming.
+- Consider an invisible heading text and a separate brand link only if the current accessible name is noisy.
+
+## Pixel-level contract recommendations
+
+### AppShell Contract
+
+Required ownership:
+
+- Root surface color and text color.
+- Main flex behavior.
+- Standard versus full-bleed route width.
+- Desktop gutter and max width.
+- Topbar offset and scroll padding.
+- Bottom nav reserved space.
+- Route overlay background inert/visibility state.
+
+Suggested public API:
+
+```ts
+<AppShell routeMode="standard | fullBleed | overlay" bottomNav="visible | hidden" topbar="owned | page" />
+```
+
+Suggested CSS surface:
+
+```css
+.ui-app-shell {}
+.ui-app-main {}
+.ui-app-main[data-route-mode='full-bleed'] {}
+.ui-app-main[data-route-mode='standard'] {}
+.ui-app-main[data-bottom-nav='visible'] {}
+```
+
+### BottomNav Contract
+
+Required ownership:
+
+- Five-entry grid.
+- Active route state.
+- Icon size and stroke.
+- Label visibility mode.
+- Reward badge slot.
+- Safe-area bottom placement.
+- Focus ring and reduced-motion behavior.
+
+Do not fix by:
+
+- Adding page-specific padding below individual pages.
+- Forcing labels visible with descendant overrides.
+- Changing icon sizes in JSX.
+
+### Topbar Contract
+
+Required ownership:
+
+- Title alignment.
+- Leading and trailing slot sizing.
+- Back button track width.
+- Action density.
+- Loading title skeleton.
+- Surface variant.
+- Sticky and safe-area behavior.
+
+Do not fix by:
+
+- Adding page-specific `rightClassName` for ordinary action layouts.
+- Overriding `.ui-topbar-title` in feature CSS except for approved variants.
+
+### PageContentShell Contract
+
+Required ownership:
+
+- Main landmark default.
+- Narrow/fluid/content width.
+- Page gap rhythm.
+- Top/bottom padding density.
+- Bottom inset reservation.
+- Empty/loading/error state alignment.
+
+Suggested public API:
+
+```ts
+<PageContentShell as="main" variant="narrow" bottomInset="bottom-nav" density="standard" />
+```
+
+## Implementation sequence
+
+1. Build `AppShell` or equivalent semantic CSS class layer without changing visuals.
+2. Move root/main utility strings from `src/App.tsx` into shell CSS.
+3. Expand `PageContentShell` to own bottom inset and density.
+4. Remove utility classes from `homeLayout.ts` and move spacing into home shell CSS variables.
+5. Add explicit bottom-nav label mode and bottom-nav z-index token.
+6. Tokenize gesture/timing constants from `App.tsx` and `PageHeader.tsx`.
+7. Convert auth/admin fallback states to shared centered-state primitives.
+
+## Verification gates for release readiness
+
+Static gates:
+
+- `src/App.tsx` contains no root/main layout utility strings.
+- `src/features/home/homeLayout.ts` returns semantic classes only.
+- `src/ui/PageContentShell.tsx` has explicit bottom inset ownership.
+- Global fallback states do not use arbitrary animation classes.
+- No component-level `768px` breakpoint remains in bottom-nav CSS.
+
+Rendered gates:
+
+- Mobile home, chat, profile, sponsor, create, post detail, and transaction pages have no content hidden by bottom nav or safe area.
+- Bottom nav remains visually stable across 320px, 375px, 390px, and 430px widths.
+- Desktop standard pages align to one app content width and gutter system.
+- Route overlay open/close does not leave background scrollable or focusable.
+- Keyboard focus can reach all bottom nav and topbar controls with visible focus ring.
+
+Accessibility gates:
+
+- Bottom nav exposes five clearly named controls.
+- Current route is announced consistently through `aria-current`.
+- Home topbar heading/link accessible name is checked with a screen reader.
+- Reduced motion disables bottom nav breathing and page-enter animation.
+
+## Current-state conclusion
+
+The global navigation system is not broken. It is close. The token and component foundations already support a refined social-app feel.
+
+The necessary next move is to stop treating the app shell as JSX layout glue. Once AppShell, PageContentShell, BottomNav, and Topbar each own their pixels, the product can pursue Apple-like quietness and Instagram/X-level chrome stability without CSS pressure or one-off fixes.

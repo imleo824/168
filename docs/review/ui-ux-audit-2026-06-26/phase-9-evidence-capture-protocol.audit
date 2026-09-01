@@ -1,0 +1,702 @@
+# UI/UE 深度审计 Phase 9 - 缺失证据采集协议
+
+日期: 2026-06-26
+
+目标: 将 Phase 8 中缺失的登录态、真实内容态、完整流程态、overlay 态、动态交互态转成可执行采集协议。后续一旦具备登录账号、真实数据或可用测试环境，就按本协议补证据，避免随机截图和遗漏关键状态。
+
+## 采集总原则
+
+1. 每个截图必须绑定路由、视口、用户状态、数据状态和健康判定。
+2. 截图必须保存到当前审计目录的 `screenshots/` 下。
+3. 文件命名必须能从文件名看出页面、视口和状态。
+4. 每张截图都要判断是否可接受: 不能是 loading、空白、半渲染、错误窗口或非目标状态。
+5. 截图不能替代动态验证；键盘、focus、contrast、读屏语义需要单独记录。
+
+## 视口标准
+
+移动视口:
+
+- 宽度: 390。
+- 高度: 844。
+- 用途: iPhone 常见窄屏审计，重点看折行、省略、底部导航、safe area、键盘。
+
+桌面视口:
+
+- 宽度: 1280。
+- 高度: 720。
+- 用途: 桌面首屏审计，重点看是否手机壳居中、是否留白变结构、是否信息密度合适。
+
+扩展桌面视口:
+
+- 宽度: 1440。
+- 高度: 900。
+- 用途: 可选。用于 about、chat、admin、profile、user-space 的桌面 composition 判断。
+
+紧凑移动视口:
+
+- 宽度: 360。
+- 高度: 740。
+- 用途: 可选。用于验证 `390px` 断点附近是否仍稳定。
+
+## 文件命名规范
+
+格式:
+
+`{batch}-{order}-{viewport}-{route-or-flow}-{state}.png`
+
+示例:
+
+- `a01-mobile-home-feed-real.png`
+- `a02-desktop-home-feed-real.png`
+- `b04-mobile-create-nine-images.png`
+- `d07-mobile-promote-payment-confirm.png`
+- `e06-desktop-overlay-post-from-home.png`
+
+命名规则:
+
+- `mobile` 表示 390 x 844。
+- `desktop` 表示 1280 x 720。
+- `wide` 表示 1440 x 900。
+- 状态名使用英文短语，避免空格。
+
+## Batch A: 内容核心截图
+
+目标: 证明内容流、帖子详情、分类页在真实数据下是否达到 X/Threads/Instagram 式内容优先。
+
+### A01 首页真实 feed 移动
+
+路由: `/`
+视口: mobile。
+用户状态: 未登录和已登录各一张，如果时间有限先已登录。
+数据要求: 至少 5 条真实帖子，包含文字、图片、标签、地点、互动数字。
+文件名: `a01-mobile-home-feed-real.png`
+
+健康判定:
+
+- 顶部栏、频道、筛选和首条内容都可见。
+- 错误态、loading、空白不能作为通过截图。
+- 内容流不能被广告或状态块完全抢占。
+- 底部导航不遮挡内容关键操作。
+
+审计重点:
+
+- feed card 的作者、时间、正文、标签、媒体、动作区是否在一屏内保持呼吸感。
+- 长地点、长标签、较大互动数字是否稳定。
+
+### A02 首页真实 feed 桌面
+
+路由: `/`
+视口: desktop。
+用户状态: 已登录。
+数据要求: 同 A01。
+文件名: `a02-desktop-home-feed-real.png`
+
+健康判定:
+
+- feed 宽度合理，不像移动卡片孤岛。
+- 右侧或周边空白如果存在，必须有结构意义。
+- 首屏至少看到一条完整帖子或核心内容。
+
+审计重点:
+
+- 桌面 composition 是否像产品页面，不只是移动流居中。
+
+### A03 帖子详情纯文本
+
+路由: `/post/:id`
+视口: mobile 和 desktop。
+状态: 纯文本、无图片、正文不少于 3 行。
+文件名: `a03-mobile-post-detail-text.png`、`a03-desktop-post-detail-text.png`
+
+健康判定:
+
+- 标题/作者/正文/操作区层级清楚。
+- 纯文本不显空，不需要靠卡片阴影撑场。
+
+### A04 帖子详情单图
+
+路由: `/post/:id`
+视口: mobile 和 desktop。
+状态: 1 张图，正文 1 到 3 行。
+文件名: `a04-mobile-post-detail-single-image.png`、`a04-desktop-post-detail-single-image.png`
+
+健康判定:
+
+- 图片比例、圆角、边界稳定。
+- 图片不挤压正文和操作区。
+
+### A05 帖子详情多图
+
+路由: `/post/:id`
+视口: mobile 和 desktop。
+状态: 至少 4 张图。
+文件名: `a05-mobile-post-detail-multi-image.png`、`a05-desktop-post-detail-multi-image.png`
+
+健康判定:
+
+- 多图入口清晰。
+- 图片计数、预览、lightbox 入口不混乱。
+
+### A06 帖子详情长文本
+
+路由: `/post/:id`
+视口: mobile 和 desktop。
+状态: 正文超过 800 字。
+文件名: `a06-mobile-post-detail-long-text.png`、`a06-desktop-post-detail-long-text.png`
+
+健康判定:
+
+- 行高和段落节奏可读。
+- 操作区不会漂移或被长文吞没。
+
+### A07 分类页真实列表
+
+路由: `/category/:categoryId`
+视口: mobile 和 desktop。
+状态: 分类下至少 5 条帖子。
+文件名: `a07-mobile-category-feed-real.png`、`a07-desktop-category-feed-real.png`
+
+健康判定:
+
+- 分类标题、筛选、列表关系清楚。
+- 分类页不应比首页更重。
+
+### A08 分类页空列表
+
+路由: `/category/:categoryId`
+视口: mobile。
+状态: 无帖子。
+文件名: `a08-mobile-category-empty.png`
+
+健康判定:
+
+- 空态必须来自统一 StatePlacement。
+- 不能是大白卡孤岛。
+
+## Batch B: 创作核心截图
+
+目标: 验证发布编辑器在真实输入、图片上传、分类结构字段、隐私和联系方式下是否精致稳定。
+
+### B01 发布编辑器空状态
+
+路由: `/create`
+视口: mobile 和 desktop。
+用户状态: 已登录。
+文件名: `b01-mobile-create-empty.png`、`b01-desktop-create-empty.png`
+
+健康判定:
+
+- 输入区、工具栏、提交按钮层级清楚。
+- 工具栏 5 个入口同一行，图标和摘要不重叠。
+
+### B02 发布编辑器长文本
+
+路由: `/create`
+视口: mobile。
+状态: 输入 500 字以上。
+文件名: `b02-mobile-create-long-text.png`
+
+健康判定:
+
+- 文本行高舒适。
+- 工具栏不被挤出或遮挡。
+- 提交按钮状态清晰。
+
+### B03 上传 1 张图
+
+路由: `/create`
+视口: mobile。
+状态: 已选 1 张图。
+文件名: `b03-mobile-create-one-image.png`
+
+健康判定:
+
+- 图片工具摘要显示稳定。
+- 预览不挤压工具栏入口。
+
+### B04 上传 9 张图
+
+路由: `/create`
+视口: mobile。
+状态: 已选满 9 张图。
+文件名: `b04-mobile-create-nine-images.png`
+
+健康判定:
+
+- 预览网格不溢出。
+- 删除按钮、进度、错误状态不重叠。
+- 工具栏摘要能省略但不能消失。
+
+### B05 上传失败
+
+路由: `/create`
+视口: mobile。
+状态: 触发图片上传错误。
+文件名: `b05-mobile-create-upload-error.png`
+
+健康判定:
+
+- 错误提示在 tile 或工具栏下方清楚出现。
+- 错误态不变成重卡片或遮挡发布器。
+
+### B06 分类结构字段
+
+路由: `/create`
+视口: mobile。
+状态: 选择带结构字段的分类，例如租房、招聘、二手、证件。
+文件名: `b06-mobile-create-category-fields.png`
+
+健康判定:
+
+- 字段行、picker、segmented、number input 属于同一控件语言。
+- 必填错误不只靠颜色表达。
+
+### B07 地点 picker
+
+路由: `/create`
+视口: mobile。
+状态: 打开地点选择。
+文件名: `b07-mobile-create-location-picker.png`
+
+健康判定:
+
+- 国家/城市列表层级清楚。
+- sheet 高度、滚动、safe area 稳定。
+
+### B08 隐私和联系方式
+
+路由: `/create`
+视口: mobile。
+状态: 切换公开/匿名，显示/隐藏联系方式。
+文件名: `b08-mobile-create-privacy-contact.png`
+
+健康判定:
+
+- 摘要立即可见。
+- 不暴露过长 Telegram 文本。
+- 状态变化不引发工具栏抖动。
+
+## Batch C: 身份和关系截图
+
+目标: 验证 Profile、UserSpace、关系列表、编辑弹层是否有 Instagram 式清晰身份层级。
+
+### C01 个人页已登录资料完整
+
+路由: `/profile`
+视口: mobile 和 desktop。
+文件名: `c01-mobile-profile-real.png`、`c01-desktop-profile-real.png`
+
+健康判定:
+
+- 头像、昵称、统计、简介、编辑入口层级清楚。
+- profile tab 不靠重卡片。
+
+### C02 个人页帖子列表
+
+路由: `/profile`
+视口: mobile。
+状态: 帖子 tab 有内容。
+文件名: `c02-mobile-profile-posts.png`
+
+健康判定:
+
+- profile header 到 feed 列表衔接自然。
+- 不出现双重卡片壳。
+
+### C03 个人页空列表
+
+路由: `/profile`
+视口: mobile。
+状态: 帖子 tab 无内容。
+文件名: `c03-mobile-profile-empty.png`
+
+健康判定:
+
+- 空态轻，不压过 profile 身份信息。
+
+### C04 用户空间
+
+路由: `/user/:id`
+视口: mobile 和 desktop。
+文件名: `c04-mobile-user-space.png`、`c04-desktop-user-space.png`
+
+健康判定:
+
+- 关注、联系、帖子列表一眼可理解。
+- desktop 不像移动页面居中放大。
+
+### C05 关系列表
+
+路由: `/profile` 或 `/user/:id`
+状态: followers/following 列表。
+文件名: `c05-mobile-profile-relations.png`
+
+健康判定:
+
+- 列表密度舒适。
+- 头像、名称、动作按钮对齐稳定。
+
+### C06 Profile edit dialog
+
+路由: `/profile`
+状态: 打开资料编辑弹层。
+文件名: `c06-mobile-profile-edit-dialog.png`、`c06-desktop-profile-edit-dialog.png`
+
+健康判定:
+
+- dialog header/body/actions 结构明确。
+- 输入框 focus 不被遮挡。
+- 不依赖大面积阴影。
+
+## Batch D: 商业流程截图
+
+目标: 验证充值、记录、赞助、推广流程是否信任感清晰、信息不拥挤。
+
+### D01 充值空状态
+
+路由: `/recharge`
+视口: mobile。
+文件名: `d01-mobile-recharge-empty.png`
+
+健康判定:
+
+- 余额、金额输入、说明层级清楚。
+- 卡片不过重。
+
+### D02 充值金额输入
+
+路由: `/recharge`
+状态: 输入金额。
+文件名: `d02-mobile-recharge-amount.png`
+
+健康判定:
+
+- 金额和估算关系清楚。
+- 数字不跳动，不挤压单位。
+
+### D03 充值二维码展示
+
+路由: `/recharge`
+状态: 生成二维码/支付地址。
+文件名: `d03-mobile-recharge-qr.png`
+
+健康判定:
+
+- QR 是主视觉，但说明不拥挤。
+- 复制地址按钮可见。
+
+### D04 交易记录有数据
+
+路由: `/transactions`
+视口: mobile。
+文件名: `d04-mobile-transactions-real.png`
+
+健康判定:
+
+- 记录列表可扫描。
+- 金额、时间、状态、ID 不混乱。
+
+### D05 交易记录空列表
+
+路由: `/transactions`
+视口: mobile。
+文件名: `d05-mobile-transactions-empty.png`
+
+健康判定:
+
+- 空态轻，操作建议明确。
+
+### D06 赞助中心
+
+路由: `/sponsor`
+视口: mobile。
+文件名: `d06-mobile-sponsor-center.png`
+
+健康判定:
+
+- 余额、主操作、记录 tab 清楚。
+- 赞助状态不依赖重卡片。
+
+### D07 推广选择帖子
+
+路由: `/promote`
+状态: 打开选择帖子 sheet。
+文件名: `d07-mobile-promote-picker.png`
+
+健康判定:
+
+- 帖子列表密度清楚。
+- sheet header、body、empty 状态统一。
+
+### D08 推广 checkout
+
+路由: `/promote`
+状态: 已选择类型和周期，底部 checkout 可见。
+文件名: `d08-mobile-promote-checkout.png`
+
+健康判定:
+
+- 价格、余额、上下文、主按钮关系明确。
+- 底栏不遮挡内容。
+
+### D09 推广支付确认
+
+路由: `/promote`
+状态: 打开支付确认 sheet。
+文件名: `d09-mobile-promote-payment-confirm.png`
+
+健康判定:
+
+- 支付 sheet 不使用过重阴影。
+- 输入框、错误、主按钮可见。
+- 键盘弹起后仍可操作。
+
+### D10 推广历史
+
+路由: `/promote/history`
+视口: mobile。
+文件名: `d10-mobile-promote-history.png`
+
+健康判定:
+
+- 历史记录分组、状态、操作按钮可扫描。
+
+## Batch E: 系统、后台和 Overlay
+
+目标: 覆盖剩余系统页、后台页、聊天真实内容和 overlay 进入方式。
+
+### E01 404
+
+路由: `/404`
+视口: mobile 和 desktop。
+文件名: `e01-mobile-404.png`、`e01-desktop-404.png`
+
+健康判定:
+
+- 使用统一 page state。
+- 不出现硬编码居中大空白。
+
+### E02 Admin desktop
+
+路由: `/168wc`
+视口: desktop。
+文件名: `e02-desktop-admin-dashboard.png`
+
+健康判定:
+
+- sidebar、table、card、actions 有统一 admin 语言。
+- Tailwind utility 债需要在截图后人工标注。
+
+### E03 Admin mobile
+
+路由: `/168wc`
+视口: mobile。
+文件名: `e03-mobile-admin-dashboard.png`
+
+健康判定:
+
+- mobile tabstrip 可用。
+- 表格/卡片不横向溢出。
+
+### E04 Chat real conversation mobile
+
+路由: `/chat`
+视口: mobile。
+状态: 至少 8 条真实消息，包含长消息。
+文件名: `e04-mobile-chat-real.png`
+
+健康判定:
+
+- 输入框、消息流、广告位、底部导航关系稳定。
+- 长消息不挤压头像或操作。
+
+### E05 Chat real conversation desktop
+
+路由: `/chat`
+视口: desktop。
+状态: 同 E04。
+文件名: `e05-desktop-chat-real.png`
+
+健康判定:
+
+- desktop 不应像窄手机壳。
+- 如果仍是窄壳，作为 P1 桌面 composition 缺陷记录。
+
+### E06 Overlay post from home
+
+入口: 首页点击帖子进入 `/post/:id` overlay。
+视口: mobile 和 desktop。
+文件名: `e06-mobile-overlay-post-from-home.png`、`e06-desktop-overlay-post-from-home.png`
+
+健康判定:
+
+- 背景层、overlay、topbar、返回、滚动锁稳定。
+
+### E07 Overlay user from home
+
+入口: 首页点击作者进入 `/user/:id` overlay。
+文件名: `e07-mobile-overlay-user-from-home.png`、`e07-desktop-overlay-user-from-home.png`
+
+健康判定:
+
+- 用户空间 overlay 不破坏背景 feed。
+
+### E08 Overlay category from home
+
+入口: 首页点击标签/分类进入 `/category/:categoryId` overlay。
+文件名: `e08-mobile-overlay-category-from-home.png`、`e08-desktop-overlay-category-from-home.png`
+
+健康判定:
+
+- 分类 overlay 头部、列表、返回稳定。
+
+## 动态验证协议
+
+### DV01 键盘 Tab 顺序
+
+覆盖页面:
+
+- 首页。
+- 发布页。
+- 帖子详情。
+- Profile edit dialog。
+- Promote payment sheet。
+
+通过标准:
+
+- Tab 顺序符合视觉顺序。
+- focus visible 清楚。
+- focus 不被 overflow 裁掉。
+- icon-only action 都有 aria-label。
+
+### DV02 Dialog focus 和 Escape
+
+覆盖弹层:
+
+- BottomSheet。
+- HomeStructuredFilterSheet。
+- PromotePaymentSheet。
+- ProfileDialog。
+- ImageLightbox。
+
+通过标准:
+
+- 打开后焦点进入可操作区域。
+- Escape 可关闭。
+- 关闭后焦点回到触发点或合理位置。
+- 背景不可误滚。
+
+### DV03 移动键盘
+
+覆盖流程:
+
+- 发布文本输入。
+- 分类字段输入。
+- Profile bio 编辑。
+- Promote payment password。
+- Recharge amount。
+
+通过标准:
+
+- 输入框不被键盘遮挡。
+- 底部 action 不挡住当前输入。
+- 页面不跳到不可恢复位置。
+
+### DV04 长文本和极端数据
+
+样本:
+
+- 1000 字帖子。
+- 80 字地点。
+- 40 字用户名。
+- 20 位数字金额。
+- 长 Telegram handle。
+- 多位互动计数。
+
+通过标准:
+
+- 可读文本换行。
+- 元信息省略。
+- 动作区不重叠。
+- 卡片高度自然增长。
+
+### DV05 图片失败和慢网络
+
+覆盖:
+
+- Feed media。
+- Detail media。
+- Avatar。
+- Upload tile。
+- Lightbox。
+
+通过标准:
+
+- 坏图有清楚 fallback。
+- loading 不闪烁。
+- 失败不破坏布局。
+
+### DV06 颜色对比
+
+必须测量:
+
+- muted text on page surface。
+- muted text on card surface。
+- brand button white text。
+- error text on error surface。
+- white text on overlay。
+- disabled state。
+
+通过标准:
+
+- 正文级文字满足可读性。
+- 辅助文字不能低到不可辨认。
+- 状态不能只靠颜色表达。
+
+## 采集记录模板
+
+每完成一张截图，在审计记录中追加:
+
+```text
+File:
+Route:
+Viewport:
+User state:
+Data state:
+Accepted: yes/no
+If rejected, reason:
+Strengths:
+Issues:
+Accessibility risks:
+Follow-up:
+```
+
+## 缺陷分级规则
+
+P0:
+
+- 首屏信任破坏。
+- 内容不可见或不可操作。
+- 关键操作被遮挡。
+- 状态误导用户。
+- 窄屏重叠。
+- 登录/支付/发布流程无法理解。
+
+P1:
+
+- 视觉层级重。
+- 桌面布局浪费空间。
+- 同类组件不一致。
+- 间距或字体影响扫描。
+- 弹层材料和动效不统一。
+
+P2:
+
+- 局部像素漂移。
+- 单个 icon baseline 问题。
+- 非核心状态下的轻微密度问题。
+- admin 内部一致性问题。
+
+## 本阶段结论
+
+Phase 9 把缺失证据从“还要补截图”变成了可执行采集协议。后续只要有登录态和真实数据环境，就可以直接按 Batch A 到 E 捕获并更新 Phase 8 完成度矩阵。当前目标仍不能标记完成，但证据补齐路径已经明确。

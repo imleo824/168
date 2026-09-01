@@ -1,0 +1,100 @@
+name: Feed Module Verification
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  verify-feed-module:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run feed module guard
+        run: npm run test:feed-module
+
+      - name: Run feed service preflight
+        run: npm run test:feed-service-preflight
+
+      - name: Run architecture audit before ratchet
+        run: npm run audit:architecture
+
+      - name: Build
+        run: npm run build
+
+      - name: Generate architecture report before ratchet
+        if: always()
+        run: npm run audit:report
+
+      - name: Create ratchet branch
+        run: |
+          BRANCH="architecture/feed-module-verification-${GITHUB_RUN_ID}"
+          echo "RATCHET_BRANCH=${BRANCH}" >> "$GITHUB_ENV"
+          git checkout -b "$BRANCH"
+
+      - name: Ratchet architecture boundaries
+        run: npm run ratchet:architecture
+
+      - name: Re-run architecture audit after ratchet
+        run: npm run audit:architecture
+
+      - name: Re-run feed module guard after ratchet
+        run: npm run test:feed-module
+
+      - name: Re-run feed service preflight after ratchet
+        run: npm run test:feed-service-preflight
+
+      - name: Rebuild after ratchet
+        run: npm run build
+
+      - name: Generate final architecture report
+        if: always()
+        run: npm run audit:report
+
+      - name: Upload architecture report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: architecture-report-feed-module-verification
+          path: artifacts/architecture-report.md
+
+      - name: Commit ratchet changes
+        id: commit
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No boundary/report changes detected."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add config/architecture-boundaries.json artifacts/architecture-report.md
+          git commit -m "chore(feed): verify module wiring and ratchet boundaries"
+          git push origin "$RATCHET_BRANCH"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Create pull request
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr create \
+            --title "chore(feed): verify module wiring and ratchet boundaries" \
+            --body "This PR verifies the feed module wiring with feed guard, service preflight, architecture audit, and build. It then ratchets architecture boundaries downward only where measured complexity decreased and uploads the architecture report." \
+            --base main \
+            --head "$RATCHET_BRANCH"

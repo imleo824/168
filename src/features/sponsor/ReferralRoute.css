@@ -1,0 +1,4 @@
+/* Route-owned referral invite styles.
+   These are intentionally kept out of global first-paint CSS. */
+
+@import "../../styles/features/referral-invite.css";

@@ -1,0 +1,49 @@
+/* Recharge and payment skeleton owner. */
+
+@layer utilities {
+  /* Recharge skeleton mirrors RechargeMobile classes */
+  .ui-skeleton-payment {
+    gap: var(--ui-space-4);
+  }
+
+  .ui-skeleton-payment-token {
+    min-height: var(--ui-control-lg);
+  }
+
+  .ui-skeleton-token-amount {
+    width: calc(var(--ui-space-8) * 2);
+    height: var(--ui-text-xl);
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-skeleton-line-surface);
+  }
+
+  .ui-skeleton-token-badge {
+    width: calc(var(--ui-space-8) + var(--ui-space-3));
+    height: var(--ui-control-xs);
+    border-radius: var(--ui-radius-sm);
+    background: var(--ui-skeleton-line-surface);
+  }
+
+  .ui-skeleton-qr {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--ui-radius-md);
+  }
+
+  .ui-skeleton-address {
+    min-height: var(--ui-control-lg);
+    background: var(--ui-skeleton-line-surface);
+  }
+
+  .ui-skeleton-copy-button {
+    min-height: var(--ui-control-lg);
+    background: var(--ui-skeleton-line-surface);
+  }
+
+  .ui-skeleton-submit {
+    width: 100%;
+    height: var(--ui-control-lg);
+    border-radius: var(--ui-action-radius);
+    background: var(--ui-skeleton-line-surface);
+  }
+}

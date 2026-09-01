@@ -1,0 +1,34 @@
+/* Category / tag feed page shell. */
+
+@layer utilities {
+  .category-feed-page {
+    min-height: var(--app-layout-vh);
+    overflow-x: clip;
+    background: var(--ui-surface-page);
+    color: var(--ui-text-primary);
+  }
+
+  .category-feed-page--mobile {
+    padding-bottom: var(--ui-category-feed-bottom-space-mobile);
+  }
+
+  .category-feed-page--desktop {
+    padding-bottom: var(--ui-category-feed-bottom-space-desktop);
+  }
+
+  .category-feed-page .category-feed-content-shell.ui-app-page-main {
+    width: 100%;
+    margin-inline: auto;
+    padding-block: var(--ui-space-none);
+    padding-inline: var(--ui-space-none);
+    background: var(--ui-surface-page);
+  }
+
+  .category-feed-page .category-feed-shell--mobile {
+    padding-top: var(--ui-space-none);
+  }
+
+  .category-feed-page .category-feed-shell--desktop {
+    padding-top: var(--ui-space-none);
+  }
+}

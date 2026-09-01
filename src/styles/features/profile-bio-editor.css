@@ -1,0 +1,66 @@
+@layer utilities {
+  .profile-bio-editor-page {
+    background: var(--ui-profile-bio-editor-page-surface);
+  }
+
+  .profile-bio-editor-main {
+    gap: var(--ui-space-3);
+    padding-bottom: calc(env(safe-area-inset-bottom) + var(--ui-control-lg) * 2 + var(--ui-space-8));
+  }
+
+  .profile-bio-editor-card {
+    display: grid;
+    gap: var(--ui-space-2);
+    border: var(--ui-border-width-hairline) solid var(--ui-line-subtle);
+    border-radius: var(--ui-radius-2xl);
+    background: var(--ui-surface-card);
+    padding: var(--ui-space-4);
+    box-shadow: var(--ui-shadow-card);
+  }
+
+  .profile-bio-editor-label {
+    color: var(--ui-text-primary);
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-title);
+  }
+
+  .profile-bio-editor-field {
+    width: 100%;
+    min-height: var(--ui-profile-bio-editor-field-min-height);
+    resize: vertical;
+    border: var(--ui-border-width-hairline) solid var(--ui-profile-bio-editor-field-border);
+    border-radius: var(--ui-radius-xl);
+    background: var(--ui-profile-bio-editor-field-surface);
+    padding: var(--ui-space-3);
+    color: var(--ui-text-primary);
+    font-size: var(--ui-text-base);
+    line-height: var(--ui-line-relaxed);
+    outline: var(--ui-outline-none);
+  }
+
+  .profile-bio-editor-field:focus {
+    border-color: var(--ui-profile-bio-editor-field-focus-border);
+    box-shadow: var(--ui-profile-bio-editor-field-focus-shadow);
+  }
+
+  .profile-bio-editor-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--ui-space-3);
+    color: var(--ui-text-tertiary);
+    font-size: var(--ui-text-xs);
+  }
+
+  .profile-bio-editor-sticky-shell {
+    padding: var(--ui-space-3) var(--ui-page-padding-x) calc(var(--ui-space-3) + env(safe-area-inset-bottom));
+  }
+
+  .profile-bio-editor-save {
+    width: 100%;
+    min-height: calc(var(--ui-control-lg) + var(--ui-space-3));
+    border-radius: var(--ui-radius-xl);
+    justify-content: center;
+    font-weight: var(--ui-font-weight-title);
+    box-shadow: var(--ui-shadow-card);
+  }
+}

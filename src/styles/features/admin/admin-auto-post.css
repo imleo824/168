@@ -1,0 +1,68 @@
+/* features/admin/admin-auto-post.css */
+/* Token-driven polish for the automatic posting admin workflow. */
+
+@layer utilities {
+  .admin-auto-post-topic-list {
+    display: grid;
+    gap: var(--ui-space-3);
+  }
+
+  .admin-auto-post-section,
+  .admin-auto-post-topic-card {
+    border-color: var(--ui-admin-auto-post-card-border);
+    background: var(--ui-admin-auto-post-card-surface);
+    box-shadow: var(--ui-admin-auto-post-card-shadow);
+  }
+
+  .admin-auto-post-topic-header,
+  .admin-auto-post-section-header {
+    display: flex;
+    min-width: 0;
+  }
+
+  .admin-auto-post-topic-header {
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ui-space-3);
+    margin-bottom: var(--ui-space-none);
+  }
+
+  .admin-auto-post-section-header {
+    flex-direction: column;
+    gap: var(--ui-space-1);
+    margin-bottom: var(--ui-space-4);
+  }
+
+  .admin-auto-post-topic-card {
+    display: grid;
+    gap: var(--ui-space-3);
+    padding: var(--ui-space-3);
+  }
+
+  .admin-auto-post-topic-fields {
+    display: grid;
+    gap: var(--ui-space-3);
+  }
+
+  .admin-auto-post-field {
+    display: grid;
+    gap: var(--ui-space-1);
+  }
+
+  .admin-quote-action-icon {
+    width: var(--ui-control-icon-sm);
+    height: var(--ui-control-icon-sm);
+    flex: 0 0 var(--ui-control-icon-sm);
+    stroke-width: var(--ui-icon-stroke);
+  }
+
+  @media (min-width: 640px) {
+    .admin-auto-post-topic-fields {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .admin-auto-post-topic-card {
+      padding: var(--ui-space-4);
+    }
+  }
+}

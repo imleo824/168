@@ -1,0 +1,6 @@
+/* User space CSS facade. */
+
+@import "./user-space-shell.css";
+@import "./user-space-actions.css";
+@import "./user-space-posts.css";
+@import "./user-space-state.css";

@@ -1,0 +1,253 @@
+/* Brand/about page. Keep page visuals token-driven and outside TSX. */
+
+@layer utilities {
+  .brand-about-page {
+    min-height: var(--app-layout-vh);
+    padding-bottom: var(--ui-space-8);
+    background: var(--ui-surface-page);
+  }
+
+  .brand-about-hero {
+    overflow: hidden;
+    border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+    border-radius: var(--ui-radius-2xl);
+    background: var(--ui-surface-card);
+    box-shadow: var(--ui-section-card-shadow, none);
+  }
+
+  .brand-about-hero-inner {
+    position: relative;
+    padding: var(--ui-brand-about-hero-padding);
+  }
+
+  .brand-about-hero-content {
+    position: relative;
+  }
+
+  .brand-about-eyebrow,
+  .brand-about-keyword {
+    display: inline-flex;
+    align-items: center;
+    border-radius: var(--ui-radius-pill);
+    border: var(--ui-border-width-hairline) solid var(--ui-line-medium);
+    background: var(--ui-social-surface-muted, var(--ui-surface-muted));
+    color: var(--ui-text-muted);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-display);
+    line-height: var(--ui-line-none);
+  }
+
+  .brand-about-eyebrow {
+    gap: var(--ui-space-2);
+    margin-bottom: var(--ui-space-4);
+    padding: var(--ui-brand-about-chip-padding);
+  }
+
+  .brand-about-eyebrow-icon {
+    width: var(--ui-brand-about-eyebrow-icon-size, var(--ui-control-icon-xs));
+    height: var(--ui-brand-about-eyebrow-icon-size, var(--ui-control-icon-xs));
+    flex: 0 0 var(--ui-brand-about-eyebrow-icon-size, var(--ui-control-icon-xs));
+    stroke-width: var(--ui-icon-stroke);
+  }
+
+  .brand-about-title {
+    color: var(--ui-text-strong);
+    font-size: var(--ui-brand-about-title-size);
+    font-weight: var(--ui-font-weight-display);
+    letter-spacing: var(--ui-brand-about-title-tracking);
+    line-height: var(--ui-line-tight);
+  }
+
+  .brand-about-copy {
+    max-width: var(--ui-brand-about-copy-max-width);
+    margin-top: var(--ui-space-4);
+    color: var(--ui-text-muted);
+    font-size: var(--ui-text-base);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-brand-about-copy-line);
+  }
+
+  .brand-about-actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-space-3);
+    margin-top: var(--ui-space-6);
+  }
+
+  .brand-about-action {
+    min-height: var(--ui-control-lg);
+    padding-inline: var(--ui-space-5);
+  }
+
+  .brand-about-action-icon {
+    width: var(--ui-brand-about-action-icon-size, var(--ui-control-icon-sm));
+    height: var(--ui-brand-about-action-icon-size, var(--ui-control-icon-sm));
+    flex: 0 0 var(--ui-brand-about-action-icon-size, var(--ui-control-icon-sm));
+    stroke-width: var(--ui-icon-stroke);
+  }
+
+  .brand-about-feature-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--ui-space-3);
+    margin-top: var(--ui-space-4);
+  }
+
+  .brand-about-section,
+  .brand-about-card {
+    border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+    border-radius: var(--ui-radius-2xl);
+    background: var(--ui-surface-card);
+  }
+
+  .brand-about-section {
+    margin-top: var(--ui-space-4);
+    padding: var(--ui-space-5);
+  }
+
+  .brand-about-card {
+    padding: var(--ui-space-5);
+    box-shadow: var(--ui-section-card-shadow, none);
+  }
+
+  .brand-about-card-icon {
+    display: flex;
+    width: var(--ui-brand-about-icon-size);
+    height: var(--ui-brand-about-icon-size);
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--ui-space-4);
+    border-radius: var(--ui-radius-xl);
+    background: var(--ui-brand);
+    color: var(--ui-color-white);
+  }
+
+  .brand-about-card-icon-graphic {
+    width: var(--ui-brand-about-card-icon-graphic-size, calc(var(--ui-control-icon-md) + var(--ui-space-1)));
+    height: var(--ui-brand-about-card-icon-graphic-size, calc(var(--ui-control-icon-md) + var(--ui-space-1)));
+    flex: 0 0 var(--ui-brand-about-card-icon-graphic-size, calc(var(--ui-control-icon-md) + var(--ui-space-1)));
+    stroke-width: var(--ui-icon-stroke);
+  }
+
+  .brand-about-section-title,
+  .brand-about-card-title,
+  .brand-about-faq-title {
+    margin: var(--ui-space-none);
+    color: var(--ui-text-strong);
+    font-weight: var(--ui-font-weight-title);
+    line-height: var(--ui-line-tight);
+  }
+
+  .brand-about-section-title {
+    font-size: var(--ui-type-section-title-size, var(--ui-text-title));
+  }
+
+  .brand-about-card-title,
+  .brand-about-faq-title {
+    font-size: var(--ui-text-body);
+  }
+
+  .brand-about-card-copy,
+  .brand-about-list-item,
+  .brand-about-faq-copy {
+    color: var(--ui-text-muted);
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-medium);
+    line-height: var(--ui-line-readable);
+  }
+
+  .brand-about-card-copy,
+  .brand-about-faq-copy {
+    margin: var(--ui-space-2) 0 0;
+  }
+
+  .brand-about-keyword-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ui-space-2);
+    margin-top: var(--ui-space-4);
+  }
+
+  .brand-about-keyword {
+    padding: var(--ui-brand-about-keyword-padding);
+    color: var(--ui-text-secondary);
+  }
+
+  .brand-about-reason-list {
+    display: grid;
+    gap: var(--ui-space-3);
+    margin-top: var(--ui-space-4);
+  }
+
+  .brand-about-list-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ui-space-3);
+  }
+
+  .brand-about-check {
+    margin-top: var(--ui-brand-about-check-offset);
+    width: var(--ui-brand-about-check-icon-size, var(--ui-control-icon-md));
+    height: var(--ui-brand-about-check-icon-size, var(--ui-control-icon-md));
+    flex: 0 0 var(--ui-brand-about-check-icon-size, var(--ui-control-icon-md));
+    color: var(--ui-text-strong);
+    stroke-width: var(--ui-icon-stroke);
+  }
+
+  .brand-about-faq-list {
+    margin-top: var(--ui-space-4);
+  }
+
+  .brand-about-faq-item {
+    padding-block: var(--ui-space-4);
+    border-top: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+  }
+
+  @media (min-width: 640px) {
+    .brand-about-hero-inner {
+      padding: var(--ui-brand-about-hero-padding-desktop);
+    }
+
+    .brand-about-title {
+      font-size: var(--ui-brand-about-title-size-desktop);
+    }
+
+    .brand-about-copy {
+      font-size: var(--ui-brand-about-copy-size-desktop);
+    }
+
+    .brand-about-actions {
+      flex-direction: row;
+    }
+
+    .brand-about-feature-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .app-shell[data-route-surface='user'][data-desktop-surface='content'] .brand-about-main {
+      width: 100%;
+      max-width: var(--app-desktop-page-content-width);
+      margin-inline: auto;
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='content'] .brand-about-main {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--ui-space-4);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='content'] :is(
+      .brand-about-hero,
+      .brand-about-feature-grid
+    ) {
+      grid-column: 1 / -1;
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='content'] .brand-about-section {
+      min-width: 0;
+      margin-top: var(--ui-space-none);
+    }
+  }
+}

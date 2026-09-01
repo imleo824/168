@@ -1,0 +1,11 @@
+/* Profile/user-space route-only stylesheet.
+ * Imported by lazy profile routes so public startup does not download
+ * profile identity, settings dialog, and user-space presentation CSS.
+ */
+
+@import "../../styles/features/settings.css";
+@import "../../styles/features/profile.css";
+@import "../../styles/features/user-space-next.css";
+@import "../../styles/features/profile-membership-performance.css";
+@import "../../styles/features/profile-plus-visual.css";
+@import "../../styles/features/profile-plus-link-contract.css";

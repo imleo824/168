@@ -1,0 +1,293 @@
+/* Global skeleton contract.
+ *
+ * Skeletons should mirror real page contracts without depending on real card
+ * component classes. Feed skeletons own their first-frame layout here so the
+ * initial loading frame and the stable frame render identically.
+ */
+
+@layer base {
+  :root {
+    --ui-skeleton-surface-tint: 4.8%;
+    --ui-skeleton-line-tint: 6.2%;
+    --ui-skeleton-avatar-tint: 5.6%;
+    --ui-skeleton-media-tint-start: 3.4%;
+    --ui-skeleton-media-tint-end: 5.4%;
+    --ui-skeleton-border-tint: 4.8%;
+    --ui-skeleton-inset-tint: 74%;
+    --ui-skeleton-highlight-strength: 82%;
+    --ui-skeleton-shimmer-duration: calc(var(--ui-duration-loading-spin) + var(--ui-duration-slow) + var(--ui-duration-slow) + var(--ui-duration-base));
+    --ui-skeleton-shimmer-start: -108%;
+    --ui-skeleton-shimmer-end: 108%;
+    --ui-skeleton-shimmer-stop-start: var(--ui-space-none);
+    --ui-skeleton-shimmer-stop-peak: 46%;
+    --ui-skeleton-shimmer-stop-end: 92%;
+    --ui-skeleton-shimmer-peak-opacity: 0.82;
+    --ui-skeleton-shimmer-reduced-opacity: 0.45;
+    --ui-skeleton-surface: color-mix(in srgb, var(--ui-color-black) var(--ui-skeleton-surface-tint), var(--ui-color-white));
+    --ui-skeleton-line-surface: color-mix(in srgb, var(--ui-color-black) var(--ui-skeleton-line-tint), var(--ui-color-white));
+    --ui-skeleton-avatar-surface: color-mix(in srgb, var(--ui-color-black) var(--ui-skeleton-avatar-tint), var(--ui-color-white));
+    --ui-skeleton-media-surface: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--ui-color-black) var(--ui-skeleton-media-tint-start), var(--ui-color-white)),
+      color-mix(in srgb, var(--ui-color-black) var(--ui-skeleton-media-tint-end), var(--ui-color-white))
+    );
+    --ui-skeleton-border: color-mix(in srgb, var(--ui-color-black) var(--ui-skeleton-border-tint), transparent);
+    --ui-skeleton-inset: color-mix(in srgb, var(--ui-color-white) var(--ui-skeleton-inset-tint), transparent);
+    --ui-skeleton-highlight: color-mix(in srgb, var(--ui-color-white) var(--ui-skeleton-highlight-strength), transparent);
+    --ui-skeleton-radius: var(--ui-radius-md);
+    --ui-skeleton-line-author-width: calc(var(--ui-space-8) * 2 + var(--ui-space-5));
+    --ui-skeleton-line-meta-width: calc(var(--ui-space-8) + var(--ui-space-6));
+    --ui-skeleton-action-pill-width: calc(var(--ui-space-8) + var(--ui-space-5));
+    --ui-skeleton-action-pill-secondary-width: calc(var(--ui-space-8) + var(--ui-space-2));
+    --ui-skeleton-chip-width: calc(var(--ui-space-8) * 2);
+    --ui-skeleton-chip-wide-width: calc(var(--ui-space-8) * 2 + var(--ui-space-4));
+    --ui-skeleton-chip-short-width: calc(var(--ui-space-8) + var(--ui-space-4));
+    --ui-skeleton-copy-title-height: calc(var(--ui-text-title) * var(--ui-line-tight));
+    --ui-skeleton-copy-line-height: calc(var(--ui-text-body) * var(--ui-line-normal));
+    --ui-skeleton-meta-height: calc(var(--ui-text-xs) * var(--ui-line-compact));
+    --ui-skeleton-media-feed-ratio: var(--ui-media-carousel-ratio);
+    --ui-feed-skeleton-list-gap: var(--ui-feed-card-list-gap);
+    --ui-feed-skeleton-shell-max-width: var(--ui-social-feed-list-max-width);
+    --ui-skeleton-media-detail-ratio: var(--ui-media-carousel-ratio);
+    --ui-feed-skeleton-author-avatar-size: var(--ui-feed-author-avatar-size);
+    --ui-feed-skeleton-author-action-width: calc(var(--ui-space-8) + var(--ui-space-4));
+    --ui-feed-skeleton-author-action-height: var(--ui-feed-author-action-height);
+    --ui-home-skeleton-bottom-item-size: var(--ui-bottom-nav-icon-size, var(--ui-control-icon-md));
+    --ui-page-loader-card-padding: calc(var(--ui-space-3) + var(--ui-space-half));
+    --ui-page-loader-section-gap: var(--ui-space-3);
+    --ui-page-loader-line-gap: var(--ui-space-2);
+    --ui-page-loader-avatar-size: calc(var(--ui-control-md) - var(--ui-space-1));
+    --ui-page-loader-title-width: calc(var(--ui-space-8) * 3 + var(--ui-space-4));
+    --ui-page-loader-meta-width: calc(var(--ui-space-8) * 5);
+    --ui-page-loader-media-height: calc(var(--ui-space-8) * 4 + var(--ui-space-2));
+  }
+}
+
+@layer utilities {
+  .ui-skeleton-shell {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--ui-skeleton-radius);
+    border: var(--ui-border-width-hairline) solid var(--ui-skeleton-border);
+    background: var(--ui-skeleton-surface);
+    color: var(--ui-color-transparent);
+    box-shadow: inset 0 var(--ui-border-width-hairline) 0 var(--ui-skeleton-inset);
+  }
+
+  .ui-skeleton-circle {
+    border-radius: var(--ui-radius-pill);
+  }
+
+  .ui-skeleton-block {
+    border-radius: var(--ui-skeleton-radius);
+  }
+
+  .ui-skeleton-shimmer {
+    position: absolute;
+    inset: var(--ui-inset-none);
+    background: linear-gradient(
+      90deg,
+      transparent var(--ui-skeleton-shimmer-stop-start),
+      var(--ui-skeleton-highlight) var(--ui-skeleton-shimmer-stop-peak),
+      transparent var(--ui-skeleton-shimmer-stop-end)
+    );
+    opacity: var(--ui-opacity-hidden);
+    transform: translateX(var(--ui-skeleton-shimmer-start));
+    animation: ui-skeleton-shimmer var(--ui-skeleton-shimmer-duration) var(--ease-standard) infinite;
+  }
+
+  @keyframes ui-skeleton-shimmer {
+    35% {
+      opacity: var(--ui-skeleton-shimmer-peak-opacity);
+    }
+
+    to {
+      opacity: var(--ui-opacity-hidden);
+      transform: translateX(var(--ui-skeleton-shimmer-end));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-skeleton-shimmer {
+      animation: var(--ui-animation-none);
+      opacity: var(--ui-skeleton-shimmer-reduced-opacity);
+      transform: var(--ui-transform-none);
+    }
+  }
+
+  .ui-page-loader-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--ui-page-loader-section-gap);
+    padding: var(--ui-page-loader-card-padding);
+  }
+
+  .ui-page-loader-header {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-page-loader-section-gap);
+  }
+
+  .ui-page-loader-avatar {
+    width: var(--ui-page-loader-avatar-size);
+    height: var(--ui-page-loader-avatar-size);
+    background: var(--ui-skeleton-avatar-surface);
+  }
+
+  .ui-page-loader-lines,
+  .ui-page-loader-copy {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: var(--ui-page-loader-line-gap);
+  }
+
+  .ui-page-loader-lines {
+    flex: 1 1 auto;
+  }
+
+  .ui-page-loader-title-line,
+  .ui-page-loader-meta-line,
+  .ui-page-loader-copy-line {
+    height: var(--ui-skeleton-meta-height);
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-skeleton-line-surface);
+  }
+
+  .ui-page-loader-title-line {
+    width: var(--ui-page-loader-title-width);
+  }
+
+  .ui-page-loader-meta-line {
+    width: var(--ui-page-loader-meta-width);
+  }
+
+  .ui-page-loader-media {
+    width: 100%;
+    height: var(--ui-page-loader-media-height);
+    background: var(--ui-skeleton-media-surface);
+  }
+
+  .ui-page-loader-copy-line--full {
+    width: 100%;
+  }
+
+  /* Shared semantic skeleton units */
+  .ui-skeleton-line-author {
+    width: var(--ui-skeleton-line-author-width);
+    height: var(--ui-skeleton-copy-line-height);
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-skeleton-line-surface);
+  }
+
+  .ui-skeleton-line-meta {
+    width: var(--ui-skeleton-line-meta-width);
+    height: var(--ui-skeleton-meta-height);
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-skeleton-line-surface);
+  }
+
+  .ui-skeleton-line-meta--wide {
+    width: calc(var(--ui-skeleton-line-meta-width) + var(--ui-space-6));
+  }
+
+  .ui-skeleton-line-meta--short {
+    width: calc(var(--ui-skeleton-line-meta-width) - var(--ui-space-3));
+  }
+
+  .ui-skeleton-line-meta--tiny {
+    width: calc(var(--ui-space-8) + var(--ui-space-1));
+  }
+
+  .ui-skeleton-copy-stack {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: var(--ui-space-2);
+  }
+
+  .ui-skeleton-copy-line {
+    height: var(--ui-skeleton-copy-line-height);
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-skeleton-line-surface);
+  }
+
+  .ui-skeleton-copy-line--title {
+    width: min(72%, var(--ui-skeleton-line-author-width) * 1.8);
+    height: var(--ui-skeleton-copy-title-height);
+  }
+
+  .ui-skeleton-copy-line--full {
+    width: 100%;
+  }
+
+  .ui-skeleton-copy-line--wide {
+    width: min(82%, 100%);
+  }
+
+  .ui-skeleton-copy-line--short {
+    width: min(46%, 100%);
+  }
+
+  .ui-skeleton-chip-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ui-space-2);
+  }
+
+  .ui-skeleton-chip {
+    width: var(--ui-skeleton-chip-width);
+    height: var(--ui-feed-chip-min-height);
+    border-radius: var(--ui-chip-radius, var(--ui-radius-sm));
+    background: var(--ui-skeleton-line-surface);
+  }
+
+  .ui-skeleton-chip--wide {
+    width: var(--ui-skeleton-chip-wide-width);
+  }
+
+  .ui-skeleton-chip--short {
+    width: var(--ui-skeleton-chip-short-width);
+  }
+
+  .ui-skeleton-action-pill {
+    width: var(--ui-skeleton-action-pill-width);
+    height: var(--ui-feed-inline-action-height, var(--ui-feed-author-action-height));
+    border-radius: var(--ui-action-radius-sm, var(--ui-radius-sm));
+    background: var(--ui-skeleton-line-surface);
+  }
+
+  .ui-skeleton-action-pill--secondary {
+    width: var(--ui-skeleton-action-pill-secondary-width);
+  }
+
+  .ui-skeleton-avatar-sm {
+    width: var(--ui-control-sm);
+    height: var(--ui-control-sm);
+    background: var(--ui-skeleton-avatar-surface);
+  }
+
+  .ui-skeleton-media {
+    width: 100%;
+    min-height: 0;
+    border-radius: var(--ui-skeleton-media-radius, var(--ui-radius-none));
+    background:
+      var(--ui-skeleton-media-surface),
+      var(--ui-brand-media-placeholder);
+    background-position: center;
+    background-size: cover;
+  }
+
+  .ui-skeleton-media--feed {
+    height: auto;
+    border-radius: var(--ui-feed-skeleton-media-radius, var(--ui-feed-card-media-radius-mobile, var(--ui-skeleton-media-radius, var(--ui-radius-xl))));
+    aspect-ratio: var(--ui-skeleton-media-feed-ratio);
+    max-height: var(--ui-media-single-max-height);
+  }
+
+  .ui-skeleton-media--detail {
+    aspect-ratio: var(--ui-skeleton-media-detail-ratio);
+    max-height: var(--ui-media-single-max-height);
+  }
+
+}

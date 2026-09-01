@@ -1,0 +1,263 @@
+# UI/UE 深度审计 Phase 6 - 总索引、覆盖矩阵与实施路线图
+
+日期: 2026-06-26
+
+目标: 将 Phase 1 到 Phase 5 的截图证据、静态系统审计、路由/组件矩阵、组件像素级审计、feature 系统审计收束成统一索引。用于判断当前距离“精致感、呼吸感、简约感”还有哪些缺口，以及下一步应先修什么。
+
+## 当前交付物索引
+
+可读审计报告:
+
+1. `phase-1-screenshot-audit.audit`
+用途: 桌面和移动截图证据审计。
+核心结论: 首页失败态和通用登录墙最伤首屏质感。
+
+2. `phase-2-static-system-audit.audit`
+用途: 样式系统、状态组件、页面壳、字体、颜色、间距审计。
+核心结论: 设计系统有基础，但 state、surface、desktop composition 语义不足。
+
+3. `phase-3-route-component-inventory.audit`
+用途: 15 个路由和 30 个顶层 UI 组件覆盖矩阵。
+核心结论: 页面和组件覆盖面已建立，但真实登录态和 overlay 证据缺失。
+
+4. `phase-4-component-pixel-audit.audit`
+用途: 顶层 UI 组件像素级审计。
+核心结论: IconAction、StatePlacement、Media、Sheet、Skeleton 五个组件家族需要统一合同。
+
+5. `phase-5-feature-system-audit.audit`
+用途: feature 级业务模块系统审计。
+核心结论: 内容流方向正确，发布/筛选/支付/后台是合同外尺寸和局部 utility 高发区。
+
+截图证据:
+
+- 桌面截图 6 张: home、create、chat、profile、promote、about。
+- 移动截图 6 张: home、create、chat、profile、promote、about。
+- 截图目录: `docs/review/ui-ux-audit-2026-06-26/screenshots/`。
+
+## 当前覆盖数字
+
+- 路由页面: 15 个。
+- 顶层 UI 组件: 30 个。
+- Feature TS/TSX 文件: 67 个。
+- Feature/component CSS 文件: 66 个。
+- 可读 `.audit` 报告: 5 份。
+- 当前截图证据: 12 张。
+
+静态风险统计:
+
+- C 端 TSX utility/硬编码风险命中约 84 处。
+- Admin TSX utility/硬编码风险命中约 522 处。
+- 非 token CSS 中 px/hex/rgba 命中约 91 处。
+
+说明:
+
+- token 源头中的色值、尺寸、阴影不算问题，它们是设计系统资产。
+- 统计命中不是最终罪名，需要人工分级。但 admin 明显是最大硬编码债。
+
+## 总体设计健康度
+
+整体健康度: 中。
+
+强项:
+
+- 内容流已经从重卡片转向轻边线列表，方向接近 X/Threads。
+- token 层、system 层、feature CSS 层已经存在，不是完全散乱项目。
+- 移动底部导航、聊天移动壳、帖子卡片、Telegram contact action 等局部已经比较克制。
+- 多数组件有可访问性意识，如 aria、role、aria-live、键盘 Escape、错误恢复。
+
+弱项:
+
+- 状态页和登录墙太重、太通用。
+- 桌面 composition 不够桌面化，多个页面像移动卡片放大。
+- icon action、media、sheet、skeleton、field controls 还没有统一合同。
+- 发布/筛选/支付等复杂 feature 里仍有具体数值、utility class、局部动画。
+- Admin 与 C 端设计系统分裂明显。
+
+## 显式目标逐项对照
+
+1. 精致感
+当前状态: 部分满足。
+已满足证据: 内容流轻边线、底部导航、部分 topbar、Telegram action、帖子卡片无阴影方向正确。
+未满足证据: 登录墙大卡片、首页失败态、关于页桌面卡片岛、支付面板 utility 动画、admin 大量硬编码。
+优先修法: SurfaceDepth、StatePlacement、IconAction、SheetContract。
+
+2. 呼吸感
+当前状态: 部分满足。
+已满足证据: feed card 内容间距较自然，移动聊天壳和 profile tab 有清楚节奏。
+未满足证据: 桌面聊天空地无结构，关于页像移动卡片放大，首页失败态大空白无内容骨架，支付/筛选 sheet 控件密度偏高。
+优先修法: PageContentShell variants、desktop split composition、FeedStateContract。
+
+3. 简约感
+当前状态: 中等偏弱。
+已满足证据: feed card 不依赖重阴影，部分列表以 border-bottom 分隔。
+未满足证据: 状态和商业流程仍常用卡片、阴影、渐变、玻璃、多个 chip shadow。
+优先修法: 降低默认 surface depth，shadow 仅保留给 overlay/modal。
+
+4. 不硬编码
+当前状态: 未完全满足。
+已满足证据: foundation/token 层较完整，许多 feature CSS 已使用 var。
+未满足证据: C 端 TSX 约 84 处风险，Admin 约 522 处风险，ImageUpload/PromotePaymentSheet/PageLoader/PostCreate 等有裸数字或 utility。
+优先修法: 先清 P0 C 端，再单独治理 admin。
+
+5. 不临时方式
+当前状态: 未完全满足。
+已满足证据: 多数组件已有抽象，能支撑长期重构。
+未满足证据: `SegmentTabs` 通过 className 推断 profile，`TopbarIconButton` 通过 className 判断 back，Promote payment 自建 sheet 而非共享 BottomSheet。
+优先修法: 用显式 prop 和合同组件替代字符串推断。
+
+6. 不 CSS 强压
+当前状态: 未完全满足。
+已满足证据: 有 `ui-control-shape-contract.css` 等系统合同。
+未满足证据: `ProfileIconButton` 有 `!p-0`，profile dialog 使用子选择器强控宽度，profile tabs 大量上下文覆盖 SegmentTabs。
+优先修法: 增强组件 API，减少页面上下文覆盖。
+
+## P0 问题总表
+
+1. 首页失败态破坏首屏信任
+证据: Phase 1 首页截图、Phase 2 和 Phase 5。
+影响: 用户第一眼看不到内容流，只看到失败文字和大片空白。
+建议: 实施 `FeedStateContract`，错误态内联到 feed 框架，保留 skeleton 和恢复动作。
+
+2. 登录墙模板过重且语义重复
+证据: create/profile/promote 截图和 `AuthRequiredState` 审计。
+影响: 发布、个人、推广页面看起来像同一张卡片复制。
+建议: `AuthRequiredState` 增加 `placement`、`tone`、`density`、`preview slot`。
+
+3. Icon action 家族分裂
+证据: Phase 4。
+影响: 发布、返回、头像、关闭、Telegram、设置行、select caret 的尺寸/stroke/背景不同步。
+建议: 新建统一 `IconAction` 合同，所有裸数字 icon size 收敛到 token。
+
+4. 发布/筛选字段控件重复
+证据: PostCreate、HomeStructuredFilterSheet、postCreateComponents。
+影响: 同类字段在发布和筛选里像两套产品。
+建议: `CreatorFieldContract`: `FormFieldRow`、`PickerButton`、`SegmentedControl`、`RangeField`。
+
+5. Sheet/Modal 合同不统一
+证据: BottomSheet、HomeStructuredFilterSheet、PromotePaymentSheet、ProfileDialog。
+影响: 弹层材料、动画、close、body padding、键盘处理不一致。
+建议: `SheetContract`，并迁移 PromotePaymentSheet 到统一 modal sheet。
+
+6. Media 合同分散
+证据: OptimizedImage、PostMediaGrid、ImageUpload、ImageLightbox、ProfileHeaderCover。
+影响: 图片尺寸、fallback、placeholder、lightbox、上传进度不统一。
+建议: `MediaContract`: image preset、avatar fallback tone、upload ring token、lightbox motion token。
+
+## P1 问题总表
+
+1. 桌面布局没有充分桌面化
+影响页面: Chat、About、Profile、Promote、UserSpace。
+建议: `PageContentShell` 增加 `feed|editor|readable|split|wide`。
+
+2. Surface depth 使用偏重
+影响页面: Auth state、BrandAbout、Recharge、Promote、ProfileDialog、HomeStructuredFilterSheet。
+建议: 默认 `flat/hairline`，overlay/modal 才 `floating/modal`。
+
+3. 字体层级偏硬
+影响组件: UIText、AuthRequiredState、BrandAbout、状态页、商业流程。
+建议: 增加 typography variants: page title、section title、card title、readable body、label、meta。
+
+4. Loading/Skeleton 与真实内容未完全对齐
+影响组件: PageLoader、Skeleton、HomeFeedSkeleton、DetailSkeleton、Recharge skeleton。
+建议: 页面级 skeleton 使用 preset，不传裸数字。
+
+5. Profile 和 UserSpace 的身份资产表达还不够
+影响页面: Profile、UserSpace。
+建议: 轻量资料资产预览、关注/联系 action 统一为 identity action contract。
+
+## P2 问题总表
+
+1. Admin 设计债巨大
+证据: admin utility 命中约 522 处。
+建议: 单独 Phase，抽 AdminBadge、AdminTable、AdminActionButton、AdminMetricCard。
+
+2. 多处 390px compact breakpoint 分散
+影响: promote、profile、sponsor 等。
+建议: 统一 responsive compact contract。
+
+3. 旧 `.md` 审计文件不作为主交付
+说明: 当前可靠交付以 `.audit` 为准，避免环境中文档读写格式不稳定影响后续审计。
+
+## 推荐实施顺序
+
+第一批: P0 状态和首页信任
+
+- 新增或增强 `UIStateBlock placement`。
+- 重构首页错误态为 feed 内联状态。
+- 重构 AuthRequiredState 为 task-aware 状态。
+- 验收: 首页失败不再像空白错误页；create/profile/promote 登录态有各自语义。
+
+第二批: P0 IconAction 和 Media
+
+- 新建统一 IconAction 或扩展现有 IconButton。
+- 收敛 Publish/Profile/Topbar/Sheet/Lightbox/Telegram 图标按钮。
+- 建立 media presets，处理 avatar fallback、image sizes、upload progress ring、lightbox motion。
+- 验收: 全站图标按钮尺寸和 stroke 一致，图片 fallback 不抢内容。
+
+第三批: P0 CreatorField 和 Sheet
+
+- 发布和首页筛选共用字段控件合同。
+- BottomSheet/PaymentSheet/ProfileDialog 收敛到 SheetContract。
+- 验收: 发布字段、筛选字段、支付 sheet 不再像三套控件。
+
+第四批: P1 Desktop composition
+
+- 扩展 PageContentShell variants。
+- Chat 桌面做 split shell。
+- About 桌面做 editorial layout。
+- 验收: 桌面留白变成信息结构，而不是空地。
+
+第五批: P2 Admin
+
+- 单独 admin design pass。
+- 不和 C 端 P0 混改。
+
+## 还缺的关键证据
+
+视觉证据缺口:
+
+- 已登录首页真实信息流。
+- 帖子详情真实图文、多图、纯文本、长文本。
+- 发布编辑器完整状态: 图片、地点、隐私、联系方式、分类结构字段。
+- 分类页真实列表和空列表。
+- 用户空间真实资料、帖子列表、关注/粉丝。
+- 充值流程、交易记录、赞助中心、推广历史。
+- Promote 完整流程: 选帖子、选时长、支付确认、成功态。
+- Overlay 进入方式: `/post/:id`、`/user/:id`、`/category/:categoryId`、`/about` 从首页打开。
+
+交互证据缺口:
+
+- 键盘焦点顺序。
+- 弹层 focus trap。
+- 移动键盘弹起。
+- 长文本和极端数字。
+- 图片上传失败、网络慢、压缩中。
+- 暗色/亮色对比度测量。
+- 可访问性读屏语义。
+
+## 当前目标完成度判断
+
+不能标记完成。
+
+原因:
+
+- 已完成大量静态审计和部分截图审计，但“所有页面、所有组件、所有布局、所有字体、所有颜色、所有间距”的像素级审计还缺登录态和真实数据态。
+- 当前证据足以指导第一批 P0 设计系统修复，但不足以证明全站已经被完整审计。
+- 后续必须继续补截图或进入 P0 实施后再做视觉回归。
+
+## 最小可执行下一步
+
+如果继续审计:
+
+1. 补登录态真实数据截图。
+2. 补帖子详情、分类页、充值、交易记录、赞助、推广历史。
+3. 补 overlay 场景。
+
+如果进入实施:
+
+1. 先做 FeedStateContract 和 AuthRequiredState。
+2. 再做 IconAction。
+3. 再做 MediaContract。
+4. 最后做 SheetContract 和 CreatorFieldContract。
+
+本阶段结论: 当前最正确的下一步不是继续随机找视觉问题，而是按 P0 合同开始实施，或先补缺失的登录态截图。两条路都清楚，但目标本身仍处于进行中。

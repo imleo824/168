@@ -1,0 +1,255 @@
+/* system/ui-primitives-upload.css */
+
+@layer utilities {
+  .ui-mono-value {
+    background: var(--ui-surface-card);
+    color: var(--ui-text-strong);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-strong);
+    letter-spacing: var(--ui-tracking-normal);
+    line-height: var(--ui-line-none);
+  }
+
+  .ui-upload-error-text {
+    color: var(--ui-danger-on-soft);
+    font-size: var(--ui-text-2xs);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-tight);
+  }
+
+  .image-upload-label {
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-tight);
+  }
+
+  .image-upload--field {
+    display: grid;
+    gap: calc(var(--ui-space-2) + var(--ui-space-half));
+  }
+
+  .image-upload-grid {
+    display: grid;
+    gap: calc(var(--ui-space-2) + var(--ui-space-half));
+  }
+
+  .image-upload-grid[data-grid-layout='single'] {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .image-upload-grid[data-grid-layout='compact'] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .image-upload-grid[data-grid-layout='dense'] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .image-upload-hint,
+  .image-upload-add-label {
+    color: var(--ui-text-soft);
+    font-size: var(--ui-text-xs);
+    line-height: var(--ui-line-none);
+  }
+
+  .image-upload-tile {
+    position: relative;
+    overflow: hidden;
+    border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+    border-radius: var(--ui-radius-xl);
+    background: var(--ui-social-surface-muted, var(--ui-surface-muted));
+  }
+
+  .image-upload-tile--square {
+    aspect-ratio: 1 / 1;
+  }
+
+  .ad-upload-tile {
+    width: 100%;
+  }
+
+  .ad-upload-tile--desktop {
+    aspect-ratio: 4 / 1;
+  }
+
+  .ad-upload-tile--mobile {
+    aspect-ratio: 3 / 1;
+  }
+
+  .image-upload-preview-image {
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    object-fit: cover;
+    opacity: var(--ui-opacity-visible);
+  }
+
+  .image-upload-tile :is(img, picture, .optimized-image) {
+    border-radius: inherit;
+  }
+
+  .ui-image-remove-btn {
+    position: absolute;
+    top: var(--ui-space-2);
+    right: var(--ui-space-2);
+    z-index: var(--ui-z-content-overlay);
+    display: inline-flex;
+    width: var(--ui-control-sm);
+    height: var(--ui-control-sm);
+    min-width: var(--ui-control-sm);
+    min-height: var(--ui-control-sm);
+    align-items: center;
+    justify-content: center;
+    border: var(--ui-border-width-hairline) solid var(--ui-upload-remove-border);
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-upload-remove-surface);
+    color: var(--ui-color-white);
+    box-shadow: var(--ui-upload-remove-shadow);
+    backdrop-filter: var(--ui-upload-remove-backdrop-filter);
+    -webkit-backdrop-filter: var(--ui-upload-remove-backdrop-filter);
+  }
+
+  .ui-image-remove-btn::before {
+    content: var(--ui-content-empty);
+    position: absolute;
+    inset: calc(var(--ui-space-2) * -1);
+    border-radius: inherit;
+  }
+
+  .ui-image-remove-btn svg {
+    width: var(--ui-control-icon-xs);
+    height: var(--ui-control-icon-xs);
+    stroke-width: var(--ui-icon-stroke);
+  }
+
+  .image-upload-busy-overlay,
+  .image-upload-error-overlay {
+    pointer-events: none;
+    position: absolute;
+    inset: var(--ui-inset-none);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ui-space-1);
+  }
+
+  .image-upload-busy-overlay {
+    background: var(--ui-upload-busy-overlay-surface);
+    color: var(--ui-color-white);
+  }
+
+  .image-upload-progress-label {
+    color: currentColor;
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-none);
+  }
+
+  .image-upload-progress-ring {
+    width: var(--ui-upload-progress-ring-size, var(--ui-control-lg));
+    height: var(--ui-upload-progress-ring-size, var(--ui-control-lg));
+    flex: none;
+    color: var(--ui-color-white);
+    transform: rotate(-90deg);
+  }
+
+  .image-upload-progress-track,
+  .image-upload-progress-value {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: var(--ui-upload-progress-ring-stroke, var(--ui-focus-ring-width));
+  }
+
+  .image-upload-progress-track {
+    color: var(--ui-upload-progress-track-color);
+  }
+
+  .image-upload-progress-value {
+    stroke-linecap: round;
+    transition: stroke-dashoffset var(--ui-duration-fast) var(--ease-standard);
+  }
+
+  .image-upload-error-overlay {
+    background: var(--ui-upload-error-overlay-surface);
+    padding: var(--ui-space-1);
+  }
+
+  .image-upload-error-message {
+    display: -webkit-box;
+    overflow: hidden;
+    text-align: center;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .image-upload-error-icon {
+    width: var(--ui-upload-error-icon-size, var(--ui-control-icon-md));
+    height: var(--ui-upload-error-icon-size, var(--ui-control-icon-md));
+    flex: none;
+    color: var(--ui-upload-error-icon-color);
+    stroke-width: var(--ui-icon-stroke);
+  }
+
+  .image-upload-toolbar-icon {
+    width: var(--ui-upload-toolbar-icon-size, calc(var(--ui-control-icon-md) + var(--ui-space-half)));
+    height: var(--ui-upload-toolbar-icon-size, calc(var(--ui-control-icon-md) + var(--ui-space-half)));
+    flex: none;
+    stroke-width: var(--ui-icon-stroke);
+  }
+
+  .image-upload-add {
+    display: flex;
+    cursor: pointer;
+    user-select: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--ui-space-1);
+    border: var(--ui-border-width-hairline) dashed var(--ui-line-medium);
+    border-radius: var(--ui-radius-xl);
+    background: var(--ui-social-surface-muted, var(--ui-surface-muted));
+    transition:
+      transform var(--ui-duration-base) var(--ease-standard),
+      background-color var(--ui-duration-base) var(--ease-standard),
+      border-color var(--ui-duration-base) var(--ease-standard);
+  }
+
+  .image-upload-add:hover,
+  .image-upload-add.is-active {
+    border-color: var(--ui-line-medium);
+    background: var(--ui-state-hover);
+  }
+
+  .image-upload-add-icon-active,
+  .image-upload-add-icon {
+    width: var(--ui-upload-add-icon-size, calc(var(--ui-control-icon-md) + var(--ui-space-1)));
+    height: var(--ui-upload-add-icon-size, calc(var(--ui-control-icon-md) + var(--ui-space-1)));
+    flex: none;
+    stroke-width: var(--ui-icon-stroke);
+  }
+
+  .image-upload-add-icon-active { color: var(--ui-text-strong); }
+  .image-upload-add-icon { color: var(--ui-text-soft); }
+
+  .image-upload-inline-error-icon {
+    width: var(--ui-upload-inline-error-icon-size, var(--ui-control-icon-xs));
+    height: var(--ui-upload-inline-error-icon-size, var(--ui-control-icon-xs));
+    flex: none;
+    margin-top: var(--ui-space-half);
+    stroke-width: var(--ui-icon-stroke);
+  }
+
+  .image-upload-global-error {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--ui-space-1);
+    color: var(--ui-danger-classic);
+  }
+
+  .ui-skeleton-card {
+    border-radius: var(--ui-radius-xl);
+  }
+
+}

@@ -1,0 +1,530 @@
+# UI/UE 深度审计 Phase 15 - 对标原则映射表
+
+日期: 2026-06-26
+
+目标: 将 X、Threads、Instagram 和 Apple 设计理念转译成本项目可检查、可实施、可验证的页面和组件标准。本文件不是实时竞品截图 benchmark，不声称已经完成 side-by-side 对比；它用于把“对标优秀产品”从口号变成后续审计和改造的判定依据。
+
+## 证据边界
+
+当前已具备:
+
+1. 本项目截图审计。
+2. 本项目路由、组件、CSS、token 审计。
+3. Phase 9 到 Phase 14 的截图采集、实施规格、动态验证门禁。
+
+当前未具备:
+
+1. X、Threads、Instagram 的当前截图证据。
+2. 同视口 side-by-side 逐屏比较。
+3. Apple HIG 逐条条文映射。
+
+因此本阶段输出是原则映射，不是完成证明。后续若要证明“已对标完成”，必须补竞品截图或明确的设计系统引用证据。
+
+## Benchmark 1: X 的内容优先原则
+
+可借鉴方向:
+
+1. 信息流是绝对主角。
+2. 导航和筛选不抢内容。
+3. 错误、空、加载应尽量内联，不中断列表语境。
+4. Action row 要稳定、轻、可快速扫过。
+5. 文本、作者、时间、互动数字的层级要清楚但不厚重。
+
+映射到本项目:
+
+页面:
+
+- `/`
+- `/category/:categoryId`
+- `/post/:id`
+- `/user/:id`
+
+组件:
+
+- `PostCard`
+- `PostFeedList`
+- `ListLoadMoreState`
+- `UIStateBlock`
+- `PostMediaGrid`
+- `ActionButton`
+
+布局检查:
+
+- Feed 状态必须保持内容流宽度。
+- 错误态不能把首页变成空白系统页。
+- 桌面 feed 不能像移动卡片孤岛。
+
+字体检查:
+
+- Author、time、body、meta、action count 必须有稳定层级。
+- 正文优先，不让 badge、标签和按钮抢权重。
+
+颜色检查:
+
+- 默认分隔用 hairline 或低噪声边界。
+- 互动状态可以有品牌色，但不能让整行按钮变成主视觉。
+
+间距检查:
+
+- Feed card 内部间距服务扫描。
+- 卡片之间不靠大 shadow 区分。
+- 加载更多和已到底状态必须轻。
+
+本项目当前差距:
+
+- 首页失败态仍是最大首屏信任风险。
+- 分类页和详情页缺真实截图证据。
+- Action row 的多数字和窄屏稳定性仍需动态验证。
+
+## Benchmark 2: Threads 的克制社交语气
+
+可借鉴方向:
+
+1. 视觉语言低噪声。
+2. 分隔线、留白和文本层级比卡片阴影更重要。
+3. Compose 和回复体验应轻，不像后台表单。
+4. 状态、空态、加载态要像产品的一部分，而不是系统提示。
+5. 动效短、安静、为理解服务。
+
+映射到本项目:
+
+页面:
+
+- `/create`
+- `/`
+- `/post/:id`
+- `/chat`
+
+组件:
+
+- `PostCreatePage`
+- `ImageUpload`
+- `UIStateBlock`
+- `AuthRequiredState`
+- `BottomSheet`
+- `HomeStructuredFilterSheet`
+
+布局检查:
+
+- 发布编辑器工具栏要保持同一行且摘要稳定。
+- 结构化字段不能显得像后台录入系统。
+- Sheet 不应比内容本身更厚重。
+
+字体检查:
+
+- 发布 placeholder、工具摘要、字段 hint 要轻。
+- 错误文案清楚但不焦虑。
+
+颜色检查:
+
+- 默认状态使用 neutral 或 muted。
+- 选中态不用层层 shadow 表达。
+
+间距检查:
+
+- 工具栏由容器管理列宽，按钮只管理内容。
+- 输入区、工具区、预览区之间要有空气，但不能割裂。
+
+本项目当前差距:
+
+- 发布页已修复图片摘要，但 toolbar 历史二次宽度合同仍需收敛。
+- `AuthRequiredState` 仍需 context-aware，避免通用登录墙。
+- `HomeStructuredFilterSheet` 和发布字段仍需统一字段合同。
+
+## Benchmark 3: Instagram 的媒体和身份层级
+
+可借鉴方向:
+
+1. 媒体比例、圆角、预览、lightbox 入口要一致。
+2. Profile 首屏应快速建立身份、关系和内容资产。
+3. 个人页 tab 和内容列表关系要清楚。
+4. 图片失败和头像 fallback 不能抢内容注意力。
+5. 用户空间和 profile 应有清晰身份层级，不靠重卡片堆叠。
+
+映射到本项目:
+
+页面:
+
+- `/profile`
+- `/user/:id`
+- `/post/:id`
+- `/`
+
+组件:
+
+- `AvatarImage`
+- `ProfileHeaderCover`
+- `ProfileIconButton`
+- `SegmentTabs`
+- `PostMediaGrid`
+- `ImageLightbox`
+- `OptimizedImage`
+
+布局检查:
+
+- Profile header、stats、bio、actions、tabs 顺序必须自然。
+- UserSpace 桌面不能只是移动 profile 居中放大。
+- Detail media 不挤压正文。
+
+字体检查:
+
+- Nickname、handle、stats、bio、tab label 必须区分。
+- Bio 长文本要自然换行，不撑破 header。
+
+颜色检查:
+
+- Avatar fallback 默认低噪声。
+- Profile action 和 contact action 不能过度品牌化。
+
+间距检查:
+
+- Profile header 到 feed 的过渡要轻。
+- Tab underline 比 pill/card 更适合身份页。
+
+本项目当前差距:
+
+- `/profile` 只有未登录截图，缺真实资料和帖子列表。
+- `/user/:id` 缺移动和桌面截图。
+- MediaContract 尚未落地，图片 fallback、lightbox、profile cover 仍分散。
+
+## Benchmark 4: Apple 的清晰、克制和层级
+
+可借鉴方向:
+
+1. Clarity: 重要信息清楚，文案和控件不互相抢。
+2. Deference: UI 服务内容，不用装饰压过任务。
+3. Depth: 层级来自语义和材料，不靠到处加 shadow。
+4. Consistency: 同类控件在不同页面应有同一合同。
+5. Accessibility: 动态、键盘、对比度、可读性是高级感的一部分。
+
+映射到本项目:
+
+页面:
+
+- 全部页面。
+
+组件:
+
+- `PageContentShell`
+- `SurfaceSectionCard`
+- `UIStateBlock`
+- `AuthRequiredState`
+- `BottomSheet`
+- `ActionButton`
+- `IconButton`
+- `UIText`
+
+布局检查:
+
+- 桌面留白必须变成结构。
+- Page shell 要有 feed、editor、readable、split、wide 等语义。
+- Overlay 和 modal 要有明确层级。
+
+字体检查:
+
+- `UIText` variant 需要覆盖 page title、section title、card title、body readable、label、meta。
+- 长说明文案应更轻，行高更舒展。
+
+颜色检查:
+
+- SurfaceDepth 要比 shadow 更重要。
+- Error、warning、success、disabled 不能只靠颜色表达。
+
+间距检查:
+
+- Page rhythm、section gap、cluster gap、control gap 需要 token。
+- Sheet padding、footer、safe area 要来自合同。
+
+本项目当前差距:
+
+- `PageContentShell` variant 仍偏少。
+- `SurfaceSectionCard` depth 语义不足。
+- `UIText` variant 仍偏粗。
+- 动态验证尚未运行。
+
+## 本项目 benchmark 转译原则
+
+### 原则 1: 内容优先
+
+适用:
+
+- Feed。
+- Post detail。
+- Category feed。
+- UserSpace feed。
+
+检查:
+
+- 页面第一眼是否看到内容或内容结构。
+- 错误态是否保留内容语境。
+- CTA 是否压过正文。
+
+不合格表现:
+
+- 首屏只剩一行错误。
+- 大登录卡占满页面但不解释任务价值。
+- 卡片阴影比正文更抢眼。
+
+### 原则 2: 状态内联化
+
+适用:
+
+- Loading。
+- Empty。
+- Error。
+- Auth required。
+- Load more。
+
+检查:
+
+- 状态是否发生在合适 placement。
+- Page、feed、panel、inline 是否区分。
+- Action 是否可键盘触达。
+
+不合格表现:
+
+- 首页错误态像全页系统错误。
+- EmptyStateCard 默认大 padding 和 shadow。
+- Feed 初始状态复用 footer 状态语义。
+
+### 原则 3: 媒体稳定性
+
+适用:
+
+- Feed image。
+- Detail media。
+- Upload。
+- Avatar。
+- Profile cover。
+- Lightbox。
+
+检查:
+
+- 比例是否稳定。
+- Fallback 是否低噪声。
+- Loading 是否减少跳动。
+- Lightbox 是否沉浸但不压迫。
+
+不合格表现:
+
+- 坏图静默消失。
+- 品牌 placeholder 反复刷屏。
+- Close button 比图片更抢眼。
+
+### 原则 4: 身份层级
+
+适用:
+
+- Profile。
+- UserSpace。
+- Chat。
+- Relation list。
+
+检查:
+
+- 头像、昵称、统计、简介、动作、tab 是否自然排序。
+- 关注和联系 action 是否清楚但不厚重。
+- 空态是否不压过身份信息。
+
+不合格表现:
+
+- 个人页未登录态和发布页完全一样。
+- 用户空间像通用卡片列表。
+- Profile tab 被上下文 CSS 大量覆盖。
+
+### 原则 5: 轻商业流程
+
+适用:
+
+- Promote。
+- Recharge。
+- Transactions。
+- Sponsor。
+
+检查:
+
+- 金额、余额、状态、风险提示是否可扫描。
+- 支付确认是否克制但可信。
+- QR 和复制地址是否层级清楚。
+
+不合格表现:
+
+- 每个区块都是重卡片。
+- Checkout 底栏遮挡内容。
+- 支付 sheet 和其他 sheet 像两套系统。
+
+### 原则 6: 合同优先
+
+适用:
+
+- 所有页面和组件。
+
+检查:
+
+- 新视觉值是否进入 token 或命名常量。
+- 页面是否只声明语义。
+- 共享组件是否通过 prop 表达状态。
+
+不合格表现:
+
+- `!p-0`。
+- `animate-[...]`。
+- `size={17}`。
+- `.page .shared-component > :not(...)`。
+- 每页自建 login/empty/error card。
+
+## 页面 benchmark 检查矩阵
+
+`/`:
+
+- X: Feed 内容优先。
+- Threads: 轻状态和轻 action。
+- Apple: 错误态 placement 清晰。
+- 关键检查: feed state、action row、media fallback、desktop structure。
+
+`/create`:
+
+- Threads: Compose 轻量。
+- Apple: 输入和工具控件清楚。
+- 关键检查: toolbar、summary、category fields、upload、privacy/contact。
+
+`/post/:id`:
+
+- X: 内容详情优先。
+- Instagram: media 稳定。
+- Apple: overlay/lightbox 层级。
+- 关键检查: long text、single/multi image、actions、comments。
+
+`/profile`:
+
+- Instagram: 身份资产层级。
+- Apple: 轻 surface。
+- 关键检查: header、stats、bio、tabs、edit dialog。
+
+`/user/:id`:
+
+- Instagram: public identity。
+- X/Threads: user feed continuity。
+- 关键检查: profile to feed transition、contact/follow、empty states。
+
+`/chat`:
+
+- Threads: 对话轻量。
+- Apple: desktop split 和输入稳定。
+- 关键检查: long message、keyboard、desktop composition。
+
+`/promote`:
+
+- Apple: 商业流程清晰。
+- Threads: 不让复杂表单变后台。
+- 关键检查: picker、checkout、payment confirm、keyboard。
+
+`/recharge`:
+
+- Apple: 金额和支付信任。
+- 关键检查: amount input、QR、copy、status。
+
+`/transactions`:
+
+- Apple: 记录可扫描。
+- 关键检查: amount、time、status、ID、empty。
+
+`/sponsor`:
+
+- Apple: 价值和记录层级。
+- 关键检查: balance、records、confirm、empty。
+
+`/about`:
+
+- Apple: editorial clarity。
+- 关键检查: desktop narrative、mobile reading rhythm、surface depth。
+
+`/category/:categoryId`:
+
+- X/Threads: category feed continuity。
+- 关键检查: header、filter、empty、load more。
+
+`/404`:
+
+- Apple: 清楚、轻、不焦虑。
+- 关键检查: StatePlacement page、action、copy。
+
+`/168wc`:
+
+- Apple: clarity and consistency，但允许 admin density。
+- 关键检查: table、mobile overflow、badge、form、hardcoded utility debt。
+
+## 组件 benchmark 检查矩阵
+
+State family:
+
+- X/Threads: 状态内联，不中断内容。
+- Apple: 状态文案清楚，可达。
+- 检查: placement、density、tone、aria-live、focus action。
+
+Action family:
+
+- X/Threads: action row 轻。
+- Instagram: profile actions 清楚。
+- Apple: 命中区和反馈稳定。
+- 检查: size、stroke、tone、hover、focus、disabled。
+
+Media family:
+
+- Instagram: media consistency。
+- Apple: immersive depth。
+- 检查: ratio、fallback、loading、lightbox、upload progress。
+
+Field family:
+
+- Threads: compose 不厚重。
+- Apple: form clarity。
+- 检查: label、hint、error、selected、keyboard。
+
+Sheet family:
+
+- Apple: modal depth and focus。
+- Threads: filter/payment 不厚。
+- 检查: header、body、footer、close、Escape、safe area。
+
+Shell family:
+
+- X/Threads: content width。
+- Apple: desktop composition。
+- 检查: feed/editor/readable/split/wide、surface depth、page rhythm。
+
+## 对标完成证据要求
+
+要从“原则映射”升级为“对标完成”，必须补:
+
+1. 同视口竞品截图或明确设计系统引用。
+2. 本项目同视口截图。
+3. Side-by-side 差异记录。
+4. 具体到页面和组件的调整项。
+5. 改造后回归截图。
+6. 动态验证记录。
+
+记录模板:
+
+```text
+Benchmark source:
+Reference behavior:
+Local route/component:
+Viewport:
+Observed gap:
+Design principle:
+Implementation contract:
+Evidence:
+Verdict:
+```
+
+`Verdict` 只能是:
+
+- `mapped`
+- `partially matched`
+- `matched with evidence`
+- `not matched`
+
+## 本阶段结论
+
+Phase 15 将对标输入转译为项目内可执行的页面、组件、布局、字体、颜色和间距检查项。当前目标仍未完成，因为还缺真实竞品截图 side-by-side、真实登录态截图和动态验证证据。后续实现时，不能只说“更像 X/Threads/Instagram/Apple”，必须回填本文件中的 benchmark 证据模板。

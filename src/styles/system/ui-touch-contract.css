@@ -1,0 +1,128 @@
+/* system/ui-touch-contract.css
+ * Shared mobile tap responsiveness contract.
+ * Keep this file token-driven and behavior-only: no page-specific visual overrides.
+ */
+
+@layer base {
+  :root {
+    --ui-tap-slop-px: 12px;
+  }
+
+  button,
+  a,
+  summary,
+  select,
+  input[type='button'],
+  input[type='submit'],
+  input[type='reset'],
+  [role='button'],
+  [role='link'] {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: var(--ui-touch-tap-highlight-color);
+  }
+}
+
+@layer utilities {
+  .pressable,
+  .ui-button,
+  .ui-icon-button,
+  .topbar-icon-button,
+  .ui-topbar-back-button,
+  .ui-segment-tab,
+  .home-topic-tab,
+  .home-topic-filter-field-chip,
+  .app-bottom-nav-item,
+  .feed-action-btn,
+  .x-card-action-cell,
+  .feed-card-author-name,
+  .feed-card-options-menu,
+  .messages-list-item,
+  .messages-item-content-button,
+  .notification-settings-item,
+  .sponsor-record-tab,
+  .category-feed-header-actions :is(button, a),
+  .detail-topbar-author,
+  .detail-bottom-action,
+  .ins-post-card[role='button'] {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: var(--ui-touch-tap-highlight-color);
+  }
+
+  .pressable,
+  .ui-button,
+  .ui-icon-button,
+  .topbar-icon-button,
+  .ui-topbar-back-button,
+  .ui-segment-tab,
+  .home-topic-tab,
+  .app-bottom-nav-item,
+  .feed-action-btn,
+  .x-card-action-cell,
+  .sponsor-record-tab,
+  .detail-bottom-action {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  :is(
+    .pressable,
+    .ui-button,
+    .ui-icon-button,
+    .topbar-icon-button,
+    .ui-topbar-back-button,
+    .ui-segment-tab,
+    .home-topic-tab,
+    .home-topic-filter-field-chip,
+    .app-bottom-nav-item,
+    .feed-action-btn,
+    .x-card-action-cell,
+    .messages-list-item,
+    .messages-item-content-button,
+    .notification-settings-item,
+    .sponsor-record-tab,
+    .detail-bottom-action
+  ):disabled,
+  :is(
+    .pressable,
+    .ui-button,
+    .ui-icon-button,
+    .topbar-icon-button,
+    .ui-topbar-back-button,
+    .ui-segment-tab,
+    .home-topic-tab,
+    .home-topic-filter-field-chip,
+    .app-bottom-nav-item,
+    .feed-action-btn,
+    .x-card-action-cell,
+    .messages-list-item,
+    .messages-item-content-button,
+    .notification-settings-item,
+    .sponsor-record-tab,
+    .detail-bottom-action
+  )[aria-disabled='true'] {
+    cursor: default;
+  }
+
+  @media (pointer: coarse) {
+    :is(
+      .pressable,
+      .ui-button,
+      .ui-icon-button,
+      .topbar-icon-button,
+      .ui-topbar-back-button,
+      .ui-segment-tab,
+      .home-topic-tab,
+      .home-topic-filter-field-chip,
+      .app-bottom-nav-item,
+      .feed-action-btn,
+      .x-card-action-cell,
+      .messages-list-item,
+      .messages-item-content-button,
+      .notification-settings-item,
+      .sponsor-record-tab,
+      .detail-bottom-action
+    ) {
+      cursor: pointer;
+    }
+  }
+}

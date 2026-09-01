@@ -1,0 +1,12 @@
+/* features/admin/AdminDesktop.css
+ * Admin console stylesheet owner.
+ * AdminPage imports this file directly, so admin-only styles stay co-located with the admin surface
+ * instead of being loaded globally through the app-wide feature layer.
+ */
+
+@import "../../styles/features/admin/admin-workflows.css";
+@import "../../styles/features/admin/admin-auto-post.css";
+@import "../../styles/features/admin/admin-primitives.css";
+@import "../../styles/features/admin/admin-tables-pagination.css";
+@import "../../styles/features/admin/admin-shell.css";
+@import "../../styles/features/admin/admin-filters-responsive.css";

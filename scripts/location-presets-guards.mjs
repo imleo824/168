@@ -1,0 +1,270 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const root = path.resolve(__dirname, '..');
+
+const presetFiles = [
+  'server/config-defaults.ts',
+  'src/features/post-create/postCreateLocation.ts',
+  'scripts/sync-publish-location-config.mjs',
+  'scripts/deploy-main-schema.mjs',
+];
+
+for (const relativePath of presetFiles) {
+  const source = fs.readFileSync(path.join(root, relativePath), 'utf8');
+
+  assert.doesNotMatch(source, /country:\s*'迪拜'/, `${relativePath} must not use Dubai as a country`);
+  assert.doesNotMatch(source, /country:\s*'台湾'/, `${relativePath} must not include Taiwan in initialized location presets`);
+  assert.doesNotMatch(source, /country:\s*'马来'/, `${relativePath} should use 马来西亚 as the country name`);
+  assert.match(source, /country:\s*'阿联酋'[\s\S]*'迪拜'/, `${relativePath} should put Dubai under UAE`);
+  assert.match(source, /country:\s*'澳门'/, `${relativePath} should include Macau region presets`);
+  assert.match(source, /country:\s*'印度'/, `${relativePath} should include expanded South Asia presets`);
+  assert.match(source, /country:\s*'土耳其'/, `${relativePath} should include expanded transregional presets`);
+  assert.match(source, /country:\s*'柬埔寨'[\s\S]*'七星海'[\s\S]*'桔井'/, `${relativePath} should include expanded Cambodia presets`);
+  assert.match(source, /country:\s*'菲律宾'[\s\S]*'MOA'[\s\S]*'碧瑶'[\s\S]*'长滩岛'/, `${relativePath} should include expanded Philippines presets`);
+  assert.match(source, /country:\s*'泰国'[\s\S]*'华欣'[\s\S]*'苏梅岛'/, `${relativePath} should include expanded Thailand presets`);
+  assert.match(source, /country:\s*'英国'[\s\S]*'伦敦'/, `${relativePath} should include UK presets`);
+  assert.match(source, /country:\s*'美国'[\s\S]*'洛杉矶'[\s\S]*'纽约'[\s\S]*'旧金山'[\s\S]*'西雅图'/, `${relativePath} should include US presets`);
+  assert.match(source, /country:\s*'澳大利亚'[\s\S]*'悉尼'[\s\S]*'墨尔本'/, `${relativePath} should include Australia presets`);
+  assert.match(source, /country:\s*'葡萄牙'[\s\S]*'里斯本'/, `${relativePath} should include visa and immigration destination presets`);
+  assert.match(source, /country:\s*'希腊'[\s\S]*'雅典'/, `${relativePath} should include Greece presets`);
+  assert.match(source, /country:\s*'马耳他'[\s\S]*'瓦莱塔'/, `${relativePath} should include Malta presets`);
+  assert.match(source, /country:\s*'安提瓜和巴布达'[\s\S]*'圣约翰'/, `${relativePath} should include Caribbean immigration destination presets`);
+  assert.doesNotMatch(source, /\bwords\s*:/, `${relativePath} must not add words aliases to location presets`);
+}
+
+const configSource = fs.readFileSync(path.join(root, 'server/config.service.ts'), 'utf8');
+const crawlDatabaseConfigSource = fs.readFileSync(path.join(root, 'server/services/auto-crawl-database-config.service.ts'), 'utf8');
+const postCreateLocationSource = fs.readFileSync(path.join(root, 'src/features/post-create/postCreateLocation.ts'), 'utf8');
+const categoryMetaServiceSource = fs.readFileSync(path.join(root, 'server/services/category-meta.service.ts'), 'utf8');
+const adminConfigSchemaSource = fs.readFileSync(path.join(root, 'src/features/admin/adminConfigSchema.ts'), 'utf8');
+const postCreatePageSource = fs.readFileSync(path.join(root, 'src/features/post-create/PostCreatePage.tsx'), 'utf8');
+const categoryMetaSchemaSource = fs.readFileSync(path.join(root, 'src/features/category/categoryMetaSchema.ts'), 'utf8');
+const useDataConfigSource = fs.readFileSync(path.join(root, 'src/hooks/useDataConfig.ts'), 'utf8');
+
+assert.doesNotMatch(
+  configSource,
+  /function mergeRequiredLocationPresets|shouldDropLocationCountry|normalizeLocationCountryAlias/,
+  'ConfigService must not merge, remove, or alias persisted location presets',
+);
+assert.match(
+  configSource,
+  /if \(!Array\.isArray\(source\)\) return invalidLocationPresets\('location_presets 必须是数组', strict\)/,
+  'ConfigService must only accept the database location preset array',
+);
+assert.match(
+  configSource,
+  /export function parseLocationPresetsForSave\(raw: unknown\)[\s\S]*parseLocationPresetsDocument\(raw, true\)/,
+  'ConfigService must expose strict location preset validation for admin saves.',
+);
+assert.match(
+  configSource,
+  /if \(strict\) throw new HttpError\(message, 400\)/,
+  'Invalid location preset saves must return a 400 instead of silently clearing presets.',
+);
+assert.match(
+  configSource,
+  /output\[key\] = JSON\.stringify\(parseLocationPresetsForSave\(obj\[key\]\)\)/,
+  'Admin config saves must use strict location preset validation.',
+);
+assert.match(
+  configSource,
+  /export function parseFeedRankProfileForSave\(raw: unknown\)[\s\S]*feed_rank_profile 必须是对象/,
+  'ConfigService must validate feed_rank_profile before admin saves.',
+);
+assert.match(
+  configSource,
+  /output\[key\] = JSON\.stringify\(parseFeedRankProfileForSave\(obj\[key\]\)\)/,
+  'Admin config saves must not persist invalid feed_rank_profile values that runtime will ignore.',
+);
+assert.match(
+  crawlDatabaseConfigSource,
+  /parseLocationPresetsStrict[\s\S]*auto_crawl_database_location_presets_not_array/,
+  'Auto crawl must strictly read location presets from SystemConfig',
+);
+assert.doesNotMatch(
+  crawlDatabaseConfigSource,
+  /DEFAULT_LOCATION_PRESETS|mergeRequiredLocationPresets|normalizeLocationCountryAlias|shouldDropLocationCountry/,
+  'Auto crawl must not use location defaults or compatibility transforms',
+);
+assert.match(
+  postCreateLocationSource,
+  /buildLocationCountryOption[\s\S]*buildLocationOptionsFromPresets[\s\S]*buildLocationCountryOption/,
+  'Post create location options should include country-level choices',
+);
+assert.match(
+  categoryMetaServiceSource,
+  /function buildLocationPresetValueSet[\s\S]*values\.add\(country\)/,
+  'Server location preset validation should accept country-level choices',
+);
+assert.doesNotMatch(
+  adminConfigSchemaSource,
+  /fields\.length\s*===\s*0[\s\S]*return null/,
+  'Admin publish category normalization must allow categories without structured fields',
+);
+assert.match(
+  adminConfigSchemaSource,
+  /normalizePublishCategorySlug\(rawSlug\)/,
+  'Admin publish category normalization must submit canonical categorySlug values.',
+);
+assert.match(
+  adminConfigSchemaSource,
+  /categorySlug,\s*slug:\s*categorySlug/,
+  'Admin publish category normalization must keep categorySlug and slug aligned for backend/public compatibility.',
+);
+assert.match(
+  adminConfigSchemaSource,
+  /schemaVersion/,
+  'Admin publish category normalization must submit schemaVersion for the database schema trigger.',
+);
+assert.match(
+  configSource,
+  /entry\.categorySlug\s*\|\|\s*entry\.slug\s*\|\|\s*entry\.id/,
+  'ConfigService must accept legacy admin category identifiers before canonical save.',
+);
+assert.match(
+  configSource,
+  /normalizePublishCategorySchemaVersion\(entry\.schemaVersion\)/,
+  'ConfigService must normalize missing or malformed publish schema versions before save.',
+);
+assert.match(
+  configSource,
+  /id:\s*categoryBySlug\.get\(schema\.categorySlug\s*\|\|\s*''\)!\.id/,
+  'Admin publish category config responses must include database category id so the binding select can stay selected after save.',
+);
+assert.match(
+  configSource,
+  /'telegram_sync_require_image'/,
+  'ConfigService must persist the admin Telegram image requirement toggle.',
+);
+assert.match(
+  configSource,
+  /BOOLEAN_STRING_TOP_LEVEL_CONFIG_KEYS[\s\S]*telegram_sync_require_image[\s\S]*tron_deposit_scan_enabled/,
+  'ConfigService must normalize boolean-like admin toggles on read and save so button state echoes reliably.',
+);
+assert.match(
+  adminConfigSchemaSource,
+  /categorySlug,\s*slug:\s*categorySlug/,
+  'Admin publish category normalization must keep categorySlug and slug aligned for backend/public compatibility.',
+);
+
+const adminSystemConfigSectionsSource = fs.readFileSync(path.join(root, 'src/features/admin/AdminSystemConfigSections.tsx'), 'utf8');
+const adminSystemConfigEditorSource = fs.readFileSync(path.join(root, 'src/features/admin/useAdminSystemConfigEditor.ts'), 'utf8');
+const adminPageSource = fs.readFileSync(path.join(root, 'src/features/admin/AdminPage.tsx'), 'utf8');
+const configRoutesSource = fs.readFileSync(path.join(root, 'server/routes/config.routes.ts'), 'utf8');
+assert.match(
+  adminSystemConfigSectionsSource,
+  /hasCategoryOverride\s*&&\s*Number\.isFinite\(current\)\s*\?\s*current\s*:\s*fallback/,
+  'Admin category price overrides must echo zero values instead of falling back to the global price.',
+);
+assert.match(
+  adminSystemConfigSectionsSource,
+  /const selectedCategorySlug = category\.categorySlug \|\| category\.slug \|\| ''/,
+  'Admin publish category binding select must use slug/categorySlug as the stable selected value.',
+);
+assert.match(
+  adminSystemConfigSectionsSource,
+  /value=\{selectedCategoryValue\}/,
+  'Admin publish category binding select must not use database UUID as the option value.',
+);
+assert.match(
+  adminSystemConfigSectionsSource,
+  /<option key=\{item\.id\} value=\{item\.slug \|\| item\.id\}>/,
+  'Admin publish category binding options must use slug first because public category ids may be slugs.',
+);
+assert.match(
+  adminSystemConfigSectionsSource,
+  /\{\s*id:\s*matched\.id,\s*categorySlug:\s*matched\.slug,\s*slug:\s*matched\.slug,\s*name:\s*matched\.name\s*\}/,
+  'Admin publish category binding must write categorySlug, slug, and id together when selecting an existing category.',
+);
+assert.match(
+  configRoutesSource,
+  /category_options:\s*databaseCategories/,
+  'Admin config responses must include database category options for backend publish category binding.',
+);
+assert.match(
+  configRoutesSource,
+  /publish_category_schema:\s*configs\.publish_category_schema/,
+  'Admin config responses must return database-normalized publish category schema instead of public category display names.',
+);
+assert.match(
+  adminSystemConfigSectionsSource,
+  /绑定数据库分类/,
+  'Admin publish category binding label must make the database source explicit.',
+);
+assert.match(
+  adminSystemConfigSectionsSource,
+  /readOnly/,
+  'Admin publish category display name must be read-only because backend names come from the database Category row.',
+);
+assert.doesNotMatch(
+  adminPageSource,
+  /useCategories|@\/hooks\/useData/,
+  'Admin page must not use public categories for backend editing/filtering surfaces.',
+);
+assert.match(
+  adminPageSource,
+  /categories=\{databaseCategoryOptions\}/,
+  'Admin system config and data panels must receive database category options.',
+);
+assert.match(
+  adminSystemConfigEditorSource,
+  /function makeUniquePublishField[\s\S]*field_\$\{index\}[\s\S]*label:\s*`字段 \$\{index\}`/,
+  'Admin publish category add field must create an immediately valid unique field instead of a blank no-op template.',
+);
+assert.match(
+  adminSystemConfigEditorSource,
+  /function nextSchemaVersion[\s\S]*schemaVersion[\s\S]*\+\s*1/,
+  'Admin publish category field changes must bump schemaVersion so saved field changes are explicit.',
+);
+assert.match(
+  adminSystemConfigEditorSource,
+  /updatePublishCategoryField[\s\S]*category\.schemaVersion = nextSchemaVersion\(category\)/,
+  'Admin publish category field edits must bump schemaVersion.',
+);
+assert.match(
+  adminSystemConfigEditorSource,
+  /addPublishCategoryField[\s\S]*makeUniquePublishField\(category\.fields \|\| \[\]\)[\s\S]*category\.schemaVersion = nextSchemaVersion\(category\)/,
+  'Admin publish category add field must create a valid field and bump schemaVersion.',
+);
+assert.match(
+  adminSystemConfigEditorSource,
+  /updatePublishCategorySchema[\s\S]*prev\?\.publish_category_schema/,
+  'Admin publish category edits must use the latest localConfig state so continuous typing does not lose characters.',
+);
+assert.match(
+  adminSystemConfigSectionsSource,
+  /options:\s*e\.target\.value\.split\('\\n'\)/,
+  'Admin publish category select options textarea must preserve newlines while editing.',
+);
+assert.doesNotMatch(
+  adminConfigSchemaSource,
+  /normalizedOptions[\s\S]{0,120}\.filter\(Boolean\)/,
+  'Admin publish category select options must not drop blank lines while the textarea is being edited.',
+);
+assert.match(
+  useDataConfigSource,
+  /alwaysFresh[\s\S]*staleTime:\s*options\.alwaysFresh\s*\?\s*0\s*:\s*CONFIG_STALE_TIME/,
+  'Post create must be able to bypass stale public config after admin publish category field changes.',
+);
+assert.match(
+  postCreatePageSource,
+  /useConfig\(true,\s*\{\s*alwaysFresh:\s*true\s*\}\)/,
+  'Post create must always refetch public config so newly saved publish category fields become available.',
+);
+assert.match(
+  categoryMetaSchemaSource,
+  /isSameCategoryRef\(item\.id,\s*categoryId\)[\s\S]*isSameCategoryRef\(item\.slug,\s*categoryId\)[\s\S]*isSameCategoryRef\(item\.name,\s*categoryId\)/,
+  'Post create category schema matching must accept id, slug, and name refs from public categories.',
+);
+assert.match(
+  categoryMetaSchemaSource,
+  /\[schema\.categorySlug,\s*schema\.slug,\s*schema\.id,\s*schema\.name\][\s\S]*isSameCategoryRef\(ref,\s*selectedCategory\.slug\)[\s\S]*isSameCategoryRef\(ref,\s*selectedCategory\.id\)/,
+  'Post create category schema matching must compare all saved schema refs against selected category refs.',
+);
+
+console.log('[location-presets-guards] passed');

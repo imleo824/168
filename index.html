@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>168 - 信息社交平台</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="application-name" content="TuiTui" />
+    <meta name="apple-mobile-web-app-title" content="TuiTui" />
+    <meta name="description" content="推推是圈内最大的匿名社交分类信息网，聚合新闻快讯、招聘求职、推广招商、商务合作、资源对接、房屋租赁、证件护照、保关捞人等全场景高价值内容，帮助用户更快找到信息和合作机会。" />
+    <meta name="keywords" content="推推,匿名社交,分类信息网,新闻快讯,招聘求职,推广招商,资源合作,商务合作,房屋租赁,证件护照,保关捞人,圈内信息,本地服务,圈内社群,分类信息平台" />
+    <meta property="og:site_name" content="TuiTui" />
+    <meta property="og:title" content="推推｜圈内最大的匿名社交分类信息网" />
+    <meta property="og:description" content="聚合新闻快讯、招聘求职、推广招商、商务合作、房屋租赁、证件护照等高质量分类信息，支持快速发布和高效对接。" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="https://168-production.up.railway.app/share-fallback.png?v=20260701-pwa-icon-2" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="推推｜圈内事 · 发推推" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="推推｜圈内最大的匿名社交分类信息网" />
+    <meta name="twitter:description" content="聚合新闻快讯、招聘求职、推广招商、商务合作、房屋租赁、证件护照等分类信息，内容更新快、交易信息更透明。" />
+    <meta name="twitter:image" content="https://168-production.up.railway.app/share-fallback.png?v=20260701-pwa-icon-2" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <link rel="manifest" href="/manifest.webmanifest?v=20260701-pwa-icon-2" />
+    <link rel="icon" href="/favicon-32.png?v=20260701-pwa-icon-2" type="image/png" sizes="32x32" />
+    <link rel="icon" href="/icon-192.png?v=20260701-pwa-icon-2" type="image/png" sizes="192x192" />
+    <link rel="icon" href="/icon-512.png?v=20260701-pwa-icon-2" type="image/png" sizes="512x512" />
+    <link rel="icon" href="/icon.png?v=20260701-pwa-icon-2" type="image/png" sizes="512x512" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=20260701-pwa-icon-2" />
+    <link rel="apple-touch-icon-precomposed" sizes="180x180" href="/apple-touch-icon.png?v=20260701-pwa-icon-2" />
+    <link rel="shortcut icon" href="/icon.png?v=20260701-pwa-icon-2" />
+    <link rel="canonical" href="https://168-production.up.railway.app/" />
+    <meta name="robots" content="index,follow,max-image-preview:large" />
+    <meta name="msapplication-TileColor" content="#ffffff" />
+    <meta name="msapplication-TileImage" content="/icon-192.png?v=20260701-pwa-icon-2" />
+    <link rel="dns-prefetch" href="//api.dicebear.com" />
+    <link rel="preconnect" href="https://api.dicebear.com" crossorigin />
+    <link rel="dns-prefetch" href="//images.unsplash.com" />
+    <link rel="preconnect" href="https://images.unsplash.com" crossorigin />
+    <style>
+      :root {
+        color-scheme: light;
+        --initial-unit: 4px;
+        --initial-space-quarter: calc(var(--initial-unit) / 4);
+        --initial-space-half: calc(var(--initial-unit) / 2);
+        --initial-space-1: var(--initial-unit);
+        --initial-space-2: calc(var(--initial-unit) * 2);
+        --initial-space-3: calc(var(--initial-unit) * 3);
+        --initial-space-4: calc(var(--initial-unit) * 4);
+        --initial-space-5: calc(var(--initial-unit) * 5);
+        --initial-space-6: calc(var(--initial-unit) * 6);
+        --initial-space-7: calc(var(--initial-unit) * 7);
+        --initial-space-8: calc(var(--initial-unit) * 8);
+        --initial-vh: 100dvh;
+        --initial-safe-top: env(safe-area-inset-top);
+        --initial-safe-bottom: env(safe-area-inset-bottom);
+        --initial-hairline: calc(var(--initial-unit) / 4);
+        --initial-page-padding-x: var(--initial-space-4);
+        --initial-topbar-edge-padding-x: calc(var(--initial-space-2) + var(--initial-space-half));
+        --initial-feed-padding-x: var(--initial-space-3);
+        --initial-control-xs: var(--initial-space-7);
+        --initial-control-sm: calc(var(--initial-space-4) * 2);
+        --initial-control-md: calc(var(--initial-space-5) * 2);
+        --initial-control-lg: calc(var(--initial-space-8) + var(--initial-space-3));
+        --initial-topbar-height: calc(var(--initial-space-8) + var(--initial-space-3));
+        --initial-shell-max: min(100%, calc(var(--initial-control-sm) * 19 + var(--initial-space-4)));
+        --initial-feed-avatar-size: calc(var(--initial-control-sm) + var(--initial-space-1));
+        --initial-feed-column-gap: var(--initial-space-3);
+        --initial-radius-sm: var(--initial-space-1);
+        --initial-radius-md: var(--initial-space-2);
+        --initial-radius-pill: 999px;
+        --initial-profile-size: var(--initial-control-sm);
+        --initial-online-badge-min-width: calc(var(--initial-space-8) * 2);
+        --initial-online-dot-size: var(--initial-space-1);
+        --initial-online-count-width: calc(var(--initial-space-6) + var(--initial-space-2));
+        --initial-online-count-height: var(--initial-space-2);
+        --initial-topic-tab-height: var(--initial-control-sm);
+        --initial-topic-tab-width: clamp(calc(var(--initial-space-8) + var(--initial-space-1)), 13vw, calc(var(--initial-space-8) + var(--initial-space-7)));
+        --initial-topic-shell-padding-y: var(--initial-space-half);
+        --initial-bottom-nav-height: calc(var(--initial-control-sm) + var(--initial-space-5));
+        --initial-bottom-nav-icon-size: calc(var(--initial-space-5) + var(--initial-space-half));
+        --initial-chip-height: calc(var(--initial-space-5) + var(--initial-space-half));
+        --initial-action-dot-size: calc(var(--initial-space-4) + var(--initial-space-half));
+        --initial-footer-row-height: calc(var(--initial-action-dot-size) + var(--initial-space-half));
+        --initial-footer-padding-top: calc(var(--initial-space-1) + var(--initial-space-quarter));
+        --initial-author-name-height: calc(var(--initial-space-4) + var(--initial-space-half));
+        --initial-author-time-height: calc(var(--initial-space-3) + var(--initial-space-half));
+        --initial-line-copy-height: calc(var(--initial-space-5) + var(--initial-space-half));
+        --initial-body-to-media-gap: calc(var(--initial-space-3) + var(--initial-space-quarter));
+        --initial-media-height: min(calc(var(--initial-space-8) * 5), 34vw);
+        --initial-copy-primary-width: 92%;
+        --initial-copy-secondary-width: 68%;
+        --initial-surface-page: var(--ui-surface-page, Canvas);
+        --initial-surface-card: var(--ui-surface-card-solid, Canvas);
+        --initial-surface-muted: var(--ui-surface-muted, color-mix(in srgb, CanvasText 7%, Canvas));
+        --initial-surface-soft: var(--ui-surface-soft, color-mix(in srgb, CanvasText 4%, Canvas));
+        --initial-border: var(--ui-line-hairline, color-mix(in srgb, CanvasText 6%, Canvas));
+        --initial-online-dot: var(--ui-online-dot, color-mix(in srgb, CanvasText 68%, Canvas));
+        --initial-text: var(--ui-text-primary, CanvasText);
+        background: var(--initial-surface-page);
+      }
+
+      body {
+        margin: 0;
+        min-height: var(--initial-vh);
+        background: var(--initial-surface-page);
+        color: var(--initial-text);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      .initial-home-shell {
+        min-height: var(--initial-vh);
+        box-sizing: border-box;
+        background: var(--initial-surface-page);
+        padding-bottom: calc(var(--initial-bottom-nav-height) + var(--initial-safe-bottom) + var(--initial-space-4));
+      }
+
+      .initial-home-topbar {
+        box-sizing: border-box;
+        width: 100%;
+        min-height: calc(var(--initial-topbar-height) + var(--initial-safe-top));
+        padding-top: var(--initial-safe-top);
+        border: 0;
+        background: var(--initial-surface-card);
+      }
+
+      .initial-home-topbar-shell {
+        box-sizing: border-box;
+        width: 100%;
+        max-width: var(--initial-shell-max);
+        margin: 0 auto;
+      }
+
+      .initial-home-topbar-inner {
+        display: grid;
+        box-sizing: border-box;
+        width: 100%;
+        min-width: 0;
+        height: var(--initial-topbar-height);
+        min-height: var(--initial-topbar-height);
+        grid-template-columns: minmax(0, 1fr) minmax(0, auto) minmax(0, 1fr);
+        align-items: center;
+        gap: var(--initial-space-2);
+        padding: 0 var(--initial-page-padding-x);
+      }
+
+      .initial-home-leading-slot,
+      .initial-home-action-slot,
+      .initial-home-leading-placeholder {
+        display: inline-flex;
+        height: var(--initial-control-lg);
+        min-height: var(--initial-control-lg);
+        align-items: center;
+      }
+
+      .initial-home-leading-slot {
+        min-width: 0;
+        justify-content: flex-start;
+        justify-self: start;
+      }
+
+      .initial-home-leading-placeholder {
+        width: var(--initial-control-lg);
+        min-width: var(--initial-control-lg);
+        flex: 0 0 var(--initial-control-lg);
+      }
+
+      .initial-home-profile-skeleton {
+        position: relative;
+        width: var(--initial-profile-size);
+        height: var(--initial-profile-size);
+        min-width: var(--initial-profile-size);
+        min-height: var(--initial-profile-size);
+        flex: 0 0 var(--initial-profile-size);
+        overflow: hidden;
+        border-radius: var(--initial-radius-pill);
+        background: var(--initial-surface-muted);
+      }
+
+      .initial-home-action-slot {
+        min-width: 0;
+        justify-content: flex-end;
+        justify-self: end;
+      }
+
+      .initial-home-online-badge {
+        display: inline-flex;
+        width: auto;
+        min-width: var(--initial-online-badge-min-width);
+        height: var(--initial-profile-size);
+        min-height: var(--initial-profile-size);
+        align-items: center;
+        justify-content: center;
+        gap: var(--initial-space-1);
+      }
+
+      .initial-home-online-dot {
+        content: "";
+        width: var(--initial-online-dot-size);
+        height: var(--initial-online-dot-size);
+        flex: 0 0 var(--initial-online-dot-size);
+        border-radius: var(--initial-radius-pill);
+        background: var(--initial-online-dot);
+      }
+
+      .initial-home-online-count {
+        width: var(--initial-online-count-width);
+        height: var(--initial-online-count-height);
+        border-radius: var(--initial-radius-pill);
+        background: var(--initial-surface-muted);
+      }
+
+      .initial-home-brand {
+        display: inline-flex;
+        min-width: 0;
+        max-width: min(58vw, calc(var(--initial-space-8) * 8 + var(--initial-space-1)));
+        height: var(--initial-topbar-height);
+        min-height: var(--initial-topbar-height);
+        align-items: center;
+        justify-content: center;
+      }
+
+      .initial-home-topic-shell {
+        width: 100%;
+        max-width: var(--initial-shell-max);
+        margin: 0 auto;
+        background: var(--initial-surface-card);
+        border-top: var(--initial-hairline) solid var(--initial-border);
+      }
+
+      .initial-home-topic-tabs {
+        display: flex;
+        min-width: 0;
+        gap: var(--initial-space-2);
+        overflow: hidden;
+        padding: var(--initial-topic-shell-padding-y) var(--initial-page-padding-x);
+      }
+
+      .initial-home-topic-tab {
+        width: var(--initial-topic-tab-width);
+        height: var(--initial-topic-tab-height);
+        min-width: var(--initial-topic-tab-width);
+        border-radius: var(--initial-radius-pill);
+        background: var(--initial-surface-muted);
+      }
+
+      .initial-home-feed {
+        display: grid;
+        width: 100%;
+        max-width: var(--initial-shell-max);
+        box-sizing: border-box;
+        margin: 0 auto;
+        gap: 0;
+      }
+
+      .initial-post-card {
+        display: grid;
+        grid-template-columns: var(--initial-feed-avatar-size) minmax(0, 1fr);
+        column-gap: var(--initial-feed-column-gap);
+        padding: var(--initial-space-3) var(--initial-page-padding-x);
+        border-bottom: var(--initial-hairline) solid var(--initial-border);
+        background: var(--initial-surface-card);
+      }
+
+      .initial-post-avatar,
+      .initial-line,
+      .initial-post-media,
+      .initial-action-dot {
+        position: relative;
+        overflow: hidden;
+        background: var(--initial-surface-muted);
+      }
+
+      .initial-post-avatar::after,
+      .initial-line::after,
+      .initial-post-media::after,
+      .initial-action-dot::after,
+      .initial-home-profile-skeleton::after,
+      .initial-home-online-count::after,
+      .initial-home-topic-tab::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        transform: translateX(-100%);
+        background: linear-gradient(90deg, transparent, color-mix(in srgb, Canvas 46%, transparent), transparent);
+        animation: initial-skeleton 1.2s ease-in-out infinite;
+      }
+
+      .initial-post-avatar {
+        width: var(--initial-feed-avatar-size);
+        height: var(--initial-feed-avatar-size);
+        border-radius: var(--initial-radius-pill);
+      }
+
+      .initial-post-copy {
+        display: grid;
+        min-width: 0;
+        gap: var(--initial-space-2);
+      }
+
+      .initial-line {
+        height: var(--initial-line-copy-height);
+        border-radius: var(--initial-radius-pill);
+      }
+
+      .initial-line--name {
+        width: 40%;
+        height: var(--initial-author-name-height);
+      }
+
+      .initial-line--time {
+        width: 24%;
+        height: var(--initial-author-time-height);
+      }
+
+      .initial-line--primary {
+        width: var(--initial-copy-primary-width);
+        margin-top: var(--initial-space-1);
+      }
+
+      .initial-line--secondary {
+        width: var(--initial-copy-secondary-width);
+      }
+
+      .initial-post-actions {
+        display: flex;
+        gap: var(--initial-space-8);
+        padding-top: var(--initial-footer-padding-top);
+      }
+
+      .initial-post-media {
+        width: 100%;
+        height: var(--initial-media-height);
+        margin-top: var(--initial-body-to-media-gap);
+        border-radius: var(--initial-radius-md);
+        background: var(--initial-surface-soft);
+      }
+
+      .initial-action-dot {
+        width: var(--initial-action-dot-size);
+        height: var(--initial-action-dot-size);
+        border-radius: var(--initial-radius-pill);
+      }
+
+      @keyframes initial-skeleton {
+        100% {
+          transform: translateX(100%);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root">
+      <div class="initial-home-shell" aria-hidden="true">
+        <div class="initial-home-topbar home-topbar ui-topbar ui-topbar--home">
+          <div class="initial-home-topbar-shell">
+            <div class="initial-home-topbar-inner ui-topbar-inner ui-topbar-inner--center-title">
+              <div class="initial-home-leading-placeholder ui-topbar-leading-placeholder">
+                <span class="initial-home-profile-skeleton"></span>
+              </div>
+              <div class="initial-home-brand"></div>
+              <div class="initial-home-action-slot">
+                <span class="initial-home-online-badge">
+                  <span class="initial-home-online-dot"></span>
+                  <span class="initial-home-online-count"></span>
+                </span>
+              </div>
+            </div>
+            <div class="initial-home-topic-shell">
+              <div class="initial-home-topic-tabs">
+                <span class="initial-home-topic-tab"></span>
+                <span class="initial-home-topic-tab initial-home-topic-tab--active"></span>
+                <span class="initial-home-topic-tab"></span>
+                <span class="initial-home-topic-tab"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <main class="initial-home-feed">
+          <article class="initial-post-card">
+            <span class="initial-post-avatar"></span>
+            <div class="initial-post-copy">
+              <span class="initial-line initial-line--name"></span>
+              <span class="initial-line initial-line--time"></span>
+              <span class="initial-line initial-line--primary"></span>
+              <span class="initial-line initial-line--secondary"></span>
+              <span class="initial-post-media"></span>
+              <div class="initial-post-actions">
+                <span class="initial-action-dot"></span>
+                <span class="initial-action-dot"></span>
+                <span class="initial-action-dot"></span>
+              </div>
+            </div>
+          </article>
+          <article class="initial-post-card">
+            <span class="initial-post-avatar"></span>
+            <div class="initial-post-copy">
+              <span class="initial-line initial-line--name"></span>
+              <span class="initial-line initial-line--time"></span>
+              <span class="initial-line initial-line--primary"></span>
+              <span class="initial-line initial-line--secondary"></span>
+              <span class="initial-post-media"></span>
+              <div class="initial-post-actions">
+                <span class="initial-action-dot"></span>
+                <span class="initial-action-dot"></span>
+                <span class="initial-action-dot"></span>
+              </div>
+            </div>
+          </article>
+          <article class="initial-post-card">
+            <span class="initial-post-avatar"></span>
+            <div class="initial-post-copy">
+              <span class="initial-line initial-line--name"></span>
+              <span class="initial-line initial-line--time"></span>
+              <span class="initial-line initial-line--primary"></span>
+              <span class="initial-line initial-line--secondary"></span>
+              <span class="initial-post-media"></span>
+              <div class="initial-post-actions">
+                <span class="initial-action-dot"></span>
+                <span class="initial-action-dot"></span>
+                <span class="initial-action-dot"></span>
+              </div>
+            </div>
+          </article>
+          <article class="initial-post-card">
+            <span class="initial-post-avatar"></span>
+            <div class="initial-post-copy">
+              <span class="initial-line initial-line--name"></span>
+              <span class="initial-line initial-line--time"></span>
+              <span class="initial-line initial-line--primary"></span>
+              <span class="initial-line initial-line--secondary"></span>
+              <span class="initial-post-media"></span>
+              <div class="initial-post-actions">
+                <span class="initial-action-dot"></span>
+                <span class="initial-action-dot"></span>
+                <span class="initial-action-dot"></span>
+              </div>
+            </div>
+          </article>
+        </main>
+      </div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

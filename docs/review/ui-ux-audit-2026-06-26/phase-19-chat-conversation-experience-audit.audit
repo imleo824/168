@@ -1,0 +1,436 @@
+# UI/UE 深度审计 Phase 19 - 聊天页对话体验专项审计
+
+日期: 2026-06-26
+
+目标: 补齐 `/chat` 聊天页的像素级和体验合同审计。此阶段关注对话流、消息气泡、回复引用、帖子预览、输入区、规则弹层、连接状态、键盘和安全区。判断标准对齐 X/Threads 的低噪声会话体验，以及 Apple 式的稳定输入和清晰状态反馈。
+
+## 本阶段读取证据
+
+页面与组件:
+
+- `src/pages/Chat.tsx`
+- `src/features/chat/ChatPage.tsx`
+- `src/features/chat/useChatLive.ts`
+
+样式:
+
+- `src/styles/features/chat.css`
+- `src/styles/features/chat-tokens.css`
+- `src/styles/features/chat-shell.css`
+- `src/styles/features/chat-stream.css`
+- `src/styles/features/chat-messages.css`
+- `src/styles/features/chat-post-preview.css`
+- `src/styles/features/chat-composer.css`
+- `src/styles/features/chat-rules.css`
+
+静态计数:
+
+- Chat TSX/CSS utility-risk matches: 32。
+
+本阶段发现的局部值:
+
+- `--chat-mobile-bottom-clearance: 0px`
+- `--chat-keyboard-inset: var(--ui-keyboard-inset, 0px)`
+- `chat-loading-spin 0.8s`
+- composer shadow `0 -10px 24px`
+- `CHAT_POST_SINGLE_IMAGE_SIZES = '(max-width: 48rem) 82vw, 20rem'`
+- `CHAT_POST_GRID_IMAGE_SIZES = '(max-width: 48rem) 38vw, 9.375rem'`
+- `CHAT_REPLY_THUMB_SIZES = '2.5rem'`
+- reply submission recovery timer `15_000`
+
+证据边界:
+
+- 本阶段为静态审计，没有运行浏览器交互验证。
+- 没有重新截图，因此不声称完成可访问性或键盘动态验证。
+
+## 总体判断
+
+聊天页整体架构比 Admin 干净，已经有明显的 Chat 子系统合同。
+
+正向基础:
+
+- `ChatPage.tsx` 拆出了 `ChatAvatar`、`ChatSystemCard`、`ChatMessageMeta`、`ChatReplyQuote`、`ChatPostImagePreview`、`ChatMessageRow`。
+- 样式按 `chat-shell`、`chat-stream`、`chat-messages`、`chat-post-preview`、`chat-composer`、`chat-rules` 分层。
+- 移动端使用固定视口和 `--chat-keyboard-inset`，已经考虑键盘与底部导航。
+- 消息流、历史加载、空态、回复上下文、帖子图片预览、规则 sheet 都有语义类。
+- 自己消息和他人消息通过 `.chat-message-row--own` 区分，没有大量页面 utility。
+
+主要风险:
+
+- 连接状态 `connecting/open/closed` 没有清晰视觉反馈，用户只会看到输入不可发或 toast。
+- 输入 textarea 固定高度且 `overflow-y: hidden`，长草稿没有自增长或内部滚动策略。
+- 规则弹层是自建 portal dialog，但没有看到 Escape、焦点管理、焦点返回等完整合同。
+- Chat 图片预览尺寸和 reply 缩略图尺寸仍在 TSX 常量中，不完全符合不硬编码要求。
+- `ChatAvatar` 没有复用 `AvatarImage`，头像 fallback 和全站头像系统会分叉。
+
+## P0: 连接状态需要显性反馈
+
+证据:
+
+`useChatLive.ts` 定义:
+
+```text
+ConnectionState = 'connecting' | 'open' | 'closed'
+```
+
+`ChatPage.tsx` 中:
+
+```text
+const canSend = Boolean(user && eligibility?.canSend && connectionState === 'open')
+```
+
+问题:
+
+连接状态只影响是否能发送，没有在 header、composer 或 stream 中给用户明确状态。
+
+影响:
+
+- WebSocket 重连时，用户可能不知道是自己没资格、没登录、网络断了，还是聊天室不可用。
+- 输入区 disabled/readOnly 的原因不够清晰。
+- 发送失败 toast 是事后反馈，不是状态反馈。
+
+建议:
+
+新增 ChatConnectionState 合同:
+
+```text
+state: connecting | open | closed
+label: 连接中 | 已连接 | 正在重连
+placement: header | composer
+tone: neutral | success | warning
+```
+
+验收:
+
+- `connecting`: header 或 composer 显示“连接中”，发送按钮不可用。
+- `closed`: 显示“正在重连”或“连接恢复后可发送”。
+- `open`: 不需要高噪声提示，可只保持正常状态。
+- 连接状态文案和发送失败 toast 不矛盾。
+
+## P0: 输入区需要真正的 Composer Contract
+
+证据:
+
+`chat-composer.css` 中:
+
+```text
+.chat-input-row textarea {
+  min-height: var(--chat-composer-control-height);
+  height: var(--chat-composer-control-height);
+  max-height: calc(var(--ui-control-lg) * 3);
+  resize: none;
+  overflow-y: hidden;
+}
+```
+
+问题:
+
+textarea 有 `max-height`，但当前没有看到自增长逻辑。长草稿会被固定高度隐藏，用户很难编辑多行内容。
+
+影响:
+
+- 聊天输入的可控感降低。
+- 长文本和回复场景下，用户可能看不到自己正在编辑的完整内容。
+- iOS 键盘打开时，固定高度加 `preventDefault` 更容易产生“输入区像被锁住”的体感。
+
+建议:
+
+建立 ChatComposer Contract:
+
+```text
+minRows: 1
+maxRows: 3
+state: idle | focused | disabled | sending | reconnecting
+replyContext: none | active
+counter: hidden | warning | max
+```
+
+验收:
+
+- 输入 1 行时保持紧凑。
+- 输入 2-3 行时 textarea 自增长。
+- 超过 maxRows 后内部滚动，而不是文字消失。
+- disabled/readOnly 原因必须可见或可被辅助技术读到。
+
+## P0: 规则弹层需要完整 Dialog 可访问合同
+
+证据:
+
+`ChatPage.tsx` 使用 `createPortal` 渲染:
+
+```text
+role="dialog"
+aria-modal="true"
+aria-labelledby="chat-rules-title"
+```
+
+关闭方式:
+
+- 点击 overlay。
+- 点击关闭按钮。
+
+未看到:
+
+- Escape 关闭。
+- 初始焦点落点。
+- 焦点 trap。
+- 关闭后焦点返回规则按钮。
+
+问题:
+
+视觉上是 bottom sheet，但交互上还不是完整 dialog。
+
+影响:
+
+- 键盘用户进入弹层后可能迷路。
+- 移动端读屏用户可能无法清晰退出。
+- 与全站 BottomSheet/Dialog 系统不一致。
+
+建议:
+
+复用或对齐现有 BottomSheet/Dialog 合同:
+
+```text
+ChatRulesSheet
+open
+onClose
+initialFocus="close"
+returnFocusRef
+closeOnEscape
+trapFocus
+```
+
+验收:
+
+- 打开规则后焦点进入 sheet。
+- Escape 可以关闭。
+- Tab 不逃出弹层。
+- 关闭后焦点回到规则按钮。
+
+## P0: 消息图片尺寸仍在 TSX 常量中
+
+证据:
+
+`ChatPage.tsx`:
+
+```text
+CHAT_POST_SINGLE_IMAGE_SIZES = '(max-width: 48rem) 82vw, 20rem'
+CHAT_POST_GRID_IMAGE_SIZES = '(max-width: 48rem) 38vw, 9.375rem'
+CHAT_REPLY_THUMB_SIZES = '2.5rem'
+```
+
+问题:
+
+这些是视觉尺寸策略，不应该散落在 TSX 常量里。它们属于 Chat media token 或 Image sizes contract。
+
+影响:
+
+- Chat 内帖子预览和全站 `PostMediaGrid` 会形成两套媒体尺寸策略。
+- 后续改布局时必须同时改 TSX 和 CSS。
+- 不利于证明“不硬编码”。
+
+建议:
+
+将尺寸迁移到 token 或 media helper:
+
+```text
+--chat-post-single-image-sizes
+--chat-post-grid-image-sizes
+--chat-reply-thumb-sizes
+```
+
+或通过 `getResponsiveImageSizes('chatPostSingle')` 一类函数统一。
+
+验收:
+
+- ChatPage 不再直接写 rem/vw sizes 字符串。
+- Chat 图片预览、帖子卡片媒体、lightbox 预览使用统一 image sizes 策略。
+
+## P1: ChatAvatar 应与全站 AvatarImage 收敛
+
+证据:
+
+`ChatAvatar` 当前:
+
+- 有头像时直接 `<img className="chat-message-avatar-image">`。
+- 无头像时使用 `.chat-message-avatar-fallback` 显示 initials。
+
+问题:
+
+全站已有 `AvatarImage`，包含 URL 规范化、优化图、失败 fallback、首字母策略。Chat 独立实现会造成头像失败、匿名用户、机器人用户的视觉分叉。
+
+建议:
+
+让 `ChatAvatar` 使用 `AvatarImage`，并新增 tone/size:
+
+```text
+size="chat"
+tone="user | system | anonymous | robot"
+```
+
+验收:
+
+- 聊天头像失败时 fallback 与全站一致。
+- 系统消息不需要头像时保持 system card。
+- 普通用户头像、匿名用户头像、机器人头像有明确差异。
+
+## P1: 消息气泡视觉可以更低噪声
+
+证据:
+
+`.chat-message-body` 使用:
+
+- border。
+- card background。
+- `box-shadow: var(--ui-shadow-card)`。
+
+自己消息使用:
+
+- brand 12% 混合背景。
+- brand 22% 边框。
+
+判断:
+
+当前视觉清晰，但如果追求 Threads 式克制，阴影可能略重。聊天页的层级更适合通过气泡方向、背景轻差、作者 meta 和时间表达，而不是 card shadow。
+
+建议:
+
+气泡 depth 分级:
+
+```text
+incoming: surface, no shadow or hairline only
+outgoing: accent-soft, no shadow
+post-preview: media surface, hairline
+system: muted pill/card, lower emphasis
+```
+
+验收:
+
+- 普通文字气泡不使用重 card shadow。
+- 帖子预览可以有更明确边界，但不抢消息正文。
+- 空态可以比消息气泡更有装饰，但不能像营销卡片。
+
+## P1: 回复引用层级需要更清楚
+
+证据:
+
+`ChatReplyQuote` 同时用于:
+
+- 消息内引用。
+- composer 上方的 reply context。
+
+通过 `context` prop 改变文案。
+
+问题:
+
+同一个组件承担“历史消息中的引用”和“正在编辑的回复对象”，这是对的。但两者的视觉权重应该有明确分级。
+
+建议:
+
+新增:
+
+```text
+data-reply-placement="message | composer"
+```
+
+验收:
+
+- 消息内引用更轻，不抢正文。
+- composer reply context 更明确，有可取消动作。
+- 缩略图、作者名、预览文本三者在窄屏不重叠。
+
+## P1: 空态和历史加载应纳入 State Contract
+
+证据:
+
+- `.chat-empty-state` 自定义空态卡片。
+- `.chat-history-button` 自定义历史加载按钮。
+- `.chat-stream-loading` 自定义 spinner。
+
+问题:
+
+全站已有 Phase 12/13 的 `UIStateBlock` 和状态合同方向。Chat 当前状态视觉是独立实现，可能与首页、发布页、Profile 状态分叉。
+
+建议:
+
+短期保留 Chat 风格，但对齐 state placement:
+
+```text
+placement="chat-stream"
+density="regular | compact"
+tone="empty | loading | error | reconnecting"
+```
+
+验收:
+
+- 空态不是独立孤岛，能继承全站状态 spacing 和 tone。
+- loading spinner 支持 `prefers-reduced-motion`。
+- 历史加载按钮和 ListLoadMoreState 的语气一致。
+
+## P2: Token 与局部值清理
+
+需要清理:
+
+- `chat-loading-spin 0.8s` 应改用 `--ui-duration-*` 或 `--chat-loading-spin-duration`。
+- composer shadow `0 -10px 24px` 应 token 化为 `--chat-composer-shadow`。
+- `--chat-mobile-bottom-clearance: 0px` 如果是语义值，应保留但加说明；否则合并到布局 token。
+- `15_000` 是回复失败恢复逻辑，不是视觉像素，但可命名为 `CHAT_REPLY_RECOVERY_MS`。
+
+## Benchmark 映射
+
+Threads:
+
+- 聊天流应安静、轻、顺滑，不靠重卡片堆叠。
+- 回复引用应该是上下文，不是主内容。
+
+X:
+
+- 历史加载、在线人数、规则入口不能抢消息流主角。
+- 消息、帖子预览和作者身份要可快速扫过。
+
+Instagram:
+
+- 聊天中的图片预览应保持清晰比例和轻边界。
+- 媒体缩略图失败不能破坏气泡节奏。
+
+Apple:
+
+- 输入区状态必须可预期。
+- 键盘、安全区、焦点和弹层都要稳定。
+- 连接状态不能只靠失败后 toast。
+
+## 动态验证门禁
+
+后续要证明聊天页完成，需要补这些场景:
+
+1. 未登录进入聊天页。
+2. 已登录但无发言资格。
+3. 连接中、连接断开、重连成功。
+4. 空聊天室。
+5. 普通文字消息、自己消息、他人消息、系统消息。
+6. 回复他人消息、取消回复、回复发送失败恢复。
+7. 带图片帖子消息，1 张、2-4 张、超过 4 张。
+8. 规则弹层键盘打开、Escape 关闭、焦点返回。
+9. iOS/Android 键盘打开后输入区不跳、不挡、不造成页面滚动穿透。
+10. 长消息、长昵称、长回复预览、长在线人数文案。
+11. prefers-reduced-motion 下 loading spinner 和输入聚焦不造成多余运动。
+
+建议命令:
+
+```text
+npm run test:goal-168-ui
+npm run lint:ui-hardcoding
+```
+
+说明: 本阶段未运行这些命令；它们是后续验收门禁，不是本阶段完成证据。
+
+## 结论
+
+聊天页已经有比较成熟的语义分层，属于全站里相对健康的页面之一。下一步不建议重做视觉，而是补齐四个合同缺口:
+
+- ChatConnectionState: 让连接状态可见。
+- ChatComposer: 让输入高度、disabled 原因、回复上下文有统一规则。
+- ChatRulesSheet: 让规则弹层符合完整 dialog 可访问性。
+- ChatMediaPreview/ChatAvatar: 让图片尺寸和头像 fallback 回到全站 token/组件体系。
+
+这些改造会直接提升精致感、呼吸感和稳定感，也符合“不硬编码、不临时方式、不 CSS 强压”的约束。

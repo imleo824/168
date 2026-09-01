@@ -1,0 +1,44 @@
+/* Post create keyboard and text-entry stability. */
+
+@layer utilities {
+  .post-create-composer,
+  .post-create-stable-focus,
+  .post-create-page .post-create-textarea {
+    overflow-anchor: none;
+  }
+
+  .post-create-stable-focus {
+    overscroll-behavior: contain;
+  }
+
+  .post-create-stable-focus input {
+    scroll-margin: var(--ui-space-none);
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+  }
+
+  .post-create-page .post-create-textarea {
+    transform: translateZ(0);
+  }
+
+  @media (max-width: 639px) {
+    .post-create-page {
+      scroll-padding-bottom: calc(env(safe-area-inset-bottom) + var(--ui-space-4));
+    }
+
+    .post-create-page:focus-within {
+      scroll-behavior: auto;
+    }
+  }
+
+  @media (pointer: coarse), (max-width: 767px) {
+    .post-create-page .post-create-textarea,
+    .post-create-page .post-create-contact-input,
+    .post-create-page textarea,
+    .post-create-page input {
+      font-size: var(--post-create-mobile-input-font-size);
+      line-height: var(--post-create-mobile-input-line-height);
+      scroll-margin-top: var(--post-create-mobile-scroll-margin-top);
+    }
+  }
+}

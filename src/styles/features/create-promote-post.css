@@ -1,0 +1,6 @@
+/* Post create composer CSS facade. */
+
+@import "./create-promote-post-editor.css";
+@import "./create-promote-post-settings.css";
+@import "./create-promote-post-picker.css";
+@import "./create-promote-post-details.css";

@@ -1,0 +1,127 @@
+/* system/ui-interaction-performance.css
+ * Industry-style interaction performance layer.
+ * Goals: keep input callbacks light, reduce presentation delay, and avoid broad expensive transitions.
+ */
+
+@layer base {
+  :root {
+    --ui-record-card-intrinsic-block-size: calc(var(--ui-space-8) * 4);
+    --ui-press-response-duration: 70ms;
+    --ui-press-settle-duration: 130ms;
+    --ui-press-color-duration: 110ms;
+  }
+}
+
+@layer utilities {
+  :is(
+    .pressable,
+    .ui-button,
+    .ui-icon-button,
+    .topbar-icon-button,
+    .ui-topbar-back-button,
+    .ui-segment-tab,
+    .home-topic-tab,
+    .home-topic-filter-field-chip,
+    .messages-list-item,
+    .messages-item-content-button,
+    .notification-settings-item,
+    .app-bottom-nav-item,
+    .home-topbar-brand-lockup,
+    .home-topbar-action-button,
+    .feed-action-btn,
+    .x-card-action-cell,
+    .sponsor-record-tab,
+    .detail-bottom-action,
+    .post-create-tool-button,
+    .image-upload-toolbar-trigger
+  ) {
+    transition:
+      background-color var(--ui-press-color-duration) var(--ease-standard),
+      border-color var(--ui-press-color-duration) var(--ease-standard),
+      color var(--ui-press-color-duration) var(--ease-standard),
+      opacity var(--ui-press-settle-duration) var(--ease-standard),
+      box-shadow var(--ui-press-settle-duration) var(--ease-standard),
+      transform var(--ui-press-response-duration) var(--ease-standard);
+  }
+
+  :is(
+    .pressable,
+    .ui-button,
+    .ui-icon-button,
+    .topbar-icon-button,
+    .ui-topbar-back-button,
+    .ui-segment-tab,
+    .home-topic-tab,
+    .home-topic-filter-field-chip,
+    .messages-list-item,
+    .messages-item-content-button,
+    .notification-settings-item,
+    .app-bottom-nav-item,
+    .home-topbar-brand-lockup,
+    .home-topbar-action-button,
+    .feed-action-btn,
+    .x-card-action-cell,
+    .sponsor-record-tab,
+    .detail-bottom-action,
+    .post-create-tool-button,
+    .image-upload-toolbar-trigger
+  ):active {
+    transition-duration:
+      var(--ui-press-response-duration),
+      var(--ui-press-response-duration),
+      var(--ui-press-response-duration),
+      var(--ui-press-response-duration),
+      var(--ui-press-response-duration),
+      var(--ui-press-response-duration);
+  }
+
+  @media (pointer: coarse) {
+    :is(
+      .pressable,
+      .ui-button,
+      .ui-icon-button,
+      .topbar-icon-button,
+      .ui-topbar-back-button,
+      .ui-segment-tab,
+      .home-topic-tab,
+      .home-topic-filter-field-chip,
+      .messages-list-item,
+      .messages-item-content-button,
+      .notification-settings-item,
+      .app-bottom-nav-item,
+      .home-topbar-brand-lockup,
+      .home-topbar-action-button,
+      .feed-action-btn,
+      .x-card-action-cell,
+      .sponsor-record-tab,
+      .detail-bottom-action,
+      .post-create-tool-button,
+      .image-upload-toolbar-trigger
+    ) {
+      transition-duration:
+        var(--ui-press-response-duration),
+        var(--ui-press-response-duration),
+        var(--ui-press-response-duration),
+        var(--ui-press-response-duration),
+        var(--ui-press-response-duration),
+        var(--ui-press-response-duration);
+    }
+  }
+
+  .sponsor-record-panel .record-card,
+  .transaction-history-page .record-card,
+  .promote-history-page .record-card,
+  .promotion-effects-page .record-card {
+    content-visibility: auto;
+    contain-intrinsic-size: auto var(--ui-record-card-intrinsic-block-size);
+  }
+
+  @supports not (content-visibility: auto) {
+    .sponsor-record-panel .record-card,
+    .transaction-history-page .record-card,
+    .promote-history-page .record-card,
+    .promotion-effects-page .record-card {
+      contain-intrinsic-size: auto;
+    }
+  }
+}

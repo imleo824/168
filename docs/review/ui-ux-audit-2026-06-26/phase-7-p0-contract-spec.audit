@@ -1,0 +1,526 @@
+# UI/UE 深度审计 Phase 7 - P0 设计合同实施规格
+
+日期: 2026-06-26
+
+目标: 将前 6 个 Phase 中反复出现的 P0 问题整理成可实施规格。这个文件不是代码改动清单，而是实施前合同，确保后续动代码时符合精致感、呼吸感、简约感，并避免硬编码、临时方案和 CSS 强压。
+
+## 总原则
+
+1. 页面不直接决定像素
+页面只声明语义，例如 `placement="feed"`、`density="compact"`、`tone="neutral"`。实际尺寸、颜色、间距、圆角、阴影由 token 和组件合同决定。
+
+2. 容器拥有布局，子组件拥有内容
+工具栏、动作栏、sheet、列表等由容器管理网格、列数、间距。按钮、chip、状态块不重复管理外部宽度。
+
+3. 默认轻，特殊才重
+常规页面和列表默认 flat 或 hairline。只有 modal、popover、lightbox、重要确认态允许 elevated/floating。
+
+4. 禁止字符串推断语义
+不能通过 className 是否包含 `profile-tabbar`、`ui-topbar-back-button` 推断行为。语义必须是明确 prop。
+
+5. 禁止裸数字进入视觉层
+icon size、stroke width、sheet inset、animation duration、skeleton width、media sizes、breakpoint 都必须走 token 或命名常量。
+
+## Contract 1: FeedStateContract
+
+### 要解决的问题
+
+首页失败态把内容流中断成空白错误页，破坏首屏信任。列表加载、空态、错误、加载更多各自为政。
+
+### 影响范围
+
+- `src/features/home/HomeFeedContent.tsx`
+- `src/features/home/HomeMobileFeedContent.tsx`
+- `src/features/home/HomeDesktopFeedContent.tsx`
+- `src/ui/UIStateBlock.tsx`
+- `src/ui/LoadingState.tsx`
+- `src/ui/ListLoadMoreState.tsx`
+- `src/ui/Skeleton.tsx`
+- `src/styles/features/home-feed-foundation.css`
+- `src/styles/system/ui-primitives-feedback.css`
+
+### 建议 API
+
+```ts
+type StatePlacement = 'page' | 'feed' | 'panel' | 'inline';
+type StateDensity = 'compact' | 'regular' | 'spacious';
+type StateTone = 'neutral' | 'empty' | 'error' | 'info' | 'success';
+
+type UIStateBlockProps = {
+  placement?: StatePlacement;
+  density?: StateDensity;
+  tone?: StateTone;
+  title?: ReactNode;
+  description?: ReactNode;
+  primaryAction?: ReactNode;
+  secondaryAction?: ReactNode;
+  icon?: ReactNode;
+};
+```
+
+### Token 要求
+
+- `--ui-state-page-min-height`
+- `--ui-state-feed-min-height`
+- `--ui-state-panel-padding`
+- `--ui-state-inline-gap`
+- `--ui-state-title-size`
+- `--ui-state-copy-size`
+- `--ui-state-action-gap`
+
+### 视觉规则
+
+`placement="feed"`:
+保留 feed 宽度和列表节奏。错误态不能居中占满整页，必须像一条内容流状态卡一样出现。
+
+`placement="page"`:
+用于 404、全页权限、系统错误。可居中，但不能默认大阴影白卡。
+
+`placement="panel"`:
+用于 sheet、dialog、充值/推广局部面板。
+
+`placement="inline"`:
+用于表单字段、加载更多、局部错误。
+
+### 禁止做法
+
+- 不在首页写 `.home-error-card { ... }` 强压状态样式。
+- 不把失败态放成纯文字大空白。
+- 不让 `EmptyStateCard` 默认带 shadow。
+- 不在 `PageLoader` 中直接传裸 width/height 数字构建 skeleton。
+
+### 验收标准
+
+- 首页数据失败时仍保留信息流结构。
+- 移动端失败态不挤掉底部导航，不出现大片无意义空地。
+- 桌面端失败态不超过 feed 最大宽度。
+- 空态、错误态、加载态、加载更多看起来来自同一套产品语言。
+
+## Contract 2: AuthRequiredStateContract
+
+### 要解决的问题
+
+发布页、个人页、推广页、充值页等登录墙像同一张重卡片复制，页面任务语义不足。
+
+### 影响范围
+
+- `src/ui/AuthRequiredState.tsx`
+- `src/features/post-create/PostCreatePage.tsx`
+- `src/features/profile/ProfileMobilePage.tsx`
+- `src/features/promote/PromoteMobilePage.tsx`
+- `src/pages/RechargeMobile.tsx`
+- `src/pages/PromoteHistory.tsx`
+- `src/features/sponsor/SponsorMobilePage.tsx`
+- `src/styles/system/ui-primitives-auth.css`
+
+### 建议 API
+
+```ts
+type AuthPlacement = 'page' | 'feed' | 'panel' | 'inline';
+type AuthTone = 'open' | 'card' | 'hero' | 'quiet';
+type AuthContext = 'create' | 'profile' | 'promote' | 'recharge' | 'sponsor' | 'records';
+
+type AuthRequiredStateProps = {
+  placement?: AuthPlacement;
+  tone?: AuthTone;
+  context?: AuthContext;
+  density?: 'compact' | 'regular' | 'spacious';
+  preview?: ReactNode;
+  meta?: ReactNode;
+  secondaryAction?: ReactNode;
+};
+```
+
+### 页面语义要求
+
+`context="create"`:
+展示发布能力摘要，例如图片、地点、隐私、联系方式、分类信息，但要轻，不做新卡片堆叠。
+
+`context="profile"`:
+展示身份资产摘要，例如资料、帖子、收藏、联系偏好。
+
+`context="promote"`:
+展示推广价值摘要，例如选择帖子、设置周期、确认预算、获得曝光。
+
+`context="recharge"`:
+强调账户安全和充值流程预期。
+
+`context="sponsor"`:
+强调赞助中心、余额、记录入口。
+
+### 禁止做法
+
+- 不新增每个页面自己的 login card。
+- 不通过 `.create-page .ui-auth-required-card` 覆盖大小。
+- 不默认使用大阴影。
+- 不把所有登录墙文案写成通用“登录后继续”。
+
+### 验收标准
+
+- create/profile/promote/recharge/sponsor 登录态一眼能看出页面任务不同。
+- 移动端卡片不压迫，桌面端不出现巨大居中孤岛。
+- 所有登录态仍复用一个组件合同。
+
+## Contract 3: IconActionContract
+
+### 要解决的问题
+
+`IconButton`、`TopbarIconButton`、`PublishIconButton`、`ProfileIconButton`、`TelegramContactIconButton`、sheet close、lightbox close、select caret、setting chevron 等各自决定尺寸、stroke、背景、圆角。
+
+### 影响范围
+
+- `src/ui/IconButton.tsx`
+- `src/ui/TopbarIconButton.tsx`
+- `src/ui/PublishIconButton.tsx`
+- `src/ui/ProfileIconButton.tsx`
+- `src/ui/TelegramContactIconButton.tsx`
+- `src/ui/HeaderSelectAction.tsx`
+- `src/ui/SettingRow.tsx`
+- `src/ui/BottomSheet.tsx`
+- `src/ui/ImageLightbox.tsx`
+- `src/styles/system/ui-control-shape-contract.css`
+- `src/styles/components/topbar-system.css`
+- `src/styles/components/telegram-contact-action.css`
+
+### 建议 API
+
+```ts
+type IconActionSize = 'xs' | 'sm' | 'md' | 'lg';
+type IconActionTone = 'quiet' | 'muted' | 'brand' | 'danger' | 'inverse';
+type IconActionContext = 'topbar' | 'sheet' | 'lightbox' | 'feed' | 'profile' | 'form';
+
+type IconActionProps = {
+  icon: ReactNode;
+  label: string;
+  size?: IconActionSize;
+  tone?: IconActionTone;
+  context?: IconActionContext;
+  selected?: boolean;
+  busy?: boolean;
+  disabled?: boolean;
+};
+```
+
+### Token 要求
+
+- `--ui-icon-action-xs-size`
+- `--ui-icon-action-sm-size`
+- `--ui-icon-action-md-size`
+- `--ui-icon-action-lg-size`
+- `--ui-icon-action-xs-icon-size`
+- `--ui-icon-action-sm-icon-size`
+- `--ui-icon-action-md-icon-size`
+- `--ui-icon-action-lg-icon-size`
+- `--ui-icon-action-stroke`
+- `--ui-icon-action-radius`
+- `--ui-icon-action-surface-muted`
+- `--ui-icon-action-surface-brand`
+- `--ui-icon-action-surface-inverse`
+
+### 迁移规则
+
+- `PublishIconButton` 不再返回 `19`、`24`、`2.25`、`2.8`。
+- `BottomSheet` close 不再写 `X size={17}`。
+- `ImageLightbox` close 不再写 `X size={18}`。
+- `HeaderSelectAction` caret 不再写 `size={12}`。
+- `SettingRow` chevron 不再写 `size={16}`。
+- `ProfileIconButton` 移除 `!p-0`。
+
+### 禁止做法
+
+- 不通过 className 判断是不是 back button。
+- 不在 icon action 组件里写裸数字。
+- 不让每个 feature 自己定义 icon button 背景。
+
+### 验收标准
+
+- 顶部、底部、sheet、lightbox、feed 内的 icon action 命中区一致。
+- 同 size 的图标视觉重量一致。
+- 发布按钮仍有品牌性，但不破坏整体 action 体系。
+
+## Contract 4: MediaContract
+
+### 要解决的问题
+
+图片尺寸、头像 fallback、上传进度、媒体占位、lightbox 动效分散在多个组件里，导致媒体体验不够统一。
+
+### 影响范围
+
+- `src/ui/OptimizedImage.tsx`
+- `src/ui/AvatarImage.tsx`
+- `src/ui/ImageLightbox.tsx`
+- `src/features/post/PostMediaGrid.tsx`
+- `src/features/upload/ImageUpload.tsx`
+- `src/features/profile/ProfileHeaderCover.tsx`
+- `src/styles/components/media.css`
+- `src/styles/system/ui-primitives-lightbox.css`
+
+### 建议 API
+
+```ts
+type MediaPreset = 'avatar' | 'feed' | 'detail' | 'cover' | 'lightbox' | 'upload';
+type AvatarFallbackTone = 'neutral' | 'brand' | 'anonymous';
+type MediaFallbackVisual = 'placeholder' | 'blank' | 'hidden';
+```
+
+### Token 要求
+
+- `--ui-media-feed-size`
+- `--ui-media-detail-size`
+- `--ui-media-cover-size`
+- `--ui-media-lightbox-size`
+- `--ui-media-avatar-size-sm`
+- `--ui-media-avatar-size-md`
+- `--ui-media-avatar-size-lg`
+- `--ui-media-placeholder-surface`
+- `--ui-media-placeholder-text`
+- `--ui-upload-progress-ring-size`
+- `--ui-upload-progress-ring-stroke`
+- `--ui-lightbox-slide-duration`
+- `--ui-lightbox-slide-ease`
+
+### 迁移规则
+
+- `OptimizedImage.defaultSizesForVariant` 不再散落 `96px`、`180px`、`860px`、`420px`。
+- `ProfileHeaderCover` 不再写 `'(max-width: 48rem) 100vw, 72rem'`。
+- `PostMediaGrid` 的比例和 drag threshold 抽为 media behavior constants。
+- `ImageUpload.ProgressRing` 的 size、stroke、transition 走 CSS variables。
+- feed 图片 placeholder 默认不显示品牌文案。
+
+### 视觉规则
+
+Feed media:
+低噪声、内容优先、边角与 feed card rhythm 一致。
+
+Avatar:
+内容流默认 neutral fallback；品牌金色 fallback 只用于明确品牌或资产场景。
+
+Upload:
+进度反馈清楚但不抢正文，错误状态要在 tile 内表达，不另起重卡片。
+
+Lightbox:
+immersive surface，关闭按钮轻材料，减少白色强阴影。
+
+### 验收标准
+
+- feed、detail、upload、lightbox 图片体验一致。
+- 坏图不会静默消失，也不会出现强品牌占位刷屏。
+- 头像 fallback 不抢内容注意力。
+
+## Contract 5: CreatorFieldContract
+
+### 要解决的问题
+
+发布分类字段、首页结构化筛选、设置行、选择器、范围输入、boolean segmented 彼此相似但各写一套。
+
+### 影响范围
+
+- `src/features/post-create/postCreateComponents.tsx`
+- `src/features/home/HomeStructuredFilterSheet.tsx`
+- `src/ui/SettingRow.tsx`
+- `src/ui/HeaderSelectAction.tsx`
+- `src/styles/features/create-promote-post-settings.css`
+- `src/styles/features/home-structured-filters.css`
+- `src/styles/features/settings.css`
+
+### 建议组件
+
+```ts
+FormFieldRow
+PickerButton
+SegmentedControl
+RangeField
+LocationOptionList
+```
+
+### 建议 API
+
+```ts
+type FieldDensity = 'compact' | 'regular';
+type FieldPlacement = 'page' | 'sheet' | 'toolbar';
+type FieldState = 'idle' | 'filled' | 'error' | 'disabled';
+```
+
+### Token 要求
+
+- `--ui-field-row-min-height`
+- `--ui-field-row-padding-x`
+- `--ui-field-row-gap`
+- `--ui-field-label-size`
+- `--ui-field-value-size`
+- `--ui-field-control-height`
+- `--ui-field-option-radius`
+- `--ui-field-option-selected-surface`
+
+### 迁移规则
+
+- 发布页分类 option 不再写 `min-height: 3rem`。
+- 首页地点 grid 高度不再写 `min(42vh, 22rem)`，改 token。
+- boolean segmented 在发布页和筛选页共用同一组件。
+- picker button 在发布页和筛选页共用同一视觉合同。
+
+### 验收标准
+
+- 发布结构化字段和首页筛选字段像同一套控件。
+- sheet 内字段密度比 page 内更 compact，但不是两套样式。
+- 错误态、filled 态、disabled 态一致。
+
+## Contract 6: SheetContract
+
+### 要解决的问题
+
+BottomSheet、HomeStructuredFilterSheet、PromotePaymentSheet、ProfileDialog、ImageLightbox 的弹层材料、padding、close、motion、键盘处理不统一。
+
+### 影响范围
+
+- `src/ui/BottomSheet.tsx`
+- `src/features/home/HomeStructuredFilterSheet.tsx`
+- `src/features/promote/promoteComponents.tsx`
+- `src/features/profile/ProfileDialog.tsx`
+- `src/ui/ImageLightbox.tsx`
+- `src/styles/components/profile-dialog.css`
+- `src/styles/features/promote-layout-checkout.css`
+- `src/styles/features/home-structured-filters.css`
+- `src/styles/system/ui-primitives-lightbox.css`
+
+### 建议 API
+
+```ts
+type SheetPlacement = 'bottom' | 'center' | 'fullscreen' | 'immersive';
+type SheetSize = 'sm' | 'md' | 'lg' | 'content';
+type SheetDensity = 'compact' | 'regular' | 'spacious';
+type SheetDepth = 'modal' | 'floating' | 'immersive';
+```
+
+### Token 要求
+
+- `--ui-sheet-padding-x`
+- `--ui-sheet-padding-y`
+- `--ui-sheet-header-height`
+- `--ui-sheet-handle-size`
+- `--ui-sheet-radius`
+- `--ui-sheet-shadow-modal`
+- `--ui-sheet-shadow-subtle`
+- `--ui-sheet-motion-duration`
+- `--ui-sheet-motion-ease`
+- `--ui-sheet-keyboard-top-inset`
+- `--ui-sheet-keyboard-bottom-inset`
+
+### 迁移规则
+
+- `PromotePaymentSheet` 不再自建 `animate-[sheet-up-in_200ms_ease-out] space-y-4 p-5`。
+- `BottomSheet` handle 不再用 `mx-auto mb-3`。
+- `ProfileDialog` 不再通过 `> :not(...)` 强控子元素宽度。
+- `HomeStructuredFilterSheet` 降低 shadow 和 chip shadow。
+
+### 可访问性要求
+
+- dialog 必须有 `aria-labelledby`。
+- 可关闭弹层必须支持 Escape。
+- 需要 focus trap 或至少明确焦点恢复策略。
+- 移动键盘弹起时输入框不能被底部遮挡。
+
+### 验收标准
+
+- 筛选 sheet、支付 sheet、资料 dialog 的 close、header、body、footer rhythm 一致。
+- sheet motion 来自 token。
+- 弹层不靠页面局部 className 控制核心视觉。
+
+## 实施顺序建议
+
+第 1 步: StatePlacement 基础
+文件重点: `UIStateBlock`、`LoadingState`、`EmptyStateCard`、`AuthRequiredState`。
+原因: 首页失败态和登录墙是当前截图中最伤质感的问题。
+
+第 2 步: FeedState 应用
+文件重点: 首页移动/桌面 feed content。
+原因: 先恢复首屏信任。
+
+第 3 步: IconAction 基础
+文件重点: IconButton、TopbarIconButton、PublishIconButton、ProfileIconButton。
+原因: 快速消除大量小像素漂移。
+
+第 4 步: MediaContract 基础
+文件重点: OptimizedImage、AvatarImage、PostMediaGrid、ImageUpload。
+原因: 内容平台的高级感很大一部分来自媒体稳定性。
+
+第 5 步: CreatorField 和 Sheet
+文件重点: PostCreate、HomeStructuredFilterSheet、PromotePaymentSheet、ProfileDialog。
+原因: 复杂业务区需要更谨慎，先有前面合同再迁移。
+
+## 全局禁止清单
+
+禁止新增:
+
+- `!p-*`、`!m-*`、`!h-*` 这类强压 utility。
+- `animate-[...]` 这类局部动画。
+- `text-[10px]` 这类裸字号。
+- icon `size={17}`、`size={18}` 这类裸尺寸。
+- sheet 内 `p-5`、`space-y-4` 这类核心布局 utility。
+- 页面级 `.some-page .shared-component { ... }` 强行修共享组件。
+- 新建每个页面自己的 empty/auth/error card。
+
+允许保留但要命名:
+
+- 行为延迟，例如 prefetch delay、focus stabilize delay。
+- 手势阈值，例如 drag threshold。
+- 图片压缩并发数、进度更新步进。
+- 业务最大数量，例如上传最大图数、可见图片数量。
+
+这些必须在命名常量或 token 中表达，不能混在 JSX 或局部 style 内。
+
+## 验收矩阵
+
+视觉验收:
+
+- 首屏内容优先，不被错误态或登录墙抢走。
+- 默认 surface 轻，只有浮层重。
+- icon action 视觉重量一致。
+- 图片、头像、上传、lightbox 属于同一媒体语言。
+- 发布字段和筛选字段属于同一控件语言。
+
+代码验收:
+
+- 页面只声明语义，不写核心像素。
+- 共享组件不通过 className 推断行为。
+- 裸数字从视觉 JSX 中消失。
+- 新增 token 有清晰命名和归属。
+- feature CSS 不覆盖共享组件的核心视觉。
+
+响应式验收:
+
+- 移动端窄屏文字只省略，不重叠。
+- 桌面端留白变成结构，不是空地。
+- sheet 在键盘弹起时保持可用。
+- overlay 路由不破坏背景滚动和 topbar 层级。
+
+可访问性验收:
+
+- 状态变化有合适 aria-live。
+- dialog 有 label 和关闭方式。
+- icon-only action 都有清晰 label。
+- loading、error、empty 不只靠颜色区分。
+- focus visible 不被全局 outline 或 overflow 裁掉。
+
+## 依赖证据缺口
+
+实施前最好补:
+
+- 已登录首页真实 feed。
+- 已登录发布编辑器完整状态。
+- 帖子详情多图、长文、纯文本。
+- 分类页和 overlay 进入。
+- 充值、赞助、推广支付完整流程。
+
+可以先实施的部分:
+
+- StatePlacement。
+- AuthRequiredState。
+- IconAction 基础。
+- Media token 基础。
+
+原因: 这些已有足够静态证据和截图证据，且修改方向是系统性收敛，不依赖具体内容数据。
+
+## 本阶段结论
+
+P0 不是“把页面做漂亮一点”，而是先把状态、图标动作、媒体、字段、弹层这五类设计合同立住。只要这些合同稳定，后续页面优化会自然变轻、变统一；如果绕过这些合同继续修页面，就会继续产生临时 CSS 和局部像素漂移。

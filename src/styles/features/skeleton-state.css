@@ -1,0 +1,21 @@
+/* Skeleton parity polish: keep placeholders visually aligned with final cards. */
+
+@layer utilities {
+  .home-page-skeleton .home-topbar-brand-lockup[data-skeleton='true'] {
+    pointer-events: none;
+  }
+
+  .home-page-skeleton .home-topbar-brand-lockup[data-skeleton='true'] .home-topbar-brand-vector {
+    opacity: var(--ui-skeleton-brand-lockup-opacity);
+  }
+
+  .ui-feed-skeleton-media-block,
+  .ui-skeleton-media--feed {
+    overflow: hidden;
+    border-radius: var(--ui-radius-xl);
+  }
+
+  .ui-skeleton-media--feed .ui-skeleton-shimmer {
+    border-radius: inherit;
+  }
+}

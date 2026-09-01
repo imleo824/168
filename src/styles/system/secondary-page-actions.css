@@ -1,0 +1,65 @@
+/* Secondary page fixed action contract.
+ *
+ * Bottom bars stay viewport-bound, and primary action labels keep priority over
+ * decorative edge slots.
+ */
+
+@layer utilities {
+  :is(.detail-bottom-bar, .promote-checkout-bar, .ui-checkout-bar) {
+    position: fixed;
+    right: var(--ui-space-none);
+    bottom: var(--ui-keyboard-inset);
+    left: var(--ui-space-none);
+    z-index: var(--ui-z-page-header);
+    transform: var(--ui-transform-none);
+    backface-visibility: hidden;
+    contain: var(--ui-contain-none);
+    will-change: auto;
+  }
+
+  .ui-checkout-bar .ui-button {
+    min-width: var(--ui-space-none);
+  }
+
+  .ui-checkout-bar .promote-action-label {
+    min-width: var(--ui-space-none);
+    max-width: 100%;
+    overflow: visible;
+    text-overflow: clip;
+    white-space: nowrap;
+  }
+
+  @media (max-width: 390px) {
+    .ui-checkout-bar .promote-action-label {
+      font-size: var(--ui-text-sm);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .app-shell[data-route-surface='user'] :is(.detail-bottom-bar, .promote-checkout-bar, .ui-checkout-bar) {
+      --secondary-page-action-width: var(--app-desktop-main-active-width);
+      --secondary-page-action-offset: var(--ui-space-none);
+      box-sizing: border-box;
+      right: auto;
+      bottom: var(--app-desktop-shell-padding-y);
+      left: calc(var(--app-desktop-main-left) + var(--secondary-page-action-offset));
+      width: var(--secondary-page-action-width);
+      max-width: var(--secondary-page-action-width);
+      overflow: hidden;
+      border-inline: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+      border-bottom: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+      border-radius: 0 0 var(--ui-radius-2xl) var(--ui-radius-2xl);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='detail'] .detail-bottom-bar,
+    .app-shell[data-route-surface='user'][data-desktop-surface='profile'] .ui-checkout-bar {
+      --secondary-page-action-width: min(var(--app-desktop-main-active-width), var(--app-desktop-reading-main-width));
+      --secondary-page-action-offset: max(var(--ui-space-none), calc((var(--app-desktop-main-active-width) - var(--secondary-page-action-width)) / 2));
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] :is(.promote-checkout-bar, .ui-checkout-bar) {
+      --secondary-page-action-width: var(--app-desktop-page-content-width);
+      --secondary-page-action-offset: var(--ui-app-shell-desktop-padding-x);
+    }
+  }
+}

@@ -1,0 +1,48 @@
+/* components/topbar-tactile.css */
+
+@layer utilities {
+  .ui-topbar-title {
+    letter-spacing: var(--ui-tracking-tight);
+  }
+
+  .ui-topbar-back-button,
+  .topbar-icon-button,
+  .ui-topbar :is(.ui-topbar-publish-btn) {
+    transition:
+      background-color var(--ui-duration-base) var(--ease-standard),
+      color var(--ui-duration-base) var(--ease-standard),
+      opacity var(--ui-duration-base) var(--ease-standard),
+      transform var(--ui-duration-press) var(--ease-standard);
+  }
+
+  .ui-topbar-back-button:active,
+  .topbar-icon-button:not(.ui-topbar-back-button):active,
+  .ui-topbar :is(.ui-topbar-publish-btn):active {
+    transform: scale(var(--ui-motion-press-scale));
+  }
+
+  .ui-topbar-back-icon,
+  .topbar-icon-button :is(svg),
+  .ui-topbar :is(.ui-topbar-publish-btn) :is(svg) {
+    stroke-width: calc(var(--ui-topbar-icon-stroke) - 0.05);
+  }
+
+  @media (hover: hover) and (pointer: fine) {
+    .topbar-icon-button:not(.ui-topbar-back-button):hover,
+    .ui-topbar :is(.ui-topbar-publish-btn):hover {
+      background: var(--ui-topbar-icon-hover-surface);
+    }
+
+    .ui-topbar-back-button:hover {
+      background: var(--ui-topbar-back-hover-surface);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-topbar-back-button:active,
+    .topbar-icon-button:not(.ui-topbar-back-button):active,
+    .ui-topbar :is(.ui-topbar-publish-btn):active {
+      transform: var(--ui-transform-none);
+    }
+  }
+}

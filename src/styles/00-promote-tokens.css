@@ -1,0 +1,35 @@
+@layer base {
+  :root {
+    --ui-promote-calendar-columns: 5;
+    --ui-promote-date-cell-padding-x: var(--ui-space-1);
+    --ui-promote-workflow-section-padding-y: var(--ui-space-4);
+    --ui-promote-step-index-size: var(--ui-control-xs);
+    --ui-promote-option-min-height: calc(var(--ui-control-lg) + var(--ui-space-5));
+    --ui-promote-option-padding: var(--ui-space-3);
+    --ui-promote-target-empty-min-height: calc(var(--ui-control-lg) + var(--ui-space-4));
+    --ui-promote-media-thumb-size: calc(var(--ui-space-8) + var(--ui-space-6));
+    --ui-promote-picker-media-thumb-size: var(--ui-control-lg);
+    --ui-promote-ad-desktop-ratio: 3.95 / 1;
+    --ui-promote-ad-mobile-ratio: 3.82 / 1;
+    --ui-promote-mobile-input-size: var(--ui-mobile-form-font-size);
+    --ui-promote-mobile-input-line: 1.35;
+    --ui-promote-checkout-content-bottom-space: var(--ui-checkout-content-bottom-space);
+    --ui-promote-checkout-shell-min-height: var(--ui-checkout-shell-min-height);
+    --ui-promote-checkout-action-min-width: var(--ui-checkout-action-min-width);
+    --ui-promote-checkout-action-min-width-compact: var(--ui-checkout-action-min-width-compact);
+    --ui-promote-checkout-shell-padding-y: var(--ui-checkout-shell-padding-y);
+    --ui-promote-option-selected-border: var(--ui-action-primary);
+    --ui-promote-option-selected-surface: var(--ui-action-primary-soft);
+    --ui-promote-option-selected-text: var(--ui-action-primary-strong);
+    --ui-promote-option-selected-shadow: var(--ui-shadow-none);
+    --ui-promote-option-idle-border: var(--ui-line-hairline);
+    --ui-promote-option-idle-surface: transparent;
+    --ui-promote-option-idle-surface-hover: var(--ui-action-muted-surface-hover);
+    --ui-promote-option-idle-text: var(--ui-text-strong);
+    --ui-promote-option-disabled-opacity: 0.58;
+    --ui-promote-meta-opacity: 0.78;
+    --ui-promote-price-opacity: 0.82;
+    --ui-promote-record-copy-opacity: 0.68;
+    --ui-promote-date-disabled-opacity: var(--ui-promote-price-opacity);
+  }
+}

@@ -1,0 +1,319 @@
+/* Shared record card contract.
+ *
+ * Record cards can render text rows, copy rows, metric rows, status pills,
+ * links and edit actions. This contract owns the shared record page shell,
+ * list shell, card surface, structure, typography, row rhythm and inline
+ * action sizing across transaction, promotion and effect-analysis surfaces.
+ */
+
+@layer utilities {
+  .record-page-shell {
+    padding-top: var(--ui-space-2);
+    color: var(--ui-text-strong);
+  }
+
+  .record-state-block {
+    padding-block: var(--ui-secondary-state-padding-y);
+  }
+
+  .record-list {
+    display: flex;
+    width: 100%;
+    max-width: var(--ui-record-list-content-max, var(--ui-page-narrow));
+    flex-direction: column;
+    gap: var(--ui-space-2);
+    margin-inline: auto;
+    margin-top: var(--ui-space-2);
+  }
+
+  @media (min-width: 1024px) {
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .record-page {
+      --ui-record-list-content-max: var(--app-desktop-page-content-width);
+    }
+  }
+
+  .record-id-row {
+    --record-id-row-gap: var(--ui-space-1);
+    --record-id-copy-size: var(--ui-record-copy-size, var(--ui-control-xs));
+    --record-id-copy-icon-size: var(--ui-record-copy-icon-size, var(--ui-control-icon-xs));
+
+    display: flex;
+    max-width: 100%;
+    align-items: center;
+    gap: var(--record-id-row-gap);
+    color: var(--ui-text-muted);
+    font-size: var(--ui-text-xs);
+    line-height: var(--ui-line-compact);
+    font-weight: var(--ui-font-weight-body);
+  }
+
+  .record-id-value {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .record-id-token {
+    font-family: var(--ui-font-family-mono, ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .record-id-copy {
+    display: inline-flex;
+    width: var(--record-id-copy-size);
+    height: var(--record-id-copy-size);
+    min-width: var(--record-id-copy-size);
+    min-height: var(--record-id-copy-size);
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--ui-radius-pill);
+    color: var(--ui-text-soft);
+    opacity: var(--ui-promote-record-copy-opacity);
+    transition:
+      transform var(--ui-duration-fast) var(--ease-standard),
+      background-color var(--ui-duration-base) var(--ease-standard),
+      color var(--ui-duration-base) var(--ease-standard),
+      opacity var(--ui-duration-base) var(--ease-standard);
+  }
+
+  .record-id-copy:active {
+    background: var(--ui-state-hover);
+    color: var(--ui-text-strong);
+    opacity: var(--ui-opacity-visible);
+    transform: scale(var(--ui-motion-press-scale));
+  }
+
+  .record-id-copy-icon {
+    width: var(--record-id-copy-icon-size);
+    height: var(--record-id-copy-icon-size);
+    flex: 0 0 var(--record-id-copy-icon-size);
+    stroke-width: var(--ui-icon-stroke);
+  }
+
+  .record-card {
+    --record-card-row-gap: var(--ui-space-1);
+    --record-card-row-inline-gap: var(--ui-space-3);
+    --record-card-aside-gap: var(--ui-space-1);
+    --record-card-aside-min-width: var(--ui-record-aside-min-width);
+    --record-card-line-min-height: var(--ui-control-xs);
+    --record-card-line-inline-gap: var(--ui-space-1);
+    --record-card-line-font-size: var(--ui-text-xs);
+    --record-card-line-line-height: var(--ui-line-compact);
+    --record-card-line-action-size: var(--record-card-line-min-height);
+    --record-card-effect-stats-row-gap: var(--ui-space-1);
+    --record-card-effect-stats-column-gap: var(--ui-space-2);
+
+    border-color: var(--ui-line-hairline);
+    background: var(--ui-surface-card);
+    box-shadow: var(--ui-shadow-none);
+    transition:
+      transform var(--ui-duration-fast) var(--ease-standard),
+      border-color var(--ui-duration-base) var(--ease-standard),
+      background-color var(--ui-duration-base) var(--ease-standard);
+  }
+
+  .record-card:active {
+    background: var(--ui-state-hover);
+    transform: var(--ui-transform-none);
+  }
+
+  .record-card .record-card-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--record-card-row-inline-gap);
+  }
+
+  .record-card .record-card-main {
+    display: grid;
+    min-width: 0;
+    flex: 1 1 auto;
+    gap: var(--record-card-row-gap);
+  }
+
+  .record-card .record-card-line--title {
+    width: 100%;
+  }
+
+  .record-card .record-card-aside {
+    display: grid;
+    min-width: var(--record-card-aside-min-width);
+    flex: 0 0 auto;
+    align-items: flex-end;
+    justify-items: end;
+    gap: var(--record-card-aside-gap);
+    text-align: right;
+  }
+
+  .record-card .record-title,
+  .record-card .record-amount {
+    margin: var(--ui-space-none);
+    color: var(--ui-text-strong);
+    font-size: var(--ui-text-md);
+    line-height: var(--ui-line-compact);
+    font-weight: var(--ui-font-weight-strong);
+    letter-spacing: var(--ui-tracking-normal);
+  }
+
+  .record-card .record-amount {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .record-card .record-amount--positive {
+    color: var(--ui-success);
+  }
+
+  .record-card .record-amount--neutral {
+    color: var(--ui-text-strong);
+  }
+
+  .record-card :is(
+    .record-time,
+    .record-id-row,
+    .record-amount-unit,
+    .record-point-gain,
+    .promotion-effect-stats
+  ) {
+    color: var(--ui-text-muted);
+    font-weight: var(--ui-font-weight-body);
+  }
+
+  .record-card .record-point-gain {
+    justify-self: end;
+    font-weight: var(--ui-font-weight-medium);
+  }
+
+  .record-card .record-card-line {
+    box-sizing: border-box;
+    display: flex;
+    min-width: 0;
+    min-height: var(--record-card-line-min-height);
+    align-items: center;
+    margin: var(--ui-space-none);
+    padding-block: var(--ui-space-none);
+    line-height: var(--record-card-line-line-height);
+  }
+
+  .record-card .record-card-line:is(a, button) {
+    width: fit-content;
+    max-width: 100%;
+    border: var(--ui-border-none);
+    background: var(--ui-surface-transparent);
+    padding: var(--ui-space-none);
+    text-align: start;
+  }
+
+  .record-card :is(
+    .record-time,
+    .record-id-row,
+    .record-amount-unit,
+    .record-point-gain,
+    .promotion-effect-stats,
+    .promote-history-related-post-link,
+    .promote-history-edit-action
+  ) {
+    font-size: var(--record-card-line-font-size);
+    line-height: var(--record-card-line-line-height);
+  }
+
+  .record-card .record-id-row.record-card-line {
+    --record-id-row-gap: var(--record-card-line-inline-gap);
+    --record-id-copy-size: var(--record-card-line-action-size);
+
+    align-items: center;
+  }
+
+  .record-card .promotion-effect-stats {
+    display: flex;
+    min-width: 0;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--record-card-effect-stats-row-gap) var(--record-card-effect-stats-column-gap);
+  }
+
+  .record-card .promotion-effect-stats.record-card-line {
+    flex-wrap: nowrap;
+    gap: var(--ui-space-none) var(--record-card-effect-stats-column-gap);
+    overflow: hidden;
+  }
+
+  .record-card .promotion-effect-stat {
+    display: inline-flex;
+    min-width: 0;
+    align-items: baseline;
+    gap: var(--ui-space-half);
+    white-space: nowrap;
+    line-height: inherit;
+  }
+
+  .record-card .promotion-effect-stats.record-card-line .promotion-effect-stat {
+    align-items: center;
+  }
+
+  .record-card .promotion-effect-stat-label {
+    color: var(--ui-text-soft);
+  }
+
+  .record-card .promotion-effect-stat-value {
+    color: var(--ui-text-secondary);
+    font-weight: var(--ui-font-weight-strong);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .record-card .record-status-pill {
+    display: inline-flex;
+    min-width: var(--ui-control-sm);
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--ui-radius-pill);
+    padding: var(--ui-space-half) var(--ui-space-2);
+    font-size: var(--ui-text-2xs);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-none);
+    white-space: nowrap;
+  }
+
+  .record-card .record-status-pill--success {
+    background: var(--ui-success-soft);
+    color: var(--ui-success);
+  }
+
+  .record-card .record-status-pill--pending {
+    background: var(--ui-warning-soft);
+    color: var(--ui-warning);
+  }
+
+  .record-card .record-status-pill--muted {
+    background: var(--ui-surface-muted);
+    color: var(--ui-text-secondary);
+  }
+
+  .record-card .promote-history-related-post-link {
+    color: var(--ui-action-primary-strong);
+    text-decoration: var(--ui-text-decoration-none);
+  }
+
+  .record-card .promote-history-related-post-link .record-id-value {
+    color: currentColor;
+  }
+
+  .record-card .promote-history-edit-action {
+    border-color: var(--ui-line-soft);
+    color: var(--ui-text-secondary);
+    font-weight: var(--ui-font-weight-body);
+  }
+
+  .record-card .promote-history-edit-action.record-card-line {
+    align-items: center;
+    gap: var(--record-card-line-inline-gap);
+  }
+
+  .record-card .promote-history-edit-icon {
+    width: var(--ui-promote-history-action-icon-size, var(--ui-control-icon-xs));
+    height: var(--ui-promote-history-action-icon-size, var(--ui-control-icon-xs));
+    flex: 0 0 var(--ui-promote-history-action-icon-size, var(--ui-control-icon-xs));
+    stroke-width: var(--ui-icon-stroke);
+  }
+}

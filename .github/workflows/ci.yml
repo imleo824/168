@@ -1,0 +1,85 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    name: Typecheck and build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Import/export guard
+        run: node scripts/import-export-audit.mjs
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Normalize source
+        run: npm run source:normalize
+
+      - name: Security guard
+        run: npm run test:security
+
+      - name: Deposit sweep state guard
+        run: npm run test:deposit-sweep
+
+      - name: Automation one-click guard
+        run: npm run test:automation-one-click
+
+      - name: Admin report guard
+        run: npm run test:admin-report
+
+      - name: CSS guards
+        run: |
+          npm run test:css-syntax
+          npm run test:css-architecture
+          npm run test:css-cleanup
+          npm run test:css-quality
+          npm run lint:ui-hardcoding
+
+      - name: Frontend interaction guards
+        run: |
+          npm run test:overlay
+          npm run test:frontend-interaction-stress
+
+      - name: Domain guards
+        run: |
+          npm run test:feed-module
+          npm run test:feed-service-preflight
+          npm run test:post-module
+          npm run test:post-main-chain
+          npm run test:post-detail-route
+          npm run test:post-detail-probe-output
+          npm run test:user-module
+          npm run test:topic-module
+          npm run test:feed-performance
+          npm run test:home-navigation
+          npm run test:post-structured-meta
+          npm run test:post-quotes
+          npm run test:quote-publish
+          npm run test:auto-post
+          npm run test:location-presets
+          npm run test:goal-168-ui
+          npm run test:automation-chain
+
+      - name: Typecheck
+        run: |
+          npx prisma generate
+          npm run lint
+
+      - name: Build
+        run: npm run build

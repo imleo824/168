@@ -1,0 +1,91 @@
+/* Promote history edit page. */
+
+@layer utilities {
+  .promote-history-edit-stack {
+    display: grid;
+    width: 100%;
+    max-width: var(--ui-promote-history-edit-content-max, var(--ui-page-narrow));
+    margin-inline: auto;
+    gap: var(--ui-space-4);
+  }
+
+  .promote-history-edit-summary {
+    display: grid;
+    gap: var(--ui-space-2);
+  }
+
+  .promote-history-edit-summary-main {
+    display: grid;
+    min-width: 0;
+    gap: var(--ui-space-half);
+  }
+
+  .promote-history-date {
+    margin: var(--ui-space-none);
+    color: var(--ui-text-muted);
+    font-size: var(--ui-text-xs);
+    line-height: var(--ui-line-compact);
+  }
+
+  .promote-history-edit-card {
+    display: grid;
+    gap: var(--ui-space-4);
+  }
+
+  .promote-history-edit-section {
+    display: grid;
+    gap: var(--ui-space-3);
+  }
+
+  .promote-history-edit-section-title {
+    margin: var(--ui-space-none);
+    color: var(--ui-text-strong);
+    font-size: var(--ui-text-md);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-compact);
+  }
+
+  .promote-history-field {
+    display: grid;
+    gap: var(--ui-space-2);
+  }
+
+  .promote-history-label,
+  .promote-history-help {
+    color: var(--ui-text-muted);
+    font-size: var(--ui-text-xs);
+    line-height: var(--ui-line-compact);
+  }
+
+  .promote-history-help {
+    color: var(--ui-text-soft);
+  }
+
+  .promote-history-target-input {
+    width: 100%;
+  }
+
+  .promote-history-save-action {
+    width: 100%;
+  }
+
+  .promote-history-actions {
+    position: sticky;
+    bottom: calc(var(--ui-bottom-nav-height, var(--ui-space-none)) + var(--ui-space-3));
+    z-index: var(--ui-z-content-raised);
+    display: grid;
+    gap: var(--ui-space-2);
+    padding-block: var(--ui-space-2) var(--ui-space-none);
+    background: linear-gradient(
+      to top,
+      var(--ui-surface-page) 72%,
+      color-mix(in srgb, var(--ui-surface-page) 0%, transparent)
+    );
+  }
+
+  @media (min-width: 1024px) {
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .promote-history-edit-stack {
+      --ui-promote-history-edit-content-max: var(--app-desktop-page-content-width);
+    }
+  }
+}

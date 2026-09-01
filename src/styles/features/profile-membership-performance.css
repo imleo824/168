@@ -1,0 +1,19 @@
+/* Profile membership polish: faster stable member-link layout and balanced contact icons. */
+
+@layer utilities {
+  .profile-modern-page .user-space-plus-link-row[data-link-type='contact'] {
+    gap: var(--ui-space-1);
+  }
+
+  .profile-modern-page .user-space-plus-contact-icon-button {
+    width: calc(var(--ui-control-md) - var(--ui-space-1));
+    height: calc(var(--ui-control-md) - var(--ui-space-1));
+    min-height: calc(var(--ui-control-md) - var(--ui-space-1));
+    box-shadow: var(--ui-shadow-hairline);
+  }
+
+  .profile-modern-page .user-space-plus-brand-icon {
+    width: calc(var(--ui-control-icon-md) - 1px);
+    height: calc(var(--ui-control-icon-md) - 1px);
+  }
+}

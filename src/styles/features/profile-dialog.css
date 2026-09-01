@@ -1,0 +1,240 @@
+/* features/profile-dialog.css */
+/* Shared design system for profile edit dialogs and setting panels. */
+
+@layer utilities {
+  .profile-dialog-overlay {
+    position: fixed;
+    inset: var(--ui-inset-none);
+    z-index: var(--ui-z-content-overlay);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: max(var(--ui-space-4), env(safe-area-inset-top)) var(--ui-page-padding-x) max(var(--ui-space-4), env(safe-area-inset-bottom));
+    isolation: isolate;
+  }
+
+  .profile-dialog-overlay.is-scrollable {
+    align-items: flex-end;
+  }
+
+  .profile-dialog-scrim {
+    position: absolute;
+    inset: var(--ui-inset-none);
+    border: var(--ui-border-none);
+    background: var(--ui-profile-dialog-scrim-surface);
+    backdrop-filter: var(--ui-glass-blur-sm, var(--ui-floating-muted-filter));
+    -webkit-backdrop-filter: var(--ui-glass-blur-sm, var(--ui-floating-muted-filter));
+  }
+
+  .profile-dialog-panel {
+    position: relative;
+    z-index: var(--ui-z-local-raised);
+    display: flex;
+    width: min(100%, var(--ui-dialog-panel-max-width));
+    max-height: calc(var(--ui-visual-viewport-height) - env(safe-area-inset-top) - env(safe-area-inset-bottom) - var(--ui-space-8));
+    flex-direction: column;
+    overflow: hidden;
+    border: var(--ui-border-width-hairline) solid var(--ui-profile-dialog-panel-border);
+    border-radius: var(--ui-radius-3xl);
+    background: var(--ui-profile-dialog-panel-surface);
+    box-shadow: var(--ui-shadow-airy, var(--ui-shadow-sheet));
+  }
+
+  .profile-dialog-overlay.is-scrollable .profile-dialog-panel {
+    max-height: calc(var(--ui-visual-viewport-height) - env(safe-area-inset-top) - env(safe-area-inset-bottom) - var(--ui-space-6));
+  }
+
+  .profile-dialog-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: var(--ui-space-3);
+    border-bottom: var(--ui-border-width-hairline) solid var(--ui-profile-dialog-divider);
+    padding: var(--ui-space-4) var(--ui-space-4) var(--ui-space-3);
+    background: var(--ui-profile-dialog-header-surface);
+  }
+
+  .profile-dialog-heading {
+    display: grid;
+    min-width: 0;
+    gap: var(--ui-space-1);
+  }
+
+  .profile-dialog-title {
+    margin: var(--ui-space-none);
+    color: var(--ui-text-strong);
+    font-size: var(--ui-text-title);
+    font-weight: var(--ui-font-weight-title);
+    line-height: var(--ui-line-title);
+    letter-spacing: var(--ui-tracking-tight);
+  }
+
+  .profile-dialog-description {
+    max-width: calc(var(--ui-space-8) * 8);
+    margin: var(--ui-space-none);
+    color: var(--ui-text-muted);
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-body);
+    line-height: var(--ui-line-readable);
+  }
+
+  .profile-dialog-close {
+    margin-top: calc(var(--ui-space-half) * -1);
+  }
+
+  .profile-dialog-body {
+    display: grid;
+    min-height: 0;
+    gap: var(--ui-space-4);
+    overflow-y: auto;
+    padding: var(--ui-space-4);
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+  }
+
+  .profile-dialog-footer,
+  .profile-dialog-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--ui-space-2);
+  }
+
+  .profile-dialog-body > .profile-dialog-actions:last-child {
+    position: sticky;
+    bottom: calc(var(--ui-space-4) * -1);
+    z-index: var(--ui-z-local-raised);
+    margin: var(--ui-space-none) calc(var(--ui-space-4) * -1) calc(var(--ui-space-4) * -1);
+    border-top: var(--ui-border-width-hairline) solid var(--ui-profile-dialog-divider);
+    padding: var(--ui-space-3) var(--ui-space-4) max(var(--ui-space-3), env(safe-area-inset-bottom));
+    background: var(--ui-profile-dialog-footer-surface);
+    backdrop-filter: var(--ui-glass-blur-sm, var(--ui-floating-muted-filter));
+    -webkit-backdrop-filter: var(--ui-glass-blur-sm, var(--ui-floating-muted-filter));
+  }
+
+  .profile-dialog-field-stack {
+    display: grid;
+    gap: var(--ui-space-3);
+  }
+
+  .profile-dialog-field-stack > div {
+    display: grid;
+    gap: var(--ui-space-1);
+  }
+
+  .profile-dialog-field-label {
+    color: var(--ui-text-secondary);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-meta);
+  }
+
+  .profile-dialog-field,
+  .profile-dialog-contact-field {
+    width: 100%;
+    min-height: calc(var(--ui-control-lg) + var(--ui-space-2));
+    border: var(--ui-border-width-hairline) solid var(--ui-profile-dialog-field-border);
+    border-radius: var(--ui-radius-2xl);
+    background: var(--ui-profile-dialog-field-surface);
+    color: var(--ui-text-strong);
+    box-shadow: var(--ui-profile-dialog-field-inset-shadow);
+    transition:
+      border-color var(--ui-duration-base) var(--ease-standard),
+      background-color var(--ui-duration-base) var(--ease-standard),
+      box-shadow var(--ui-duration-base) var(--ease-standard);
+  }
+
+  .profile-dialog-field {
+    padding: var(--ui-space-none) var(--ui-space-4);
+    font: inherit;
+    font-size: var(--ui-text-body);
+    font-weight: var(--ui-font-weight-medium);
+    line-height: var(--ui-line-normal);
+    outline: var(--ui-outline-none);
+  }
+
+  textarea.profile-dialog-field {
+    min-height: calc(var(--ui-control-xl) + var(--ui-space-8));
+    padding-block: var(--ui-space-3);
+    resize: vertical;
+  }
+
+  .profile-dialog-field::placeholder,
+  .profile-dialog-contact-input::placeholder {
+    color: var(--ui-text-disabled);
+  }
+
+  .profile-dialog-field:focus,
+  .profile-dialog-contact-field:focus-within {
+    border-color: var(--ui-profile-dialog-field-focus-border);
+    background: var(--ui-profile-dialog-field-focus-surface);
+    box-shadow: var(--ui-form-focus-shadow, var(--ui-control-focus-shadow));
+  }
+
+  .profile-dialog-contact-field {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: var(--ui-space-2);
+    padding-inline: var(--ui-space-3) var(--ui-space-4);
+  }
+
+  .profile-dialog-contact-prefix {
+    display: inline-flex;
+    min-width: var(--ui-control-sm);
+    min-height: var(--ui-control-sm);
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-profile-dialog-contact-prefix-surface);
+    color: var(--ui-brand-strong);
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-none);
+  }
+
+  .profile-dialog-contact-input {
+    width: 100%;
+    min-width: 0;
+    border: var(--ui-border-none);
+    background: var(--ui-surface-transparent);
+    color: var(--ui-text-strong);
+    font: inherit;
+    font-size: var(--ui-text-body);
+    font-weight: var(--ui-font-weight-medium);
+    outline: var(--ui-outline-none);
+  }
+
+  .profile-dialog-field-error {
+    margin: calc(var(--ui-space-2) * -1) var(--ui-space-none) var(--ui-space-none);
+    color: var(--ui-danger-classic);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-medium);
+    line-height: var(--ui-line-normal);
+  }
+
+  .profile-dialog-panel :is(input, textarea, button) {
+    -webkit-tap-highlight-color: var(--ui-tap-highlight-color);
+  }
+
+  @media (max-width: 390px) {
+    .profile-dialog-overlay {
+      padding-inline: var(--ui-space-3);
+    }
+
+    .profile-dialog-header,
+    .profile-dialog-body {
+      padding-inline: var(--ui-space-3);
+    }
+
+    .profile-dialog-body > .profile-dialog-actions:last-child {
+      margin-inline: calc(var(--ui-space-3) * -1);
+      padding-inline: var(--ui-space-3);
+    }
+  }
+
+  @media (min-width: 640px) {
+    .profile-dialog-panel {
+      width: min(100%, var(--ui-dialog-panel-max-width));
+    }
+  }
+}

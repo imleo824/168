@@ -1,0 +1,176 @@
+/* Promote date picker and calendar grid contract. */
+
+@layer utilities {
+  .promote-mobile-page .promote-calendar-card {
+    width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    border-radius: var(--ui-radius-lg);
+    background: var(--ui-surface-card);
+    padding: var(--ui-space-3);
+    box-sizing: border-box;
+  }
+
+  .promote-mobile-page .promote-calendar-status {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ui-space-2);
+    margin-bottom: var(--ui-space-2);
+    border-radius: var(--ui-radius-md);
+    padding: var(--ui-space-2) var(--ui-space-3);
+  }
+
+  .promote-mobile-page .promote-calendar-status--error {
+    background: var(--ui-danger-soft-surface);
+  }
+
+  .promote-mobile-page .promote-calendar-status-text {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--ui-danger-classic);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-tight);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .promote-mobile-page .promote-calendar-retry {
+    flex: 0 0 auto;
+    border-radius: var(--ui-radius-pill);
+    color: var(--ui-brand);
+    padding: var(--ui-space-1) var(--ui-space-2);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-strong);
+    line-height: var(--ui-line-tight);
+  }
+
+  .promote-mobile-page .promote-calendar-grid {
+    display: grid;
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: repeat(var(--ui-promote-calendar-columns, 4), minmax(0, 1fr));
+    gap: var(--promote-calendar-gap);
+  }
+
+  .promote-mobile-page .promote-date-cell {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    aspect-ratio: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+    border-radius: var(--ui-radius-md);
+    padding-inline: var(--ui-promote-date-cell-padding-x);
+    box-sizing: border-box;
+    color: var(--promote-idle-text);
+    transition:
+      background-color var(--ui-duration-base) var(--ease-standard),
+      color var(--ui-duration-base) var(--ease-standard),
+      transform var(--ui-duration-base) var(--ease-standard);
+  }
+
+  .promote-mobile-page .promote-date-cell:disabled {
+    pointer-events: none;
+    opacity: var(--ui-promote-date-disabled-opacity);
+  }
+
+  .promote-mobile-page :is(
+    .promote-calendar-cell-date,
+    .promote-calendar-cell-meta
+  ) {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .promote-mobile-page .promote-calendar-cell-date {
+    font-size: var(--ui-text-xs);
+    line-height: var(--ui-line-tight);
+  }
+
+  .promote-mobile-page .promote-calendar-cell-meta {
+    font-size: var(--ui-text-2xs);
+    line-height: var(--ui-line-tight);
+  }
+
+  .promote-mobile-page .promote-date-cell-idle {
+    border-color: var(--promote-idle-border);
+    background: var(--promote-idle-surface);
+    color: var(--promote-idle-text);
+    box-shadow: var(--ui-shadow-none);
+  }
+
+  .promote-mobile-page .promote-date-cell-idle:hover {
+    border-color: var(--promote-idle-border);
+    background: var(--promote-idle-surface-hover);
+  }
+
+  .promote-mobile-page .promote-date-cell-selected {
+    border-color: var(--promote-selected-border);
+    background: var(--promote-selected-surface);
+    color: var(--promote-selected-text);
+    box-shadow: var(--ui-shadow-none);
+  }
+
+  .promote-mobile-page .promote-date-cell-loading {
+    cursor: wait;
+    border-color: var(--ui-color-transparent);
+    background: var(--ui-surface-muted);
+    color: var(--ui-text-disabled);
+  }
+
+  .promote-mobile-page .promote-date-cell-unavailable {
+    cursor: not-allowed;
+    border-color: var(--ui-color-transparent);
+    background: var(--ui-surface-muted);
+    color: var(--ui-text-disabled);
+  }
+
+  .promote-mobile-page .promote-date-cell-booked,
+  .promote-mobile-page .promote-date-cell-booked-own {
+    cursor: not-allowed;
+  }
+
+  .promote-mobile-page .promote-date-cell-booked {
+    border-color: var(--ui-color-transparent);
+    background: var(--ui-warning-bg);
+  }
+
+  .promote-mobile-page .promote-date-cell-booked-own {
+    border-color: var(--ui-color-transparent);
+    background: var(--ui-success-bg);
+  }
+
+  .promote-mobile-page :is(
+    .promote-calendar-cell-date,
+    .promote-calendar-cell-meta
+  ) {
+    font-weight: var(--ui-font-weight-medium);
+  }
+
+  .promote-mobile-page :is(
+    .promote-calendar-cell-date.ui-text-inverse,
+    .promote-calendar-cell-meta.ui-text-inverse
+  ) {
+    color: var(--promote-selected-text);
+  }
+
+  @media (min-width: 640px) {
+    .promote-mobile-page .promote-calendar-grid {
+      grid-template-columns: repeat(7, minmax(0, 1fr));
+    }
+  }
+}

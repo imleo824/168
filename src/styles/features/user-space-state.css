@@ -1,0 +1,7 @@
+/* User space loading and empty states. */
+
+@layer utilities {
+  .user-space-state-block {
+    padding-block: calc(var(--ui-space-8) * 3);
+  }
+}

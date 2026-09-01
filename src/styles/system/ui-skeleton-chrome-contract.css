@@ -1,0 +1,78 @@
+/* Skeleton chrome contract loaded in the late chrome layer. */
+
+@layer utilities {
+  .home-page-skeleton {
+    --home-page-skeleton-tab-width: calc(var(--ui-space-8) + var(--ui-space-4));
+    --home-page-skeleton-tab-gap: var(--ui-home-topic-tab-gap);
+    --home-page-skeleton-tab-repeat: calc(var(--home-page-skeleton-tab-width) + var(--home-page-skeleton-tab-gap));
+    width: 100%;
+    min-height: var(--app-layout-vh);
+    overflow-x: clip;
+    background: var(--ui-surface-page);
+    color: var(--ui-text-primary);
+  }
+
+  .home-page-skeleton-feed-panel {
+    background: var(--ui-surface-card);
+  }
+
+  .home-page-skeleton-feed {
+    margin-inline: auto;
+  }
+
+  .home-page-skeleton .home-topbar-profile-skeleton,
+  .home-page-skeleton .home-topbar .ui-profile-icon-button {
+    position: relative;
+    display: inline-flex;
+    width: var(--ui-home-topbar-action-size);
+    height: var(--ui-home-topbar-action-size);
+    min-width: var(--ui-home-topbar-action-size);
+    min-height: var(--ui-home-topbar-action-size);
+    flex: 0 0 var(--ui-home-topbar-action-size);
+    border-radius: var(--ui-radius-pill);
+    background: var(--ui-skeleton-avatar-surface);
+    box-shadow:
+      inset 0 var(--ui-border-width-hairline) 0 var(--ui-skeleton-inset),
+      0 0 0 var(--ui-border-width-hairline) var(--ui-skeleton-border);
+    overflow: hidden;
+  }
+
+  .home-page-skeleton .home-topbar .ui-profile-icon-button::before {
+    content: var(--ui-content-empty);
+    position: absolute;
+    inset: var(--ui-inset-none);
+    border-radius: inherit;
+    background: linear-gradient(
+      90deg,
+      transparent var(--ui-skeleton-shimmer-stop-start),
+      var(--ui-skeleton-highlight) var(--ui-skeleton-shimmer-stop-peak),
+      transparent var(--ui-skeleton-shimmer-stop-end)
+    );
+    opacity: var(--ui-opacity-hidden);
+    transform: translateX(var(--ui-skeleton-shimmer-start));
+    animation: ui-skeleton-shimmer var(--ui-skeleton-shimmer-duration) var(--ease-standard) infinite;
+  }
+
+  .home-topic-tabs-shell[data-bootstrap-state='loading'] .home-topic-tabs-list {
+    opacity: var(--ui-opacity-hidden);
+  }
+
+  .home-topic-tabs-shell[data-bootstrap-state='loading'] .home-topic-tabs-rail {
+    position: relative;
+  }
+
+  .home-topic-tabs-shell[data-bootstrap-state='loading'] .home-topic-tabs-rail::after {
+    content: var(--ui-content-empty);
+    position: absolute;
+    inset: var(--home-topic-tabs-rail-padding);
+    pointer-events: none;
+    background:
+      repeating-linear-gradient(
+        90deg,
+        var(--ui-surface-muted) 0 var(--home-page-skeleton-tab-width),
+        transparent var(--home-page-skeleton-tab-width) var(--home-page-skeleton-tab-repeat)
+      ) 0 50% / auto var(--home-topic-tab-min-height) repeat-x;
+    border-radius: var(--ui-radius-pill);
+    opacity: var(--ui-skeleton-opacity, 1);
+  }
+}

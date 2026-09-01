@@ -1,0 +1,78 @@
+<svg width="1200" height="675" viewBox="0 0 1200 675" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="675" fill="url(#paint0_linear)"/>
+  <circle cx="1032" cy="88" r="210" fill="rgba(255,205,89,0.13)"/>
+  <circle cx="128" cy="632" r="248" fill="rgba(255,177,52,0.12)"/>
+  <text x="600" y="102" fill="#F9D978" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="70" font-weight="950" text-anchor="middle" letter-spacing="1.4">Tui Plus</text>
+  <text x="600" y="145" fill="rgba(255,255,255,0.82)" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="31" font-weight="750" text-anchor="middle">会员权益</text>
+  <g transform="translate(54 172)">
+    <rect width="534" height="88" rx="18" fill="rgba(255,255,255,0.070)"/>
+    <rect x="22" y="22" width="28" height="28" rx="10" fill="rgba(249,217,120,0.18)"/>
+    <text x="34" y="45" fill="#F9D978" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" font-weight="900" text-anchor="middle">1</text>
+    <text x="76" y="38" fill="#FFFFFF" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="32" font-weight="900">内容曝光权重提升</text>
+    <text x="76" y="63" fill="rgba(255,255,255,0.72)" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="22" font-weight="600">发布帖子的算法推荐权重提升，获得更多流量曝光</text>
+  </g>
+
+  <g transform="translate(612 172)">
+    <rect width="534" height="88" rx="18" fill="rgba(255,255,255,0.070)"/>
+    <rect x="22" y="22" width="28" height="28" rx="10" fill="rgba(249,217,120,0.18)"/>
+    <text x="34" y="45" fill="#F9D978" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" font-weight="900" text-anchor="middle">2</text>
+    <text x="76" y="38" fill="#FFFFFF" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="32" font-weight="900">无限制绑定联系方式</text>
+    <text x="76" y="63" fill="rgba(255,255,255,0.72)" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="22" font-weight="600">发布帖子可不限次数附加 Telegram 沟通入口</text>
+  </g>
+
+  <g transform="translate(54 274)">
+    <rect width="534" height="88" rx="18" fill="rgba(255,255,255,0.070)"/>
+    <rect x="22" y="22" width="28" height="28" rx="10" fill="rgba(249,217,120,0.18)"/>
+    <text x="34" y="45" fill="#F9D978" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" font-weight="900" text-anchor="middle">3</text>
+    <text x="76" y="38" fill="#FFFFFF" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="32" font-weight="900">发帖直接设置推广链接</text>
+    <text x="76" y="63" fill="rgba(255,255,255,0.72)" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="22" font-weight="600">点击到网址注册</text>
+  </g>
+
+  <g transform="translate(612 274)">
+    <rect width="534" height="88" rx="18" fill="rgba(255,255,255,0.070)"/>
+    <rect x="22" y="22" width="28" height="28" rx="10" fill="rgba(249,217,120,0.18)"/>
+    <text x="34" y="45" fill="#F9D978" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" font-weight="900" text-anchor="middle">4</text>
+    <text x="76" y="38" fill="#FFFFFF" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="32" font-weight="900">会员专属付费广告功能</text>
+    <text x="76" y="63" fill="rgba(255,255,255,0.72)" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="22" font-weight="600">享有首页与分类频道广告置顶购买与投放特权</text>
+  </g>
+
+  <g transform="translate(54 376)">
+    <rect width="534" height="88" rx="18" fill="rgba(255,255,255,0.070)"/>
+    <rect x="22" y="22" width="28" height="28" rx="10" fill="rgba(249,217,120,0.18)"/>
+    <text x="34" y="45" fill="#F9D978" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" font-weight="900" text-anchor="middle">5</text>
+    <text x="76" y="38" fill="#FFFFFF" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="32" font-weight="900">主页展示专属网站</text>
+    <text x="76" y="63" fill="rgba(255,255,255,0.72)" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="22" font-weight="600">在个人主页挂载独立网站链接，访客一键直达</text>
+  </g>
+
+  <g transform="translate(612 376)">
+    <rect width="534" height="88" rx="18" fill="rgba(255,255,255,0.070)"/>
+    <rect x="22" y="22" width="28" height="28" rx="10" fill="rgba(249,217,120,0.18)"/>
+    <text x="34" y="45" fill="#F9D978" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" font-weight="900" text-anchor="middle">6</text>
+    <text x="76" y="38" fill="#FFFFFF" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="32" font-weight="900">主页挂载 Telegram 频道</text>
+    <text x="76" y="63" fill="rgba(255,255,255,0.72)" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="22" font-weight="600">在个人主页展示 Telegram 频道，实现引流沉淀</text>
+  </g>
+
+  <g transform="translate(54 478)">
+    <rect width="534" height="88" rx="18" fill="rgba(255,255,255,0.070)"/>
+    <rect x="22" y="22" width="28" height="28" rx="10" fill="rgba(249,217,120,0.18)"/>
+    <text x="34" y="45" fill="#F9D978" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" font-weight="900" text-anchor="middle">7</text>
+    <text x="76" y="38" fill="#FFFFFF" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="32" font-weight="900">自动同步官方 Telegram 频道</text>
+    <text x="76" y="63" fill="rgba(255,255,255,0.72)" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="22" font-weight="600">发布的帖子自动一键同步推送到官方频道</text>
+  </g>
+
+  <g transform="translate(612 478)">
+    <rect width="534" height="88" rx="18" fill="rgba(255,255,255,0.070)"/>
+    <rect x="22" y="22" width="28" height="28" rx="10" fill="rgba(249,217,120,0.18)"/>
+    <text x="34" y="45" fill="#F9D978" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="20" font-weight="900" text-anchor="middle">8</text>
+    <text x="76" y="38" fill="#FFFFFF" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="32" font-weight="900">尊享会员专属身份标识</text>
+    <text x="76" y="63" fill="rgba(255,255,255,0.72)" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="22" font-weight="600">全站亮起尊贵会员标识，显著提升关注与信任度</text>
+  </g>
+  <text x="600" y="632" fill="rgba(255,255,255,0.62)" font-family="Arial, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="24" font-weight="600" text-anchor="middle">发现圈内事，就上推推 · tuitui888.com</text>
+  <defs>
+    <linearGradient id="paint0_linear" x1="0" y1="0" x2="1200" y2="675" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1F1708"/>
+      <stop offset="0.50" stop-color="#0E0E14"/>
+      <stop offset="1" stop-color="#2A1B08"/>
+    </linearGradient>
+  </defs>
+</svg>
