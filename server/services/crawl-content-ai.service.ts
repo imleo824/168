@@ -8,6 +8,7 @@ import { generateAutomationAiText } from './automation-ai.service';
 import { cleanString } from './auto-crawl-normalize';
 import { cleanCrawlContent, type CrawlExtractResult } from './crawl-content-extract.service';
 import {
+  currencyRate,
   normalizeCrawlCategoryMeta,
   type CrawlCategoryRef,
 } from './crawl-category-meta-normalize.service';
@@ -295,7 +296,7 @@ function schemaInstruction(context: AutoCrawlExtractionContext) {
     ? '\n薪资 select 字段必须先识别金额、币种和周期，再归入配置区间：U、USDT、USD、美元、刀按美元等值处理；也要识别 RMB/CNY/人民币、PHP/披索/比索、THB/泰铢、KHR/瑞尔、VND/越南盾、AED/迪拉姆、MYR/马币/林吉特、SGD/新币、IDR/印尼盾、LAK/基普、MMK/缅币、JPY/日元、KRW/韩元、HKD/港币、MOP/澳门币、EUR/欧元等常见币种。能按原文语义合理换算到美元月薪区间时，输出最接近的 options 原文值；没有明确数字金额，或币种/周期不足以可靠判断，或只写面谈、面议、待遇从优、薪资详聊、看能力，必须输出“面议”。'
     : '';
 
-  return `当前分类允许的 Meta Schema：${JSON.stringify(fields)}${locationRule}${salaryRangeRule}\n本次只处理这些后台字段：${configuredLabels || '无'}。meta 只能包含 Schema 中配置的 key；required=true 的字段必须优先从原文完整提取，但原文没有可靠证据时仍必须省略，禁止猜测或填造默认值，后续发布契约会阻止结构不完整的内容。未配置的原文属性必须完全忽略，不要抽取、不要转写、不要放入 meta 候选，例如年龄、性别、国籍、语言、学历、工作时间、休假、班次、人数、经验要求等，除非它们本身就是 Schema 字段。字段 key 只是输出键，原文不需要出现 key 字符串；只围绕 Schema 字段的 label、type、options 理解上下文后提取，不要做关键词照抄。number 字段只在 Schema 配置了对应字段时才解析数值，例如配置了薪资数字字段且原文“薪资 1000USD”才输出 {"salary":1000}；select 字段必须输出 options 中的原文值，不能自造新值。无法确认的字段直接省略。`;
+  return `当前分类允许的 Meta Schema：${JSON.stringify(fields)}${locationRule}${salaryRangeRule}\n本次只处理这些后台字段：${configuredLabels || '无'}。meta 只能包含 Schema 中配置的 key；required=true 的字段必须优先从原文完整提取，但原文没有可靠证据时仍必须省略，禁止猜测或填造默认值，后续发布契约会阻止结构不完整的内容。未配置的原文属性必须完全忽略，不要抽取、不要转写、不要放入 meta 候选，例如年龄、性别、国籍、语言、学历、工作时间、休假、班次、人数、经验要求等，除非它们本身就是 Schema 字段。字段 key 只是输出键，原文不需要出现 key 字符串；只围绕 Schema 字段的 label、type、options 理解上下文后提取，不要做关键词照抄。number 字段只在 Schema 配置了对应字段时才解析数值；对于价格、薪资、租金等金额字段（key/label 包含 price, salary, rent, cost, fee, amount, 价格, 租金, 薪资），若原文中带有明确的非 USD 币种（如 AED 85,000、RMB 5000、10000 PHP 等），必须在 meta 中保留包含币种和数值的原始表达（如 {"price": "AED 85,000"}），以便系统自动精准按汇率换算为 USD；若原文为 USD/美元/U/纯数字，则可直接输出数值。select 字段必须输出 options 中的原文值，不能自造新值。无法确认的字段直接省略。`;
 }
 
 function locationFromMeta(meta: Record<string, unknown>, schema: PublishCategoryMetaConfig | null) {
@@ -379,7 +380,20 @@ ${sourceContent}
   });
   const ruleBasedRawMeta = buildRuleBasedCrawlMetaCandidates(context, sourceContent);
   const ruleBasedFallbackRawMeta = Object.fromEntries(Object.entries(ruleBasedRawMeta)
-    .filter(([key]) => !Object.prototype.hasOwnProperty.call(aiNormalized.meta, key)));
+    .filter(([key, candidate]) => {
+      if (!Object.prototype.hasOwnProperty.call(aiNormalized.meta, key)) return true;
+      const candidateStr = String(candidate || '');
+      const candidateRate = currencyRate(candidateStr);
+      if (candidateRate !== null && candidateRate !== 1) {
+        const aiVal = aiNormalized.meta[key];
+        const aiRawVal = String((aiRawMeta as Record<string, unknown>)[key] ?? '');
+        const aiRawRate = currencyRate(aiRawVal);
+        if (typeof aiVal === 'number' && (aiRawRate === null || aiRawRate === 1)) {
+          return true;
+        }
+      }
+      return false;
+    }));
   const normalized = Object.keys(ruleBasedFallbackRawMeta).length
     ? await normalizeCrawlCategoryMeta({
       category: context.category,

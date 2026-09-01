@@ -128,8 +128,15 @@ function formatKeyedMetaValue(key: string, value: unknown) {
   return formatted;
 }
 
+const HAS_CURRENCY_PATTERN = /(?:aed|迪拉姆|usdt?|usd|\$|刀|u|rmb|cny|人民币|元|¥|php|披索|比索|peso|thb|泰铢|khr|瑞尔|vnd|越南盾|myr|马币|林吉特|sgd|新币|idr|印尼盾|lak|基普|mmk|缅币|jpy|日元|krw|韩元|hkd|港币|mop|澳门币|eur|欧元|面议|面谈)/i;
+
 function formatCurrencySuffixValue(value: string) {
-  const normalized = value.replace(/\$/g, '').replace(/\s*-\s*/g, '-').trim();
+  const text = value.trim();
+  if (!text) return '';
+  if (HAS_CURRENCY_PATTERN.test(text)) {
+    return text;
+  }
+  const normalized = text.replace(/\s*-\s*/g, '-').trim();
   return normalized.replace(/\d[\d,]*(?:\.\d+)?/g, (match) => `${match}$`);
 }
 

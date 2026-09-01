@@ -374,7 +374,7 @@ function isSalarySelectField(field: PublishCategoryMetaFieldConfig) {
     && (field.options || []).some((option) => /\$|面议/.test(option));
 }
 
-function currencyRate(raw: string) {
+export function currencyRate(raw: string) {
   if (/(?:usdt|usd|(?:^|[^a-z])u(?:$|[^a-z])|美元|美金|刀|\$)/i.test(raw)) return 1;
   if (/(?:jpy|日元)/i.test(raw)) return 0.0064;
   if (/(?:rmb|cny|人民币|(?<!日)元|¥)/i.test(raw)) return 0.14;
@@ -441,12 +441,12 @@ function contextualMoneySource(raw: unknown, field: PublishCategoryMetaFieldConf
   if (!text) return '';
 
   for (const term of moneyFieldSearchTerms(field)) {
-    const pattern = new RegExp(`${escapeRegex(term)}\\s*[:：]?\\s*(?:${UNSIGNED_NUMBER_TOKEN_PATTERN_SOURCE})(?:${NUMBER_RANGE_SEPARATOR_PATTERN_SOURCE}(?:${UNSIGNED_NUMBER_TOKEN_PATTERN_SOURCE}))?(?:\\s*(?:${MONEY_CURRENCY_PATTERN_SOURCE}))?`, 'i');
+    const pattern = new RegExp(`${escapeRegex(term)}\\s*[:：]?\\s*(?:${MONEY_CURRENCY_PATTERN_SOURCE})?\\s*(?:${UNSIGNED_NUMBER_TOKEN_PATTERN_SOURCE})(?:${NUMBER_RANGE_SEPARATOR_PATTERN_SOURCE}(?:${UNSIGNED_NUMBER_TOKEN_PATTERN_SOURCE}))?(?:\\s*(?:${MONEY_CURRENCY_PATTERN_SOURCE}))?`, 'i');
     const match = text.match(pattern);
     if (match?.[0]) return match[0];
   }
 
-  const explicitMoneyPattern = new RegExp(`(?:${UNSIGNED_NUMBER_TOKEN_PATTERN_SOURCE})(?:${NUMBER_RANGE_SEPARATOR_PATTERN_SOURCE}(?:${UNSIGNED_NUMBER_TOKEN_PATTERN_SOURCE}))?\\s*(?:${MONEY_CURRENCY_PATTERN_SOURCE})`, 'gi');
+  const explicitMoneyPattern = new RegExp(`(?:${MONEY_CURRENCY_PATTERN_SOURCE})\\s*(?:${UNSIGNED_NUMBER_TOKEN_PATTERN_SOURCE})(?:${NUMBER_RANGE_SEPARATOR_PATTERN_SOURCE}(?:${UNSIGNED_NUMBER_TOKEN_PATTERN_SOURCE}))?|(?:${UNSIGNED_NUMBER_TOKEN_PATTERN_SOURCE})(?:${NUMBER_RANGE_SEPARATOR_PATTERN_SOURCE}(?:${UNSIGNED_NUMBER_TOKEN_PATTERN_SOURCE}))?\\s*(?:${MONEY_CURRENCY_PATTERN_SOURCE})`, 'gi');
   const explicitMatches = [...text.matchAll(explicitMoneyPattern)];
   return explicitMatches.length === 1 ? explicitMatches[0]?.[0] || '' : '';
 }

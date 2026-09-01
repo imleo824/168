@@ -535,6 +535,22 @@ const unitWordMoneyMeta = await normalizeCrawlCategoryMeta({
 assert.equal(unitWordMoneyMeta.meta.price, undefined, 'English words starting with u must not be mistaken for USD/U currency.');
 assert.equal(unitWordMoneyMeta.audit.rejected.price?.reason, 'money_number_not_matched');
 
+const aedPriceMeta = await normalizeCrawlCategoryMeta({
+  category: { id: 'category_secondhand', name: '二手物品', slug: 'secondhand' },
+  categoryMetaSchema: {
+    categorySlug: 'secondhand',
+    schemaVersion: 1,
+    name: '二手物品',
+    fields: [
+      { key: 'price', label: '价格', type: 'number', required: false },
+    ],
+  },
+  rawMeta: { price: 'AED 85,000' },
+  locationPresets: [],
+});
+
+assert.equal(aedPriceMeta.meta.price, 23120, 'AED 85,000 must normalize to 23120 USD based on exchange rate (1 AED = 0.272 USD).');
+
 const usdRentMeta = await normalizeCrawlCategoryMeta({
   category: { id: 'category_housing', name: '租房', slug: 'housing' },
   categoryMetaSchema: {
