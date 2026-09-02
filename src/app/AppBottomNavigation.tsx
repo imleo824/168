@@ -124,11 +124,13 @@ export default function AppBottomNavigation() {
   const goProfile = () => {
     warmupRoutePath(APP_ROUTES.profile);
     warmupNavigationIntent('profile');
-    if (pathname === APP_ROUTES.profile) {
-      scrollActivePageToTop('smooth');
-      return;
-    }
-    navigate(APP_ROUTES.profile);
+    requireAuth(() => {
+      if (pathname === APP_ROUTES.profile) {
+        scrollActivePageToTop('smooth');
+        return;
+      }
+      navigate(APP_ROUTES.profile);
+    });
   };
 
   const { guarded: guardedGoCreate } = useInteractionGuard(goCreate, {

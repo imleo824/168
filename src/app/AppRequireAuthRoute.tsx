@@ -1,5 +1,5 @@
 import { useEffect, useRef, type ReactNode } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ShieldCheck, UserRound } from 'lucide-react';
 
 import { useAuth } from '@/context/AuthContext';
@@ -9,7 +9,6 @@ import AppPage from '@/ui/AppPage';
 import { PageLoader } from '@/ui/PageLoader';
 import PageHeader from '@/ui/PageHeader';
 import PageContentShell from '@/ui/PageContentShell';
-import AuthRequiredState from '@/ui/AuthRequiredState';
 import { writeStoredReferralInvite } from '@/utils/referralInvite';
 import { REFERRAL_INVITE_SOURCES, readReferralInviteCodeFromSearch } from '../../shared/referral';
 
@@ -52,49 +51,30 @@ type AppRequireAuthRouteProps = {
 export default function AppRequireAuthRoute({ children, allowContextualGuestState = false }: AppRequireAuthRouteProps) {
   const { user, loading, requireAuth } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const handledInviteCodeRef = useRef('');
 
   useEffect(() => {
     if (loading || user) return;
+
     const inviteCode = readReferralInviteCodeFromSearch(location.search);
-    if (!inviteCode || handledInviteCodeRef.current === inviteCode) return;
-    handledInviteCodeRef.current = inviteCode;
-    writeStoredReferralInvite({ code: inviteCode, source: REFERRAL_INVITE_SOURCES.LINK });
-    requireAuth();
-  }, [loading, location.search, requireAuth, user]);
+    if (inviteCode && handledInviteCodeRef.current !== inviteCode) {
+      handledInviteCodeRef.current = inviteCode;
+      writeStoredReferralInvite({ code: inviteCode, source: REFERRAL_INVITE_SOURCES.LINK });
+    }
+
+    if (!allowContextualGuestState) {
+      const targetPath = location.pathname + location.search;
+      navigate(APP_ROUTES.home, { replace: true });
+      requireAuth(() => {
+        navigate(targetPath);
+      });
+    }
+  }, [loading, user, navigate, location.pathname, location.search, requireAuth, allowContextualGuestState]);
 
   if (loading) return <PageLoader />;
   if (!user && !allowContextualGuestState) {
-    const routeMeta = getAuthRouteMeta(location.pathname);
-
-    return (
-      <AppPage mobileAddressBarScroll bottomSafe className="auth-required-page surface-page">
-        <SEO
-          title={routeMeta.documentTitle}
-          description="登录推推后继续访问发布、推广、充值和个人记录等账号功能。"
-          canonicalPath={location.pathname}
-          noindex
-        />
-        <PageHeader title={routeMeta.pageTitle} showBack={routeMeta.showBack} titleAlign="center" />
-        <PageContentShell as="main" className="ui-auth-required-wrap ui-app-page-main">
-          <AuthRequiredState
-            titleAs="h1"
-            title="需要登录"
-            description="登录后可查看仅属于你的记录与操作历史。"
-            actionLabel="登录 / 注册"
-            onAction={() => requireAuth()}
-            icon={<ShieldCheck />}
-            context="records"
-            tone="panel"
-            density="compact"
-            previewItems={[
-              { icon: <ShieldCheck aria-hidden="true" />, label: '私有记录', description: '只展示当前账号可见的数据' },
-              { icon: <UserRound aria-hidden="true" />, label: '账号同步', description: '登录后恢复个人资料和历史操作' },
-            ]}
-          />
-        </PageContentShell>
-      </AppPage>
-    );
+    return null;
   }
   return <>{children}</>;
 }

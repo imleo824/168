@@ -521,15 +521,17 @@ export default function ProfileMobile() {
     mode: 'drop',
   });
 
+  useEffect(() => {
+    if (!authUser) {
+      navigate(APP_ROUTES.home, { replace: true });
+      requireAuth(() => {
+        navigate(APP_ROUTES.profile);
+      });
+    }
+  }, [authUser, navigate, requireAuth]);
+
   if (!user) {
-    return (
-      <AppPage mobileAddressBarScroll className="profile-modern-page surface-page">
-        <SEO title="登录推推" description="登录推推，管理您发布的圈内分类信息、资源和服务。" noindex />
-        <PageContentShell as="main" className="ui-auth-required-wrap ui-app-page-main">
-          <ProfileAuthRequiredState onAction={() => requireAuth(() => navigate(APP_ROUTES.profile))} />
-        </PageContentShell>
-      </AppPage>
-    );
+    return null;
   }
 
   return (

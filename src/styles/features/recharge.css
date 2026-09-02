@@ -748,6 +748,42 @@
     flex-direction: column;
   }
 
+  .recharge-page .recharge-form-card-surface {
+    padding: var(--ui-space-5) var(--ui-space-4);
+  }
+
+  @media (min-width: 640px) {
+    .recharge-page .recharge-form-card-surface {
+      padding: var(--ui-space-6) var(--ui-space-5);
+    }
+  }
+
+  /* 预计获得积分的独立宽敞信息条 */
+  .recharge-page .recharge-estimate-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--ui-space-3);
+    padding: var(--ui-space-3) var(--ui-space-4);
+    background: var(--ui-brand-soft);
+    border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+    border-radius: var(--ui-radius-xl);
+    animation: fade-in var(--ui-duration-base) var(--ease-standard);
+  }
+
+  .recharge-page .recharge-estimate-left {
+    display: flex;
+    align-items: center;
+    gap: var(--ui-space-2);
+  }
+
+  .recharge-page .recharge-estimate-sparkle-icon {
+    width: 0.95rem;
+    height: 0.95rem;
+    color: var(--ui-brand);
+    animation: pulse 2s infinite ease-in-out;
+  }
+
   .recharge-page :is(
     .recharge-step,
     .recharge-form,
@@ -810,13 +846,13 @@
 
   .recharge-page .recharge-amount-field {
     display: flex;
-    min-height: var(--ui-recharge-input-height);
+    min-height: 3.5rem;
     align-items: center;
-    gap: var(--ui-space-2);
+    gap: var(--ui-space-3);
     border: var(--ui-border-width-hairline) solid var(--ui-social-line-soft);
-    border-radius: var(--ui-recharge-input-radius);
+    border-radius: var(--ui-radius-xl);
     background: var(--ui-social-surface-muted, var(--ui-surface-muted));
-    padding-inline: var(--ui-space-3);
+    padding-inline: var(--ui-space-4);
     transition: border-color var(--ui-duration-fast) var(--ease-standard), background-color var(--ui-duration-fast) var(--ease-standard);
   }
 
@@ -831,26 +867,27 @@
     border: var(--ui-border-none);
     background: var(--ui-surface-transparent);
     color: var(--ui-text-strong);
-    font-size: max(var(--ui-mobile-form-font-size), var(--ui-text-title));
+    font-size: var(--ui-text-md);
     font-weight: var(--ui-font-weight-strong);
     line-height: var(--ui-line-none);
     outline: var(--ui-outline-none);
+    padding-block: var(--ui-space-2);
   }
 
-  .recharge-page .recharge-estimate {
-    display: inline-flex;
-    flex: 0 0 auto;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: var(--ui-space-half);
-    white-space: nowrap;
-  }
-
-  .recharge-page .recharge-estimate-value {
+  .recharge-page .recharge-estimate-bar .recharge-estimate-value {
     color: var(--ui-brand);
     font-size: var(--ui-text-sm);
     font-weight: var(--ui-font-weight-display, 700);
     font-variant-numeric: tabular-nums;
+    display: flex;
+    align-items: baseline;
+    gap: var(--ui-space-half);
+  }
+
+  .recharge-page .recharge-estimate-bar .recharge-estimate-value span {
+    font-size: var(--ui-text-2xs);
+    color: var(--ui-text-muted);
+    font-weight: var(--ui-font-weight-medium);
   }
 
   .recharge-page .ui-token-amount {

@@ -567,15 +567,19 @@ export default function RechargeMobile() {
                           <XCircle className="w-4 h-4" />
                         </button>
                       )}
-                      {amount && (
-                        <div className="recharge-estimate">
-                          <span className="recharge-estimate-value">
-                            +{Math.floor(parseFloat(amount) * currentPointsPerUsdt).toLocaleString()}
-                          </span>
-                          <span className="recharge-estimate-label">预计获得积分</span>
-                        </div>
-                      )}
                     </div>
+
+                    {amount && (
+                      <div className="recharge-estimate-bar">
+                        <div className="recharge-estimate-left">
+                          <Sparkles className="recharge-estimate-sparkle-icon" />
+                          <span className="recharge-estimate-label">预计获得</span>
+                        </div>
+                        <span className="recharge-estimate-value">
+                          +{Math.floor(parseFloat(amount) * currentPointsPerUsdt).toLocaleString()} <span>积分</span>
+                        </span>
+                      </div>
+                    )}
                   </div>
 
                   <div className="recharge-preset-section">

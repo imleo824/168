@@ -227,7 +227,9 @@ function Navigation() {
 
   const openProfile = () => {
     warmupNavigationIntent('profile');
-    navigate(APP_ROUTES.profile);
+    requireAuth(() => {
+      navigate(APP_ROUTES.profile);
+    });
   };
 
   const openCreate = () => {
@@ -375,6 +377,20 @@ function AppDesktopSidebar() {
                 key={item.to}
                 to={item.to}
                 end={item.end}
+                onClick={(e) => {
+                  const protectedPaths = new Set<string>([
+                    APP_ROUTES.profile,
+                    APP_ROUTES.messages,
+                    APP_ROUTES.create,
+                    APP_ROUTES.sponsor,
+                  ]);
+                  if (protectedPaths.has(item.to)) {
+                    e.preventDefault();
+                    requireAuth(() => {
+                      navigate(item.to);
+                    });
+                  }
+                }}
                 className={({ isActive }) => (
                   `app-desktop-nav-item flex flex-row items-center gap-3${isActive ? ' app-desktop-nav-item--active' : ''}`
                 )}
@@ -598,7 +614,7 @@ function AppLayout() {
             </Suspense>
           </RecoveryGuard>
         </div>
-        {isUserSurface ? <AppDesktopAdRail /> : null}
+        {isUserSurface && isDesktopViewport ? <AppDesktopAdRail /> : null}
         {isUserSurface ? <AppBottomNavigation /> : null}
         <GlobalAuthOverlay />
       </div>
