@@ -448,6 +448,40 @@
       gap: var(--ui-space-4);
     }
 
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-panel {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: var(--ui-space-4);
+      padding: var(--ui-space-5);
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-row {
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: var(--ui-space-4);
+      width: 100%;
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-main {
+      flex-direction: column;
+      align-items: center;
+      gap: var(--ui-space-1);
+      flex: 0 0 auto;
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-panel .ui-token-amount {
+      font-size: 1.625rem;
+    }
+
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-side {
+      flex-direction: column;
+      align-items: center;
+      gap: var(--ui-space-2);
+    }
+
     .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-footer-action {
       justify-content: flex-end;
     }

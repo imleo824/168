@@ -112,12 +112,19 @@
     .user-space-avatar-next[data-tui-plus='true'],
     .feed-card-author-avatar-link[data-tui-plus='true'],
     .app-bottom-nav-avatar-shell[data-tui-plus='true']
-  ) .ui-avatar,
-  .ui-avatar[data-tui-plus='true'] {
+  ) .ui-avatar {
     position: relative;
     z-index: var(--ui-z-local-raised);
     overflow: hidden;
     border-radius: inherit;
+    box-shadow: var(--ui-shadow-none);
+  }
+
+  .ui-avatar[data-tui-plus='true'] {
+    position: relative;
+    z-index: var(--ui-z-local-raised);
+    overflow: hidden;
+    border-radius: var(--ui-radius-pill);
     box-shadow: var(--ui-shadow-none);
   }
 

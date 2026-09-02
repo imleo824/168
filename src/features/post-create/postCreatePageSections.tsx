@@ -67,10 +67,10 @@ export function PostCreateAuthRequiredState({ onAction }: { onAction: () => void
       description="选择分类、地点与展示偏好，让你的内容被更精准地看到。"
       actionLabel="登录 / 注册"
       previewItems={[
-        { icon: <Hash aria-hidden="true" />, label: '选好分类', description: '精准归类到对应频道，让关注该话题的用户更快发现' },
-        { icon: <MapPin aria-hidden="true" />, label: '补充地点', description: '标注所属城市或区域，提升同城与附近曝光效率' },
-        { icon: <LockKeyhole aria-hidden="true" />, label: '控制展示', description: '自由切换公开或匿名，灵活掌控个人隐私与展示方式' },
-        { icon: <Send aria-hidden="true" />, label: '保留联系入口', description: '一键公开或隐藏 Telegram 账号，方便读者直接沟通' },
+        { icon: <Hash aria-hidden="true" />, label: '设置分类', description: '精准归类到对应频道，让关注该话题的用户更快发现' },
+        { icon: <MapPin aria-hidden="true" />, label: '添加地点', description: '标注所属城市或区域，提升同城与附近曝光效率' },
+        { icon: <LockKeyhole aria-hidden="true" />, label: '匿名分布', description: '自由切换公开或匿名，灵活掌控个人隐私与展示方式' },
+        { icon: <Send aria-hidden="true" />, label: '联系方式', description: '一键公开或隐藏 Telegram 账号，方便读者直接沟通' },
       ]}
       onAction={onAction}
     />
