@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -14,10 +14,10 @@ import {
   ChevronRight,
   LayoutGrid,
 } from 'lucide-react';
-import { getAllActivePromotions } from '@/services/api';
+import { getAllActivePromotions, getHomeAds } from '@/services/api';
 import { APP_ROUTES } from '@/app/routePaths';
 import { PromotionType, type PromotionBooking } from '@/types';
-import { warmupNavigationIntent } from '@/utils/routeWarmups';
+import { warmupNavigationIntent, warmupRoutePath } from '@/utils/routeWarmups';
 
 function getPromotionTag(type: string, booking?: PromotionBooking) {
   if (type === PromotionType.AD_HOME) {
@@ -55,12 +55,37 @@ function normalizeAdTargetUrlForDisplay(url?: string | null) {
 export const AppDesktopAdRail: React.FC = () => {
   const navigate = useNavigate();
 
-  const { data: promotions, isLoading } = useQuery<PromotionBooking[]>({
+  const { data: promotions, isLoading: isLoadingPromos } = useQuery<PromotionBooking[]>({
     queryKey: ['promotions', 'all-active'],
     queryFn: () => getAllActivePromotions(),
     staleTime: 30_000,
     refetchInterval: 60_000,
   });
+
+  const { data: homeAds, isLoading: isLoadingHomeAds } = useQuery<PromotionBooking[]>({
+    queryKey: ['promotions', 'home-ads'],
+    queryFn: () => getHomeAds(),
+    staleTime: 30_000,
+    refetchInterval: 60_000,
+  });
+
+  const activePromotions = useMemo(() => {
+    const list: PromotionBooking[] = [...(promotions || [])];
+    const seenKeys = new Set(list.map((item) => item.id || `${item.type}:${item.slotIndex}`));
+
+    if (homeAds && Array.isArray(homeAds)) {
+      for (const ad of homeAds) {
+        const key = ad.id || `${ad.type}:${ad.slotIndex}`;
+        if (!seenKeys.has(key)) {
+          seenKeys.add(key);
+          list.push(ad);
+        }
+      }
+    }
+    return list;
+  }, [promotions, homeAds]);
+
+  const isLoading = isLoadingPromos && isLoadingHomeAds;
 
   const handleSponsorClick = () => {
     warmupNavigationIntent('sponsor');
@@ -96,9 +121,9 @@ export const AppDesktopAdRail: React.FC = () => {
           <div>
             <h2 className="text-sm font-semibold text-[var(--ui-text-primary)] leading-none flex items-center gap-1.5">
               实时推广
-              {promotions && promotions.length > 0 && (
+              {activePromotions && activePromotions.length > 0 && (
                 <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-[var(--ui-brand)]/10 text-[var(--ui-brand)]">
-                  {promotions.length} 生效中
+                  {activePromotions.length} 生效中
                 </span>
               )}
             </h2>
@@ -107,9 +132,10 @@ export const AppDesktopAdRail: React.FC = () => {
         </div>
 
         <button
+          type="button"
           onClick={handleSponsorClick}
           onMouseEnter={() => warmupNavigationIntent('sponsor')}
-          className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg text-[var(--ui-brand)] bg-[var(--ui-brand)]/10 hover:bg-[var(--ui-brand)]/20 transition-colors"
+          className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg text-[var(--ui-brand)] bg-[var(--ui-brand)]/10 hover:bg-[var(--ui-brand)]/20 transition-colors cursor-pointer"
           title="发起新推广"
         >
           <TrendingUp className="w-3.5 h-3.5" />
@@ -136,27 +162,25 @@ export const AppDesktopAdRail: React.FC = () => {
               </div>
             ))}
           </div>
-        ) : !promotions || promotions.length === 0 ? (
+        ) : !activePromotions || activePromotions.length === 0 ? (
           /* Empty State */
           <div className="p-6 text-center flex flex-col items-center justify-center my-auto">
             <div className="w-12 h-12 rounded-2xl bg-[var(--ui-brand)]/10 flex items-center justify-center text-[var(--ui-brand)] mb-3">
               <Megaphone className="w-6 h-6" />
             </div>
-            <h3 className="text-sm font-semibold text-[var(--ui-text-primary)] mb-1">暂无生效中的广告</h3>
-            <p className="text-xs text-[var(--ui-text-muted)] mb-4 max-w-xs leading-relaxed">
-              锁定热门位置，提升贴文曝光度与精准客户引流。
-            </p>
+            <h3 className="text-sm font-semibold text-[var(--ui-text-primary)] mb-1">暂无广告</h3>         
             <button
+              type="button"
               onClick={handleSponsorClick}
-              className="px-4 py-2 text-xs font-medium rounded-xl bg-[var(--ui-brand)] text-[var(--ui-color-white)] hover:opacity-90 transition-opacity inline-flex items-center gap-1.5"
+              className="px-4 py-2 text-xs font-medium rounded-xl bg-[var(--ui-brand)] text-[var(--ui-color-white)] hover:opacity-90 transition-opacity inline-flex items-center gap-1.5 cursor-pointer"
             >
               <TrendingUp className="w-3.5 h-3.5" />
-              <span>立即发起推广</span>
+              <span>我要推广</span>
             </button>
           </div>
         ) : (
           /* Promotion Items List (Sorted newest top to bottom) */
-          promotions.map((item) => {
+          activePromotions.map((item) => {
             const tag = getPromotionTag(item.type, item);
             const hasBannerImage = Boolean(item.adImageUrl || item.adMobileImageUrl);
             const adImageUrl = item.adImageUrl || item.adMobileImageUrl;
@@ -166,7 +190,20 @@ export const AppDesktopAdRail: React.FC = () => {
             return (
               <div
                 key={item.id}
+                role="button"
+                tabIndex={0}
                 onClick={() => handleItemClick(item)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleItemClick(item);
+                  }
+                }}
+                onMouseEnter={() => {
+                  if (item.postId) {
+                    warmupRoutePath(`/post/${item.postId}`);
+                  }
+                }}
                 className="app-desktop-ad-rail-card group"
               >
                 {/* Header Row: Badge & Type */}
@@ -200,6 +237,8 @@ export const AppDesktopAdRail: React.FC = () => {
                       alt="广告Banner"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                       loading="lazy"
+                      decoding="async"
+                      referrerPolicy="no-referrer"
                     />
                   </div>
                 )}
@@ -213,10 +252,12 @@ export const AppDesktopAdRail: React.FC = () => {
                         <img
                           src={post.user.photoUrl}
                           alt={post.user.displayName || 'User'}
-                          className="w-5 h-5 rounded-full object-cover border border-[var(--ui-line-hairline)]"
+                          className="w-5 h-5 rounded-full object-cover border border-[var(--ui-line-hairline)] flex-shrink-0"
+                          decoding="async"
+                          referrerPolicy="no-referrer"
                         />
                       ) : (
-                        <div className="w-5 h-5 rounded-full bg-[var(--ui-brand)]/10 text-[var(--ui-brand)] text-xs font-bold flex items-center justify-center">
+                        <div className="w-5 h-5 rounded-full bg-[var(--ui-brand)]/10 text-[var(--ui-brand)] text-xs font-bold flex items-center justify-center flex-shrink-0">
                           {(post.user?.displayName || post.user?.username || 'U')[0].toUpperCase()}
                         </div>
                       )}
@@ -243,6 +284,8 @@ export const AppDesktopAdRail: React.FC = () => {
                           alt={post.title || '帖子图文'}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           loading="lazy"
+                          decoding="async"
+                          referrerPolicy="no-referrer"
                         />
                       </div>
                     )}
@@ -251,31 +294,36 @@ export const AppDesktopAdRail: React.FC = () => {
                     <div className="flex items-center justify-between text-xs text-[var(--ui-text-muted)] pt-1">
                       <div className="flex items-center gap-3">
                         <span className="flex items-center gap-1">
-                          <Eye className="w-3 h-3 opacity-60" />
+                          <Eye className="w-3 h-3 opacity-60 flex-shrink-0" />
                           <span>{post.viewCount || 0}</span>
                         </span>
                         <span className="flex items-center gap-1">
-                          <MessageSquare className="w-3 h-3 opacity-60" />
+                          <MessageSquare className="w-3 h-3 opacity-60 flex-shrink-0" />
                           <span>{post.commentCount || 0}</span>
                         </span>
                         <span className="flex items-center gap-1">
-                          <Heart className="w-3 h-3 opacity-60" />
+                          <Heart className="w-3 h-3 opacity-60 flex-shrink-0" />
                           <span>{post.likeCount || 0}</span>
                         </span>
                       </div>
                       <span className="flex items-center text-[var(--ui-brand)] opacity-0 group-hover:opacity-100 transition-opacity font-medium">
-                        查看详情 <ChevronRight className="w-3 h-3" />
+                        查看详情 <ChevronRight className="w-3 h-3 flex-shrink-0" />
                       </span>
                     </div>
                   </div>
                 ) : (
                   /* Banner/URL only without post attached */
-                  <div>
-                    {item.adTargetUrl ? (
-                      <p className="text-xs font-medium text-[var(--ui-text-primary)] line-clamp-1 group-hover:text-[var(--ui-brand)] transition-colors">
-                        {item.adTargetUrl}
-                      </p>
-                    ) : null}
+                  <div className="flex items-center justify-between pt-0.5">
+                    <span className="text-xs font-medium text-[var(--ui-text-primary)] group-hover:text-[var(--ui-brand)] transition-colors truncate">
+                      {item.id === 'system-ad-tuiplus'
+                        ? '推推会员 TUI+ 全站高曝光特权'
+                        : item.id === 'system-ad-sponsor'
+                          ? '赞助商与全站精准引流中心'
+                          : item.adTargetUrl || '点击了解详情'}
+                    </span>
+                    <span className="flex items-center text-xs text-[var(--ui-brand)] font-medium flex-shrink-0 ml-1">
+                      点击访问 <ChevronRight className="w-3 h-3 flex-shrink-0" />
+                    </span>
                   </div>
                 )}
               </div>

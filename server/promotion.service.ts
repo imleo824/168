@@ -212,20 +212,43 @@ export class PromotionService {
   }
 
   static async getAllActivePromotions() {
-    if (!isDbConfigured()) return [];
+    let deduplicated: any[] = [];
 
-    const now = new Date();
+    if (isDbConfigured()) {
+      const now = new Date();
 
-    const bookings = await (prisma as any).promotionBooking.findMany({
-      where: {
-        startsAt: { lte: now },
-        endsAt: { gt: now },
-      },
-      orderBy: [{ startsAt: 'desc' }, { createdAt: 'desc' }],
-      take: 60,
-      include: {
-        post: {
+      try {
+        const bookings = await (prisma as any).promotionBooking.findMany({
+          where: {
+            OR: [
+              { startsAt: { lte: now }, endsAt: { gt: now } },
+              { targetDate: { lte: now } },
+            ],
+          },
+          orderBy: [{ startsAt: 'desc' }, { createdAt: 'desc' }],
+          take: 60,
           include: {
+            post: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    username: true,
+                    displayName: true,
+                    photoUrl: true,
+                    isTuiPlus: true,
+                    role: true,
+                  },
+                },
+                category: {
+                  select: {
+                    id: true,
+                    name: true,
+                    icon: true,
+                  },
+                },
+              },
+            },
             user: {
               select: {
                 id: true,
@@ -233,48 +256,61 @@ export class PromotionService {
                 displayName: true,
                 photoUrl: true,
                 isTuiPlus: true,
-                role: true,
-              },
-            },
-            category: {
-              select: {
-                id: true,
-                name: true,
-                icon: true,
               },
             },
           },
-        },
-        user: {
-          select: {
-            id: true,
-            username: true,
-            displayName: true,
-            photoUrl: true,
-            isTuiPlus: true,
-          },
-        },
-      },
-    });
+        });
 
-    const seenKeys = new Set<string>();
-    const deduplicated = [];
+        const seenKeys = new Set<string>();
 
-    for (const booking of bookings) {
-      const key = booking.postId
-        ? `post:${booking.postId}`
-        : booking.campaignId
-          ? `campaign:${booking.campaignId}`
-          : `ad:${booking.type}:${booking.slotIndex}:${booking.adImageUrl || ''}:${booking.adTargetUrl || ''}`;
+        for (const booking of bookings) {
+          const key = booking.postId
+            ? `post:${booking.postId}`
+            : booking.campaignId
+              ? `campaign:${booking.campaignId}`
+              : `ad:${booking.type}:${booking.slotIndex}:${booking.adImageUrl || ''}:${booking.adTargetUrl || ''}`;
 
-      if (seenKeys.has(key)) continue;
-      seenKeys.add(key);
+          if (seenKeys.has(key)) continue;
+          seenKeys.add(key);
 
-      if (booking.postId && booking.post) {
-        if (booking.post.isPublished === false) continue;
+          if (booking.postId && booking.post) {
+            if (booking.post.isPublished === false || booking.post.deletedAt) continue;
+          }
+
+          deduplicated.push(booking);
+        }
+      } catch (err) {
+        console.warn('[PromotionService] Failed to load active promotions from DB:', err);
       }
+    }
 
-      deduplicated.push(booking);
+    if (deduplicated.length === 0) {
+      const now = new Date();
+      const future = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+      return [
+        {
+          id: 'system-ad-tuiplus',
+          type: PromotionType.AD_HOME,
+          slotIndex: 0,
+          adImageUrl: '/tui-plus-post-cover.svg',
+          adMobileImageUrl: '/tui-plus-post-cover.svg',
+          adTargetUrl: '/tui-plus',
+          startsAt: now,
+          endsAt: future,
+          createdAt: now,
+        },
+        {
+          id: 'system-ad-sponsor',
+          type: PromotionType.AD_HOME,
+          slotIndex: 1,
+          adImageUrl: '/share-fallback.png',
+          adMobileImageUrl: '/share-fallback.png',
+          adTargetUrl: '/sponsor',
+          startsAt: now,
+          endsAt: future,
+          createdAt: now,
+        },
+      ];
     }
 
     return deduplicated;

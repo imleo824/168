@@ -405,11 +405,24 @@
       color: var(--ui-color-white);
       font-size: var(--ui-text-md);
       font-weight: var(--ui-font-weight-strong);
-      transition: background-color var(--ui-duration-base) var(--ease-standard);
+      transition: background-color var(--ui-duration-base) var(--ease-standard),
+                  transform var(--ui-duration-fast) var(--ease-standard),
+                  box-shadow var(--ui-duration-base) var(--ease-standard);
+      cursor: pointer;
+      user-select: none;
+      outline: var(--ui-outline-none);
     }
 
     .app-desktop-post-action:hover {
       background: var(--ui-brand-hover);
+    }
+
+    .app-desktop-post-action:active {
+      transform: scale(0.98);
+    }
+
+    .app-desktop-post-action:focus-visible {
+      box-shadow: 0 0 0 2px var(--ui-surface-card), 0 0 0 4px var(--ui-brand);
     }
 
     .app-desktop-ad-action {
@@ -422,12 +435,26 @@
       color: var(--ui-brand);
       font-size: var(--ui-text-md);
       font-weight: var(--ui-font-weight-strong);
-      transition: all var(--ui-duration-base) var(--ease-standard);
+      transition: background-color var(--ui-duration-base) var(--ease-standard),
+                  border-color var(--ui-duration-base) var(--ease-standard),
+                  transform var(--ui-duration-fast) var(--ease-standard),
+                  box-shadow var(--ui-duration-base) var(--ease-standard);
+      cursor: pointer;
+      user-select: none;
+      outline: var(--ui-outline-none);
     }
 
     .app-desktop-ad-action:hover {
       background: var(--ui-desktop-ad-action-hover-bg);
       border-color: var(--ui-desktop-ad-action-hover-border);
+    }
+
+    .app-desktop-ad-action:active {
+      transform: scale(0.98);
+    }
+
+    .app-desktop-ad-action:focus-visible {
+      box-shadow: 0 0 0 2px var(--ui-surface-card), 0 0 0 4px var(--ui-desktop-ad-action-border);
     }
 
     .app-desktop-sidebar-context {

@@ -18,8 +18,7 @@ type PublicPromotionAdPayload = {
 function normalizePublicImageUrl(value: unknown) {
   const url = String(value || '').trim();
   if (!url || url.length > MAX_PUBLIC_AD_URL_LENGTH || /[\u0000-\u001F\u007F]/.test(url)) return null;
-  if (/^https?:\/\//i.test(url)) return url;
-  if (process.env.NODE_ENV !== 'production' && url.startsWith('/uploads/')) return url;
+  if (/^https?:\/\//i.test(url) || url.startsWith('/') || url.startsWith('data:image/')) return url;
   return null;
 }
 
