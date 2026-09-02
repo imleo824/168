@@ -204,10 +204,43 @@
     box-shadow: var(--ui-bottom-nav-shadow);
   }
 
+  .app-bottom-nav-item--publish {
+    position: relative;
+    z-index: var(--ui-z-local-raised);
+  }
+
+  .app-bottom-nav-item--publish .app-bottom-nav-icon-shell {
+    background: var(--ui-brand);
+    color: var(--ui-color-white);
+    border-radius: var(--ui-radius-pill);
+    box-shadow: 
+      0 4px 10px color-mix(in srgb, var(--ui-brand) 28%, transparent),
+      inset 0 1px 0 color-mix(in srgb, var(--ui-color-white) 15%, transparent);
+    width: calc(var(--ui-bottom-nav-icon-shell-size) + var(--ui-space-1));
+    height: calc(var(--ui-bottom-nav-icon-shell-size) + var(--ui-space-1));
+    transition: 
+      background-color var(--ui-duration-base) var(--ease-standard),
+      color var(--ui-duration-base) var(--ease-standard),
+      transform var(--ui-duration-press) var(--ease-standard),
+      box-shadow var(--ui-duration-base) var(--ease-standard);
+  }
+
   .app-bottom-nav-item--publish .app-bottom-nav-icon {
-    width: var(--ui-bottom-nav-publish-icon-size);
-    height: var(--ui-bottom-nav-publish-icon-size);
-    flex-basis: var(--ui-bottom-nav-publish-icon-size);
+    width: calc(var(--ui-bottom-nav-publish-icon-size) + var(--ui-space-half));
+    height: calc(var(--ui-bottom-nav-publish-icon-size) + var(--ui-space-half));
+    flex-basis: calc(var(--ui-bottom-nav-publish-icon-size) + var(--ui-space-half));
+  }
+
+  .app-bottom-nav-item--publish:hover .app-bottom-nav-icon-shell {
+    background: var(--ui-brand-hover);
+    color: var(--ui-color-white);
+    transform: scale(1.05);
+  }
+
+  .app-bottom-nav-item--publish:active .app-bottom-nav-icon-shell {
+    background: var(--ui-brand-strong);
+    color: var(--ui-color-white);
+    transform: scale(0.93);
   }
 
   .app-bottom-nav-label {

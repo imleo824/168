@@ -456,51 +456,21 @@ export default function RechargeMobile() {
       />
 
       <PageContentShell className="recharge-shell ui-app-page-main">
-        {/* 1. 顶部账户积分与汇率概览卡片 */}
-        <SurfaceSectionCard
-          as="section"
-          tone="solid"
-          paddingClassName="recharge-balance-card-surface"
-          className="recharge-balance-card"
-          ariaLabel="当前账户积分"
-        >
-          <div className="recharge-balance-header">
-            <div className="recharge-balance-info">
-              <div className="recharge-balance-label-row">
-                <Coins className="recharge-balance-icon" aria-hidden="true" />
-                <span className="recharge-balance-label">当前账户积分</span>
-              </div>
-              <div className="recharge-balance-value">
-                {user.points !== undefined ? user.points.toLocaleString() : 0}
-                <span className="recharge-balance-unit">积分</span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => navigate('/transaction-history')}
-              className="recharge-balance-records-link"
-            >
-              <History className="recharge-records-icon" aria-hidden="true" />
-              <span>积分明细</span>
-            </button>
+        {/* 顶部汇率与结算安全概览信息条 */}
+        <div className="recharge-page-meta-row flex flex-wrap items-center justify-between gap-4 py-3 px-4 border border-line-hairline bg-surface-muted rounded-xl mb-4 text-xs text-subtle">
+          <div className="recharge-meta-item">
+            <Zap className="recharge-meta-icon" aria-hidden="true" />
+            <span>1 USDT = {currentPointsPerUsdt} 积分</span>
           </div>
-
-          <div className="recharge-balance-meta">
-            <div className="recharge-meta-item">
-              <Zap className="recharge-meta-icon" aria-hidden="true" />
-              <span>1 USDT = {currentPointsPerUsdt} 积分</span>
-            </div>
-            <div className="recharge-meta-item">
-              <ShieldCheck className="recharge-meta-icon" aria-hidden="true" />
-              <span>TRC-20 链上秒级结算</span>
-            </div>
-            <div className="recharge-meta-item">
-              <Clock className="recharge-meta-icon" aria-hidden="true" />
-              <span>起充 {currentMinUsdt} USDT</span>
-            </div>
+          <div className="recharge-meta-item">
+            <ShieldCheck className="recharge-meta-icon" aria-hidden="true" />
+            <span>TRC-20 链上秒级结算</span>
           </div>
-        </SurfaceSectionCard>
+          <div className="recharge-meta-item">
+            <Clock className="recharge-meta-icon" aria-hidden="true" />
+            <span>起充 {currentMinUsdt} USDT</span>
+          </div>
+        </div>
 
         {/* 待完成订单提醒条 */}
         {step === 'AMOUNT' && activeWaitingOrder && (
