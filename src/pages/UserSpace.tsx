@@ -95,19 +95,19 @@ function UserSpaceHeader({
 
           <div className="profile-stats-row user-space-stats user-space-stats-next" aria-label="个人数据">
             <div className="profile-stat-item user-space-stat-item">
-              <span className="profile-stat-value ui-stat-value">{formatCompactChineseEngagementCount(displayUser?.viewCount ?? 0)}</span>
+              <span className="profile-stat-value ui-stat-value">{formatCompactChineseEngagementCount(displayUser?.viewCount ?? 0) || "0"}</span>
               <span className="profile-stat-label ui-stat-label">热度</span>
             </div>
             <div className="profile-stat-item user-space-stat-item">
-              <span className="profile-stat-value ui-stat-value">{formatCompactChineseEngagementCount(displayUser?.postCount ?? postsCount)}</span>
+              <span className="profile-stat-value ui-stat-value">{formatCompactChineseEngagementCount(displayUser?.postCount ?? postsCount) || "0"}</span>
               <span className="profile-stat-label ui-stat-label">发布</span>
             </div>
             <div className="profile-stat-item user-space-stat-item">
-              <span className="profile-stat-value ui-stat-value">{formatCompactChineseEngagementCount(displayUser?.followerCount ?? 0)}</span>
+              <span className="profile-stat-value ui-stat-value">{formatCompactChineseEngagementCount(displayUser?.followerCount ?? 0) || "0"}</span>
               <span className="profile-stat-label ui-stat-label">粉丝</span>
             </div>
             <div className="profile-stat-item user-space-stat-item">
-              <span className="profile-stat-value ui-stat-value">{formatCompactChineseEngagementCount(displayUser?.followingCount ?? 0)}</span>
+              <span className="profile-stat-value ui-stat-value">{formatCompactChineseEngagementCount(displayUser?.followingCount ?? 0) || "0"}</span>
               <span className="profile-stat-label ui-stat-label">关注</span>
             </div>
           </div>
