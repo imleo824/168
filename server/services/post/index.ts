@@ -1,5 +1,6 @@
 import prisma, { isDbConfigured } from '../../db';
 import { Prisma } from '@prisma/client';
+import { PromotionService } from '../../promotion.service';
 import { ConfigService, isSameCategoryRef, type PublishCategoryMetaConfig } from '../../config.service';
 import {
   RECOMMENDATION_SCORE_PROFILE_FIELDS,
@@ -162,14 +163,14 @@ async function getActivePinnedPosts(categoryId?: string) {
 
   const scopeKey = categoryId ? `CATEGORY:${categoryId}` : 'GLOBAL';
   const nowTime = new Date();
+  const activeTimeWhere = PromotionService.buildActiveTimeWhereClause(nowTime);
   let rows: Array<{ postId: string | null; slotIndex: number }> = [];
   try {
     rows = await (prisma as any).promotionBooking.findMany({
       where: {
         type: categoryId ? 'PIN_CATEGORY' : 'PIN_HOME',
         scopeKey,
-        startsAt: { lte: nowTime },
-        endsAt: { gt: nowTime },
+        ...activeTimeWhere,
       },
       select: { postId: true, slotIndex: true },
       orderBy: [{ slotIndex: 'asc' }, { createdAt: 'asc' }],
@@ -211,13 +212,13 @@ async function getActivePinnedPostsForUser(userId: string) {
   if (cached && cached.expiresAt > now) return cached.data;
 
   const nowTime = new Date();
+  const activeTimeWhere = PromotionService.buildActiveTimeWhereClause(nowTime);
   let rows: Array<{ postId: string | null; slotIndex: number }> = [];
   try {
     rows = await (prisma as any).promotionBooking.findMany({
       where: {
         type: { in: ['PIN_HOME', 'PIN_CATEGORY'] },
-        startsAt: { lte: nowTime },
-        endsAt: { gt: nowTime },
+        ...activeTimeWhere,
         postId: { not: null },
         post: { is: { userId: cleanUserId, deletedAt: null } },
       },

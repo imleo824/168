@@ -2,7 +2,7 @@ import prisma, { isDbConfigured } from './db';
 import bcrypt from 'bcryptjs';
 import { randomUUID } from 'crypto';
 import { PromotionType, TransactionAction, getPromotionTypeLabel } from '../shared/domain';
-import { PLATFORM_TIMEZONE, getPlatformDateKey } from './platform-time';
+import { DAY_MS, PLATFORM_TIMEZONE, getPlatformDateKey, getPlatformDayRange } from './platform-time';
 import {
   ACTIVE_HOME_ADS_CACHE_TTL_MS,
   ACTIVE_PROMOTED_POST_IDS_CACHE_TTL_MS,
@@ -48,8 +48,178 @@ let activeHomeAdsCache: ActiveHomeAdsCache | null = null;
 let activeChatAdsCache: ActiveHomeAdsCache | null = null;
 let activePromotedPostIdsCache: { expiresAt: number; data: string[] } | null = null;
 
+export function getDefaultActiveHomeAds() {
+  const now = new Date();
+  const startsAt = new Date(now.getTime() - 3600_000 * 24);
+  const endsAt = new Date(now.getTime() + 3600_000 * 24 * 30);
+
+  return [
+    {
+      id: 'default-home-ad-1',
+      campaignId: 'default-campaign-1',
+      type: PromotionType.AD_HOME,
+      targetDate: startsAt,
+      startsAt,
+      endsAt,
+      slotIndex: 0,
+      postId: null,
+      adImageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1200&q=80',
+      adMobileImageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80',
+      adTargetUrl: '/tui-plus',
+      categoryId: null,
+      userId: 'system',
+      pricePaid: 1000,
+      createdAt: startsAt,
+      updatedAt: startsAt,
+    },
+    {
+      id: 'default-home-ad-2',
+      campaignId: 'default-campaign-2',
+      type: PromotionType.AD_HOME,
+      targetDate: startsAt,
+      startsAt,
+      endsAt,
+      slotIndex: 1,
+      postId: null,
+      adImageUrl: 'https://images.unsplash.com/photo-1614680376593-902f749f7ffc?auto=format&fit=crop&w=1200&q=80',
+      adMobileImageUrl: 'https://images.unsplash.com/photo-1614680376593-902f749f7ffc?auto=format&fit=crop&w=800&q=80',
+      adTargetUrl: '/sponsor',
+      categoryId: null,
+      userId: 'system',
+      pricePaid: 800,
+      createdAt: startsAt,
+      updatedAt: startsAt,
+    },
+    {
+      id: 'default-home-ad-3',
+      campaignId: 'default-campaign-3',
+      type: PromotionType.AD_HOME,
+      targetDate: startsAt,
+      startsAt,
+      endsAt,
+      slotIndex: 2,
+      postId: null,
+      adImageUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1200&q=80',
+      adMobileImageUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80',
+      adTargetUrl: '/sponsor',
+      categoryId: null,
+      userId: 'system',
+      pricePaid: 600,
+      createdAt: startsAt,
+      updatedAt: startsAt,
+    },
+  ];
+}
+
+export function getDefaultActivePromotions() {
+  const homeAds = getDefaultActiveHomeAds();
+  const now = new Date();
+  const startsAt = new Date(now.getTime() - 3600_000 * 24);
+  const endsAt = new Date(now.getTime() + 3600_000 * 24 * 30);
+
+  const pinnedItems = [
+    {
+      id: 'default-pin-home-1',
+      type: PromotionType.PIN_HOME,
+      slotIndex: 0,
+      targetDate: startsAt,
+      startsAt,
+      endsAt,
+      postId: 'notice-safety-rules',
+      adImageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80',
+      adTargetUrl: '/post/notice-safety-rules',
+      userId: 'system',
+      createdAt: startsAt,
+      updatedAt: startsAt,
+      post: {
+        id: 'notice-safety-rules',
+        title: '【平台公告】推推信息发布规范与防骗安全指南',
+        content: '为营造诚信高效的分类信息交流环境，推推全站严格执行发布规范。请广大推友警惕任何先款或线下异常交易，认准官方认证标识。',
+        isPublished: true,
+        viewCount: 16800,
+        likeCount: 520,
+        commentCount: 88,
+        createdAt: startsAt,
+        photos: ['https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80'],
+        user: {
+          id: 'official-tuitui',
+          username: 'tuitui_admin',
+          displayName: '推推官方运营团队',
+          photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+          isTuiPlus: true,
+          role: 'ADMIN',
+        },
+        category: {
+          id: 'notice',
+          name: '官方公告',
+          icon: 'Megaphone',
+        },
+      },
+    },
+    {
+      id: 'default-pin-home-2',
+      type: PromotionType.PIN_HOME,
+      slotIndex: 0,
+      targetDate: startsAt,
+      startsAt,
+      endsAt,
+      postId: 'notice-sponsor-guide',
+      adImageUrl: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80',
+      adTargetUrl: '/sponsor',
+      userId: 'system',
+      createdAt: startsAt,
+      updatedAt: startsAt,
+      post: {
+        id: 'notice-sponsor-guide',
+        title: '【商业合作】推推全站推广广告位招商与投放指南',
+        content: 'PC端三列黄金广告位、移动端首页置顶横幅、分类信息顶置火热开放中，日均海量精准流量曝光，支持自助预约与多期连投！',
+        isPublished: true,
+        viewCount: 9680,
+        likeCount: 310,
+        commentCount: 42,
+        createdAt: startsAt,
+        photos: ['https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80'],
+        user: {
+          id: 'official-commercial',
+          username: 'tuitui_ads',
+          displayName: '推推商业化合作',
+          photoUrl: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=200&q=80',
+          isTuiPlus: true,
+          role: 'ADMIN',
+        },
+        category: {
+          id: 'business',
+          name: '商务合作',
+          icon: 'TrendingUp',
+        },
+      },
+    },
+  ];
+
+  return [...homeAds, ...pinnedItems];
+}
+
 export class PromotionService {
   static readonly GLOBAL_SCOPE = GLOBAL_PROMOTION_SCOPE;
+
+  static buildActiveTimeWhereClause(now = new Date()) {
+    const todayKey = getPlatformDateKey(now);
+    const utcTodayStart = startOfUtcDay(todayKey);
+    const utcTodayEnd = new Date(utcTodayStart.getTime() + DAY_MS);
+    const platformRange = getPlatformDayRange(now);
+    const platformStart = platformRange.start;
+    const platformEnd = platformRange.end;
+
+    return {
+      OR: [
+        { startsAt: { lte: now }, endsAt: { gt: now } },
+        { startsAt: { lte: platformEnd }, endsAt: { gte: platformStart } },
+        { targetDate: { gte: platformStart, lt: platformEnd } },
+        { targetDate: { gte: utcTodayStart, lt: utcTodayEnd } },
+        { targetDate: utcTodayStart },
+      ],
+    };
+  }
 
   static clearCache() {
     activeHomeAdsCache = null;
@@ -96,68 +266,84 @@ export class PromotionService {
   }
 
   static async getActiveHomeAds() {
-    if (!isDbConfigured()) return [];
     if (activeHomeAdsCache && activeHomeAdsCache.expiresAt > Date.now()) {
       return activeHomeAdsCache.data;
     }
 
-    const now = new Date();
-    const todayKey = getPlatformDateKey(now);
-    const todayTargetDate = startOfUtcDay(todayKey);
-
-    const bookings = await (prisma as any).promotionBooking.findMany({
-      where: {
-        type: PromotionType.AD_HOME,
-        OR: [
-          { startsAt: { lte: now }, endsAt: { gt: now } },
-          { targetDate: todayTargetDate },
-        ],
-        AND: [
-          {
-            OR: [
-              { adImageUrl: { not: null } },
-              { adMobileImageUrl: { not: null } },
-            ],
-          },
-        ],
-      },
-      orderBy: [{ slotIndex: 'asc' }, { createdAt: 'asc' }],
-      take: 12,
-      select: {
-        id: true,
-        campaignId: true,
-        type: true,
-        targetDate: true,
-        startsAt: true,
-        endsAt: true,
-        slotIndex: true,
-        postId: true,
-        adImageUrl: true,
-        adMobileImageUrl: true,
-        adTargetUrl: true,
-        categoryId: true,
-        userId: true,
-        pricePaid: true,
-        createdAt: true,
-        updatedAt: true,
-      },
-    });
-
-    const seenSlots = new Set<number>();
-    const visibleBookings = [];
-    for (const booking of bookings) {
-      if (!HOME_AD_SLOT_INDICES.has(booking.slotIndex) || seenSlots.has(booking.slotIndex)) continue;
-      seenSlots.add(booking.slotIndex);
-      visibleBookings.push(booking);
-      if (visibleBookings.length >= HOME_AD_SLOT_INDICES.size) break;
+    if (!isDbConfigured()) {
+      const fallback = getDefaultActiveHomeAds();
+      activeHomeAdsCache = {
+        expiresAt: Date.now() + ACTIVE_HOME_ADS_CACHE_TTL_MS,
+        data: fallback,
+      };
+      return fallback;
     }
 
-    activeHomeAdsCache = {
-      expiresAt: Date.now() + ACTIVE_HOME_ADS_CACHE_TTL_MS,
-      data: visibleBookings,
-    };
+    const now = new Date();
+    const activeTimeWhere = this.buildActiveTimeWhereClause(now);
 
-    return visibleBookings;
+    try {
+      const bookings = await (prisma as any).promotionBooking.findMany({
+        where: {
+          type: PromotionType.AD_HOME,
+          ...activeTimeWhere,
+          AND: [
+            {
+              OR: [
+                { adImageUrl: { not: null } },
+                { adMobileImageUrl: { not: null } },
+              ],
+            },
+          ],
+        },
+        orderBy: [{ slotIndex: 'asc' }, { createdAt: 'desc' }],
+        take: 30,
+        select: {
+          id: true,
+          campaignId: true,
+          type: true,
+          targetDate: true,
+          startsAt: true,
+          endsAt: true,
+          slotIndex: true,
+          postId: true,
+          adImageUrl: true,
+          adMobileImageUrl: true,
+          adTargetUrl: true,
+          categoryId: true,
+          userId: true,
+          pricePaid: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      });
+
+      const seenSlots = new Set<number>();
+      const visibleBookings = [];
+      for (const booking of bookings) {
+        if (!HOME_AD_SLOT_INDICES.has(booking.slotIndex) || seenSlots.has(booking.slotIndex)) continue;
+        seenSlots.add(booking.slotIndex);
+        visibleBookings.push(booking);
+        if (visibleBookings.length >= HOME_AD_SLOT_INDICES.size) break;
+      }
+
+      const result = visibleBookings.length > 0 ? visibleBookings : getDefaultActiveHomeAds();
+
+      activeHomeAdsCache = {
+        expiresAt: Date.now() + ACTIVE_HOME_ADS_CACHE_TTL_MS,
+        data: result,
+      };
+
+      return result;
+    } catch (err) {
+      console.warn('[PromotionService] Failed to load home ads from DB:', err);
+      const fallback = getDefaultActiveHomeAds();
+      activeHomeAdsCache = {
+        expiresAt: Date.now() + ACTIVE_HOME_ADS_CACHE_TTL_MS,
+        data: fallback,
+      };
+      return fallback;
+    }
   }
 
   static async getActiveChatAds() {
@@ -167,20 +353,24 @@ export class PromotionService {
     }
 
     const now = new Date();
+    const activeTimeWhere = this.buildActiveTimeWhereClause(now);
 
     const bookings = await (prisma as any).promotionBooking.findMany({
       where: {
         type: PromotionType.PIN_CHAT,
         scopeKey: GLOBAL_PROMOTION_SCOPE,
-        startsAt: { lte: now },
-        endsAt: { gt: now },
-        OR: [
-          { adImageUrl: { not: null } },
-          { adMobileImageUrl: { not: null } },
+        ...activeTimeWhere,
+        AND: [
+          {
+            OR: [
+              { adImageUrl: { not: null } },
+              { adMobileImageUrl: { not: null } },
+            ],
+          },
         ],
       },
-      orderBy: [{ slotIndex: 'asc' }, { createdAt: 'asc' }],
-      take: 12,
+      orderBy: [{ slotIndex: 'asc' }, { createdAt: 'desc' }],
+      take: 30,
       select: {
         id: true,
         campaignId: true,
@@ -219,22 +409,20 @@ export class PromotionService {
   }
 
   static async getAllActivePromotions() {
-    if (!isDbConfigured()) return [];
+    if (!isDbConfigured()) {
+      return getDefaultActivePromotions();
+    }
 
     const now = new Date();
-    const todayKey = getPlatformDateKey(now);
-    const todayTargetDate = startOfUtcDay(todayKey);
+    const activeTimeWhere = this.buildActiveTimeWhereClause(now);
 
     try {
       const bookings = await (prisma as any).promotionBooking.findMany({
         where: {
-          OR: [
-            { startsAt: { lte: now }, endsAt: { gt: now } },
-            { targetDate: todayTargetDate },
-          ],
+          ...activeTimeWhere,
         },
-        orderBy: [{ startsAt: 'desc' }, { createdAt: 'desc' }],
-        take: 60,
+        orderBy: [{ createdAt: 'desc' }, { startsAt: 'desc' }],
+        take: 100,
         include: {
           post: {
             include: {
@@ -273,9 +461,9 @@ export class PromotionService {
       const deduplicated = [];
 
       for (const booking of bookings) {
-        const key = booking.postId
+        const key = booking.id || (booking.postId
           ? `post:${booking.postId}`
-          : `ad:${booking.type}:${booking.slotIndex}:${booking.id || ''}:${booking.adImageUrl || ''}:${booking.adTargetUrl || ''}`;
+          : `ad:${booking.type}:${booking.slotIndex}:${booking.adImageUrl || ''}:${booking.adTargetUrl || ''}`);
 
         if (seenKeys.has(key)) continue;
         seenKeys.add(key);
@@ -287,10 +475,14 @@ export class PromotionService {
         deduplicated.push(booking);
       }
 
+      if (deduplicated.length === 0) {
+        return getDefaultActivePromotions();
+      }
+
       return deduplicated;
     } catch (err) {
       console.warn('[PromotionService] Failed to load active promotions from DB:', err);
-      return [];
+      return getDefaultActivePromotions();
     }
   }
 
@@ -306,6 +498,7 @@ export class PromotionService {
     }
 
     const now = new Date();
+    const activeTimeWhere = this.buildActiveTimeWhereClause(now);
     const typeFilter = options.type
       ? Array.isArray(options.type) ? { in: options.type } : options.type
       : { in: [PromotionType.PIN_HOME, PromotionType.PIN_CATEGORY] };
@@ -317,8 +510,7 @@ export class PromotionService {
       where: {
         type: typeFilter,
         ...(categoryIds.length > 0 ? { categoryId: { in: categoryIds } } : {}),
-        startsAt: { lte: now },
-        endsAt: { gt: now },
+        ...activeTimeWhere,
         postId: { not: null },
       },
       orderBy: [{ startsAt: 'desc' }, { createdAt: 'desc' }],

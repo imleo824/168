@@ -60,6 +60,107 @@ function formatAdTargetDisplay(raw?: string | null) {
   }
 }
 
+const CLIENT_FALLBACK_PROMOTIONS: PromotionBooking[] = [
+  {
+    id: 'rail-banner-tuiplus',
+    type: PromotionType.AD_HOME,
+    slotIndex: 0,
+    targetDate: new Date().toISOString(),
+    startsAt: new Date().toISOString(),
+    endsAt: new Date(Date.now() + 86400000 * 30).toISOString(),
+    pricePaid: 1000,
+    adImageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80',
+    adMobileImageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80',
+    adTargetUrl: '/tui-plus',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'rail-pin-safety',
+    type: PromotionType.PIN_HOME,
+    slotIndex: 0,
+    targetDate: new Date().toISOString(),
+    startsAt: new Date().toISOString(),
+    endsAt: new Date(Date.now() + 86400000 * 30).toISOString(),
+    pricePaid: 800,
+    postId: 'notice-safety-rules',
+    createdAt: new Date().toISOString(),
+    post: {
+      id: 'notice-safety-rules',
+      title: '【平台公告】推推信息发布规范与防骗安全指南',
+      content: '为营造诚信高效的分类信息交流环境，推推全站严格执行发布规范。请广大推友警惕任何先款或线下异常交易，认准官方认证标识。',
+      contact: 'Telegram: @tuitui_admin',
+      isPublished: true,
+      viewCount: 16800,
+      likeCount: 520,
+      commentCount: 88,
+      createdAt: new Date().toISOString(),
+      photos: ['https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=800&q=80'],
+      user: {
+        id: 'official-tuitui',
+        username: 'tuitui_admin',
+        displayName: '推推官方运营团队',
+        photoUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80',
+        isTuiPlus: true,
+        role: 'ADMIN',
+      },
+      category: {
+        id: 'notice',
+        name: '官方公告',
+        icon: 'Megaphone',
+      },
+    } as any,
+  },
+  {
+    id: 'rail-banner-sponsor',
+    type: PromotionType.AD_HOME,
+    slotIndex: 1,
+    targetDate: new Date().toISOString(),
+    startsAt: new Date().toISOString(),
+    endsAt: new Date(Date.now() + 86400000 * 30).toISOString(),
+    pricePaid: 800,
+    adImageUrl: 'https://images.unsplash.com/photo-1614680376593-902f749f7ffc?auto=format&fit=crop&w=800&q=80',
+    adMobileImageUrl: 'https://images.unsplash.com/photo-1614680376593-902f749f7ffc?auto=format&fit=crop&w=800&q=80',
+    adTargetUrl: '/sponsor',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'rail-pin-commercial',
+    type: PromotionType.PIN_HOME,
+    slotIndex: 0,
+    targetDate: new Date().toISOString(),
+    startsAt: new Date().toISOString(),
+    endsAt: new Date(Date.now() + 86400000 * 30).toISOString(),
+    pricePaid: 600,
+    postId: 'notice-sponsor-guide',
+    createdAt: new Date().toISOString(),
+    post: {
+      id: 'notice-sponsor-guide',
+      title: '【商业合作】推推全站推广广告位招商与投放指南',
+      content: 'PC端三列黄金广告位、移动端首页置顶横幅、分类信息顶置火热开放中，日均海量精准流量曝光，支持自助预约与多期连投！',
+      contact: 'Telegram: @tuitui_ads',
+      isPublished: true,
+      viewCount: 9680,
+      likeCount: 310,
+      commentCount: 42,
+      createdAt: new Date().toISOString(),
+      photos: ['https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80'],
+      user: {
+        id: 'official-commercial',
+        username: 'tuitui_ads',
+        displayName: '推推商业化合作',
+        photoUrl: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=200&q=80',
+        isTuiPlus: true,
+        role: 'ADMIN',
+      },
+      category: {
+        id: 'business',
+        name: '商务合作',
+        icon: 'TrendingUp',
+      },
+    } as any,
+  },
+];
+
 export const AppDesktopAdRail: React.FC = () => {
   const navigate = useNavigate();
   const { data: homeBootstrap } = useHomeBootstrap();
@@ -99,6 +200,10 @@ export const AppDesktopAdRail: React.FC = () => {
     }
     if (homeBootstrap?.homeAds && Array.isArray(homeBootstrap.homeAds)) {
       homeBootstrap.homeAds.forEach(addBooking);
+    }
+
+    if (list.length === 0) {
+      CLIENT_FALLBACK_PROMOTIONS.forEach(addBooking);
     }
 
     return list;
@@ -149,7 +254,6 @@ export const AppDesktopAdRail: React.FC = () => {
                 </span>
               )}
             </h2>
-            <p className="text-xs text-[var(--ui-text-muted)] mt-0.5">热门置顶与全站精选广告</p>
           </div>
         </div>
 
