@@ -211,6 +211,75 @@ export class PromotionService {
     return visibleBookings;
   }
 
+  static async getAllActivePromotions() {
+    if (!isDbConfigured()) return [];
+
+    const now = new Date();
+
+    const bookings = await (prisma as any).promotionBooking.findMany({
+      where: {
+        startsAt: { lte: now },
+        endsAt: { gt: now },
+      },
+      orderBy: [{ startsAt: 'desc' }, { createdAt: 'desc' }],
+      take: 60,
+      include: {
+        post: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                username: true,
+                displayName: true,
+                photoUrl: true,
+                isTuiPlus: true,
+                role: true,
+              },
+            },
+            category: {
+              select: {
+                id: true,
+                name: true,
+                icon: true,
+              },
+            },
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            username: true,
+            displayName: true,
+            photoUrl: true,
+            isTuiPlus: true,
+          },
+        },
+      },
+    });
+
+    const seenKeys = new Set<string>();
+    const deduplicated = [];
+
+    for (const booking of bookings) {
+      const key = booking.postId
+        ? `post:${booking.postId}`
+        : booking.campaignId
+          ? `campaign:${booking.campaignId}`
+          : `ad:${booking.type}:${booking.slotIndex}:${booking.adImageUrl || ''}:${booking.adTargetUrl || ''}`;
+
+      if (seenKeys.has(key)) continue;
+      seenKeys.add(key);
+
+      if (booking.postId && booking.post) {
+        if (booking.post.isPublished === false) continue;
+      }
+
+      deduplicated.push(booking);
+    }
+
+    return deduplicated;
+  }
+
   static async getActivePromotedPostIds(options: ActivePromotedPostIdOptions = {}): Promise<string[]> {
     if (!isDbConfigured()) return [];
     const hasScopedOptions = Boolean(

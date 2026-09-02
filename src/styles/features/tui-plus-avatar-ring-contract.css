@@ -6,12 +6,14 @@
     .ui-profile-icon-button[data-tui-plus='true'],
     .profile-avatar-button[data-tui-plus='true'],
     .user-space-avatar-next[data-tui-plus='true'],
-    .feed-card-author-avatar-link[data-tui-plus='true']
+    .feed-card-author-avatar-link[data-tui-plus='true'],
+    .app-desktop-user-avatar-shell[data-tui-plus='true']
   ),
   .profile-avatar-button[data-tui-plus='true'],
   .user-space-avatar-next[data-tui-plus='true'],
   .ins-post-card .feed-card-author-avatar-link[data-tui-plus='true'],
-  .ui-profile-icon-button[data-tui-plus='true'] {
+  .ui-profile-icon-button[data-tui-plus='true'],
+  .app-desktop-user-avatar-shell[data-tui-plus='true'] {
     position: relative;
     isolation: isolate;
     overflow: visible;
@@ -25,14 +27,16 @@
     .ui-profile-icon-button[data-tui-plus='true'],
     .profile-avatar-button[data-tui-plus='true'],
     .user-space-avatar-next[data-tui-plus='true'],
-    .feed-card-author-avatar-link[data-tui-plus='true']
+    .feed-card-author-avatar-link[data-tui-plus='true'],
+    .app-desktop-user-avatar-shell[data-tui-plus='true']
   )::before,
   :where(
     .ui-avatar-action[data-tui-plus='true'],
     .ui-profile-icon-button[data-tui-plus='true'],
     .profile-avatar-button[data-tui-plus='true'],
     .user-space-avatar-next[data-tui-plus='true'],
-    .feed-card-author-avatar-link[data-tui-plus='true']
+    .feed-card-author-avatar-link[data-tui-plus='true'],
+    .app-desktop-user-avatar-shell[data-tui-plus='true']
   )::after,
   .profile-avatar-button[data-tui-plus='true']::before,
   .profile-avatar-button[data-tui-plus='true']::after,
@@ -41,7 +45,9 @@
   .ins-post-card .feed-card-author-avatar-link[data-tui-plus='true']::before,
   .ins-post-card .feed-card-author-avatar-link[data-tui-plus='true']::after,
   .ui-profile-icon-button[data-tui-plus='true']::before,
-  .ui-profile-icon-button[data-tui-plus='true']::after {
+  .ui-profile-icon-button[data-tui-plus='true']::after,
+  .app-desktop-user-avatar-shell[data-tui-plus='true']::before,
+  .app-desktop-user-avatar-shell[data-tui-plus='true']::after {
     content: var(--ui-content-empty);
     pointer-events: none;
     position: absolute;
@@ -55,12 +61,14 @@
     .ui-profile-icon-button[data-tui-plus='true'],
     .profile-avatar-button[data-tui-plus='true'],
     .user-space-avatar-next[data-tui-plus='true'],
-    .feed-card-author-avatar-link[data-tui-plus='true']
+    .feed-card-author-avatar-link[data-tui-plus='true'],
+    .app-desktop-user-avatar-shell[data-tui-plus='true']
   )::before,
   .profile-avatar-button[data-tui-plus='true']::before,
   .user-space-avatar-next[data-tui-plus='true']::before,
   .ins-post-card .feed-card-author-avatar-link[data-tui-plus='true']::before,
-  .ui-profile-icon-button[data-tui-plus='true']::before {
+  .ui-profile-icon-button[data-tui-plus='true']::before,
+  .app-desktop-user-avatar-shell[data-tui-plus='true']::before {
     inset: calc((var(--ui-avatar-tui-plus-ring-gap) + var(--ui-avatar-tui-plus-ring-size)) * -1);
     z-index: var(--ui-z-local-underlay);
     background: var(--ui-avatar-tui-plus-ring-gradient);
@@ -71,12 +79,14 @@
     .ui-profile-icon-button[data-tui-plus='true'],
     .profile-avatar-button[data-tui-plus='true'],
     .user-space-avatar-next[data-tui-plus='true'],
-    .feed-card-author-avatar-link[data-tui-plus='true']
+    .feed-card-author-avatar-link[data-tui-plus='true'],
+    .app-desktop-user-avatar-shell[data-tui-plus='true']
   )::after,
   .profile-avatar-button[data-tui-plus='true']::after,
   .user-space-avatar-next[data-tui-plus='true']::after,
   .ins-post-card .feed-card-author-avatar-link[data-tui-plus='true']::after,
-  .ui-profile-icon-button[data-tui-plus='true']::after {
+  .ui-profile-icon-button[data-tui-plus='true']::after,
+  .app-desktop-user-avatar-shell[data-tui-plus='true']::after {
     inset: calc(var(--ui-avatar-tui-plus-ring-gap) * -1);
     z-index: var(--ui-z-local-behind);
     background: var(--ui-avatar-tui-plus-ring-surface, var(--ui-surface-card));
@@ -87,22 +97,25 @@
     .ui-profile-icon-button[data-tui-plus='true'],
     .profile-avatar-button[data-tui-plus='true'],
     .user-space-avatar-next[data-tui-plus='true'],
-    .feed-card-author-avatar-link[data-tui-plus='true']
+    .feed-card-author-avatar-link[data-tui-plus='true'],
+    .app-desktop-user-avatar-shell[data-tui-plus='true']
   ) :where(.ui-avatar, img),
   .profile-avatar-button[data-tui-plus='true'] :where(.ui-avatar, img),
   .user-space-avatar-next[data-tui-plus='true'] :where(.ui-avatar, img),
   .ins-post-card .feed-card-author-avatar-link[data-tui-plus='true'] :where(.ui-avatar, img),
-  .ui-profile-icon-button[data-tui-plus='true'] :where(.ui-avatar, img) {
+  .ui-profile-icon-button[data-tui-plus='true'] :where(.ui-avatar, img),
+  .app-desktop-user-avatar-shell[data-tui-plus='true'] :where(.ui-avatar, img) {
     position: relative;
     z-index: var(--ui-z-local-raised);
     overflow: hidden;
     border-radius: inherit;
+    object-fit: cover;
     box-shadow: var(--ui-shadow-none);
   }
 
   .ui-avatar[data-tui-plus='true']:not(:where([data-tui-plus='true'] .ui-avatar, [data-tui-plus='true'] > .ui-avatar)) {
-    overflow: visible;
     border-radius: var(--ui-radius-pill);
+    object-fit: cover;
     box-shadow:
       0 0 0 var(--ui-avatar-tui-plus-ring-gap) var(--ui-avatar-tui-plus-ring-surface, var(--ui-surface-card)),
       0 0 0 calc(var(--ui-avatar-tui-plus-ring-gap) + var(--ui-avatar-tui-plus-ring-size)) var(--ui-avatar-tui-plus-ring-color, var(--ui-brand));

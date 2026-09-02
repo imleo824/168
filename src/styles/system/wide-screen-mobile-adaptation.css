@@ -10,6 +10,7 @@
     --app-shell-viewport-width: var(--ui-viewport-width);
     --app-shell-viewport-height: var(--app-layout-vh);
     --app-desktop-sidebar-width: calc(var(--ui-space-8) * 7 + var(--ui-space-4));
+    --app-desktop-ad-rail-width: calc(var(--ui-space-8) * 9 + var(--ui-space-6));
     --app-desktop-feed-main-width: calc(var(--ui-space-8) * 26);
     --app-desktop-reading-main-width: var(--app-desktop-feed-main-width);
     --app-desktop-detail-main-width: calc(
@@ -34,6 +35,7 @@
     --app-desktop-frame-width: calc(
       var(--app-desktop-sidebar-width) +
       var(--app-desktop-workspace-main-width) +
+      var(--app-desktop-ad-rail-width) +
       (var(--app-desktop-shell-gap) * 2)
     );
     --app-desktop-shell-width: var(--app-desktop-frame-width);
@@ -66,7 +68,8 @@
     background: var(--ui-surface-page);
   }
 
-  .app-desktop-sidebar {
+  .app-desktop-sidebar,
+  .app-desktop-ad-rail {
     display: none;
   }
 
@@ -159,7 +162,7 @@
       );
       --app-desktop-shell-left: calc((var(--app-shell-viewport-width) - var(--app-desktop-shell-active-width)) / 2);
       --app-desktop-shell-content-height: calc(var(--app-shell-viewport-height) - (var(--app-desktop-shell-padding-y) * 2));
-      --app-desktop-main-side-gap-total: var(--app-desktop-shell-gap);
+      --app-desktop-main-side-gap-total: calc(var(--app-desktop-shell-gap) * 2);
       --app-desktop-main-left: calc(var(--app-desktop-shell-left) + var(--app-desktop-sidebar-width) + var(--app-desktop-shell-gap));
       --app-desktop-main-active-width: min(
         var(--app-desktop-main-width),
@@ -168,6 +171,7 @@
           calc(
             var(--app-desktop-shell-active-width) -
             var(--app-desktop-sidebar-width) -
+            var(--app-desktop-ad-rail-width) -
             var(--app-desktop-main-side-gap-total) -
             var(--app-desktop-balance-spacer-width)
           )
@@ -175,7 +179,8 @@
       );
       grid-template-columns:
         minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
-        minmax(0, var(--app-desktop-main-active-width));
+        minmax(0, var(--app-desktop-main-active-width))
+        minmax(calc(var(--ui-space-8) * 7), var(--app-desktop-ad-rail-width));
       gap: var(--app-desktop-shell-gap);
       align-items: start;
       justify-content: center;
@@ -187,12 +192,13 @@
     }
 
     .app-shell[data-route-surface='user'][data-desktop-surface='feed'] {
-      --app-desktop-main-side-gap-total: var(--app-desktop-shell-gap);
+      --app-desktop-main-side-gap-total: calc(var(--app-desktop-shell-gap) * 2);
       --app-desktop-balance-spacer-width: var(--ui-space-none);
       align-items: stretch;
       grid-template-columns:
         minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
-        minmax(0, var(--app-desktop-main-active-width));
+        minmax(0, var(--app-desktop-main-active-width))
+        minmax(calc(var(--ui-space-8) * 7), var(--app-desktop-ad-rail-width));
     }
 
     .app-shell[data-route-surface='user'] > .ui-layer-header {
@@ -200,11 +206,12 @@
     }
 
     .app-shell[data-route-surface='user']:not([data-desktop-surface='feed']) {
-      --app-desktop-main-side-gap-total: var(--app-desktop-shell-gap);
+      --app-desktop-main-side-gap-total: calc(var(--app-desktop-shell-gap) * 2);
       --app-desktop-balance-spacer-width: var(--ui-space-none);
       grid-template-columns:
         minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
-        minmax(0, var(--app-desktop-main-active-width));
+        minmax(0, var(--app-desktop-main-active-width))
+        minmax(calc(var(--ui-space-8) * 7), var(--app-desktop-ad-rail-width));
     }
 
     .app-shell[data-route-surface='user']:not([data-desktop-surface='feed'])::after {
@@ -405,6 +412,24 @@
       background: var(--ui-brand-hover);
     }
 
+    .app-desktop-ad-action {
+      margin-top: var(--ui-space-2);
+      width: 100%;
+      height: var(--ui-control-lg);
+      border-radius: var(--ui-radius-full);
+      background: var(--ui-desktop-ad-action-bg);
+      border: var(--ui-border-width-hairline) solid var(--ui-desktop-ad-action-border);
+      color: var(--ui-brand);
+      font-size: var(--ui-text-md);
+      font-weight: var(--ui-font-weight-strong);
+      transition: all var(--ui-duration-base) var(--ease-standard);
+    }
+
+    .app-desktop-ad-action:hover {
+      background: var(--ui-desktop-ad-action-hover-bg);
+      border-color: var(--ui-desktop-ad-action-hover-border);
+    }
+
     .app-desktop-sidebar-context {
       margin-top: auto;
       display: flex;
@@ -422,6 +447,25 @@
 
     .app-desktop-user-card:hover {
       background-color: var(--ui-state-hover);
+    }
+
+    .app-desktop-user-avatar-shell {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: calc(var(--ui-space-8) + var(--ui-space-1));
+      height: calc(var(--ui-space-8) + var(--ui-space-1));
+      border-radius: var(--ui-radius-pill);
+      flex-shrink: 0;
+    }
+
+    .app-desktop-user-avatar-shell .ui-avatar {
+      width: 100%;
+      height: 100%;
+      border-radius: var(--ui-radius-pill);
+      object-fit: cover;
+      display: block;
     }
 
     .app-desktop-guest-avatar {
@@ -478,27 +522,30 @@
     .app-shell[data-route-surface='user'] {
       --app-desktop-balance-spacer-width: var(--ui-space-none);
       --app-desktop-main-width: var(--app-desktop-workspace-main-width);
-      --app-desktop-main-side-gap-total: var(--app-desktop-shell-gap);
+      --app-desktop-main-side-gap-total: calc(var(--app-desktop-shell-gap) * 2);
       grid-template-columns:
         minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
-        minmax(0, var(--app-desktop-main-active-width));
+        minmax(0, var(--app-desktop-main-active-width))
+        minmax(calc(var(--ui-space-8) * 7), var(--app-desktop-ad-rail-width));
       justify-content: center;
     }
 
     .app-shell[data-route-surface='user'][data-desktop-surface='feed'] {
       --app-desktop-main-width: var(--app-desktop-workspace-main-width);
-      --app-desktop-main-side-gap-total: var(--app-desktop-shell-gap);
+      --app-desktop-main-side-gap-total: calc(var(--app-desktop-shell-gap) * 2);
       grid-template-columns:
         minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
-        minmax(0, var(--app-desktop-main-active-width));
+        minmax(0, var(--app-desktop-main-active-width))
+        minmax(calc(var(--ui-space-8) * 7), var(--app-desktop-ad-rail-width));
     }
 
     .app-shell[data-route-surface='user']:not([data-desktop-surface='feed']) {
       --app-desktop-balance-spacer-width: var(--ui-space-none);
-      --app-desktop-main-side-gap-total: var(--app-desktop-shell-gap);
+      --app-desktop-main-side-gap-total: calc(var(--app-desktop-shell-gap) * 2);
       grid-template-columns:
         minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
-        minmax(0, var(--app-desktop-main-active-width));
+        minmax(0, var(--app-desktop-main-active-width))
+        minmax(calc(var(--ui-space-8) * 7), var(--app-desktop-ad-rail-width));
     }
 
     .app-shell[data-route-surface='user']:not([data-desktop-surface='feed'])::after {
@@ -509,18 +556,18 @@
 
   @media (min-width: 96rem) {
     .app-shell[data-route-surface='user']:not([data-desktop-surface='feed']) {
-      --app-desktop-main-side-gap-total: var(--app-desktop-shell-gap);
+      --app-desktop-main-side-gap-total: calc(var(--app-desktop-shell-gap) * 2);
       --app-desktop-balance-spacer-width: var(--ui-space-none);
       grid-template-columns:
         minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
-        minmax(0, var(--app-desktop-main-active-width));
+        minmax(0, var(--app-desktop-main-active-width))
+        minmax(calc(var(--ui-space-8) * 7), var(--app-desktop-ad-rail-width));
     }
 
     .app-shell[data-route-surface='user']:not([data-desktop-surface='feed'])::after {
       display: none;
       content: none;
     }
-
   }
 
   @media (max-width: 767px) {

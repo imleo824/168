@@ -1,6 +1,6 @@
 import { lazy, Suspense, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Camera, ChevronRight, Crown, Edit2, MessageCircle, SlidersHorizontal } from 'lucide-react';
+import { Camera, ChevronRight, Crown, Edit2, MessageCircle, SlidersHorizontal, UserRound } from 'lucide-react';
 
 import { APP_ROUTES } from '@/app/routePaths';
 import AuthRequiredState from '@/ui/AuthRequiredState';
@@ -43,15 +43,13 @@ export function ProfileAuthRequiredState({
   return (
     <AuthRequiredState
       titleAs="h1"
-      icon={<MessageCircle />}
-      actionIcon={<MessageCircle />}
-      actionVariant="primary"
+      icon={<UserRound />}
       context="profile"
       tone="panel"
       density="compact"
       title="欢迎回来"
-      description="请先登录后管理您的个人主页"
-      actionLabel="账号密码登录 / 注册"
+      description="登录推推账号后，随时管理你的个人主页与发布历史。"
+      actionLabel="登录 / 注册"
       previewItems={[
         { icon: <Camera aria-hidden="true" />, label: '主页资料', description: '头像、封面和个人简介统一管理' },
         { icon: <Edit2 aria-hidden="true" />, label: '发布记录', description: '查看帖子、引用和互动内容' },

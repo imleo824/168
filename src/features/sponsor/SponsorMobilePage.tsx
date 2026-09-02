@@ -211,6 +211,7 @@ export default function SponsorMobilePage() {
           <AuthRequiredState
             icon={<HandCoins />}
             context="sponsor"
+            tone="panel"
             density="compact"
             title="登录后推广"
             description="查看积分余额、充积分入口、曝光服务和积分记录。"
@@ -221,7 +222,6 @@ export default function SponsorMobilePage() {
               { icon: <ReceiptText aria-hidden="true" />, label: '积分记录', description: '追踪充积分、推广和消费记录' },
             ]}
             onAction={() => requireAuth()}
-            tone="open"
           />
         </PageContentShell>
       </AppPage>

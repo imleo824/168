@@ -625,7 +625,7 @@ export default function TuiPlusLinkEditorMobile() {
                                 onChange={(event) => updateChannelAutoPost(index, event.target.checked)}
                                 disabled={saveBusy}
                               />
-                              <span>频道内容自动发帖</span>
+                              <span>我的频道更新自动同步发帖</span>
                             </label>
                           ) : null}
                         </>

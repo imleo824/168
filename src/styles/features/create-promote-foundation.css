@@ -54,21 +54,7 @@
   }
 
   .post-create-page .ui-auth-required-wrap {
-    padding-block: calc(var(--ui-space-8) * 2) var(--ui-space-8);
-  }
-
-  .post-create-page .ui-auth-required-card {
-    border-color: var(--ui-create-auth-card-border);
-    border-radius: var(--ui-radius-3xl);
-    padding: var(--ui-space-8) var(--ui-space-4);
-    box-shadow: var(--ui-shadow-card);
-  }
-
-  .post-create-page .ui-auth-required-icon {
-    width: var(--ui-control-xl);
-    height: var(--ui-control-xl);
-    margin-bottom: var(--ui-space-4);
-    border-radius: var(--ui-radius-2xl);
+    padding-block: var(--ui-space-6) var(--ui-space-8);
   }
 
   @media (min-width: 640px) {

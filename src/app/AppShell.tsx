@@ -2,7 +2,7 @@ import { BrowserRouter as Router, Navigate, NavLink, Route, Routes, useLocation,
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 import { HelmetProvider } from 'react-helmet-async';
 import { lazy, Suspense, useEffect, useMemo, type ReactNode } from 'react';
-import { Bell, CirclePlus, House, Info, ShieldCheck, TrendingUp, UserRound } from 'lucide-react';
+import { Bell, CirclePlus, House, Info, Megaphone, ShieldCheck, TrendingUp, UserRound } from 'lucide-react';
 
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import Home from '@/pages/Home';
@@ -23,6 +23,7 @@ import PageContentShell from '@/ui/PageContentShell';
 import AvatarImage from '@/ui/AvatarImage';
 import { warmupNavigationIntent, warmupRoutePath } from '@/utils/routeWarmups';
 import AppBottomNavigation from '@/app/AppBottomNavigation';
+import { AppDesktopAdRail } from '@/app/AppDesktopAdRail';
 import AppRequireAuthRoute from '@/app/AppRequireAuthRoute';
 import AppRequireTuiPlusRoute from '@/app/AppRequireTuiPlusRoute';
 import { APP_ROUTES } from '@/app/routePaths';
@@ -333,7 +334,7 @@ function AppDesktopSidebar() {
     if (user?.role === 'ADMIN') {
       return [
         ...DESKTOP_NAV_ITEMS,
-        { to: '/168wc', label: '管理后台', icon: ShieldCheck, end: false },
+        { to: '/168wc', label: '后台', icon: ShieldCheck, end: false },
       ];
     }
     return DESKTOP_NAV_ITEMS;
@@ -346,6 +347,11 @@ function AppDesktopSidebar() {
       primePostCreateComposerFocus();
       navigate(APP_ROUTES.create);
     });
+  };
+
+  const handleAdPost = () => {
+    warmupNavigationIntent('sponsor');
+    navigate(APP_ROUTES.sponsor);
   };
 
   const displayName = user?.displayName || user?.username || (user?.id ? `推友_${user.id.slice(0, 4)}` : '未登录用户');
@@ -398,6 +404,17 @@ function AppDesktopSidebar() {
           <CirclePlus className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
           <span>立即发推</span>
         </button>
+        <button
+          type="button"
+          className="app-desktop-ad-action pressable flex flex-row items-center justify-center gap-2"
+          onClick={handleAdPost}
+          onMouseEnter={() => warmupNavigationIntent('sponsor')}
+          aria-label="投放广告"
+          title="投放广告"
+        >
+          <Megaphone className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
+          <span>投放广告</span>
+        </button>
       </div>
       <section className="app-desktop-sidebar-context" aria-label="当前在线">
         {user ? (
@@ -407,15 +424,19 @@ function AppDesktopSidebar() {
             aria-label="查看个人主页"
             title="查看个人主页"
           >
-            <AvatarImage
-              src={user.photoUrl || ''}
-              name={displayName}
-              id={user.id}
-              alt={displayName}
-              className="w-9 h-9 rounded-full flex-shrink-0"
-              variant="thumb"
-              isTuiPlus={isTuiPlusActive(user)}
-            />
+            <span
+              className="app-desktop-user-avatar-shell flex-shrink-0"
+              data-tui-plus={isTuiPlusActive(user) ? 'true' : undefined}
+            >
+              <AvatarImage
+                src={user.photoUrl || ''}
+                name={displayName}
+                id={user.id}
+                alt={displayName}
+                className="w-full h-full rounded-full object-cover block"
+                variant="thumb"
+              />
+            </span>
             <div className="app-desktop-user-info flex flex-col min-w-0 flex-1">
               <span className="app-desktop-user-name truncate">{displayName}</span>
               <span className="app-desktop-user-role">
@@ -577,6 +598,7 @@ function AppLayout() {
             </Suspense>
           </RecoveryGuard>
         </div>
+        {isUserSurface ? <AppDesktopAdRail /> : null}
         {isUserSurface ? <AppBottomNavigation /> : null}
         <GlobalAuthOverlay />
       </div>

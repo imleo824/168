@@ -1,6 +1,6 @@
 import { lazy, Suspense, useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Hash, Link as LinkIcon, LockKeyhole, MapPin, Send, Zap } from 'lucide-react';
+import { Hash, Link as LinkIcon, LockKeyhole, MapPin, Send, ShieldCheck, Zap } from 'lucide-react';
 
 import { APP_ROUTES } from '@/app/routePaths';
 import { useAuth } from '@/context/AuthContext';
@@ -59,17 +59,16 @@ export function PostCreateAuthRequiredState({ onAction }: { onAction: () => void
   return (
     <AuthRequiredState
       icon={<Zap />}
-      actionIcon={<Zap aria-hidden="true" />}
       context="create"
       tone="panel"
       density="compact"
-      title="登录后开始发布"
+      title="登录后开启发布"
       description="选择分类、地点与展示偏好，让你的内容被更精准地看到。"
       actionLabel="登录 / 注册"
       previewItems={[
         { icon: <Hash aria-hidden="true" />, label: '设置分类', description: '精准归类到对应频道，让关注该话题的用户更快发现' },
         { icon: <MapPin aria-hidden="true" />, label: '添加地点', description: '标注所属城市或区域，提升同城与附近曝光效率' },
-        { icon: <LockKeyhole aria-hidden="true" />, label: '匿名发布', description: '自由切换公开或匿名，灵活掌控个人隐私与展示方式' },
+        { icon: <ShieldCheck aria-hidden="true" />, label: '隐私控制', description: '自由切换公开或匿名，灵活掌控个人隐私与展示方式' },
         { icon: <Send aria-hidden="true" />, label: '联系方式', description: '一键公开或隐藏 Telegram 账号，方便读者直接沟通' },
       ]}
       onAction={onAction}

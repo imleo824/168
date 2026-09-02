@@ -297,6 +297,8 @@ export const recordPostViews = (
 
 export const getHomeAds = (options?: RequestInit) => fetcher<PromotionBooking[]>('/api/promotions/home-ads', options);
 
+export const getAllActivePromotions = (options?: RequestInit) => fetcher<PromotionBooking[]>('/api/promotions/active', options);
+
 export const getMyPromotions = () => fetcher<PromotionBooking[]>('/api/me/promotions');
 
 export const getMyPromotionEffects = (params: { startDate?: string; endDate?: string; includeItems?: boolean } = {}) => {

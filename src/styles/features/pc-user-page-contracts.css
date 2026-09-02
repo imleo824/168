@@ -84,8 +84,7 @@
       .messages-list,
       .notification-settings-list,
       .profile-relation-list-shell,
-      .user-space-posts-panel,
-      .referral-record-list
+      .user-space-posts-panel
     ) {
       gap: var(--ui-space-none);
       border-top: var(--ui-border-width-hairline) solid var(--ui-pc-line);
@@ -107,6 +106,51 @@
       background: var(--ui-surface-card);
       box-shadow: var(--ui-shadow-none);
       transition: background-color var(--ui-duration-base) var(--ease-standard);
+    }
+
+    /* Distinct 2-Column Grid Record Cards for PC (Promote & Invite Referral) */
+    .app-shell[data-route-surface='user'] :is(
+      .referral-record-list,
+      .sponsor-record-list,
+      .promote-history-shell .record-list,
+      .referral-records-page-main .record-list
+    ) {
+      display: grid;
+      width: 100%;
+      max-width: var(--app-desktop-page-content-width);
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--ui-space-3);
+      margin-inline: auto;
+      border-top: var(--ui-border-none);
+      border-bottom: var(--ui-border-none);
+      background: var(--ui-surface-transparent);
+    }
+
+    .app-shell[data-route-surface='user'] :is(
+      .referral-record-list,
+      .sponsor-record-list,
+      .promote-history-shell .record-list,
+      .referral-records-page-main .record-list
+    ) :is(.record-card, .referral-record-card, .promote-history-card) {
+      border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+      border-radius: var(--ui-radius-card);
+      background: var(--ui-surface-card);
+      box-shadow: var(--ui-shadow-card);
+      padding: var(--ui-space-3) var(--ui-space-4);
+      transition:
+        border-color var(--ui-duration-base) var(--ease-standard),
+        box-shadow var(--ui-duration-base) var(--ease-standard),
+        transform var(--ui-duration-fast) var(--ease-standard);
+    }
+
+    .app-shell[data-route-surface='user'] :is(
+      .referral-record-list,
+      .sponsor-record-list,
+      .promote-history-shell .record-list,
+      .referral-records-page-main .record-list
+    ) :is(.record-card, .referral-record-card, .promote-history-card):hover {
+      border-color: var(--ui-line-medium);
+      box-shadow: var(--ui-shadow-card-hover);
     }
 
     .app-shell[data-route-surface='user'] :is(
