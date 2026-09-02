@@ -385,7 +385,6 @@ export default function MessagesMobile() {
         />
       </div>
       <PageContentShell as="main" className="messages-main ui-app-page-main">
-        {canShowPushPrompt ? <PushNotificationSetting /> : null}
         {renderContent}
       </PageContentShell>
     </AppPage>
