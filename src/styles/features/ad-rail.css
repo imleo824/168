@@ -67,6 +67,7 @@
     background: var(--ui-surface-weak);
     transition: background-color var(--ui-duration-base) var(--ease-standard),
                 border-color var(--ui-duration-base) var(--ease-standard),
+                box-shadow var(--ui-duration-base) var(--ease-standard),
                 transform var(--ui-duration-fast) var(--ease-standard);
     cursor: pointer;
     overflow: hidden;
@@ -75,15 +76,67 @@
 
   .app-desktop-ad-rail-card:hover {
     background: var(--ui-surface-card);
-    border-color: var(--ui-ad-rail-card-hover-border);
+    border-color: var(--ui-brand-soft, var(--ui-ad-rail-card-hover-border));
+    box-shadow: var(--ui-shadow-card-hover);
+    transform: translateY(-1px);
   }
 
   .app-desktop-ad-rail-card:focus-visible {
     border-color: var(--ui-brand);
-    box-shadow: 0 0 0 2px var(--ui-ad-rail-tag-amber-border);
+    box-shadow: 0 0 0 2px var(--ui-brand-soft);
   }
 
   .app-desktop-ad-rail-card:active {
-    transform: translateY(1px);
+    transform: scale(0.99) translateY(0);
+  }
+
+  .app-desktop-ad-rail-empty {
+    padding: var(--ui-space-6) var(--ui-space-4);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-block: auto;
+    border-radius: var(--ui-radius-xl);
+    border: var(--ui-border-width-hairline) dashed var(--ui-line-hairline);
+    background: var(--ui-surface-weak);
+  }
+
+  .app-desktop-ad-rail-empty-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: var(--ui-radius-xl);
+    background: var(--ui-brand-soft);
+    border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ui-brand);
+    margin-bottom: var(--ui-space-3);
+  }
+
+  .app-desktop-ad-rail-empty-btn {
+    padding: var(--ui-space-2) var(--ui-space-4);
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-strong);
+    border-radius: var(--ui-radius-lg);
+    background: var(--ui-brand);
+    color: var(--ui-color-white);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ui-space-1);
+    cursor: pointer;
+    border: var(--ui-border-none);
+    transition: background-color var(--ui-duration-base) var(--ease-standard),
+                transform var(--ui-duration-fast) var(--ease-standard);
+  }
+
+  .app-desktop-ad-rail-empty-btn:hover {
+    background: var(--ui-brand-hover);
+  }
+
+  .app-desktop-ad-rail-empty-btn:active {
+    transform: scale(0.96);
   }
 }
