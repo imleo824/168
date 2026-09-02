@@ -69,7 +69,7 @@ export function PostCreateAuthRequiredState({ onAction }: { onAction: () => void
       previewItems={[
         { icon: <Hash aria-hidden="true" />, label: '设置分类', description: '精准归类到对应频道，让关注该话题的用户更快发现' },
         { icon: <MapPin aria-hidden="true" />, label: '添加地点', description: '标注所属城市或区域，提升同城与附近曝光效率' },
-        { icon: <LockKeyhole aria-hidden="true" />, label: '匿名分布', description: '自由切换公开或匿名，灵活掌控个人隐私与展示方式' },
+        { icon: <LockKeyhole aria-hidden="true" />, label: '匿名发布', description: '自由切换公开或匿名，灵活掌控个人隐私与展示方式' },
         { icon: <Send aria-hidden="true" />, label: '联系方式', description: '一键公开或隐藏 Telegram 账号，方便读者直接沟通' },
       ]}
       onAction={onAction}

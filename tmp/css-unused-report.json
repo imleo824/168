@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-09-02T05:47:13.747Z",
+  "generatedAt": "2026-09-02T07:08:53.192Z",
   "definedCount": 1868,
   "usedCount": 2007,
   "unusedCount": 183,
-  "duplicateCount": 902,
+  "duplicateCount": 905,
   "highConfidenceUnused": [
     "account-info-status--truncate",
     "account-info-status-text",
@@ -3064,13 +3064,13 @@
         {
           "file": "src/styles/components/avatar.css",
           "line": 98,
-          "selector": ":where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) > .ui-avatar,\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) .ui-avatar,\n  .ui-avatar[data-tui-plus='true']",
+          "selector": ":where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) > .ui-avatar,\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) .ui-avatar",
           "raw": "\n\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar"
         },
         {
           "file": "src/styles/components/avatar.css",
           "line": 98,
-          "selector": ":where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) > .ui-avatar,\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) .ui-avatar,\n  .ui-avatar[data-tui-plus='true']",
+          "selector": ":where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) > .ui-avatar,\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) .ui-avatar",
           "raw": "\n\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar"
         },
         {
@@ -3431,7 +3431,7 @@
     },
     {
       "className": "app-shell",
-      "count": 151,
+      "count": 157,
       "refs": [
         {
           "file": "src/styles/components/feed-card-responsive.css",
@@ -3910,24 +3910,60 @@
         {
           "file": "src/styles/features/recharge.css",
           "line": 428,
+          "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-step--amount :is(.recharge-notice-box, .recharge-submit)",
+          "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-step--amount :is(.recharge-notice-box, .recharge-submit) {"
+        },
+        {
+          "file": "src/styles/features/recharge.css",
+          "line": 432,
           "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-preset-grid",
           "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-preset-grid {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 432,
+          "line": 436,
           "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-payment-panel",
           "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-payment-panel {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 439,
+          "line": 443,
           "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-instruction-body",
           "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-instruction-body {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 445,
+          "line": 449,
+          "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-panel",
+          "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-panel {"
+        },
+        {
+          "file": "src/styles/features/recharge.css",
+          "line": 458,
+          "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-row",
+          "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-row {"
+        },
+        {
+          "file": "src/styles/features/recharge.css",
+          "line": 466,
+          "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-main",
+          "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-main {"
+        },
+        {
+          "file": "src/styles/features/recharge.css",
+          "line": 473,
+          "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-panel .ui-token-amount",
+          "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-panel .ui-token-amount {"
+        },
+        {
+          "file": "src/styles/features/recharge.css",
+          "line": 477,
+          "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-side",
+          "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-side {"
+        },
+        {
+          "file": "src/styles/features/recharge.css",
+          "line": 483,
           "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-footer-action",
           "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-footer-action {"
         },
@@ -7024,13 +7060,13 @@
         {
           "file": "src/styles/components/avatar.css",
           "line": 98,
-          "selector": ":where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) > .ui-avatar,\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) .ui-avatar,\n  .ui-avatar[data-tui-plus='true']",
+          "selector": ":where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) > .ui-avatar,\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) .ui-avatar",
           "raw": "\n\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar"
         },
         {
           "file": "src/styles/components/avatar.css",
           "line": 98,
-          "selector": ":where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) > .ui-avatar,\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) .ui-avatar,\n  .ui-avatar[data-tui-plus='true']",
+          "selector": ":where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) > .ui-avatar,\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) .ui-avatar",
           "raw": "\n\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar"
         },
         {
@@ -15154,13 +15190,13 @@
         {
           "file": "src/styles/components/avatar.css",
           "line": 98,
-          "selector": ":where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) > .ui-avatar,\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) .ui-avatar,\n  .ui-avatar[data-tui-plus='true']",
+          "selector": ":where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) > .ui-avatar,\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) .ui-avatar",
           "raw": "\n\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar"
         },
         {
           "file": "src/styles/components/avatar.css",
           "line": 98,
-          "selector": ":where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) > .ui-avatar,\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) .ui-avatar,\n  .ui-avatar[data-tui-plus='true']",
+          "selector": ":where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) > .ui-avatar,\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) .ui-avatar",
           "raw": "\n\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar"
         },
         {
@@ -21123,19 +21159,19 @@
       "refs": [
         {
           "file": "src/styles/features/recharge.css",
-          "line": 624,
+          "line": 662,
           "selector": ".recharge-page :is(.recharge-token-row, .recharge-token-main, .recharge-address-row)",
           "raw": "\n\n  .recharge-page :is(.recharge-token-row, .recharge-token-main, .recharge-address-row) {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 704,
+          "line": 742,
           "selector": ".recharge-page .recharge-address-row",
           "raw": "\n\n  .recharge-page .recharge-address-row {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 739,
+          "line": 777,
           "selector": ".recharge-page .recharge-address-row",
           "raw": "\n    .recharge-page .recharge-address-row {"
         }
@@ -21159,7 +21195,7 @@
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 527,
+          "line": 565,
           "selector": ".recharge-page .recharge-amount-input",
           "raw": "\n\n  .recharge-page .recharge-amount-input {"
         }
@@ -21225,7 +21261,7 @@
       "refs": [
         {
           "file": "src/styles/features/recharge.css",
-          "line": 723,
+          "line": 761,
           "selector": ".recharge-page .recharge-copy-button",
           "raw": "\n\n  .recharge-page .recharge-copy-button {"
         },
@@ -21243,13 +21279,13 @@
       "refs": [
         {
           "file": "src/styles/features/recharge.css",
-          "line": 456,
+          "line": 494,
           "selector": ".recharge-page :is(\n    .recharge-step,\n    .recharge-form,\n    .recharge-field,\n    .recharge-instruction-body,\n    .recharge-payment-panel\n  )",
           "raw": "\n\n  .recharge-page :is(\n    .recharge-step,\n    .recharge-form,\n    .recharge-field,\n    .recharge-instruction-body,\n    .recharge-payment-panel\n  ) {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 476,
+          "line": 514,
           "selector": ".recharge-page .recharge-field",
           "raw": "\n\n  .recharge-page .recharge-field {"
         }
@@ -21267,13 +21303,13 @@
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 445,
+          "line": 483,
           "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-footer-action",
           "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-footer-action {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 733,
+          "line": 771,
           "selector": ".recharge-page .recharge-footer-action",
           "raw": "\n\n  .recharge-page .recharge-footer-action {"
         }
@@ -21285,13 +21321,13 @@
       "refs": [
         {
           "file": "src/styles/features/recharge.css",
-          "line": 456,
+          "line": 494,
           "selector": ".recharge-page :is(\n    .recharge-step,\n    .recharge-form,\n    .recharge-field,\n    .recharge-instruction-body,\n    .recharge-payment-panel\n  )",
           "raw": "\n\n  .recharge-page :is(\n    .recharge-step,\n    .recharge-form,\n    .recharge-field,\n    .recharge-instruction-body,\n    .recharge-payment-panel\n  ) {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 468,
+          "line": 506,
           "selector": ".recharge-page :is(.recharge-form, .recharge-step)",
           "raw": "\n\n  .recharge-page :is(.recharge-form, .recharge-step) {"
         }
@@ -21333,7 +21369,7 @@
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 450,
+          "line": 488,
           "selector": ".recharge-page .recharge-form-card",
           "raw": "\n\n  .recharge-page .recharge-form-card {"
         }
@@ -21345,21 +21381,39 @@
       "refs": [
         {
           "file": "src/styles/features/recharge.css",
-          "line": 439,
+          "line": 443,
           "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-instruction-body",
           "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-instruction-body {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 456,
+          "line": 494,
           "selector": ".recharge-page :is(\n    .recharge-step,\n    .recharge-form,\n    .recharge-field,\n    .recharge-instruction-body,\n    .recharge-payment-panel\n  )",
           "raw": "\n\n  .recharge-page :is(\n    .recharge-step,\n    .recharge-form,\n    .recharge-field,\n    .recharge-instruction-body,\n    .recharge-payment-panel\n  ) {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 668,
+          "line": 706,
           "selector": ".recharge-page .recharge-instruction-body",
           "raw": "\n\n  .recharge-page .recharge-instruction-body {"
+        }
+      ]
+    },
+    {
+      "className": "recharge-notice-box",
+      "count": 2,
+      "refs": [
+        {
+          "file": "src/styles/features/recharge.css",
+          "line": 184,
+          "selector": ".recharge-notice-box",
+          "raw": "\n\n   \n  .recharge-notice-box {"
+        },
+        {
+          "file": "src/styles/features/recharge.css",
+          "line": 428,
+          "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-step--amount :is(.recharge-notice-box, .recharge-submit)",
+          "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-step--amount :is(.recharge-notice-box, .recharge-submit) {"
         }
       ]
     },
@@ -21401,7 +21455,7 @@
     },
     {
       "className": "recharge-page",
-      "count": 61,
+      "count": 67,
       "refs": [
         {
           "file": "src/styles/features/recharge.css",
@@ -21490,282 +21544,318 @@
         {
           "file": "src/styles/features/recharge.css",
           "line": 428,
+          "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-step--amount :is(.recharge-notice-box, .recharge-submit)",
+          "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-step--amount :is(.recharge-notice-box, .recharge-submit) {"
+        },
+        {
+          "file": "src/styles/features/recharge.css",
+          "line": 432,
           "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-preset-grid",
           "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-preset-grid {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 432,
+          "line": 436,
           "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-payment-panel",
           "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-payment-panel {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 439,
+          "line": 443,
           "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-instruction-body",
           "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-instruction-body {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 445,
+          "line": 449,
+          "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-panel",
+          "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-panel {"
+        },
+        {
+          "file": "src/styles/features/recharge.css",
+          "line": 458,
+          "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-row",
+          "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-row {"
+        },
+        {
+          "file": "src/styles/features/recharge.css",
+          "line": 466,
+          "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-main",
+          "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-main {"
+        },
+        {
+          "file": "src/styles/features/recharge.css",
+          "line": 473,
+          "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-panel .ui-token-amount",
+          "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-panel .ui-token-amount {"
+        },
+        {
+          "file": "src/styles/features/recharge.css",
+          "line": 477,
+          "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-side",
+          "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-side {"
+        },
+        {
+          "file": "src/styles/features/recharge.css",
+          "line": 483,
           "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-footer-action",
           "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-footer-action {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 450,
+          "line": 488,
           "selector": ".recharge-page .recharge-form-card",
           "raw": "\n\n  .recharge-page .recharge-form-card {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 456,
+          "line": 494,
           "selector": ".recharge-page :is(\n    .recharge-step,\n    .recharge-form,\n    .recharge-field,\n    .recharge-instruction-body,\n    .recharge-payment-panel\n  )",
           "raw": "\n\n  .recharge-page :is(\n    .recharge-step,\n    .recharge-form,\n    .recharge-field,\n    .recharge-instruction-body,\n    .recharge-payment-panel\n  ) {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 468,
+          "line": 506,
           "selector": ".recharge-page :is(.recharge-form, .recharge-step)",
           "raw": "\n\n  .recharge-page :is(.recharge-form, .recharge-step) {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 472,
+          "line": 510,
           "selector": ".recharge-page .recharge-step--instructions",
           "raw": "\n\n  .recharge-page .recharge-step--instructions {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 476,
+          "line": 514,
           "selector": ".recharge-page .recharge-field",
           "raw": "\n\n  .recharge-page .recharge-field {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 480,
+          "line": 518,
           "selector": ".recharge-page .recharge-section-heading",
           "raw": "\n\n  .recharge-page .recharge-section-heading {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 488,
+          "line": 526,
           "selector": ".recharge-page .recharge-label",
           "raw": "\n\n  .recharge-page .recharge-label {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 495,
+          "line": 533,
           "selector": ".recharge-page :is(\n    .recharge-section-hint,\n    .recharge-note,\n    .recharge-network-note,\n    .recharge-estimate-label,\n    .ui-token-panel-label,\n    .ui-token-panel-unit\n  )",
           "raw": "\n\n  .recharge-page :is(\n    .recharge-section-hint,\n    .recharge-note,\n    .recharge-network-note,\n    .recharge-estimate-label,\n    .ui-token-panel-label,\n    .ui-token-panel-uni"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 510,
+          "line": 548,
           "selector": ".recharge-page .recharge-section-hint",
           "raw": "\n\n  .recharge-page .recharge-section-hint {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 516,
+          "line": 554,
           "selector": ".recharge-page .recharge-amount-field",
           "raw": "\n\n  .recharge-page .recharge-amount-field {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 527,
+          "line": 565,
           "selector": ".recharge-page .recharge-amount-input",
           "raw": "\n\n  .recharge-page .recharge-amount-input {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 539,
+          "line": 577,
           "selector": ".recharge-page .recharge-estimate",
           "raw": "\n\n  .recharge-page .recharge-estimate {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 548,
+          "line": 586,
           "selector": ".recharge-page :is(.recharge-estimate-value, .ui-token-amount)",
           "raw": "\n\n  .recharge-page :is(.recharge-estimate-value, .ui-token-amount) {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 554,
+          "line": 592,
           "selector": ".recharge-page .recharge-preset-grid",
           "raw": "\n\n  .recharge-page .recharge-preset-grid {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 560,
+          "line": 598,
           "selector": ".recharge-page .ui-amount-option",
           "raw": "\n\n  .recharge-page .ui-amount-option {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 568,
+          "line": 606,
           "selector": ".recharge-page .ui-amount-option-active",
           "raw": "\n\n  .recharge-page .ui-amount-option-active {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 574,
+          "line": 612,
           "selector": ".recharge-page .ui-amount-option-idle",
           "raw": "\n\n  .recharge-page .ui-amount-option-idle {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 579,
+          "line": 617,
           "selector": ".recharge-page .recharge-submit",
           "raw": "\n\n  .recharge-page .recharge-submit {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 584,
+          "line": 622,
           "selector": ".recharge-page .recharge-action-status",
           "raw": "\n\n  .recharge-page .recharge-action-status {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 591,
+          "line": 629,
           "selector": ".recharge-page .recharge-action-spinner",
           "raw": "\n\n  .recharge-page .recharge-action-spinner {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 595,
+          "line": 633,
           "selector": ".recharge-page .recharge-submit-icon",
           "raw": "\n\n  .recharge-page .recharge-submit-icon {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 602,
+          "line": 640,
           "selector": ".recharge-page .recharge-copy-icon",
           "raw": "\n\n  .recharge-page .recharge-copy-icon {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 609,
+          "line": 647,
           "selector": ".recharge-page .recharge-copy-icon--success",
           "raw": "\n\n  .recharge-page .recharge-copy-icon--success {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 613,
+          "line": 651,
           "selector": ".recharge-page .recharge-payment-panel",
           "raw": "\n\n  .recharge-page .recharge-payment-panel {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 617,
+          "line": 655,
           "selector": ".recharge-page .recharge-token-panel",
           "raw": "\n\n  .recharge-page .recharge-token-panel {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 624,
+          "line": 662,
           "selector": ".recharge-page :is(.recharge-token-row, .recharge-token-main, .recharge-address-row)",
           "raw": "\n\n  .recharge-page :is(.recharge-token-row, .recharge-token-main, .recharge-address-row) {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 631,
+          "line": 669,
           "selector": ".recharge-page .recharge-token-row",
           "raw": "\n\n  .recharge-page .recharge-token-row {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 635,
+          "line": 673,
           "selector": ".recharge-page .recharge-token-main",
           "raw": "\n\n  .recharge-page .recharge-token-main {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 640,
+          "line": 678,
           "selector": ".recharge-page .recharge-token-panel :is(.ui-token-panel-label, .ui-token-panel-unit)",
           "raw": "\n\n  .recharge-page .recharge-token-panel :is(.ui-token-panel-label, .ui-token-panel-unit) {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 644,
+          "line": 682,
           "selector": ".recharge-page .recharge-token-panel .ui-token-amount",
           "raw": "\n\n  .recharge-page .recharge-token-panel .ui-token-amount {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 649,
+          "line": 687,
           "selector": ".recharge-page .recharge-token-amount",
           "raw": "\n\n  .recharge-page .recharge-token-amount {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 654,
+          "line": 692,
           "selector": ".recharge-page .recharge-token-network-badge",
           "raw": "\n\n  .recharge-page .recharge-token-network-badge {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 668,
+          "line": 706,
           "selector": ".recharge-page .recharge-instruction-body",
           "raw": "\n\n  .recharge-page .recharge-instruction-body {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 672,
+          "line": 710,
           "selector": ".recharge-page .recharge-qr-wrap",
           "raw": "\n\n  .recharge-page .recharge-qr-wrap {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 679,
+          "line": 717,
           "selector": ".recharge-page :is(.ui-token-qr-card, .recharge-qr-card)",
           "raw": "\n\n  .recharge-page :is(.ui-token-qr-card, .recharge-qr-card) {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 691,
+          "line": 729,
           "selector": ".recharge-page :is(.recharge-qr-image, .recharge-qr-skeleton)",
           "raw": "\n\n  .recharge-page :is(.recharge-qr-image, .recharge-qr-skeleton) {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 698,
+          "line": 736,
           "selector": ".recharge-page .recharge-qr-empty",
           "raw": "\n\n  .recharge-page .recharge-qr-empty {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 704,
+          "line": 742,
           "selector": ".recharge-page .recharge-address-row",
           "raw": "\n\n  .recharge-page .recharge-address-row {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 710,
+          "line": 748,
           "selector": ".recharge-page :is(.ui-mono-value, .recharge-address-value)",
           "raw": "\n\n  .recharge-page :is(.ui-mono-value, .recharge-address-value) {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 723,
+          "line": 761,
           "selector": ".recharge-page .recharge-copy-button",
           "raw": "\n\n  .recharge-page .recharge-copy-button {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 727,
+          "line": 765,
           "selector": ".recharge-page .recharge-copy-button--icon-only",
           "raw": "\n\n  .recharge-page .recharge-copy-button--icon-only {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 733,
+          "line": 771,
           "selector": ".recharge-page .recharge-footer-action",
           "raw": "\n\n  .recharge-page .recharge-footer-action {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 739,
+          "line": 777,
           "selector": ".recharge-page .recharge-address-row",
           "raw": "\n    .recharge-page .recharge-address-row {"
         }
@@ -21801,19 +21891,19 @@
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 432,
+          "line": 436,
           "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-payment-panel",
           "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-payment-panel {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 456,
+          "line": 494,
           "selector": ".recharge-page :is(\n    .recharge-step,\n    .recharge-form,\n    .recharge-field,\n    .recharge-instruction-body,\n    .recharge-payment-panel\n  )",
           "raw": "\n\n  .recharge-page :is(\n    .recharge-step,\n    .recharge-form,\n    .recharge-field,\n    .recharge-instruction-body,\n    .recharge-payment-panel\n  ) {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 613,
+          "line": 651,
           "selector": ".recharge-page .recharge-payment-panel",
           "raw": "\n\n  .recharge-page .recharge-payment-panel {"
         }
@@ -21831,13 +21921,13 @@
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 428,
+          "line": 432,
           "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-preset-grid",
           "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-preset-grid {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 554,
+          "line": 592,
           "selector": ".recharge-page .recharge-preset-grid",
           "raw": "\n\n  .recharge-page .recharge-preset-grid {"
         }
@@ -21849,13 +21939,13 @@
       "refs": [
         {
           "file": "src/styles/features/recharge.css",
-          "line": 495,
+          "line": 533,
           "selector": ".recharge-page :is(\n    .recharge-section-hint,\n    .recharge-note,\n    .recharge-network-note,\n    .recharge-estimate-label,\n    .ui-token-panel-label,\n    .ui-token-panel-unit\n  )",
           "raw": "\n\n  .recharge-page :is(\n    .recharge-section-hint,\n    .recharge-note,\n    .recharge-network-note,\n    .recharge-estimate-label,\n    .ui-token-panel-label,\n    .ui-token-panel-uni"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 510,
+          "line": 548,
           "selector": ".recharge-page .recharge-section-hint",
           "raw": "\n\n  .recharge-page .recharge-section-hint {"
         }
@@ -21891,13 +21981,13 @@
       "refs": [
         {
           "file": "src/styles/features/recharge.css",
-          "line": 456,
+          "line": 494,
           "selector": ".recharge-page :is(\n    .recharge-step,\n    .recharge-form,\n    .recharge-field,\n    .recharge-instruction-body,\n    .recharge-payment-panel\n  )",
           "raw": "\n\n  .recharge-page :is(\n    .recharge-step,\n    .recharge-form,\n    .recharge-field,\n    .recharge-instruction-body,\n    .recharge-payment-panel\n  ) {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 468,
+          "line": 506,
           "selector": ".recharge-page :is(.recharge-form, .recharge-step)",
           "raw": "\n\n  .recharge-page :is(.recharge-form, .recharge-step) {"
         }
@@ -21905,7 +21995,7 @@
     },
     {
       "className": "recharge-step--amount",
-      "count": 2,
+      "count": 3,
       "refs": [
         {
           "file": "src/styles/features/pc-user-page-contracts.css",
@@ -21918,22 +22008,52 @@
           "line": 421,
           "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-step--amount",
           "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-step--amount {"
+        },
+        {
+          "file": "src/styles/features/recharge.css",
+          "line": 428,
+          "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-step--amount :is(.recharge-notice-box, .recharge-submit)",
+          "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-step--amount :is(.recharge-notice-box, .recharge-submit) {"
+        }
+      ]
+    },
+    {
+      "className": "recharge-submit",
+      "count": 2,
+      "refs": [
+        {
+          "file": "src/styles/features/recharge.css",
+          "line": 428,
+          "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-step--amount :is(.recharge-notice-box, .recharge-submit)",
+          "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-step--amount :is(.recharge-notice-box, .recharge-submit) {"
+        },
+        {
+          "file": "src/styles/features/recharge.css",
+          "line": 617,
+          "selector": ".recharge-page .recharge-submit",
+          "raw": "\n\n  .recharge-page .recharge-submit {"
         }
       ]
     },
     {
       "className": "recharge-token-main",
-      "count": 2,
+      "count": 3,
       "refs": [
         {
           "file": "src/styles/features/recharge.css",
-          "line": 624,
+          "line": 466,
+          "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-main",
+          "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-main {"
+        },
+        {
+          "file": "src/styles/features/recharge.css",
+          "line": 662,
           "selector": ".recharge-page :is(.recharge-token-row, .recharge-token-main, .recharge-address-row)",
           "raw": "\n\n  .recharge-page :is(.recharge-token-row, .recharge-token-main, .recharge-address-row) {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 635,
+          "line": 673,
           "selector": ".recharge-page .recharge-token-main",
           "raw": "\n\n  .recharge-page .recharge-token-main {"
         }
@@ -21941,23 +22061,35 @@
     },
     {
       "className": "recharge-token-panel",
-      "count": 3,
+      "count": 5,
       "refs": [
         {
           "file": "src/styles/features/recharge.css",
-          "line": 617,
+          "line": 449,
+          "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-panel",
+          "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-panel {"
+        },
+        {
+          "file": "src/styles/features/recharge.css",
+          "line": 473,
+          "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-panel .ui-token-amount",
+          "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-panel .ui-token-amount {"
+        },
+        {
+          "file": "src/styles/features/recharge.css",
+          "line": 655,
           "selector": ".recharge-page .recharge-token-panel",
           "raw": "\n\n  .recharge-page .recharge-token-panel {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 640,
+          "line": 678,
           "selector": ".recharge-page .recharge-token-panel :is(.ui-token-panel-label, .ui-token-panel-unit)",
           "raw": "\n\n  .recharge-page .recharge-token-panel :is(.ui-token-panel-label, .ui-token-panel-unit) {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 644,
+          "line": 682,
           "selector": ".recharge-page .recharge-token-panel .ui-token-amount",
           "raw": "\n\n  .recharge-page .recharge-token-panel .ui-token-amount {"
         }
@@ -21965,19 +22097,43 @@
     },
     {
       "className": "recharge-token-row",
-      "count": 2,
+      "count": 3,
       "refs": [
         {
           "file": "src/styles/features/recharge.css",
-          "line": 624,
+          "line": 458,
+          "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-row",
+          "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-row {"
+        },
+        {
+          "file": "src/styles/features/recharge.css",
+          "line": 662,
           "selector": ".recharge-page :is(.recharge-token-row, .recharge-token-main, .recharge-address-row)",
           "raw": "\n\n  .recharge-page :is(.recharge-token-row, .recharge-token-main, .recharge-address-row) {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 631,
+          "line": 669,
           "selector": ".recharge-page .recharge-token-row",
           "raw": "\n\n  .recharge-page .recharge-token-row {"
+        }
+      ]
+    },
+    {
+      "className": "recharge-token-side",
+      "count": 2,
+      "refs": [
+        {
+          "file": "src/styles/features/recharge.css",
+          "line": 192,
+          "selector": ".recharge-token-side",
+          "raw": "\n\n  .recharge-token-side {"
+        },
+        {
+          "file": "src/styles/features/recharge.css",
+          "line": 477,
+          "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-side",
+          "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-side {"
         }
       ]
     },
@@ -26607,7 +26763,7 @@
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 560,
+          "line": 598,
           "selector": ".recharge-page .ui-amount-option",
           "raw": "\n\n  .recharge-page .ui-amount-option {"
         },
@@ -26649,7 +26805,7 @@
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 568,
+          "line": 606,
           "selector": ".recharge-page .ui-amount-option-active",
           "raw": "\n\n  .recharge-page .ui-amount-option-active {"
         },
@@ -26679,7 +26835,7 @@
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 574,
+          "line": 612,
           "selector": ".recharge-page .ui-amount-option-idle",
           "raw": "\n\n  .recharge-page .ui-amount-option-idle {"
         },
@@ -27568,36 +27724,36 @@
         {
           "file": "src/styles/components/avatar.css",
           "line": 98,
-          "selector": ":where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) > .ui-avatar,\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) .ui-avatar,\n  .ui-avatar[data-tui-plus='true']",
+          "selector": ":where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) > .ui-avatar,\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) .ui-avatar",
           "raw": "\n\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar"
         },
         {
           "file": "src/styles/components/avatar.css",
           "line": 98,
-          "selector": ":where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) > .ui-avatar,\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) .ui-avatar,\n  .ui-avatar[data-tui-plus='true']",
+          "selector": ":where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) > .ui-avatar,\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) .ui-avatar",
           "raw": "\n\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar"
         },
         {
           "file": "src/styles/components/avatar.css",
-          "line": 98,
-          "selector": ":where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) > .ui-avatar,\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) .ui-avatar,\n  .ui-avatar[data-tui-plus='true']",
-          "raw": "\n\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar"
+          "line": 121,
+          "selector": ".ui-avatar[data-tui-plus='true']",
+          "raw": "\n\n  .ui-avatar[data-tui-plus='true'] {"
         },
         {
           "file": "src/styles/components/avatar.css",
-          "line": 122,
+          "line": 129,
           "selector": ".ui-avatar[data-tui-plus='true']:not(:where([data-tui-plus='true'] .ui-avatar, [data-tui-plus='true'] > .ui-avatar))",
           "raw": "\n\n  .ui-avatar[data-tui-plus='true']:not(:where([data-tui-plus='true'] .ui-avatar, [data-tui-plus='true'] > .ui-avatar)) {"
         },
         {
           "file": "src/styles/components/avatar.css",
-          "line": 122,
+          "line": 129,
           "selector": ".ui-avatar[data-tui-plus='true']:not(:where([data-tui-plus='true'] .ui-avatar, [data-tui-plus='true'] > .ui-avatar))",
           "raw": "\n\n  .ui-avatar[data-tui-plus='true']:not(:where([data-tui-plus='true'] .ui-avatar, [data-tui-plus='true'] > .ui-avatar)) {"
         },
         {
           "file": "src/styles/components/avatar.css",
-          "line": 122,
+          "line": 129,
           "selector": ".ui-avatar[data-tui-plus='true']:not(:where([data-tui-plus='true'] .ui-avatar, [data-tui-plus='true'] > .ui-avatar))",
           "raw": "\n\n  .ui-avatar[data-tui-plus='true']:not(:where([data-tui-plus='true'] .ui-avatar, [data-tui-plus='true'] > .ui-avatar)) {"
         },
@@ -27772,13 +27928,13 @@
         {
           "file": "src/styles/components/avatar.css",
           "line": 98,
-          "selector": ":where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) > .ui-avatar,\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) .ui-avatar,\n  .ui-avatar[data-tui-plus='true']",
+          "selector": ":where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) > .ui-avatar,\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) .ui-avatar",
           "raw": "\n\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar"
         },
         {
           "file": "src/styles/components/avatar.css",
           "line": 98,
-          "selector": ":where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) > .ui-avatar,\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) .ui-avatar,\n  .ui-avatar[data-tui-plus='true']",
+          "selector": ":where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) > .ui-avatar,\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) .ui-avatar",
           "raw": "\n\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar"
         },
         {
@@ -30753,7 +30909,7 @@
       "refs": [
         {
           "file": "src/styles/features/recharge.css",
-          "line": 710,
+          "line": 748,
           "selector": ".recharge-page :is(.ui-mono-value, .recharge-address-value)",
           "raw": "\n\n  .recharge-page :is(.ui-mono-value, .recharge-address-value) {"
         },
@@ -31180,13 +31336,13 @@
         {
           "file": "src/styles/components/avatar.css",
           "line": 98,
-          "selector": ":where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) > .ui-avatar,\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) .ui-avatar,\n  .ui-avatar[data-tui-plus='true']",
+          "selector": ":where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) > .ui-avatar,\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) .ui-avatar",
           "raw": "\n\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar"
         },
         {
           "file": "src/styles/components/avatar.css",
           "line": 98,
-          "selector": ":where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) > .ui-avatar,\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) .ui-avatar,\n  .ui-avatar[data-tui-plus='true']",
+          "selector": ":where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) > .ui-avatar,\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) .ui-avatar",
           "raw": "\n\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar"
         },
         {
@@ -32711,17 +32867,23 @@
     },
     {
       "className": "ui-token-amount",
-      "count": 3,
+      "count": 4,
       "refs": [
         {
           "file": "src/styles/features/recharge.css",
-          "line": 548,
+          "line": 473,
+          "selector": ".app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-panel .ui-token-amount",
+          "raw": "\n\n    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-token-panel .ui-token-amount {"
+        },
+        {
+          "file": "src/styles/features/recharge.css",
+          "line": 586,
           "selector": ".recharge-page :is(.recharge-estimate-value, .ui-token-amount)",
           "raw": "\n\n  .recharge-page :is(.recharge-estimate-value, .ui-token-amount) {"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 644,
+          "line": 682,
           "selector": ".recharge-page .recharge-token-panel .ui-token-amount",
           "raw": "\n\n  .recharge-page .recharge-token-panel .ui-token-amount {"
         },
@@ -32739,13 +32901,13 @@
       "refs": [
         {
           "file": "src/styles/features/recharge.css",
-          "line": 495,
+          "line": 533,
           "selector": ".recharge-page :is(\n    .recharge-section-hint,\n    .recharge-note,\n    .recharge-network-note,\n    .recharge-estimate-label,\n    .ui-token-panel-label,\n    .ui-token-panel-unit\n  )",
           "raw": "\n\n  .recharge-page :is(\n    .recharge-section-hint,\n    .recharge-note,\n    .recharge-network-note,\n    .recharge-estimate-label,\n    .ui-token-panel-label,\n    .ui-token-panel-uni"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 640,
+          "line": 678,
           "selector": ".recharge-page .recharge-token-panel :is(.ui-token-panel-label, .ui-token-panel-unit)",
           "raw": "\n\n  .recharge-page .recharge-token-panel :is(.ui-token-panel-label, .ui-token-panel-unit) {"
         },
@@ -32769,13 +32931,13 @@
       "refs": [
         {
           "file": "src/styles/features/recharge.css",
-          "line": 495,
+          "line": 533,
           "selector": ".recharge-page :is(\n    .recharge-section-hint,\n    .recharge-note,\n    .recharge-network-note,\n    .recharge-estimate-label,\n    .ui-token-panel-label,\n    .ui-token-panel-unit\n  )",
           "raw": "\n\n  .recharge-page :is(\n    .recharge-section-hint,\n    .recharge-note,\n    .recharge-network-note,\n    .recharge-estimate-label,\n    .ui-token-panel-label,\n    .ui-token-panel-uni"
         },
         {
           "file": "src/styles/features/recharge.css",
-          "line": 640,
+          "line": 678,
           "selector": ".recharge-page .recharge-token-panel :is(.ui-token-panel-label, .ui-token-panel-unit)",
           "raw": "\n\n  .recharge-page .recharge-token-panel :is(.ui-token-panel-label, .ui-token-panel-unit) {"
         },
@@ -32799,7 +32961,7 @@
       "refs": [
         {
           "file": "src/styles/features/recharge.css",
-          "line": 679,
+          "line": 717,
           "selector": ".recharge-page :is(.ui-token-qr-card, .recharge-qr-card)",
           "raw": "\n\n  .recharge-page :is(.ui-token-qr-card, .recharge-qr-card) {"
         },
@@ -35080,13 +35242,13 @@
         {
           "file": "src/styles/components/avatar.css",
           "line": 98,
-          "selector": ":where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) > .ui-avatar,\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) .ui-avatar,\n  .ui-avatar[data-tui-plus='true']",
+          "selector": ":where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) > .ui-avatar,\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) .ui-avatar",
           "raw": "\n\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar"
         },
         {
           "file": "src/styles/components/avatar.css",
           "line": 98,
-          "selector": ":where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) > .ui-avatar,\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) .ui-avatar,\n  .ui-avatar[data-tui-plus='true']",
+          "selector": ":where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) > .ui-avatar,\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar-next[data-tui-plus='true'],\n    .feed-card-author-avatar-link[data-tui-plus='true'],\n    .app-bottom-nav-avatar-shell[data-tui-plus='true']\n  ) .ui-avatar",
           "raw": "\n\n  :where(\n    .ui-avatar-action[data-tui-plus='true'],\n    .ui-profile-icon-button[data-tui-plus='true'],\n    .profile-avatar-button[data-tui-plus='true'],\n    .user-space-avatar"
         },
         {

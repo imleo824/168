@@ -825,15 +825,7 @@ export const allowedSelectorPropertyOverlapManifests = [
     properties: ["align-items", "grid-template-columns"],
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
   },
-  {
-    selector: ".ui-avatar[data-tui-plus='true']:not(:where([data-tui-plus='true'] .ui-avatar, [data-tui-plus='true'] > .ui-avatar))",
-    files: [
-      "src/styles/components/avatar.css",
-      "src/styles/features/tui-plus-avatar-ring-contract.css",
-    ],
-    properties: ["box-shadow", "overflow"],
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
+
   {
     selector: ".ui-button[data-action-size='header']",
     files: [
