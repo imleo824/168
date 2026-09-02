@@ -427,6 +427,10 @@
       gap: var(--ui-space-4);
     }
 
+    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-step--amount :is(.recharge-notice-box, .recharge-submit) {
+      grid-column: 1 / -1;
+    }
+
     .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-preset-grid {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }

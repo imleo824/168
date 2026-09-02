@@ -75,6 +75,21 @@ export const getHomeNotificationSummary = (params: { followingSince?: string; di
   return fetcher<HomeNotificationSummary>('/api/notifications/home-summary' + (suffix ? '?' + suffix : ''));
 };
 
+export const getNotificationsList = (
+  params: { type?: string; limit?: number; cursor?: string | null } = {},
+  options?: ApiRequestOptions,
+) => {
+  const query = new URLSearchParams();
+  if (params.type) query.set('type', params.type);
+  if (params.limit) query.set('limit', String(params.limit));
+  if (params.cursor) query.set('cursor', params.cursor);
+  const suffix = query.toString();
+  return fetcher<{ items: any[]; nextCursor: string | null; hasMore: boolean; unreadCount: number }>(
+    '/api/notifications' + (suffix ? '?' + suffix : ''),
+    options,
+  );
+};
+
 export const recordPostViews = (
   postIds: string[],
   events?: Array<{ postId: string; dwellMs?: number; quickSkip?: boolean }>,

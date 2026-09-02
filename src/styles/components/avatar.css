@@ -123,6 +123,7 @@
 
   .ui-avatar[data-tui-plus='true']:not(:where([data-tui-plus='true'] .ui-avatar, [data-tui-plus='true'] > .ui-avatar)) {
     overflow: visible;
+    border-radius: var(--ui-radius-pill);
     box-shadow:
       0 0 0 var(--ui-avatar-tui-plus-ring-gap) var(--ui-avatar-tui-plus-ring-surface),
       0 0 0 calc(var(--ui-avatar-tui-plus-ring-gap) + var(--ui-avatar-tui-plus-ring-size)) var(--ui-avatar-tui-plus-ring-color);

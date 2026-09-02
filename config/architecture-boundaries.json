@@ -17,6 +17,6 @@
   },
   "frontendApi": {
     "maxDirectApiFilesOutsideAllowedApiLayers": 11,
-    "maxDirectApiLiteralsOutsideAllowedApiLayers": 90
+    "maxDirectApiLiteralsOutsideAllowedApiLayers": 47
   }
 }

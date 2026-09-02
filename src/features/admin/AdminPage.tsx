@@ -4,7 +4,32 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Save } from 'lucide-react';
 import SEO from '@/platform/SEO';
 import { APP_ROUTES } from '@/app/routePaths';
-import { apiFetch } from '@/services/api';
+import {
+  fetchAdminConfigApi,
+  saveAdminConfigApi,
+  fetchOpsReportApi,
+  fetchAdminListApi,
+  fetchDepositAddressStatsApi,
+  importDepositAddressesApi,
+  updateDepositAddressStatusApi,
+  createSweepJobApi,
+  creditRechargeOrderApi,
+  updateUserDisabledStateApi,
+  adjustUserPointsApi,
+  updatePostPublishStateApi,
+  deletePostPermanentlyApi,
+  updatePostCategoryApi,
+  updatePromotionApi,
+  togglePromotionDisplayStateApi,
+  cancelPromotionApi,
+  fetchChatConfigApi,
+  saveChatConfigApi,
+  updateChatMessageStatusApi,
+  muteChatAuthorApi,
+  fetchPublicConfigApi,
+  fetchPublicCategoriesApi,
+  fetchHomeBootstrapApi,
+} from './services/adminApi';
 import { Navigate } from 'react-router-dom';
 import { AdminDialogsProvider, useAdminDialogs } from './AdminDialogs';
 
@@ -123,12 +148,8 @@ function AdminConsole() {
   const fetchAdminConfig = useCallback(async () => {
     if (user?.role !== 'ADMIN') return;
     try {
-      const res = await apiFetch('/api/admin/config');
-      if (!res.ok) {
-        setConfigSaveError('配置加载失败，请刷新重试');
-        return;
-      }
-      setLocalConfig(await res.json());
+      const config = await fetchAdminConfigApi();
+      setLocalConfig(config);
     } catch {
       setConfigSaveError('配置加载失败，请刷新重试');
     }
@@ -136,20 +157,11 @@ function AdminConsole() {
 
   const refreshPublicConfigCaches = useCallback(async (savedConfig?: any, savedCategories?: any[]) => {
     const cacheBust = Date.now();
-    const readJson = async <T,>(path: string): Promise<T> => {
-      const separator = path.includes('?') ? '&' : '?';
-      const res = await apiFetch(`${path}${separator}adminRefresh=${cacheBust}`, {
-        cache: 'no-store',
-        retry: false,
-      });
-      if (!res.ok) throw new Error('refresh failed');
-      return await res.json();
-    };
 
     const [config, categories, homeBootstrap] = await Promise.all([
-      savedConfig ? Promise.resolve(savedConfig) : readJson<any>('/api/config'),
-      savedCategories ? Promise.resolve(savedCategories) : readJson<any[]>('/api/categories'),
-      readJson<any>('/api/home/bootstrap'),
+      savedConfig ? Promise.resolve(savedConfig) : fetchPublicConfigApi(cacheBust),
+      savedCategories ? Promise.resolve(savedCategories) : fetchPublicCategoriesApi(cacheBust),
+      fetchHomeBootstrapApi(cacheBust),
     ]);
     const nextHomeBootstrap = {
       ...homeBootstrap,
@@ -194,17 +206,11 @@ function AdminConsole() {
     setOpsReportError('');
     setIsLoadingReport(true);
     try {
-      const res = await apiFetch('/api/admin/ops-report');
-      if (requestId !== reportRequestIdRef.current) return;
-      if (!res.ok) {
-        setOpsReportError('报表加载失败，请重试');
-        setOpsReport(null);
-        return;
-      }
-      const data = await res.json();
+      const data = await fetchOpsReportApi();
       if (requestId !== reportRequestIdRef.current) return;
       setOpsReport(data || null);
     } catch {
+      if (requestId !== reportRequestIdRef.current) return;
       setOpsReportError('报表加载失败，请重试');
       setOpsReport(null);
     } finally {
@@ -221,9 +227,8 @@ function AdminConsole() {
   const fetchDepositAddressStats = useCallback(async () => {
     if (user?.role !== 'ADMIN') return;
     try {
-      const res = await apiFetch('/api/admin/deposit-addresses/stats');
-      if (!res.ok) return;
-      setDepositAddressStats(await res.json());
+      const stats = await fetchDepositAddressStatsApi();
+      setDepositAddressStats(stats);
     } catch {
       // 地址池统计不阻断主列表。
     }
@@ -234,13 +239,7 @@ function AdminConsole() {
     if (!text || isImportingAddresses) return;
     setIsImportingAddresses(true);
     try {
-      const res = await apiFetch('/api/admin/deposit-addresses', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ addresses: text }),
-      });
-      const payload = await res.json();
-      if (!res.ok) throw new Error(payload?.error || '地址导入失败');
+      const payload = await importDepositAddressesApi(text);
       setAddressImportText('');
       showToast(`已导入 ${payload.created || 0} 个，跳过 ${payload.skipped || 0} 个`, 'success');
       await fetchDepositAddressStats();
@@ -254,13 +253,7 @@ function AdminConsole() {
 
   const updateDepositAddressStatus = async (id: string, status: 'AVAILABLE' | 'DISABLED') => {
     try {
-      const res = await apiFetch(`/api/admin/deposit-addresses/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
-      });
-      const payload = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(payload?.error || '状态更新失败');
+      await updateDepositAddressStatusApi(id, status);
       showToast('地址状态已更新', 'success');
       await fetchDepositAddressStats();
       await fetchData();
@@ -281,9 +274,7 @@ function AdminConsole() {
     }
     setIsCreatingSweepJob(true);
     try {
-      const res = await apiFetch('/api/admin/deposit-sweep-jobs', { method: 'POST' });
-      const payload = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(payload?.error || '创建归集任务失败');
+      const payload = await createSweepJobApi();
       showToast(`已创建归集任务：${payload?.job?.orderCount || 0} 笔`, 'success');
       await fetchDepositAddressStats();
       await fetchData();
@@ -326,13 +317,7 @@ function AdminConsole() {
 
     setProcessingOrderId(item.id);
     try {
-      const res = await apiFetch(`/api/admin/orders/${item.id}/credit`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(requestBody),
-      });
-      const payload = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(payload?.error || '确认到账失败');
+      await creditRechargeOrderApi(item.id, requestBody);
       showToast('已确认到账并入账积分', 'success');
       await fetchDepositAddressStats();
       await fetchData();
@@ -369,17 +354,7 @@ function AdminConsole() {
 
     setProcessingAdminActionId(item.id);
     try {
-      const res = await apiFetch(`/api/admin/users/${item.id}/points`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          changeType,
-          amount,
-          remark: `${actionText}操作`,
-        }),
-      });
-      const payload = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(payload?.error || '用户积分调整失败');
+      await adjustUserPointsApi(item.id, changeType, amount, `${actionText}操作`);
       showToast(`已为 ${displayName} 执行${actionText}`, 'success');
       await fetchData();
     } catch (error: any) {
@@ -402,13 +377,7 @@ function AdminConsole() {
 
     setProcessingAdminActionId(item.id);
     try {
-      const res = await apiFetch(`/api/admin/posts/${item.id}/publish`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isPublished }),
-      });
-      const payload = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(payload?.error || '内容状态更新失败');
+      await updatePostPublishStateApi(item.id, isPublished);
       showToast(isPublished ? '内容已上架' : '内容已下架', 'success');
       await fetchData();
     } catch (error: any) {
@@ -430,11 +399,7 @@ function AdminConsole() {
 
     setProcessingAdminActionId(item.id);
     try {
-      const res = await apiFetch(`/api/admin/posts/${item.id}/permanent`, {
-        method: 'DELETE',
-      });
-      const payload = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(payload?.error || '内容永久删除失败');
+      await deletePostPermanentlyApi(item.id);
       showToast('内容已永久删除', 'success');
       await fetchData();
     } catch (error: any) {
@@ -469,13 +434,7 @@ function AdminConsole() {
 
     setProcessingAdminActionId(item.id);
     try {
-      const res = await apiFetch(`/api/admin/posts/${item.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ categoryId: editingPostDraftCategoryId }),
-      });
-      const payload = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(payload?.error || '内容分类更新失败');
+      await updatePostCategoryApi(item.id, editingPostDraftCategoryId);
       showToast('分类已更新', 'success');
       cancelPostCategoryEdit();
       await fetchData();
@@ -537,13 +496,7 @@ function AdminConsole() {
 
     setProcessingAdminActionId(item.id);
     try {
-      const res = await apiFetch(`/api/admin/promotions/${item.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      const payloadData = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(payloadData?.error || '广告更新失败');
+      await updatePromotionApi(item.id, payload);
       showToast('广告信息已更新', 'success');
       cancelEditingPromotion();
       await fetchData();
@@ -565,13 +518,7 @@ function AdminConsole() {
 
     setProcessingAdminActionId(item.id);
     try {
-      const res = await apiFetch(`/api/admin/promotions/${item.id}/display-state`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isActive }),
-      });
-      const payloadData = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(payloadData?.error || '投放展示状态更新失败');
+      await togglePromotionDisplayStateApi(item.id, isActive);
       showToast(isActive ? '已恢复展示' : '已暂停展示，排期仍保留', 'success');
       await fetchData();
     } catch (error: any) {
@@ -593,11 +540,7 @@ function AdminConsole() {
 
     setProcessingAdminActionId(item.id);
     try {
-      const res = await apiFetch(`/api/admin/promotions/${item.id}`, {
-        method: 'DELETE',
-      });
-      const payload = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(payload?.error || '投放取消失败');
+      await cancelPromotionApi(item.id);
       showToast('投放已取消，预约位置已释放', 'success');
       await fetchData();
     } catch (error: any) {
@@ -620,13 +563,7 @@ function AdminConsole() {
 
     setProcessingAdminActionId(item.id);
     try {
-      const res = await apiFetch(`/api/admin/users/${item.id}/disabled`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ isDisabled }),
-      });
-      const payload = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(payload?.error || '用户状态更新失败');
+      await updateUserDisabledStateApi(item.id, isDisabled);
       showToast(isDisabled ? '用户已禁用' : '用户已启用', 'success');
       await fetchData();
     } catch (error: any) {
@@ -639,9 +576,7 @@ function AdminConsole() {
   const fetchChatControls = useCallback(async () => {
     setIsLoadingChatControls(true);
     try {
-      const configRes = await apiFetch('/api/admin/chat/config');
-      if (!configRes.ok) throw new Error('聊天控制台加载失败');
-      const config = await configRes.json();
+      const config = await fetchChatConfigApi();
       setChatConfigDraft(config);
     } catch (error: any) {
       showToast(error?.message || '聊天控制台加载失败', 'error');
@@ -653,13 +588,7 @@ function AdminConsole() {
   const saveChatConfig = async () => {
     setIsSaving(true);
     try {
-      const res = await apiFetch('/api/admin/chat/config', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(chatConfigDraft),
-      });
-      const payload = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(payload?.error || '聊天配置保存失败');
+      const payload = await saveChatConfigApi(chatConfigDraft);
       setChatConfigDraft(payload);
       showToast('聊天配置已保存', 'success');
     } catch (error: any) {
@@ -673,13 +602,7 @@ function AdminConsole() {
     if (!item?.id) return;
     setProcessingAdminActionId(item.id);
     try {
-      const res = await apiFetch(`/api/admin/chat/messages/${item.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
-      });
-      const payload = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(payload?.error || '消息处理失败');
+      const payload = await updateChatMessageStatusApi(item.id, status);
       setDataList((current) => current.map((message) => message.id === item.id ? payload : message));
       showToast(status === 'VISIBLE' ? '消息已恢复' : '消息已处理', 'success');
     } catch (error: any) {
@@ -693,18 +616,12 @@ function AdminConsole() {
     if (!item?.authorUserId) return;
     setProcessingAdminActionId(item.id);
     try {
-      const res = await apiFetch('/api/admin/chat/mutes', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId: item.authorUserId,
-          minutes: options.minutes,
-          permanent: Boolean(options.permanent),
-          reason: '后台聊天管理禁言',
-        }),
+      await muteChatAuthorApi({
+        userId: item.authorUserId,
+        minutes: options.minutes,
+        permanent: Boolean(options.permanent),
+        reason: '后台聊天管理禁言',
       });
-      const payload = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(payload?.error || '禁言失败');
       showToast(`已禁言该用户：${options.label}`, 'success');
     } catch (error: any) {
       showToast(error?.message || '禁言失败', 'error');
@@ -803,7 +720,7 @@ function AdminConsole() {
     }
 
     try {
-      const res = await apiFetch(`${url}?${params.toString()}`);
+      const res = await fetchAdminListApi(url, params);
       if (requestId !== listRequestIdRef.current) return;
       if (res.ok) {
         const data = await res.json();
@@ -936,11 +853,7 @@ function AdminConsole() {
        const sanitizedConfig = JSON.parse(JSON.stringify(localConfig || {}));
        sanitizedConfig.publish_category_schema = normalizeAdminPublishCategorySchema(sanitizedConfig.publish_category_schema);
        sanitizedConfig.location_presets = normalizeAdminLocationPresets(sanitizedConfig.location_presets);
-       const res = await apiFetch('/api/admin/config', {
-         method: 'PATCH',
-         headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify(sanitizedConfig)
-       });
+       const res = await saveAdminConfigApi(sanitizedConfig);
        if (res.ok) {
          const payload = await res.json().catch((): null => null);
          await Promise.all([
