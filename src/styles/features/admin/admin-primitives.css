@@ -125,12 +125,14 @@
     color: var(--ui-text-primary);
     font-size: var(--ui-type-title-size, var(--ui-text-base));
     font-weight: var(--ui-font-weight-title);
+    font-variant-numeric: tabular-nums;
   }
 
   .admin-text-value-sm {
     color: var(--ui-text-primary);
     font-size: var(--ui-text-sm);
     font-weight: var(--ui-font-weight-title);
+    font-variant-numeric: tabular-nums;
   }
 
   .admin-text-strong-xs {

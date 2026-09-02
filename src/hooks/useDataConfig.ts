@@ -53,12 +53,15 @@ export function useConfig(
 
 export function useCategories() {
   const isVisible = usePageVisibility();
+  const snapshot = useMemo(() => readHomeBootstrapSnapshot(), []);
 
   return useQuery({
     queryKey: ['categories'],
     queryFn: getCategories,
     staleTime: CATEGORY_STALE_TIME,
     gcTime: 1000 * 60 * 10,
+    initialData: snapshot?.data?.categories,
+    initialDataUpdatedAt: snapshot?.updatedAt,
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     refetchOnReconnect: true,

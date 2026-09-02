@@ -183,6 +183,7 @@
   .record-card .record-point-gain {
     justify-self: end;
     font-weight: var(--ui-font-weight-medium);
+    font-variant-numeric: tabular-nums;
   }
 
   .record-card .record-card-line {

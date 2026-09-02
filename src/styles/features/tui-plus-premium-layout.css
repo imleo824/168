@@ -163,6 +163,7 @@
   .tui-plus-plan-card-price b {
     font-size: calc(var(--ui-text-title) + var(--ui-space-half));
     line-height: var(--ui-line-tight);
+    font-variant-numeric: tabular-nums;
   }
 
   .tui-plus-plan-card-meta {

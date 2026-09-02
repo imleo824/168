@@ -224,6 +224,7 @@
 
   .messages-item-time {
     align-self: start;
+    flex-shrink: 0;
     padding-inline-end: var(--ui-space-3);
     color: var(--ui-text-soft);
     font-size: var(--ui-text-xs);

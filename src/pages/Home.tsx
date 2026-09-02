@@ -25,6 +25,7 @@ import {
   getHomeStructuredFilterScope,
   sanitizeHomeStructuredFilters,
 } from '@/features/home/homeStructuredFilterUtils';
+import { readInitialHomeCategories } from '@/features/home/homeBootstrapSnapshotCache';
 import { getHomeShellClassName } from '@/features/home/homeLayout';
 import { useOnlinePresence } from '@/features/home/OnlinePresenceContext';
 import { useHomeBootstrap } from '@/hooks/useDataConfig';
@@ -107,7 +108,7 @@ export default function Home() {
   const shortFeedChromeLockRef = useRef(false);
   const resolvedFeedIdentitiesRef = useRef(new Set<string>());
   const activeFeedIdentityRef = useRef('discover:all');
-  const stableHomeCategoriesRef = useRef<Category[]>([]);
+  const stableHomeCategoriesRef = useRef<Category[]>(readInitialHomeCategories());
 
   const { data: homeBootstrap } = useHomeBootstrap();
   const { onlineCount } = useOnlinePresence();

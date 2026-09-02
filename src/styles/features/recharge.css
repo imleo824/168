@@ -69,6 +69,7 @@
     display: flex;
     align-items: baseline;
     gap: var(--ui-space-1);
+    font-variant-numeric: tabular-nums;
   }
 
   .recharge-balance-unit {
@@ -150,21 +151,24 @@
     height: auto;
     min-height: calc(var(--ui-control-md) * 1.3);
     padding: var(--ui-space-2);
-    border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+    border: var(--ui-border-width-hairline) solid var(--ui-social-line-soft);
     border-radius: var(--ui-radius-xl);
     transition: all var(--ui-duration-fast) var(--ease-standard);
+    cursor: pointer;
   }
 
   .recharge-page .ui-amount-val {
     font-size: var(--ui-text-body);
     font-weight: var(--ui-font-weight-display, 700);
     line-height: var(--ui-line-compact);
+    font-variant-numeric: tabular-nums;
   }
 
   .recharge-page .ui-amount-pts {
     font-size: var(--ui-text-2xs);
     font-weight: var(--ui-font-weight-medium);
     color: var(--ui-text-muted);
+    transition: color var(--ui-duration-fast) var(--ease-standard);
   }
 
   .recharge-page .ui-amount-option-active {
@@ -172,6 +176,10 @@
     background: var(--ui-brand);
     color: var(--ui-color-white);
     box-shadow: var(--ui-shadow-card);
+  }
+
+  .recharge-page .ui-amount-option-active .ui-amount-pts {
+    color: var(--ui-inverse-muted-text);
   }
 
   .recharge-page .ui-amount-option-idle {
@@ -186,10 +194,10 @@
 
   /* 提示与支付说明 */
   .recharge-notice-box {
-    padding: calc(var(--ui-space-2) + var(--ui-space-half)) var(--ui-space-3);
-    border-radius: var(--ui-radius-lg);
+    padding: var(--ui-space-3);
+    border-radius: var(--ui-radius-xl);
     background: var(--ui-social-surface-muted, var(--ui-surface-muted));
-    border-left: 3px solid var(--ui-brand);
+    border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
   }
 
   .recharge-token-side {
@@ -421,17 +429,13 @@
 
     .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-step--amount {
       display: grid;
-      grid-template-columns: minmax(0, 1.35fr) minmax(calc(var(--ui-space-8) * 4), 0.65fr);
+      grid-template-columns: 1fr;
       align-items: start;
       gap: var(--ui-space-4);
     }
 
-    .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-step--amount :is(.recharge-notice-box, .recharge-submit) {
-      grid-column: 1 / -1;
-    }
-
     .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-preset-grid {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr));
     }
 
     .app-shell[data-route-surface='user'][data-desktop-surface='workspace'] .recharge-page .recharge-payment-panel {
@@ -561,6 +565,12 @@
     border-radius: var(--ui-recharge-input-radius);
     background: var(--ui-social-surface-muted, var(--ui-surface-muted));
     padding-inline: var(--ui-space-3);
+    transition: border-color var(--ui-duration-fast) var(--ease-standard), background-color var(--ui-duration-fast) var(--ease-standard);
+  }
+
+  .recharge-page .recharge-amount-field:focus-within {
+    border-color: var(--ui-brand);
+    background: var(--ui-surface-card);
   }
 
   .recharge-page .recharge-amount-input {
@@ -584,36 +594,17 @@
     white-space: nowrap;
   }
 
-  .recharge-page :is(.recharge-estimate-value, .ui-token-amount) {
-    color: var(--ui-text-strong);
-    font-weight: var(--ui-font-weight-display);
+  .recharge-page .recharge-estimate-value {
+    color: var(--ui-brand);
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-display, 700);
     font-variant-numeric: tabular-nums;
   }
 
-  .recharge-page .recharge-preset-grid {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--ui-space-2);
-  }
-
-  .recharge-page .recharge-preset-grid .ui-amount-option {
-    height: auto;
-    min-height: var(--ui-control-md);
-    border: var(--ui-border-width-hairline) solid var(--ui-social-line-soft);
-    border-radius: var(--ui-radius-lg);
-    font-size: var(--ui-text-sm);
-    font-weight: var(--ui-font-weight-strong);
-  }
-
-  .recharge-page .ui-amount-option-active {
-    border-color: var(--ui-action-primary);
-    background: var(--ui-action-primary);
-    color: var(--ui-color-white);
-  }
-
-  .recharge-page .ui-amount-option-idle {
-    background: var(--ui-surface-card);
-    color: var(--ui-text-secondary);
+  .recharge-page .ui-token-amount {
+    color: var(--ui-text-strong);
+    font-weight: var(--ui-font-weight-display);
+    font-variant-numeric: tabular-nums;
   }
 
   .recharge-page .recharge-submit {

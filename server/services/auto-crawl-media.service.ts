@@ -58,6 +58,14 @@ async function readLimitedBody(response: Response) {
   return Buffer.concat(chunks.map((chunk) => Buffer.from(chunk)), total);
 }
 
+function sniffImageMime(buffer: Buffer): 'image/jpeg' | 'image/png' | 'image/webp' | null {
+  if (!buffer || buffer.length < 12) return null;
+  if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) return 'image/jpeg';
+  if (buffer.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]))) return 'image/png';
+  if (buffer.subarray(0, 4).toString('ascii') === 'RIFF' && buffer.subarray(8, 12).toString('ascii') === 'WEBP') return 'image/webp';
+  return null;
+}
+
 async function fetchImage(initialUrl: string) {
   let currentUrl = initialUrl;
   for (let redirectCount = 0; redirectCount <= IMAGE_MAX_REDIRECTS; redirectCount += 1) {
@@ -80,9 +88,19 @@ async function fetchImage(initialUrl: string) {
         continue;
       }
       if (!response.ok) throw new Error(`image_fetch_failed:${response.status}`);
-      const mime = (response.headers.get('content-type') || '').split(';')[0]?.trim().toLowerCase() || '';
-      if (!ALLOWED_IMAGE_MIME.has(mime)) throw new Error(`image_type_not_supported:${mime || 'unknown'}`);
-      return { buffer: await readLimitedBody(response), mime, finalUrl: currentUrl };
+      const rawMime = (response.headers.get('content-type') || '').split(';')[0]?.trim().toLowerCase() || '';
+      let mime = rawMime;
+      if (mime === 'image/jpg' || mime === 'image/pjpeg') mime = 'image/jpeg';
+      if (mime === 'image/x-png') mime = 'image/png';
+
+      const buffer = await readLimitedBody(response);
+      const sniffed = sniffImageMime(buffer);
+      if (sniffed) {
+        mime = sniffed;
+      } else if (!ALLOWED_IMAGE_MIME.has(mime)) {
+        throw new Error(`image_type_not_supported:${rawMime || 'unknown'}`);
+      }
+      return { buffer, mime, finalUrl: currentUrl };
     } finally {
       clearTimeout(timer);
     }

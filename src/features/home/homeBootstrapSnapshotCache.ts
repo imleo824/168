@@ -24,6 +24,12 @@ export function readHomeBootstrapSnapshot() {
   return snapshot;
 }
 
+export function readInitialHomeCategories() {
+  const snapshot = readHomeBootstrapSnapshot();
+  const categories = snapshot?.data?.categories;
+  return Array.isArray(categories) ? categories : [];
+}
+
 export function stabilizeHomeBootstrapReferenceData(data: HomeBootstrap | undefined | null) {
   if (!data || !Array.isArray(data.categories)) return data || null;
   if (data.categories.length > 0) return data;

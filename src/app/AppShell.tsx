@@ -436,7 +436,6 @@ function AppDesktopSidebar() {
             </span>
             <div className="app-desktop-user-info flex flex-col min-w-0 flex-1">
               <span className="app-desktop-user-name">登录 / 注册</span>
-              <span className="app-desktop-user-role">解锁完整发布与互动</span>
             </div>
           </button>
         )}

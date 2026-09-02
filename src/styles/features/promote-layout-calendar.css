@@ -99,6 +99,7 @@
   .promote-mobile-page .promote-calendar-cell-date {
     font-size: var(--ui-text-xs);
     line-height: var(--ui-line-tight);
+    font-variant-numeric: tabular-nums;
   }
 
   .promote-mobile-page .promote-calendar-cell-meta {

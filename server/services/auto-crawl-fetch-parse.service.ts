@@ -123,7 +123,9 @@ function cleanTelegramMessageHtml(rawHtml: string) {
     // Strip forwarded from banner in Telegram preview
     .replace(/<div\b[^>]*class=["'][^"']*\btgme_widget_message_forwarded_from\b[^"']*["'][^>]*>[\s\S]*?<\/div>/gi, '')
     // Strip round voice / video notes player markup artifacts
-    .replace(/<div\b[^>]*class=["'][^"']*\btgme_widget_message_roundvideo_player\b[^"']*["'][^>]*>[\s\S]*?<\/div>/gi, '');
+    .replace(/<div\b[^>]*class=["'][^"']*\btgme_widget_message_roundvideo_player\b[^"']*["'][^>]*>[\s\S]*?<\/div>/gi, '')
+    // Strip telegram poll options/voters snippet that pollutes body text
+    .replace(/<div\b[^>]*class=["'][^"']*\btgme_widget_message_poll\b[^"']*["'][^>]*>[\s\S]*?<\/div>/gi, '');
 }
 
 function isTelegramServiceOrSponsoredBlock(block: string) {

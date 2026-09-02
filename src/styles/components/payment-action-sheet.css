@@ -134,11 +134,13 @@
   .payment-action-summary-value {
     color: var(--ui-text-primary);
     font-weight: var(--ui-font-weight-strong);
+    font-variant-numeric: tabular-nums;
   }
 
   .payment-action-summary-total {
     color: var(--ui-brand);
     font-weight: var(--ui-font-weight-strong);
+    font-variant-numeric: tabular-nums;
   }
 
   .payment-action-method-card,
