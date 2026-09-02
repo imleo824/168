@@ -18,6 +18,9 @@ import { getAllActivePromotions, getHomeAds } from '@/services/api';
 import { APP_ROUTES } from '@/app/routePaths';
 import { PromotionType, type PromotionBooking } from '@/types';
 import { warmupNavigationIntent, warmupRoutePath } from '@/utils/routeWarmups';
+import { resolveAdTargetUrlInput } from '@/utils/adTargetUrl';
+import { useHomeBootstrap } from '@/hooks/useDataConfig';
+import AvatarImage from '@/ui/AvatarImage';
 
 function getPromotionTag(type: string, booking?: PromotionBooking) {
   if (type === PromotionType.AD_HOME) {
@@ -39,21 +42,27 @@ function getPromotionTag(type: string, booking?: PromotionBooking) {
   return { label: '精选推广', tagClass: 'app-desktop-ad-rail-tag-amber' };
 }
 
-function normalizeAdTargetUrlForDisplay(url?: string | null) {
-  if (!url) return '';
+function formatAdTargetDisplay(raw?: string | null) {
+  if (!raw) return '';
+  const resolved = resolveAdTargetUrlInput(raw);
+  const target = resolved.value || raw;
   try {
-    if (url.startsWith('http://') || url.startsWith('https://')) {
-      const parsed = new URL(url);
+    if (target.startsWith('http://') || target.startsWith('https://')) {
+      const parsed = new URL(target);
       return parsed.hostname.replace(/^www\./, '');
     }
-    return url;
+    if (target.startsWith('tg://')) {
+      return 'Telegram';
+    }
+    return target;
   } catch {
-    return url;
+    return target;
   }
 }
 
 export const AppDesktopAdRail: React.FC = () => {
   const navigate = useNavigate();
+  const { data: homeBootstrap } = useHomeBootstrap();
 
   const { data: promotions, isLoading: isLoadingPromos } = useQuery<PromotionBooking[]>({
     queryKey: ['promotions', 'all-active'],
@@ -70,22 +79,32 @@ export const AppDesktopAdRail: React.FC = () => {
   });
 
   const activePromotions = useMemo(() => {
-    const list: PromotionBooking[] = [...(promotions || [])];
-    const seenKeys = new Set(list.map((item) => item.id || `${item.type}:${item.slotIndex}`));
+    const list: PromotionBooking[] = [];
+    const seenKeys = new Set<string>();
 
-    if (homeAds && Array.isArray(homeAds)) {
-      for (const ad of homeAds) {
-        const key = ad.id || `${ad.type}:${ad.slotIndex}`;
-        if (!seenKeys.has(key)) {
-          seenKeys.add(key);
-          list.push(ad);
-        }
+    const addBooking = (item: PromotionBooking | null | undefined) => {
+      if (!item) return;
+      const key = item.id || `${item.type}:${item.slotIndex}:${item.postId || ''}:${item.adTargetUrl || ''}`;
+      if (!seenKeys.has(key)) {
+        seenKeys.add(key);
+        list.push(item);
       }
-    }
-    return list;
-  }, [promotions, homeAds]);
+    };
 
-  const isLoading = isLoadingPromos && isLoadingHomeAds;
+    if (promotions && Array.isArray(promotions)) {
+      promotions.forEach(addBooking);
+    }
+    if (homeAds && Array.isArray(homeAds)) {
+      homeAds.forEach(addBooking);
+    }
+    if (homeBootstrap?.homeAds && Array.isArray(homeBootstrap.homeAds)) {
+      homeBootstrap.homeAds.forEach(addBooking);
+    }
+
+    return list;
+  }, [promotions, homeAds, homeBootstrap?.homeAds]);
+
+  const isLoading = (isLoadingPromos || isLoadingHomeAds) && activePromotions.length === 0;
 
   const handleSponsorClick = () => {
     warmupNavigationIntent('sponsor');
@@ -99,10 +118,13 @@ export const AppDesktopAdRail: React.FC = () => {
     }
 
     if (item.adTargetUrl) {
-      if (item.adTargetUrl.startsWith('http://') || item.adTargetUrl.startsWith('https://')) {
-        window.open(item.adTargetUrl, '_blank', 'noopener,noreferrer');
+      const resolved = resolveAdTargetUrlInput(item.adTargetUrl);
+      const target = resolved.value || item.adTargetUrl;
+      const isExternal = /^(?:https?:\/\/|tg:\/\/)/i.test(target);
+      if (isExternal) {
+        window.open(target, '_blank', 'noopener,noreferrer');
       } else {
-        navigate(item.adTargetUrl);
+        navigate(target);
       }
     }
   };
@@ -168,7 +190,8 @@ export const AppDesktopAdRail: React.FC = () => {
             <div className="w-12 h-12 rounded-2xl bg-[var(--ui-brand)]/10 flex items-center justify-center text-[var(--ui-brand)] mb-3">
               <Megaphone className="w-6 h-6" />
             </div>
-            <h3 className="text-sm font-semibold text-[var(--ui-text-primary)] mb-1">暂无广告</h3>         
+            <h3 className="text-sm font-semibold text-[var(--ui-text-primary)] mb-1">暂无广告</h3>
+            <p className="text-xs text-[var(--ui-text-muted)] mb-4">抢占黄金曝光位，让更多人发现您</p>
             <button
               type="button"
               onClick={handleSponsorClick}
@@ -189,7 +212,7 @@ export const AppDesktopAdRail: React.FC = () => {
 
             return (
               <div
-                key={item.id}
+                key={item.id || `${item.type}:${item.slotIndex}:${item.postId || ''}`}
                 role="button"
                 tabIndex={0}
                 onClick={() => handleItemClick(item)}
@@ -223,8 +246,8 @@ export const AppDesktopAdRail: React.FC = () => {
 
                   {item.adTargetUrl && (
                     <span className="text-xs text-[var(--ui-text-muted)] group-hover:text-[var(--ui-brand)] flex items-center gap-0.5 transition-colors">
-                      <span>{normalizeAdTargetUrlForDisplay(item.adTargetUrl)}</span>
-                      <ExternalLink className="w-2.5 h-2.5" />
+                      <span className="truncate max-w-28">{formatAdTargetDisplay(item.adTargetUrl)}</span>
+                      <ExternalLink className="w-2.5 h-2.5 flex-shrink-0" />
                     </span>
                   )}
                 </div>
@@ -248,19 +271,16 @@ export const AppDesktopAdRail: React.FC = () => {
                   <div className="space-y-1.5">
                     {/* Author Row */}
                     <div className="flex items-center gap-2">
-                      {post.user?.photoUrl ? (
-                        <img
-                          src={post.user.photoUrl}
-                          alt={post.user.displayName || 'User'}
-                          className="w-5 h-5 rounded-full object-cover border border-[var(--ui-line-hairline)] flex-shrink-0"
-                          decoding="async"
-                          referrerPolicy="no-referrer"
+                      <span className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0">
+                        <AvatarImage
+                          src={post.user?.photoUrl || ''}
+                          name={post.user?.displayName || post.user?.username}
+                          id={post.user?.id || post.userId}
+                          alt={post.user?.displayName || post.user?.username || '用户'}
+                          className="w-full h-full object-cover"
+                          variant="thumb"
                         />
-                      ) : (
-                        <div className="w-5 h-5 rounded-full bg-[var(--ui-brand)]/10 text-[var(--ui-brand)] text-xs font-bold flex items-center justify-center flex-shrink-0">
-                          {(post.user?.displayName || post.user?.username || 'U')[0].toUpperCase()}
-                        </div>
-                      )}
+                      </span>
                       <span className="text-xs font-medium text-[var(--ui-text-primary)] truncate max-w-32">
                         {post.user?.displayName || post.user?.username || '匿名用户'}
                       </span>

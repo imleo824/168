@@ -20,6 +20,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useScrollLock } from "@/utils/scrollLock";
 import ListReturnScrollRestorer from "@/utils/ListReturnScrollRestorer";
 import { normalizeTelegramContactHandle } from "@/utils/contact";
+import { formatCompactChineseEngagementCount } from "@/utils/engagement";
 import { useInteractionGuard } from "@/hooks/useInteractionGuard";
 import {
   normalizeLoginAccount,
@@ -175,10 +176,10 @@ export default function ProfileMobile() {
   );
   const profileStats = useMemo(
     () => [
-      { key: "HEAT", label: "热度", value: user?.viewCount ?? 0 },
-      { key: "POSTS", label: "发布", value: user?.postCount ?? 0, tab: "POSTS" as const },
-      { key: "FANS", label: "粉丝", value: user?.followerCount ?? 0, tab: "FANS" as const },
-      { key: "FOLLOWING", label: "关注", value: user?.followingCount ?? 0, tab: "FOLLOWING" as const },
+      { key: "HEAT", label: "热度", value: formatCompactChineseEngagementCount(user?.viewCount ?? 0) },
+      { key: "POSTS", label: "发布", value: formatCompactChineseEngagementCount(user?.postCount ?? 0), tab: "POSTS" as const },
+      { key: "FANS", label: "粉丝", value: formatCompactChineseEngagementCount(user?.followerCount ?? 0), tab: "FANS" as const },
+      { key: "FOLLOWING", label: "关注", value: formatCompactChineseEngagementCount(user?.followingCount ?? 0), tab: "FOLLOWING" as const },
     ],
     [user?.followerCount, user?.followingCount, user?.postCount, user?.viewCount],
   );

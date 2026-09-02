@@ -102,16 +102,23 @@ export class PromotionService {
     }
 
     const now = new Date();
+    const todayKey = getPlatformDateKey(now);
+    const todayTargetDate = startOfUtcDay(todayKey);
 
     const bookings = await (prisma as any).promotionBooking.findMany({
       where: {
         type: PromotionType.AD_HOME,
-        scopeKey: GLOBAL_PROMOTION_SCOPE,
-        startsAt: { lte: now },
-        endsAt: { gt: now },
         OR: [
-          { adImageUrl: { not: null } },
-          { adMobileImageUrl: { not: null } },
+          { startsAt: { lte: now }, endsAt: { gt: now } },
+          { targetDate: todayTargetDate },
+        ],
+        AND: [
+          {
+            OR: [
+              { adImageUrl: { not: null } },
+              { adMobileImageUrl: { not: null } },
+            ],
+          },
         ],
       },
       orderBy: [{ slotIndex: 'asc' }, { createdAt: 'asc' }],
@@ -268,15 +275,13 @@ export class PromotionService {
       for (const booking of bookings) {
         const key = booking.postId
           ? `post:${booking.postId}`
-          : booking.campaignId
-            ? `campaign:${booking.campaignId}`
-            : `ad:${booking.type}:${booking.slotIndex}:${booking.adImageUrl || ''}:${booking.adTargetUrl || ''}`;
+          : `ad:${booking.type}:${booking.slotIndex}:${booking.id || ''}:${booking.adImageUrl || ''}:${booking.adTargetUrl || ''}`;
 
         if (seenKeys.has(key)) continue;
         seenKeys.add(key);
 
-        if (booking.postId && booking.post) {
-          if (booking.post.isPublished === false || booking.post.deletedAt) continue;
+        if (booking.postId) {
+          if (!booking.post || booking.post.isPublished === false || booking.post.deletedAt) continue;
         }
 
         deduplicated.push(booking);

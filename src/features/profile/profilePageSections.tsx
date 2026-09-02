@@ -24,7 +24,7 @@ export type ProfileTabType = 'POSTS' | 'COMMENTS' | 'QUOTES' | 'LIKED' | 'FOLLOW
 type ProfileStatItem = {
   key: string;
   label: string;
-  value: number;
+  value: string | number;
   tab?: ProfileTabType;
 };
 
