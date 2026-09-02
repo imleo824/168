@@ -3,6 +3,7 @@ import { Plus, Save, Trash2, X } from 'lucide-react';
 
 import { useAuth } from '@/context/AuthContext';
 import { apiFetch } from '@/services/api';
+import { useAdminDialogs } from './AdminDialogs';
 import { ConfigItem } from './adminChrome';
 import { AdminAutoCrawlExecutionLogsCompactPanel } from './AdminAutoCrawlExecutionLogsCompactPanel';
 
@@ -91,6 +92,7 @@ function shortId(id?: string | null) {
 
 export function AdminAutoCrawlPanel({ view = 'config' }: { view?: AutoCrawlView }) {
   const { showToast } = useAuth();
+  const { confirm } = useAdminDialogs();
   const [config, setConfig] = useState<AutoCrawlConfig | null>(null);
   const [draft, setDraft] = useState<Partial<AutoCrawlConfig>>({});
   const [sourceDraft, setSourceDraft] = useState<Partial<AutoCrawlSource>>(EMPTY_SOURCE);
@@ -244,7 +246,12 @@ export function AdminAutoCrawlPanel({ view = 'config' }: { view?: AutoCrawlView 
   };
 
   const deleteSource = async (source: AutoCrawlSource) => {
-    if (!window.confirm(`确认删除数据源「${source.sourceName || source.source}」？`)) return;
+    const confirmed = await confirm({
+      title: '删除数据源',
+      message: `确认删除数据源「${source.sourceName || source.source}」？`,
+      danger: true,
+    });
+    if (!confirmed) return;
     try {
       const response = await apiFetch(`/api/admin/auto-crawl/sources/${source.id}`, { method: 'DELETE' });
       const payload = await response.json().catch(() => ({}));

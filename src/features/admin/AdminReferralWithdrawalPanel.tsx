@@ -3,6 +3,7 @@ import { RefreshCw } from 'lucide-react';
 
 import { apiFetch } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
+import { useAdminDialogs } from './AdminDialogs';
 
 type ReferralWithdrawalStatus = 'PENDING' | 'WITHDRAWING' | 'APPROVED' | 'PAID' | 'REJECTED' | 'CANCELED';
 
@@ -57,6 +58,7 @@ function canProcess(item: AdminReferralWithdrawalItem) {
 
 export default function AdminReferralWithdrawalPanel() {
   const { showToast } = useAuth();
+  const { confirm, prompt } = useAdminDialogs();
   const [status, setStatus] = useState('PENDING');
   const [search, setSearch] = useState('');
   const [items, setItems] = useState<AdminReferralWithdrawalItem[]>([]);
@@ -92,9 +94,19 @@ export default function AdminReferralWithdrawalPanel() {
     if (!item?.id || processingId) return;
     const isPaid = nextStatus === 'PAID';
     const actionText = isPaid ? '已打款' : '拒绝';
-    const note = window.prompt(`${actionText}：可填写备注（选填）`, '');
+    const note = await prompt({
+      title: `${actionText}提现订单`,
+      message: `${actionText}：可填写备注（选填）`,
+      placeholder: '请输入备注',
+      required: false,
+    });
     if (note === null) return;
-    if (!window.confirm(`确认${actionText} ${formatMoney(item.amount)} USDT？`)) return;
+    const confirmed = await confirm({
+      title: `确认${actionText}`,
+      message: `确认${actionText} ${formatMoney(item.amount)} USDT？`,
+      danger: !isPaid,
+    });
+    if (!confirmed) return;
 
     setProcessingId(item.id);
     try {

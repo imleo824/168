@@ -6,6 +6,7 @@ import SEO from '@/platform/SEO';
 import { APP_ROUTES } from '@/app/routePaths';
 import { apiFetch } from '@/services/api';
 import { Navigate } from 'react-router-dom';
+import { AdminDialogsProvider, useAdminDialogs } from './AdminDialogs';
 
 import './AdminDesktop.css';
 
@@ -47,6 +48,15 @@ import { SystemConfigHeader } from './SystemConfigHeader';
 import { useAdminSystemConfigEditor } from './useAdminSystemConfigEditor';
 
 export default function Admin() {
+  return (
+    <AdminDialogsProvider>
+      <AdminConsole />
+    </AdminDialogsProvider>
+  );
+}
+
+function AdminConsole() {
+  const { confirm, prompt } = useAdminDialogs();
   const { user, showToast } = useAuth();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<AdminTab>('report');
@@ -287,10 +297,18 @@ export default function Admin() {
   const creditManualRechargeOrder = async (item: any) => {
     if (!item?.id || processingOrderId) return;
     const canForce = item.status === 'WAITING_PAYMENT' || item.status === 'MANUAL_REVIEW';
-    const confirmed = window.confirm(`确认已收到 ${item.usdtAmount} USDT，并给该用户入账积分？`);
+    const confirmed = await confirm({
+      title: '确认到账',
+      message: `确认已收到 ${item.usdtAmount} USDT，并给该用户入账积分？`,
+    });
     if (!confirmed) return;
 
-    const customPointsText = window.prompt('可选：输入手动入账积分（留空按系统规则计算）');
+    const customPointsText = await prompt({
+      title: '手动入账积分',
+      message: '可选：输入手动入账积分（留空按系统规则计算）',
+      placeholder: '请输入正整数',
+      required: false,
+    });
     if (customPointsText === null) return;
     const normalizedCustomPoints = customPointsText.trim();
 
@@ -329,7 +347,12 @@ export default function Admin() {
     if (!item?.id || processingAdminActionId) return;
     const actionText = changeType === 'INCREASE' ? '上分' : '下分';
     const displayName = item.displayName || item.loginAccount || item.id || '该用户';
-    const amountText = window.prompt(`请输入要为 ${displayName} ${actionText} 的积分（正整数）`);
+    const amountText = await prompt({
+      title: `用户${actionText}`,
+      message: `请输入要为 ${displayName} ${actionText} 的积分（正整数）`,
+      placeholder: '请输入正整数',
+      required: true,
+    });
     if (!amountText) return;
 
     const amount = Number(amountText.trim());
@@ -338,7 +361,11 @@ export default function Admin() {
       return;
     }
 
-    if (!window.confirm(`确认执行${actionText} ${amount} 积分？`)) return;
+    const confirmed = await confirm({
+      title: `确认${actionText}`,
+      message: `确认执行${actionText} ${amount} 积分？`,
+    });
+    if (!confirmed) return;
 
     setProcessingAdminActionId(item.id);
     try {
@@ -364,7 +391,14 @@ export default function Admin() {
 
   const updatePostPublishState = async (item: any, isPublished: boolean) => {
     if (!item?.id || processingAdminActionId) return;
-    if (!isPublished && !window.confirm('确认下架这条内容？下架后前台不会展示。')) return;
+    if (!isPublished) {
+      const confirmed = await confirm({
+        title: '下架内容',
+        message: '确认下架这条内容？下架后前台不会展示。',
+        danger: true,
+      });
+      if (!confirmed) return;
+    }
 
     setProcessingAdminActionId(item.id);
     try {
@@ -386,7 +420,12 @@ export default function Admin() {
 
   const deletePostPermanently = async (item: any) => {
     if (!item?.id || processingAdminActionId) return;
-    const confirmText = window.prompt(`确认删除该内容后将永久移除，且无法恢复。请输入“永久删除”继续：`);
+    const confirmText = await prompt({
+      title: '永久删除内容',
+      message: `确认删除该内容后将永久移除，且无法恢复。请输入“永久删除”继续：`,
+      placeholder: '永久删除',
+      required: true,
+    });
     if (confirmText !== '永久删除') return;
 
     setProcessingAdminActionId(item.id);
@@ -490,7 +529,11 @@ export default function Admin() {
       return;
     }
 
-    if (!window.confirm('确认更新该广告的核心信息吗？')) return;
+    const confirmed = await confirm({
+      title: '更新广告信息',
+      message: '确认更新该广告的核心信息吗？',
+    });
+    if (!confirmed) return;
 
     setProcessingAdminActionId(item.id);
     try {
@@ -513,7 +556,12 @@ export default function Admin() {
 
   const togglePromotionActiveState = async (item: any, isActive: boolean) => {
     if (!item?.id || processingAdminActionId) return;
-    if (!window.confirm(isActive ? '确认恢复展示该投放？' : '确认暂停展示该投放？暂停不会释放已预约位置。')) return;
+    const confirmed = await confirm({
+      title: isActive ? '恢复展示广告' : '暂停展示广告',
+      message: isActive ? '确认恢复展示该投放？' : '确认暂停展示该投放？暂停不会释放已预约位置。',
+      danger: !isActive,
+    });
+    if (!confirmed) return;
 
     setProcessingAdminActionId(item.id);
     try {
@@ -535,7 +583,12 @@ export default function Admin() {
 
   const cancelPromotionAndReleaseSlot = async (item: any) => {
     if (!item?.id || processingAdminActionId) return;
-    const confirmText = window.prompt('确认取消该投放并释放预约位置？输入“取消投放”继续：');
+    const confirmText = await prompt({
+      title: '取消投放',
+      message: '确认取消该投放并释放预约位置？输入“取消投放”继续：',
+      placeholder: '取消投放',
+      required: true,
+    });
     if (confirmText !== '取消投放') return;
 
     setProcessingAdminActionId(item.id);
@@ -556,7 +609,14 @@ export default function Admin() {
 
   const updateUserDisabledState = async (item: any, isDisabled: boolean) => {
     if (!item?.id || processingAdminActionId) return;
-    if (isDisabled && !window.confirm('确认禁用该用户？禁用后用户无法登录和进行写操作。')) return;
+    if (isDisabled) {
+      const confirmed = await confirm({
+        title: '禁用用户',
+        message: '确认禁用该用户？禁用后用户无法登录和进行写操作。',
+        danger: true,
+      });
+      if (!confirmed) return;
+    }
 
     setProcessingAdminActionId(item.id);
     try {

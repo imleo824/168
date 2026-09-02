@@ -8,6 +8,7 @@ const ENTRY_FILES = [join(ROOT, 'index.html')];
 const EXCLUDED_FILES = new Set([
   'src/pages/Admin.tsx',
   'src/features/admin/AdminChatPanel.tsx',
+  'src/features/admin/AdminDialogs.tsx',
   'src/features/admin/AdminFiltersPanel.tsx',
   'src/features/admin/AdminPage.tsx',
   'src/features/admin/AdminPaginationBar.tsx',
