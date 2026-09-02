@@ -315,11 +315,7 @@ export const AppDesktopAdRail: React.FC = () => {
                   /* Banner/URL only without post attached */
                   <div className="flex items-center justify-between pt-0.5">
                     <span className="text-xs font-medium text-[var(--ui-text-primary)] group-hover:text-[var(--ui-brand)] transition-colors truncate">
-                      {item.id === 'system-ad-tuiplus'
-                        ? '推推会员 TUI+ 全站高曝光特权'
-                        : item.id === 'system-ad-sponsor'
-                          ? '赞助商与全站精准引流中心'
-                          : item.adTargetUrl || '点击了解详情'}
+                      {item.adTargetUrl || '点击了解详情'}
                     </span>
                     <span className="flex items-center text-xs text-[var(--ui-brand)] font-medium flex-shrink-0 ml-1">
                       点击访问 <ChevronRight className="w-3 h-3 flex-shrink-0" />

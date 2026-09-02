@@ -65,7 +65,7 @@ export function compactFeedPostPayload(
     ...post,
     title: toFeedPreviewText(post.title, FEED_TITLE_PREVIEW_MAX_CHARS),
     content: toFeedPreviewText(post.content, FEED_CONTENT_PREVIEW_MAX_CHARS),
-    images: Array.isArray(post.images) ? post.images.slice(0, FEED_IMAGE_PREVIEW_MAX_COUNT) : [],
+    images: Array.isArray(post.images) ? post.images : [],
     quotedPost: compactQuotedPostPayload(post.quotedPost, {
       currentUserId: options.currentUserId,
       currentUserRole: options.currentUserRole,
