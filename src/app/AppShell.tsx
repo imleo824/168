@@ -11,7 +11,6 @@ import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 import { useScrollLock } from '@/utils/scrollLock';
 import { primePostCreateComposerFocus } from '@/utils/postCreateFocusPrime';
 import { ApiError } from '@/services/apiCore';
-import { getNotificationsList } from '@/services/homeStartupApi';
 import PageHeader from '@/ui/PageHeader';
 import ProfileIconButton from '@/ui/ProfileIconButton';
 import PublishIconButton from '@/ui/PublishIconButton';

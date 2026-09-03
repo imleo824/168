@@ -24,7 +24,7 @@ export async function registerFrontendAssets(app: Express, isProd: boolean, serv
     } else {
       app.use(express.static('dist', {
         setHeaders: (res, filePath) => {
-          const isHashedAsset = filePath.includes(`${path.sep}assets${path.sep}`);
+          const isHashedAsset = /[\\/]assets[\\/]/.test(filePath) || filePath.includes(`${path.sep}assets${path.sep}`);
           const fileName = path.basename(filePath);
           const isAppIconAsset = /^(?:favicon-\d+|icon|icon-\d+|apple-touch-icon)\.(?:png|ico|webp|avif|svg)$/i.test(fileName);
           const isShareFallbackAsset = /^share-fallback\.(?:png|ico|webp|avif|svg)$/i.test(fileName);
@@ -51,6 +51,7 @@ export async function registerFrontendAssets(app: Express, isProd: boolean, serv
         res.status(404).type('text/plain').send('Asset not found');
       });
       app.get('*', (_req, res) => {
+        res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate');
         res.sendFile('dist/index.html', { root: '.' });
       });
     }

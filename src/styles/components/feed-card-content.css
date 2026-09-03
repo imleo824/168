@@ -107,6 +107,10 @@
     margin-top: var(--x-card-meta-row-margin-top);
   }
 
+  .ins-post-card .x-card-quoted-post {
+    margin-top: calc(var(--ui-space-2) + var(--ui-space-half));
+  }
+
   .ins-post-card .x-card-expand-button {
     pointer-events: auto;
     position: absolute;

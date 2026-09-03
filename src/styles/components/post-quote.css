@@ -16,12 +16,17 @@
     transition:
       border-color var(--ui-duration-base) var(--ease-standard),
       background-color var(--ui-duration-base) var(--ease-standard),
-      box-shadow var(--ui-duration-base) var(--ease-standard);
+      box-shadow var(--ui-duration-base) var(--ease-standard),
+      transform var(--ui-duration-fast) var(--ease-standard);
   }
 
   .quoted-post-preview-card:not(:disabled):hover {
     border-color: var(--ui-quote-preview-border-hover);
     background: var(--ui-surface-card);
+  }
+
+  .quoted-post-preview-card:not(:disabled):active {
+    transform: scale(var(--ui-motion-press-scale));
   }
 
   .quoted-post-preview-card:disabled {

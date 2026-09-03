@@ -143,6 +143,8 @@ export const AppDesktopSidebar: React.FC = () => {
             type="button"
             className="app-desktop-post-action pressable flex flex-row items-center justify-center gap-2"
             onClick={handleQuickPost}
+            onMouseEnter={() => warmupNavigationIntent('create')}
+            onFocus={() => warmupNavigationIntent('create')}
             aria-label="快速发推"
             title="快速发推"
           >

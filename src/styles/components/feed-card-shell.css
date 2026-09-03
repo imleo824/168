@@ -239,6 +239,7 @@
     font-size: var(--ui-type-feed-meta-size);
     font-weight: var(--ui-font-weight-medium);
     line-height: var(--ui-line-tight);
+    padding-inline: var(--ui-space-quarter);
   }
 
   .ins-post-card .feed-card-author-time {
@@ -255,6 +256,7 @@
     font-size: var(--ui-type-feed-meta-size);
     font-weight: var(--ui-font-weight-medium);
     line-height: var(--ui-line-tight);
+    font-variant-numeric: tabular-nums;
     text-overflow: clip;
     white-space: nowrap;
   }

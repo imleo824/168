@@ -85,7 +85,7 @@ export const getNotificationsList = (
   if (params.cursor) query.set('cursor', params.cursor);
   const suffix = query.toString();
   return fetcher<{ items: any[]; nextCursor: string | null; hasMore: boolean; unreadCount: number }>(
-    '/api/notifications' + (suffix ? '?' + suffix : ''),
+    '/api/me/notifications' + (suffix ? '?' + suffix : ''),
     options,
   );
 };

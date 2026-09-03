@@ -104,6 +104,7 @@
     height: var(--feed-card-action-icon-size);
     flex: 0 0 var(--feed-card-action-icon-size);
     stroke-width: var(--ui-icon-stroke);
+    transition: transform var(--ui-duration-fast) var(--ease-standard);
   }
 
   .ins-post-card .feed-action-count,

@@ -296,10 +296,10 @@
     .app-bottom-nav *,
     .app-bottom-nav *::before,
     .app-bottom-nav *::after {
-      animation-duration: 0.001ms;
+      animation-duration: var(--ui-duration-motion-reduced);
       animation-iteration-count: 1;
       scroll-behavior: auto;
-      transition-duration: 0.001ms;
+      transition-duration: var(--ui-duration-motion-reduced);
     }
   }
 }

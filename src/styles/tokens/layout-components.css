@@ -196,7 +196,7 @@
     --ui-feed-avatar-activity-ring-gap: calc(var(--ui-border-width-hairline) + (var(--ui-border-width-hairline) / 2));
     --ui-feed-avatar-activity-ring-surface: var(--ui-surface-card);
     --ui-feed-avatar-activity-ring-color: var(--ui-color-white);
-    --ui-feed-card-content-line: 1.42;
+    --ui-feed-card-content-line: 1.58;
     --ui-feed-author-name-row-height: calc(var(--ui-type-feed-author-size) + var(--ui-space-half));
     --ui-feed-author-meta-row-height: calc(var(--ui-type-feed-meta-size) + var(--ui-space-half));
     --ui-feed-card-body-to-media-gap: var(--ui-space-3);

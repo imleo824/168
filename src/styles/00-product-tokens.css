@@ -191,7 +191,7 @@
     --ui-social-action: color-mix(in srgb, var(--ui-color-black) 70%, transparent);
     --ui-social-action-muted: color-mix(in srgb, var(--ui-color-black) 46%, transparent);
     --ui-social-feed-max-width: var(--ui-feed-card-max-width);
-    --ui-social-feed-row-padding-y: var(--ui-space-5);
+    --ui-social-feed-row-padding-y: var(--ui-space-4);
     --ui-social-feed-row-padding-x: var(--ui-space-4);
     --ui-social-feed-column-gap: var(--ui-space-3);
     --ui-social-feed-list-padding-x: var(--ui-space-none);
@@ -202,7 +202,7 @@
     --ui-social-feed-avatar-size: calc(var(--ui-control-sm) + var(--ui-space-1));
     --ui-social-feed-avatar-size-desktop: var(--ui-social-feed-avatar-size);
     --ui-social-feed-body-size: var(--ui-text-base);
-    --ui-social-feed-body-line: 1.54;
+    --ui-social-feed-body-line: 1.58;
     --ui-social-feed-meta-size: var(--ui-text-xs);
     --ui-social-feed-meta-line: var(--ui-line-tight);
     --ui-social-feed-footer-gap: calc(var(--ui-space-1) + var(--ui-space-half));
