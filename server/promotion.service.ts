@@ -142,18 +142,10 @@ export class PromotionService {
     const activeTimeWhere = this.buildActiveTimeWhereClause(now);
 
     try {
-      const bookings = await (prisma as any).promotionBooking.findMany({
+      let bookings = await (prisma as any).promotionBooking.findMany({
         where: {
           type: PromotionType.AD_HOME,
           ...activeTimeWhere,
-          AND: [
-            {
-              OR: [
-                { adImageUrl: { not: null } },
-                { adMobileImageUrl: { not: null } },
-              ],
-            },
-          ],
         },
         orderBy: [{ slotIndex: 'asc' }, { createdAt: 'desc' }],
         take: 30,
@@ -176,6 +168,39 @@ export class PromotionService {
           updatedAt: true,
         },
       });
+
+      // Broaden search if activeTimeWhere yielded no results due to timezone offsets
+      if (bookings.length === 0) {
+        bookings = await (prisma as any).promotionBooking.findMany({
+          where: {
+            type: PromotionType.AD_HOME,
+            OR: [
+              { endsAt: { gte: new Date(now.getTime() - 48 * 3600 * 1000) } },
+              { targetDate: { gte: new Date(now.getTime() - 48 * 3600 * 1000) } },
+            ],
+          },
+          orderBy: [{ slotIndex: 'asc' }, { createdAt: 'desc' }],
+          take: 30,
+          select: {
+            id: true,
+            campaignId: true,
+            type: true,
+            targetDate: true,
+            startsAt: true,
+            endsAt: true,
+            slotIndex: true,
+            postId: true,
+            adImageUrl: true,
+            adMobileImageUrl: true,
+            adTargetUrl: true,
+            categoryId: true,
+            userId: true,
+            pricePaid: true,
+            createdAt: true,
+            updatedAt: true,
+          },
+        });
+      }
 
       const seenSlots = new Set<number>();
       const visibleBookings = [];
@@ -270,7 +295,7 @@ export class PromotionService {
     const activeTimeWhere = this.buildActiveTimeWhereClause(now);
 
     try {
-      const bookings = await (prisma as any).promotionBooking.findMany({
+      let bookings = await (prisma as any).promotionBooking.findMany({
         where: {
           ...activeTimeWhere,
         },
@@ -310,6 +335,52 @@ export class PromotionService {
         },
       });
 
+      // Broaden query if activeTimeWhere yielded 0 results (e.g. timezone boundaries or platform day differences)
+      if (bookings.length === 0) {
+        bookings = await (prisma as any).promotionBooking.findMany({
+          where: {
+            OR: [
+              { endsAt: { gte: new Date(now.getTime() - 48 * 3600 * 1000) } },
+              { targetDate: { gte: new Date(now.getTime() - 48 * 3600 * 1000) } },
+            ],
+          },
+          orderBy: [{ createdAt: 'desc' }, { startsAt: 'desc' }],
+          take: 100,
+          include: {
+            post: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    username: true,
+                    displayName: true,
+                    photoUrl: true,
+                    isTuiPlus: true,
+                    role: true,
+                  },
+                },
+                category: {
+                  select: {
+                    id: true,
+                    name: true,
+                    icon: true,
+                  },
+                },
+              },
+            },
+            user: {
+              select: {
+                id: true,
+                username: true,
+                displayName: true,
+                photoUrl: true,
+                isTuiPlus: true,
+              },
+            },
+          },
+        });
+      }
+
       const seenKeys = new Set<string>();
       const deduplicated = [];
 
@@ -322,7 +393,11 @@ export class PromotionService {
         seenKeys.add(key);
 
         if (booking.postId) {
-          if (!booking.post || booking.post.isPublished === false || booking.post.deletedAt) continue;
+          // If post is deleted or unpublished, but there is an ad URL or ad image, preserve it as a link/banner ad
+          const hasAdContent = Boolean(booking.adTargetUrl || booking.adImageUrl || booking.adMobileImageUrl);
+          if ((!booking.post || booking.post.isPublished === false || booking.post.deletedAt) && !hasAdContent) {
+            continue;
+          }
         }
 
         deduplicated.push(booking);
