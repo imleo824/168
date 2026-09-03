@@ -568,6 +568,82 @@ function semanticSalaryOption(raw: unknown, field: PublishCategoryMetaFieldConfi
   return salaryOption || option;
 }
 
+function parseNumericRangeFromOption(option: string): { min: number; max: number } | null {
+  const text = String(option || '').normalize('NFKC').replace(/,/g, '');
+  const numbers = (text.match(/\d+(?:\.\d+)?/g) || []).map(Number).filter(Number.isFinite);
+  if (!numbers.length) return null;
+
+  if (/以下|以内|under|below|less\s+than/i.test(text)) {
+    return { min: Number.NEGATIVE_INFINITY, max: numbers[0] };
+  }
+  if (/以上|超过|over|above|greater\s+than|(?:\+)/i.test(text)) {
+    return { min: numbers[0], max: Number.POSITIVE_INFINITY };
+  }
+  if (numbers.length >= 2) {
+    return { min: Math.min(numbers[0], numbers[1]), max: Math.max(numbers[0], numbers[1]) };
+  }
+  return { min: numbers[0], max: numbers[0] };
+}
+
+function chooseNumericRangeOption(amount: number, field: PublishCategoryMetaFieldConfig): string | null {
+  const options = field.options || [];
+  let bestMatch: string | null = null;
+  let exactMatch: string | null = null;
+
+  for (const option of options) {
+    const range = parseNumericRangeFromOption(option);
+    if (!range) continue;
+
+    if (range.min === range.max && amount === range.min) {
+      exactMatch = option;
+      break;
+    }
+
+    if (amount >= range.min && amount <= range.max) {
+      bestMatch = option;
+    }
+  }
+
+  return exactMatch || bestMatch;
+}
+
+function semanticRangeSelectOption(raw: unknown, field: PublishCategoryMetaFieldConfig): string | null {
+  if (field.type !== 'select') return null;
+  const options = field.options || [];
+  
+  const hasNumericOptions = options.some(opt => {
+    const text = String(opt || '');
+    return /\d/.test(text) || /面议|面谈/i.test(text);
+  });
+  if (!hasNumericOptions) return null;
+
+  const isNegotiableInput = typeof raw === 'string' && /面议|面谈|详聊|从优|看能力|negotiable|tbd/i.test(raw);
+  const negOpt = negotiableOption(field);
+  if (isNegotiableInput && negOpt) {
+    return negOpt;
+  }
+
+  let numericValue: number | null = null;
+  if (typeof raw === 'number') {
+    if (Number.isFinite(raw)) {
+      numericValue = raw;
+    }
+  } else if (typeof raw === 'string') {
+    const isMoney = moneyField(field);
+    const normalizedRes = isMoney ? normalizeMoneyNumber(raw) : normalizePlainNumber(raw);
+    if (normalizedRes.value !== null && normalizedRes.value !== undefined) {
+      numericValue = normalizedRes.value;
+    }
+  }
+
+  if (numericValue !== null) {
+    const matchedOption = chooseNumericRangeOption(numericValue, field);
+    if (matchedOption) return matchedOption;
+  }
+
+  return null;
+}
+
 function normalizeFieldValue(
   raw: unknown,
   field: PublishCategoryMetaFieldConfig,
@@ -585,6 +661,11 @@ function normalizeFieldValue(
   if (field.type === 'select') {
     const exactValue = exactConfiguredOption(raw, field);
     if (exactValue) return { value: exactValue, reason: 'database_option_exact' };
+    
+    // 优先：如果是数值或价格相关的单选，自动匹配区间范围 (例如将抓取到的具体价格“260$”自动映射入“200-500”单选区间)
+    const rangeValue = semanticRangeSelectOption(raw, field);
+    if (rangeValue) return { value: rangeValue, reason: 'select_option_range_mapped' };
+
     const salaryValue = semanticSalaryOption(raw, field);
     if (salaryValue) return { value: salaryValue, reason: 'salary_option_semantic' };
     const semanticValue = semanticConfiguredOption(raw, field);
