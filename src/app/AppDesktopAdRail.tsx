@@ -84,9 +84,19 @@ export const AppDesktopAdRail: React.FC = () => {
 
     const addBooking = (item: PromotionBooking | null | undefined) => {
       if (!item) return;
-      const key = item.id || `${item.type}:${item.slotIndex}:${item.postId || ''}:${item.adTargetUrl || ''}`;
-      if (!seenKeys.has(key)) {
-        seenKeys.add(key);
+      // Never display fake/fallback ads
+      if (String(item.id || '').startsWith('fallback-')) return;
+      // Filter out any expired promotion items
+      if (item.endsAt && new Date(item.endsAt).getTime() <= Date.now()) return;
+
+      const dedupeKey = item.postId
+        ? `post:${item.postId}`
+        : (item.adImageUrl || item.adTargetUrl)
+          ? `ad:${item.adImageUrl || ''}:${item.adTargetUrl || ''}`
+          : (item.id || `${item.type}:${item.slotIndex}`);
+
+      if (!seenKeys.has(dedupeKey)) {
+        seenKeys.add(dedupeKey);
         list.push(item);
       }
     };
@@ -208,7 +218,7 @@ export const AppDesktopAdRail: React.FC = () => {
             const hasBannerImage = Boolean(item.adImageUrl || item.adMobileImageUrl);
             const adImageUrl = item.adImageUrl || item.adMobileImageUrl;
             const post = item.post;
-            const coverPhoto = post?.photos?.[0] || (post as any)?.image || (post as any)?.images?.[0];
+            const coverPhoto = (post as any)?.images?.[0] || post?.photos?.[0] || (post as any)?.image;
 
             return (
               <div

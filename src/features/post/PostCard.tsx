@@ -554,23 +554,14 @@ const PostCard = memo(function PostCard({ post: inputPost, isOwner = false, show
   const locationTags = useMemo(() => displayTags.filter((tag) => isLocationTag(tag)), [displayTags]);
   const hasPublishLocation = locationTags.length > 0;
 
-  // 3. 规格与高级属性元数据 (Structured Meta Items)：
-  //    从 post.categoryMeta 提取出如“薪资”、“面积”、“户型”等选择的信息作为属性标签。
-  const rawStructuredMetaItems = useMemo(() => buildPostStructuredMetaItems(post.categoryMeta), [post.categoryMeta]);
-
-  // 4. 优先级与覆盖冲突消解 (Location Overlap Suppression)：
-  //    - 【重要设计规约】：如果发布时用户输入或选择了明确的发布地点（hasPublishLocation 为 true），
-  //      则优先展示该发布地点，且必须过滤并清除 Meta (structuredMetaItems) 里面提取出的“地点”或“地区”键值。
-  //    - 如果发布时未指定具体地点，但 Meta 属性里有选择的地点信息，则照常在 Meta 标签中显示。
-  const structuredMetaItems = useMemo(() => {
-    if (hasPublishLocation) {
-      return rawStructuredMetaItems.filter((item) => !isPostStructuredLocationMeta(item));
-    }
-    return rawStructuredMetaItems;
-  }, [rawStructuredMetaItems, hasPublishLocation]);
-
-  // 仅在发布时存在明确地点时，展示发布地点标签
-  const visibleLocationTags = useMemo(() => (hasPublishLocation ? locationTags : []), [locationTags, hasPublishLocation]);
+  const structuredMetaItems = useMemo(
+    () => buildPostStructuredMetaItems(post.categoryMeta),
+    [post.categoryMeta],
+  );
+  const visibleLocationTags = useMemo(
+    () => structuredMetaItems.some(isPostStructuredLocationMeta) ? [] : locationTags,
+    [locationTags, structuredMetaItems],
+  );
 
   // 综合判定当前卡片是否具有任何可见属性标签，用于确定正文和卡片底部的视觉分界与排版间距。
   const hasVisibleTags = visibleLocationTags.length > 0 || categoryChips.length > 0 || structuredMetaItems.length > 0;

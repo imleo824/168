@@ -662,12 +662,12 @@ function normalizeFieldValue(
     const exactValue = exactConfiguredOption(raw, field);
     if (exactValue) return { value: exactValue, reason: 'database_option_exact' };
     
+    const salaryValue = semanticSalaryOption(raw, field);
+    if (salaryValue) return { value: salaryValue, reason: 'salary_option_semantic' };
+
     // 优先：如果是数值或价格相关的单选，自动匹配区间范围 (例如将抓取到的具体价格“260$”自动映射入“200-500”单选区间)
     const rangeValue = semanticRangeSelectOption(raw, field);
     if (rangeValue) return { value: rangeValue, reason: 'select_option_range_mapped' };
-
-    const salaryValue = semanticSalaryOption(raw, field);
-    if (salaryValue) return { value: salaryValue, reason: 'salary_option_semantic' };
     const semanticValue = semanticConfiguredOption(raw, field);
     return semanticValue
       ? { value: semanticValue, reason: 'database_option_semantic' }

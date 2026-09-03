@@ -533,7 +533,7 @@ export default function RechargeMobile() {
                   </div>
 
                   <ActionButton
-                    disabled={currentFlowBusy || createOrderBusy || !amount || Number(amount) < currentMinUsdt}
+                    disabled={currentFlowBusy || createOrderBusy}
                     type="submit"
                     variant="brand"
                     className="recharge-submit"

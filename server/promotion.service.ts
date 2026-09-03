@@ -46,35 +46,7 @@ import {
 } from './promotion-utils';
 
 function getFallbackPromotionItems() {
-  const now = new Date();
-  return [
-    {
-      id: 'fallback-pin-1',
-      type: PromotionType.PIN_HOME,
-      slotIndex: 0,
-      scopeKey: 'GLOBAL',
-      startsAt: now,
-      endsAt: new Date(now.getTime() + 30 * 24 * 3600 * 1000),
-      targetDate: now,
-      createdAt: now,
-      postId: 'post-pin-1',
-      post: {
-        id: 'post-pin-1',
-        title: '欢迎来到推推论坛 · 官方使用指南',
-        content: '发表优质内容，参与社群讨论，获取更多积分与推广曝光机制！',
-        viewCount: 1280,
-        commentCount: 36,
-        likeCount: 99,
-        user: {
-          id: 'official-admin',
-          username: 'admin',
-          displayName: '推推官方',
-          photoUrl: 'https://api.dicebear.com/7.x/identicon/svg?seed=tuitui',
-          isTuiPlus: true,
-        },
-      },
-    },
-  ];
+  return [];
 }
 
 let activeHomeAdsCache: ActiveHomeAdsCache | null = null;
@@ -177,10 +149,8 @@ export class PromotionService {
         bookings = await (prisma as any).promotionBooking.findMany({
           where: {
             type: PromotionType.AD_HOME,
-            OR: [
-              { endsAt: { gte: new Date(now.getTime() - 48 * 3600 * 1000) } },
-              { targetDate: { gte: new Date(now.getTime() - 48 * 3600 * 1000) } },
-            ],
+            endsAt: { gt: now },
+            startsAt: { lte: new Date(now.getTime() + 24 * 3600 * 1000) },
           },
           orderBy: [{ slotIndex: 'asc' }, { createdAt: 'desc' }],
           take: 30,
@@ -292,12 +262,23 @@ export class PromotionService {
     const now = new Date();
 
     if (!isDbConfigured()) {
-      return getFallbackPromotionItems();
+      return [];
     }
 
     const activeTimeWhere = this.buildActiveTimeWhereClause(now);
 
     try {
+      const userSelect = {
+        id: true,
+        displayName: true,
+        loginAccount: true,
+        photoUrl: true,
+        role: true,
+        userType: true,
+        plusStatus: true,
+        plusExpiresAt: true,
+      };
+
       let bookings = await (prisma as any).promotionBooking.findMany({
         where: {
           ...activeTimeWhere,
@@ -308,14 +289,7 @@ export class PromotionService {
           post: {
             include: {
               user: {
-                select: {
-                  id: true,
-                  username: true,
-                  displayName: true,
-                  photoUrl: true,
-                  isTuiPlus: true,
-                  role: true,
-                },
+                select: userSelect,
               },
               category: {
                 select: {
@@ -327,13 +301,7 @@ export class PromotionService {
             },
           },
           user: {
-            select: {
-              id: true,
-              username: true,
-              displayName: true,
-              photoUrl: true,
-              isTuiPlus: true,
-            },
+            select: userSelect,
           },
         },
       });
@@ -342,10 +310,8 @@ export class PromotionService {
       if (bookings.length === 0) {
         bookings = await (prisma as any).promotionBooking.findMany({
           where: {
-            OR: [
-              { endsAt: { gte: new Date(now.getTime() - 48 * 3600 * 1000) } },
-              { targetDate: { gte: new Date(now.getTime() - 48 * 3600 * 1000) } },
-            ],
+            endsAt: { gt: now },
+            startsAt: { lte: new Date(now.getTime() + 24 * 3600 * 1000) },
           },
           orderBy: [{ createdAt: 'desc' }, { startsAt: 'desc' }],
           take: 100,
@@ -353,14 +319,7 @@ export class PromotionService {
             post: {
               include: {
                 user: {
-                  select: {
-                    id: true,
-                    username: true,
-                    displayName: true,
-                    photoUrl: true,
-                    isTuiPlus: true,
-                    role: true,
-                  },
+                  select: userSelect,
                 },
                 category: {
                   select: {
@@ -372,13 +331,7 @@ export class PromotionService {
               },
             },
             user: {
-              select: {
-                id: true,
-                username: true,
-                displayName: true,
-                photoUrl: true,
-                isTuiPlus: true,
-              },
+              select: userSelect,
             },
           },
         });
@@ -388,9 +341,11 @@ export class PromotionService {
       const deduplicated = [];
 
       for (const booking of bookings) {
-        const key = booking.id || (booking.postId
+        const key = booking.postId
           ? `post:${booking.postId}`
-          : `ad:${booking.type}:${booking.slotIndex}:${booking.adImageUrl || ''}:${booking.adTargetUrl || ''}`);
+          : (booking.adImageUrl || booking.adTargetUrl)
+            ? `ad:${booking.adImageUrl || ''}:${booking.adTargetUrl || ''}`
+            : booking.id;
 
         if (seenKeys.has(key)) continue;
         seenKeys.add(key);
@@ -403,17 +358,38 @@ export class PromotionService {
           }
         }
 
-        deduplicated.push(booking);
-      }
+        const formatUser = (u: any) => {
+          if (!u) return null;
+          const isTuiPlus = u.plusStatus === 'ACTIVE' && (!u.plusExpiresAt || new Date(u.plusExpiresAt) > now);
+          return {
+            id: u.id,
+            displayName: u.displayName || u.loginAccount || '用户',
+            username: u.loginAccount || u.displayName || '',
+            photoUrl: u.photoUrl || null,
+            role: u.role || 'USER',
+            userType: u.userType || 'NORMAL',
+            isTuiPlus,
+          };
+        };
 
-      if (deduplicated.length === 0) {
-        return getFallbackPromotionItems();
+        const formatted = {
+          ...booking,
+          user: formatUser(booking.user),
+          post: booking.post
+            ? {
+                ...booking.post,
+                user: formatUser(booking.post.user),
+              }
+            : null,
+        };
+
+        deduplicated.push(formatted);
       }
 
       return deduplicated;
     } catch (err) {
-      console.warn('[PromotionService] Failed to load active promotions from DB:', err);
-      return getFallbackPromotionItems();
+      console.error('[PromotionService] Failed to load active promotions from DB:', err);
+      return [];
     }
   }
 

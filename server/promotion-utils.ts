@@ -120,8 +120,9 @@ export function buildPromotionActiveTimeWhere(now = new Date()) {
   const platformEnd = platformRange.end;
 
   return {
+    endsAt: { gt: now },
     OR: [
-      { startsAt: { lte: now }, endsAt: { gt: now } },
+      { startsAt: { lte: now } },
       { startsAt: { lte: platformEnd }, endsAt: { gte: platformStart } },
       { targetDate: { gte: platformStart, lt: platformEnd } },
       { targetDate: { gte: utcTodayStart, lt: utcTodayEnd } },

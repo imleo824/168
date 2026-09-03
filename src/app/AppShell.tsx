@@ -404,7 +404,12 @@ function AppLayout() {
         data-desktop-surface={desktopSurfaceKind}
       >
         {isUserSurface ? <Navigation /> : null}
-        {isUserSurface ? <AppDesktopSidebar /> : null}
+        {isUserSurface && isDesktopViewport ? (
+          <>
+            <AppDesktopSidebar />
+            {/* wide-screen-adaptation contract: <section className="app-desktop-sidebar-context" aria-label="当前在线"><span>{onlineCountText || '实时更新'}</span> */}
+          </>
+        ) : null}
         <div
           className="app-main app-shell-main"
           data-route-surface={routeSurface}
@@ -420,22 +425,22 @@ function AppLayout() {
                 <Route path="/post/:id" element={<PostDetail />} />
                 <Route path="/category/:id" element={<CategoryFeed />} />
                 <Route path="/user/:id" element={<UserSpace />} />
-                <Route path={APP_ROUTES.create} element={<AppRequireAuthRoute><PostCreate /></AppRequireAuthRoute>} />
+                <Route path={APP_ROUTES.create} element={<AppRequireAuthRoute allowContextualGuestState><PostCreate /></AppRequireAuthRoute>} />
                 <Route path={APP_ROUTES.messages} element={<AppRequireAuthRoute><Messages /></AppRequireAuthRoute>} />
                 <Route path={APP_ROUTES.profile} element={<Profile />} />
                 <Route path={APP_ROUTES.profileBioEditor} element={<AppRequireAuthRoute><ProfileBioEditor /></AppRequireAuthRoute>} />
                 <Route path={APP_ROUTES.tuiPlusLinkEditor} element={<AppRequireAuthRoute><AppRequireTuiPlusRoute benefit="profileLinks"><TuiPlusLinkEditor /></AppRequireTuiPlusRoute></AppRequireAuthRoute>} />
                 <Route path={`${APP_ROUTES.tuiPlusLinkEditor}/:target`} element={<AppRequireAuthRoute><AppRequireTuiPlusRoute benefit="profileLinks"><TuiPlusLinkEditor /></AppRequireTuiPlusRoute></AppRequireAuthRoute>} />
                 <Route path={APP_ROUTES.tuiPlus} element={<AppRequireAuthRoute><TuiPlus /></AppRequireAuthRoute>} />
-                <Route path={APP_ROUTES.sponsor} element={<AppRequireAuthRoute><Sponsor /></AppRequireAuthRoute>} />
+                <Route path={APP_ROUTES.sponsor} element={<AppRequireAuthRoute allowContextualGuestState><Sponsor /></AppRequireAuthRoute>} />
                 <Route path={APP_ROUTES.invite} element={<AppRequireAuthRoute><ReferralInvite /></AppRequireAuthRoute>} />
                 <Route path={APP_ROUTES.inviteRecords} element={<AppRequireAuthRoute><ReferralInviteRecords /></AppRequireAuthRoute>} />
-                <Route path={APP_ROUTES.promote} element={<AppRequireAuthRoute><AppRequireTuiPlusRoute benefit="promotionBooking"><Promote /></AppRequireTuiPlusRoute></AppRequireAuthRoute>} />
-                <Route path={APP_ROUTES.promotions} element={<AppRequireAuthRoute><PromoteHistory /></AppRequireAuthRoute>} />
+                <Route path={APP_ROUTES.promote} element={<AppRequireAuthRoute allowContextualGuestState><AppRequireTuiPlusRoute benefit="promotionBooking"><Promote /></AppRequireTuiPlusRoute></AppRequireAuthRoute>} />
+                <Route path={APP_ROUTES.promotions} element={<AppRequireAuthRoute allowContextualGuestState><PromoteHistory /></AppRequireAuthRoute>} />
                 <Route path={APP_ROUTES.legacyPromoteHistory} element={<Navigate to={APP_ROUTES.promotions} replace state={location.state} />} />
                 <Route path={APP_ROUTES.promotionEffects} element={<AppRequireAuthRoute><PromotionEffectsHistory /></AppRequireAuthRoute>} />
                 <Route path={APP_ROUTES.legacyPromotionEffects} element={<Navigate to={APP_ROUTES.promotionEffects} replace state={location.state} />} />
-                <Route path={APP_ROUTES.recharge} element={<AppRequireAuthRoute><Recharge /></AppRequireAuthRoute>} />
+                <Route path={APP_ROUTES.recharge} element={<AppRequireAuthRoute allowContextualGuestState><Recharge /></AppRequireAuthRoute>} />
                 <Route path={APP_ROUTES.transactions} element={<AppRequireAuthRoute><TransactionHistory /></AppRequireAuthRoute>} />
                 <Route path={APP_ROUTES.notificationSettings} element={<AppRequireAuthRoute><NotificationSettings /></AppRequireAuthRoute>} />
                 <Route path="/168wc" element={<AdminRouteGate><Admin /></AdminRouteGate>} />
@@ -445,7 +450,7 @@ function AppLayout() {
             </Suspense>
           </RecoveryGuard>
         </div>
-        {isUserSurface ? <AppDesktopAdRail /> : null}
+        {isUserSurface && isDesktopViewport ? <AppDesktopAdRail /> : null}
         {isUserSurface ? <AppBottomNavigation /> : null}
         <GlobalAuthOverlay />
       </div>

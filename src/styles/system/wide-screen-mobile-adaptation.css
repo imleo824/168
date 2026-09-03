@@ -202,22 +202,22 @@
     }
 
     .app-shell[data-route-surface='user'] > .ui-layer-header {
-      display: none !important;
+      display: none;
     }
 
-    .app-desktop-sidebar {
-      grid-column: 1 !important;
-      grid-row: 1 !important;
+    .app-shell[data-route-surface='user'] .app-desktop-sidebar {
+      grid-column: 1;
+      grid-row: 1;
     }
 
     .app-shell[data-route-surface='user'] .app-shell-main {
-      grid-column: 2 !important;
-      grid-row: 1 !important;
+      grid-column: 2;
+      grid-row: 1;
     }
 
-    .app-desktop-ad-rail {
-      grid-column: 3 !important;
-      grid-row: 1 !important;
+    .app-shell[data-route-surface='user'] .app-desktop-ad-rail {
+      grid-column: 3;
+      grid-row: 1;
     }
 
     .app-shell[data-route-surface='user']:not([data-desktop-surface='feed']) {

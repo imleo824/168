@@ -277,7 +277,7 @@
     --segment-tab-count: 1;
 
     --ui-motion-scale-base: 1;
-    --ui-motion-press-scale: 0.995;
+    --ui-motion-press-scale: 0.975;
     --ui-motion-press-scale-strong: 0.97;
     --ui-motion-feedback-pop-scale-start: var(--ui-bottom-nav-press-scale);
     --ui-motion-feedback-pop-scale-peak: 1.16;

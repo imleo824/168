@@ -213,9 +213,7 @@
     background: var(--ui-brand);
     color: var(--ui-color-white);
     border-radius: var(--ui-radius-pill);
-    box-shadow: 
-      0 4px 10px color-mix(in srgb, var(--ui-brand) 28%, transparent),
-      inset 0 1px 0 color-mix(in srgb, var(--ui-color-white) 15%, transparent);
+    box-shadow: var(--ui-bottom-nav-active-shell-shadow);
     width: calc(var(--ui-bottom-nav-icon-shell-size) + var(--ui-space-1));
     height: calc(var(--ui-bottom-nav-icon-shell-size) + var(--ui-space-1));
     transition: 
