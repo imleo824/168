@@ -4,13 +4,10 @@ import {
   Copy,
   CheckCircle2,
   ArrowRight,
-  Coins,
-  History,
   RefreshCw,
   XCircle,
   Sparkles,
   AlertCircle,
-  ExternalLink,
 } from 'lucide-react';
 import { useAsyncFlow } from '@/hooks/useAsyncFlow';
 
@@ -666,113 +663,6 @@ export default function RechargeMobile() {
             </form>
           </SurfaceSectionCard>
 
-          {/* 右侧/侧栏：最近充值订单 + 常见问题 */}
-          <div className="recharge-sidebar-column">
-            {/* 最近充值记录卡片 */}
-            <SurfaceSectionCard
-              as="section"
-              tone="solid"
-              paddingClassName="recharge-orders-card-surface"
-              className="recharge-orders-card"
-              ariaLabel="最近充值记录"
-            >
-              <div className="recharge-orders-header">
-                <div className="recharge-orders-title-wrap">
-                  <History className="recharge-orders-title-icon" aria-hidden="true" />
-                  <h3 className="recharge-orders-title">最近充值记录</h3>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => loadOrders({ showBusyHint: true })}
-                  disabled={isLoadingOrders}
-                  className="recharge-orders-refresh-btn"
-                  title="刷新记录"
-                >
-                  <RefreshCw className={`recharge-orders-refresh-icon ${isLoadingOrders ? 'animate-spin' : ''}`} />
-                  <span>刷新</span>
-                </button>
-              </div>
-
-              {isLoadingOrders && orders.length === 0 ? (
-                <div className="recharge-orders-skeleton">
-                  <Skeleton className="h-12 w-full rounded-xl mb-2" />
-                  <Skeleton className="h-12 w-full rounded-xl mb-2" />
-                  <Skeleton className="h-12 w-full rounded-xl" />
-                </div>
-              ) : orders.length === 0 ? (
-                <div className="recharge-orders-empty">
-                  <Coins className="recharge-empty-icon" />
-                  <p className="recharge-empty-text">暂无充值记录</p>
-                  <p className="recharge-empty-sub">转账成功后，系统将自动归集并增加积分</p>
-                </div>
-              ) : (
-                <div className="recharge-orders-list">
-                  {orders.slice(0, 5).map((order) => {
-                    const badge = getOrderStatusBadge(order.status);
-                    const isWaiting = order.status === 'WAITING_PAYMENT';
-                    const isCredited = isRechargeOrderCredited(order);
-                    const isReview = order.status === 'MANUAL_REVIEW';
-
-                    return (
-                      <div key={order.id} className="recharge-order-item">
-                        <div className="recharge-order-main">
-                          <div className="recharge-order-primary">
-                            <span className="recharge-order-amount">{order.usdtAmount} USDT</span>
-                            <span className="recharge-order-pts">
-                              +{Math.floor(Number(order.usdtAmount) * currentPointsPerUsdt).toLocaleString()} 积分
-                            </span>
-                          </div>
-                          <div className="recharge-order-sub">
-                            <span>{formatOrderTime(order.createdAt)}</span>
-                            <span className="recharge-order-network">TRC-20</span>
-                          </div>
-                        </div>
-
-                        <div className="recharge-order-side">
-                          <span className={`recharge-status-badge ${badge.className}`}>
-                            {badge.label}
-                          </span>
-                          {isWaiting && (
-                            <button
-                              type="button"
-                              onClick={() => resumeActiveOrder(order)}
-                              className="recharge-order-resume-btn"
-                            >
-                              继续支付
-                            </button>
-                          )}
-                          {isReview && (
-                            <button
-                              type="button"
-                              onClick={() => void runRefreshOrderStatus()}
-                              className="recharge-order-resume-btn"
-                            >
-                              查询确认
-                            </button>
-                          )}
-                          {isCredited && (
-                            <span className="recharge-order-credited-label">已到账</span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                  {orders.length > 5 && (
-                    <button
-                      type="button"
-                      onClick={() => navigate('/transaction-history')}
-                      className="recharge-orders-more-link"
-                    >
-                      <span>查看全部记录 ({orders.length})</span>
-                      <ExternalLink className="w-3.5 h-3.5" />
-                    </button>
-                  )}
-                </div>
-              )}
-            </SurfaceSectionCard>
-
-
-          </div>
         </div>
       </PageContentShell>
     </AppPage>

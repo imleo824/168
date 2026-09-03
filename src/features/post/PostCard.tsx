@@ -269,13 +269,50 @@ function dedupeTagItems(items: Array<{ id: string; name: string }>): Array<{ id:
 function buildCategoryChips(post: FeedPost): Array<{ id: string; name: string }> {
   const items: Array<{ id: string; name: string }> = [];
   const categoryId = cleanString(post.categoryId);
-  if (categoryId && post.category?.id === categoryId && post.category?.name) items.push({ id: post.category.id, name: post.category.name });
-  if (post.category?.id && post.category?.name) items.push({ id: post.category.id, name: post.category.name });
-  if (post.primaryCategory?.id && post.primaryCategory?.name) items.push({ id: post.primaryCategory.id, name: post.primaryCategory.name });
-  const matchedCategory = categoryId ? (post.categories || []).find((item) => item?.category?.id === categoryId)?.category : null;
-  if (matchedCategory?.id && matchedCategory?.name) items.push({ id: matchedCategory.id, name: matchedCategory.name });
-  (post.categories || []).forEach((item) => { if (item?.category?.id && item?.category?.name) items.push({ id: item.category.id, name: item.category.name }); });
-  (post.subCategories || []).forEach((item) => { if (item?.id && item?.name) items.push({ id: item.id, name: item.name }); });
+
+  // 优先级 1：如果发布数据显式声明了关联的激活子分类 (subCategories)
+  if (post.subCategories && Array.isArray(post.subCategories)) {
+    post.subCategories.forEach((item) => {
+      if (item?.id && item?.name) {
+        items.push({ id: item.id, name: item.name });
+      }
+    });
+  }
+
+  // 优先级 2：如果指定的 categoryId 与包含完整子级分类匹配
+  const matchedCategory = categoryId
+    ? (post.categories || []).find((item) => item?.category?.id === categoryId)?.category
+    : null;
+  if (matchedCategory?.id && matchedCategory?.name) {
+    items.push({ id: matchedCategory.id, name: matchedCategory.name });
+  }
+
+  // 优先级 3：如果指定了激活的 categoryId，且该分类正好是 post.category 本身
+  if (categoryId && post.category?.id === categoryId && post.category?.name) {
+    items.push({ id: post.category.id, name: post.category.name });
+  }
+
+  // 优先级 4：主关联分类 post.category
+  if (post.category?.id && post.category?.name) {
+    items.push({ id: post.category.id, name: post.category.name });
+  }
+
+  // 优先级 5：基础分类或主要一级分类 (primaryCategory)
+  if (post.primaryCategory?.id && post.primaryCategory?.name) {
+    items.push({ id: post.primaryCategory.id, name: post.primaryCategory.name });
+  }
+
+  // 优先级 6：多对多关联列表 (categories) 中包含的所有分类
+  if (post.categories && Array.isArray(post.categories)) {
+    post.categories.forEach((item) => {
+      if (item?.category?.id && item?.category?.name) {
+        items.push({ id: item.category.id, name: item.category.name });
+      }
+    });
+  }
+
+  // 对所有层级提炼出的候选分类进行查重、修剪，并仅返回前 1 个最具体、最精准的分类标签
+  // 仅限 1 个以满足 Feed 流卡片的极简单行空间规范，防止列表视觉繁杂
   return dedupeTagItems(items).slice(0, 1);
 }
 
@@ -506,12 +543,38 @@ const PostCard = memo(function PostCard({ post: inputPost, isOwner = false, show
   const profileState = canOpenProfile && currentUser?.id !== authorId ? withCurrentBackground(location) : undefined;
   const canShowContact = Boolean(post.showContact !== false && cleanString(post.contact));
   const contactUrl = canShowContact ? getTelegramContactUrl(post.contact || '') : '';
-  const categoryChips = useMemo(() => (hideCategoryTag ? [] : buildCategoryChips(post)), [hideCategoryTag, post]);
+  // ==================== 标签展示与过滤逻辑树 ====================
+  // 1. 分类标签 (Category Chips)：
+  //    根据最新业务规划，卡片中不再展示任何分类标签。
+  const categoryChips = useMemo(() => [], []);
+
+  // 2. 发布时选择的地点标签提取 (Location Tags)：
+  //    从用户发布时填写的 post.location 文本中提炼出细粒度的区域/商圈。
   const displayTags = useMemo(() => buildDisplayLocationTags(post.location), [post.location]);
   const locationTags = useMemo(() => displayTags.filter((tag) => isLocationTag(tag)), [displayTags]);
-  const structuredMetaItems = useMemo(() => buildPostStructuredMetaItems(post.categoryMeta), [post.categoryMeta]);
-  const visibleLocationTags = useMemo(() => structuredMetaItems.some(isPostStructuredLocationMeta) ? [] : locationTags, [locationTags, structuredMetaItems]);
+  const hasPublishLocation = locationTags.length > 0;
+
+  // 3. 规格与高级属性元数据 (Structured Meta Items)：
+  //    从 post.categoryMeta 提取出如“薪资”、“面积”、“户型”等选择的信息作为属性标签。
+  const rawStructuredMetaItems = useMemo(() => buildPostStructuredMetaItems(post.categoryMeta), [post.categoryMeta]);
+
+  // 4. 优先级与覆盖冲突消解 (Location Overlap Suppression)：
+  //    - 【重要设计规约】：如果发布时用户输入或选择了明确的发布地点（hasPublishLocation 为 true），
+  //      则优先展示该发布地点，且必须过滤并清除 Meta (structuredMetaItems) 里面提取出的“地点”或“地区”键值。
+  //    - 如果发布时未指定具体地点，但 Meta 属性里有选择的地点信息，则照常在 Meta 标签中显示。
+  const structuredMetaItems = useMemo(() => {
+    if (hasPublishLocation) {
+      return rawStructuredMetaItems.filter((item) => !isPostStructuredLocationMeta(item));
+    }
+    return rawStructuredMetaItems;
+  }, [rawStructuredMetaItems, hasPublishLocation]);
+
+  // 仅在发布时存在明确地点时，展示发布地点标签
+  const visibleLocationTags = useMemo(() => (hasPublishLocation ? locationTags : []), [locationTags, hasPublishLocation]);
+
+  // 综合判定当前卡片是否具有任何可见属性标签，用于确定正文和卡片底部的视觉分界与排版间距。
   const hasVisibleTags = visibleLocationTags.length > 0 || categoryChips.length > 0 || structuredMetaItems.length > 0;
+  // =============================================================
   const hasBodyContent = Boolean(displayText || hasVisibleTags || post.quotedPost);
   const { toggleLike, isPending, hasLiked, likeCount, viewCount } = usePostStats(postId, { hasLiked: !!post.hasLiked, likeCount: post.likeCount || 0, viewCount: post.viewCount || 0 });
   const { isLikeFeedbackActive, triggerLikeFeedback } = useLikeFeedback();
