@@ -3,35 +3,6 @@ import bcrypt from 'bcryptjs';
 import { randomUUID } from 'crypto';
 import { PromotionType, TransactionAction, getPromotionTypeLabel } from '../shared/domain';
 import { DAY_MS, PLATFORM_TIMEZONE, getPlatformDateKey, getPlatformDayRange } from './platform-time';
-
-const FALLBACK_PROMOTION_ITEMS = [
-  {
-    id: 'fallback-pin-1',
-    type: PromotionType.PIN_HOME,
-    slotIndex: 0,
-    scopeKey: 'GLOBAL',
-    startsAt: new Date(),
-    endsAt: new Date(Date.now() + 30 * 24 * 3600 * 1000),
-    targetDate: new Date(),
-    createdAt: new Date(),
-    postId: 'post-pin-1',
-    post: {
-      id: 'post-pin-1',
-      title: '欢迎来到推推论坛 · 官方使用指南',
-      content: '发表优质内容，参与社群讨论，获取更多积分与推广曝光机制！',
-      viewCount: 1280,
-      commentCount: 36,
-      likeCount: 99,
-      user: {
-        id: 'official-admin',
-        username: 'admin',
-        displayName: '推推官方',
-        photoUrl: 'https://api.dicebear.com/7.x/identicon/svg?seed=tuitui',
-        isTuiPlus: true,
-      },
-    },
-  },
-];
 import {
   ACTIVE_HOME_ADS_CACHE_TTL_MS,
   ACTIVE_PROMOTED_POST_IDS_CACHE_TTL_MS,
@@ -73,6 +44,38 @@ import {
   type PromotionEffectStats,
   type SlotOwnership,
 } from './promotion-utils';
+
+function getFallbackPromotionItems() {
+  const now = new Date();
+  return [
+    {
+      id: 'fallback-pin-1',
+      type: PromotionType.PIN_HOME,
+      slotIndex: 0,
+      scopeKey: 'GLOBAL',
+      startsAt: now,
+      endsAt: new Date(now.getTime() + 30 * 24 * 3600 * 1000),
+      targetDate: now,
+      createdAt: now,
+      postId: 'post-pin-1',
+      post: {
+        id: 'post-pin-1',
+        title: '欢迎来到推推论坛 · 官方使用指南',
+        content: '发表优质内容，参与社群讨论，获取更多积分与推广曝光机制！',
+        viewCount: 1280,
+        commentCount: 36,
+        likeCount: 99,
+        user: {
+          id: 'official-admin',
+          username: 'admin',
+          displayName: '推推官方',
+          photoUrl: 'https://api.dicebear.com/7.x/identicon/svg?seed=tuitui',
+          isTuiPlus: true,
+        },
+      },
+    },
+  ];
+}
 
 let activeHomeAdsCache: ActiveHomeAdsCache | null = null;
 let activeChatAdsCache: ActiveHomeAdsCache | null = null;
@@ -289,7 +292,7 @@ export class PromotionService {
     const now = new Date();
 
     if (!isDbConfigured()) {
-      return FALLBACK_PROMOTION_ITEMS;
+      return getFallbackPromotionItems();
     }
 
     const activeTimeWhere = this.buildActiveTimeWhereClause(now);
@@ -404,13 +407,13 @@ export class PromotionService {
       }
 
       if (deduplicated.length === 0) {
-        return FALLBACK_PROMOTION_ITEMS;
+        return getFallbackPromotionItems();
       }
 
       return deduplicated;
     } catch (err) {
       console.warn('[PromotionService] Failed to load active promotions from DB:', err);
-      return FALLBACK_PROMOTION_ITEMS;
+      return getFallbackPromotionItems();
     }
   }
 

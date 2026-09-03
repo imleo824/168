@@ -6,12 +6,8 @@ import {
   ArrowRight,
   Coins,
   History,
-  ShieldCheck,
-  Zap,
   RefreshCw,
   XCircle,
-  HelpCircle,
-  Clock,
   Sparkles,
   AlertCircle,
   ExternalLink,
@@ -429,22 +425,6 @@ export default function RechargeMobile() {
       />
 
       <PageContentShell className="recharge-shell ui-app-page-main">
-        {/* 顶部汇率与结算安全概览信息条 */}
-        <div className="recharge-page-meta-row flex flex-wrap items-center justify-between gap-4 py-3 px-4 border border-line-hairline bg-surface-muted rounded-xl mb-4 text-xs text-subtle">
-          <div className="recharge-meta-item">
-            <Zap className="recharge-meta-icon" aria-hidden="true" />
-            <span>1 USDT = {currentPointsPerUsdt} 积分</span>
-          </div>
-          <div className="recharge-meta-item">
-            <ShieldCheck className="recharge-meta-icon" aria-hidden="true" />
-            <span>TRC-20 链上秒级结算</span>
-          </div>
-          <div className="recharge-meta-item">
-            <Clock className="recharge-meta-icon" aria-hidden="true" />
-            <span>起充 {currentMinUsdt} USDT</span>
-          </div>
-        </div>
-
         {/* 待完成订单提醒条 */}
         {step === 'AMOUNT' && activeWaitingOrder && (
           <div className="recharge-active-order-banner">
@@ -791,42 +771,7 @@ export default function RechargeMobile() {
               )}
             </SurfaceSectionCard>
 
-            {/* 充值指南与 FAQ 卡片 */}
-            <SurfaceSectionCard
-              as="section"
-              tone="solid"
-              paddingClassName="recharge-faq-card-surface"
-              className="recharge-faq-card"
-              ariaLabel="充值说明与帮助"
-            >
-              <div className="recharge-faq-header">
-                <HelpCircle className="recharge-faq-icon" />
-                <h3 className="recharge-faq-title">充值须知与解答</h3>
-              </div>
 
-              <div className="recharge-faq-list">
-                <div className="recharge-faq-item">
-                  <div className="recharge-faq-question">1. 转账后多久积分到账？</div>
-                  <div className="recharge-faq-answer">
-                    TRC-20 USDT 转账通常需 1~3 分钟进行 TRON 链上确认。确认完成后，系统将秒级归集并自动为您的账户累加积分。
-                  </div>
-                </div>
-
-                <div className="recharge-faq-item">
-                  <div className="recharge-faq-question">2. 必须使用 TRC-20 网络吗？</div>
-                  <div className="recharge-faq-answer">
-                    是的，专属地址仅支持波场 TRON (TRC-20) 网络的 USDT 转账。请勿使用 ERC-20、BEP-20 等其他网络，以免资产丢失。
-                  </div>
-                </div>
-
-                <div className="recharge-faq-item">
-                  <div className="recharge-faq-question">3. 超时未到账如何处理？</div>
-                  <div className="recharge-faq-answer">
-                    如转账后超过 10 分钟未到账，可先点击“刷新到账状态”。若仍未到账，可保留转账哈希 (TxID) 并联系平台客服核查处理。
-                  </div>
-                </div>
-              </div>
-            </SurfaceSectionCard>
           </div>
         </div>
       </PageContentShell>
