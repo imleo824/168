@@ -202,7 +202,22 @@
     }
 
     .app-shell[data-route-surface='user'] > .ui-layer-header {
-      display: none;
+      display: none !important;
+    }
+
+    .app-desktop-sidebar {
+      grid-column: 1 !important;
+      grid-row: 1 !important;
+    }
+
+    .app-shell[data-route-surface='user'] .app-shell-main {
+      grid-column: 2 !important;
+      grid-row: 1 !important;
+    }
+
+    .app-desktop-ad-rail {
+      grid-column: 3 !important;
+      grid-row: 1 !important;
     }
 
     .app-shell[data-route-surface='user']:not([data-desktop-surface='feed']) {
