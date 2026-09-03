@@ -49,84 +49,6 @@ let activeHomeAdsCache: ActiveHomeAdsCache | null = null;
 let activeChatAdsCache: ActiveHomeAdsCache | null = null;
 let activePromotedPostIdsCache: { expiresAt: number; data: string[] } | null = null;
 
-const inMemoryBookings: any[] = [];
-
-export function getFallbackActivePromotions() {
-  const now = new Date();
-  const startsAt = new Date(now.getTime() - 7 * DAY_MS);
-  const endsAt = new Date(now.getTime() + 30 * DAY_MS);
-
-  const defaultItems = [
-    {
-      id: 'default-ad-home-0',
-      type: PromotionType.AD_HOME,
-      slotIndex: 0,
-      scopeKey: GLOBAL_PROMOTION_SCOPE,
-      adImageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1200&auto=format&fit=crop',
-      adMobileImageUrl: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=600&auto=format&fit=crop',
-      adTargetUrl: 'https://t.me/tuitui_official',
-      startsAt,
-      endsAt,
-      targetDate: now,
-      createdAt: now,
-    },
-    {
-      id: 'default-pin-home-0',
-      type: PromotionType.PIN_HOME,
-      slotIndex: 0,
-      scopeKey: GLOBAL_PROMOTION_SCOPE,
-      startsAt,
-      endsAt,
-      targetDate: now,
-      createdAt: now,
-      postId: 'default-featured-post-1',
-      post: {
-        id: 'default-featured-post-1',
-        title: '🔥 2026 优质合作与精选推介',
-        content: '推推平台全面升级！支持爆料、二手交易、租房、求职招聘等实时发布。欢迎优质赞助商与个人内容上线置顶推广！',
-        viewCount: 3820,
-        likeCount: 245,
-        commentCount: 56,
-        user: {
-          id: 'official-user',
-          displayName: '推推官方运营',
-          username: 'tuitui_official',
-          photoUrl: 'https://api.dicebear.com/7.x/bottts/svg?seed=tuitui',
-        },
-        photos: ['https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=1000&auto=format&fit=crop'],
-      },
-    },
-    {
-      id: 'default-pin-category-0',
-      type: PromotionType.PIN_CATEGORY,
-      slotIndex: 0,
-      scopeKey: GLOBAL_PROMOTION_SCOPE,
-      startsAt,
-      endsAt,
-      targetDate: now,
-      createdAt: now,
-      postId: 'default-featured-post-2',
-      post: {
-        id: 'default-featured-post-2',
-        title: '📢 黄金曝光位现已全面开放预约',
-        content: '支持热门置顶、分类置顶、首页广告图等多种展示形态。快速提升品牌知名度与信息转化率！',
-        viewCount: 2150,
-        likeCount: 168,
-        commentCount: 34,
-        user: {
-          id: 'sponsor-user',
-          displayName: '星级赞助商',
-          username: 'star_sponsor',
-          photoUrl: 'https://api.dicebear.com/7.x/identicon/svg?seed=sponsor',
-        },
-        photos: ['https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=1000&auto=format&fit=crop'],
-      },
-    },
-  ];
-
-  return [...inMemoryBookings, ...defaultItems];
-}
-
 export class PromotionService {
   static readonly GLOBAL_SCOPE = GLOBAL_PROMOTION_SCOPE;
 
@@ -184,7 +106,7 @@ export class PromotionService {
     }
 
     if (!isDbConfigured()) {
-      return getFallbackActivePromotions().filter((item) => item.type === PromotionType.AD_HOME);
+      return [];
     }
 
     const now = new Date();
@@ -235,10 +157,6 @@ export class PromotionService {
         if (visibleBookings.length >= HOME_AD_SLOT_INDICES.size) break;
       }
 
-      if (visibleBookings.length === 0) {
-        return getFallbackActivePromotions().filter((item) => item.type === PromotionType.AD_HOME);
-      }
-
       activeHomeAdsCache = {
         expiresAt: Date.now() + ACTIVE_HOME_ADS_CACHE_TTL_MS,
         data: visibleBookings,
@@ -247,7 +165,7 @@ export class PromotionService {
       return visibleBookings;
     } catch (err) {
       console.warn('[PromotionService] Failed to load home ads from DB:', err);
-      return getFallbackActivePromotions().filter((item) => item.type === PromotionType.AD_HOME);
+      return [];
     }
   }
 
@@ -315,7 +233,7 @@ export class PromotionService {
 
   static async getAllActivePromotions() {
     if (!isDbConfigured()) {
-      return getFallbackActivePromotions();
+      return [];
     }
 
     const now = new Date();
@@ -380,14 +298,10 @@ export class PromotionService {
         deduplicated.push(booking);
       }
 
-      if (deduplicated.length === 0) {
-        return getFallbackActivePromotions();
-      }
-
       return deduplicated;
     } catch (err) {
       console.warn('[PromotionService] Failed to load active promotions from DB:', err);
-      return getFallbackActivePromotions();
+      return [];
     }
   }
 
