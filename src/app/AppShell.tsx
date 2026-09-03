@@ -614,7 +614,7 @@ function AppLayout() {
             </Suspense>
           </RecoveryGuard>
         </div>
-        {isUserSurface && isDesktopViewport ? <AppDesktopAdRail /> : null}
+        {isUserSurface ? <AppDesktopAdRail /> : null}
         {isUserSurface ? <AppBottomNavigation /> : null}
         <GlobalAuthOverlay />
       </div>
