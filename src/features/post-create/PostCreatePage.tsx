@@ -612,19 +612,11 @@ export default function PostCreate({
   }, []);
 
   const handleSelectCategory = useCallback((categoryId: string) => {
+    if (!categoryId) return;
     setCategoryDraftId(categoryId);
-    setCategoryMetaDraft(categoryId === form.categoryId ? form.categoryMeta : {});
-    setCategoryMetaErrors({});
-  }, [form.categoryId, form.categoryMeta]);
-
-  const handleSaveCategory = useCallback(() => {
-    if (!categoryDraftId) {
-      showToast('请选择分类', 'error');
-      return;
-    }
-    const nextSchema = findCategoryMetaSchema(categoryDraftId, publishCategorySchemas, publishCategories);
+    const nextSchema = findCategoryMetaSchema(categoryId, publishCategorySchemas, publishCategories);
     const nextFields = getOrderedCategoryMetaFields(nextSchema?.fields || []);
-    const nextMeta = categoryDraftId === form.categoryId ? form.categoryMeta : {};
+    const nextMeta = categoryId === form.categoryId ? form.categoryMeta : {};
     setCategoryMetaDraft(nextMeta);
     setCategoryMetaErrors({});
 
@@ -634,9 +626,17 @@ export default function PostCreate({
       return;
     }
 
-    commitCategory(categoryDraftId, {});
+    commitCategory(categoryId, {});
     setIsCategoryPickerOpen(false);
-  }, [categoryDraftId, commitCategory, form.categoryId, form.categoryMeta, publishCategories, publishCategorySchemas, showToast]);
+  }, [commitCategory, form.categoryId, form.categoryMeta, publishCategories, publishCategorySchemas]);
+
+  const handleSaveCategory = useCallback(() => {
+    if (!categoryDraftId) {
+      showToast('请选择分类', 'error');
+      return;
+    }
+    handleSelectCategory(categoryDraftId);
+  }, [categoryDraftId, handleSelectCategory, showToast]);
 
   const handleOpenCategoryMeta = useCallback(() => {
     if (!form.categoryId || selectedCategoryFields.length === 0) return;

@@ -210,7 +210,7 @@ export function CategoryPickerOption({
   return (
     <button
       type="button"
-      aria-label={selected ? `已选分类：${formatCreateTopicLabel(category.name)}，点击进入下一步` : `选择分类：${formatCreateTopicLabel(category.name)}`}
+      aria-label={selected ? `已选分类：${formatCreateTopicLabel(category.name)}` : `选择分类：${formatCreateTopicLabel(category.name)}`}
       onClick={() => onSelect(category.id)}
       role="option"
       aria-selected={selected}

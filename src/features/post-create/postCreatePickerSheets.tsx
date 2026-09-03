@@ -118,7 +118,6 @@ export function PostCreateCategoryPickerSheet({
   onClose,
   onClear,
   onSelect,
-  onSave,
 }: {
   open: boolean;
   categories: any[];
@@ -126,7 +125,7 @@ export function PostCreateCategoryPickerSheet({
   onClose: () => void;
   onClear: () => void;
   onSelect: (categoryId: string) => void;
-  onSave: () => void;
+  onSave?: () => void;
 }) {
   const selectedCategory = categories.find((category) => category.id === selectedCategoryId) || null;
   const selectedCategoryLabel = String(selectedCategory?.name || '').trim();
@@ -139,18 +138,6 @@ export function PostCreateCategoryPickerSheet({
       description="选择合适的分类，内容将展示在对应专属频道"
       ariaLabel="选择分类"
       onClose={onClose}
-      rightAction={(
-        <ActionButton
-          type="button"
-          variant="brand"
-          size="header"
-          onClick={onSave}
-          disabled={!selectedCategoryId}
-          className="post-create-picker-page-save"
-        >
-          下一步
-        </ActionButton>
-      )}
     >
       <div data-post-create-stable-focus="true" className="post-create-stable-focus post-create-location-picker post-create-picker-field-page">
         {selectedCategoryLabel ? (
