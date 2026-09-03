@@ -23,29 +23,22 @@ export async function refreshHomeAdsNow(queryClient: QueryClient) {
 
 export async function syncPromotionVisibilityAfterBooking(
   queryClient: QueryClient,
-  type: PromotionType | string,
+  _type?: PromotionType | string,
 ) {
-  const normalizedType = String(type || '').toUpperCase();
   const tasks: Array<Promise<unknown>> = [];
 
   clearHomeFeedSnapshots();
   tasks.push(queryClient.invalidateQueries({ queryKey: ['promotions'] }));
   tasks.push(queryClient.invalidateQueries({ queryKey: ['transactions'] }));
   tasks.push(queryClient.invalidateQueries({ queryKey: ['user-profile'] }));
-
-  if (normalizedType === PromotionType.AD_HOME) {
-    tasks.push(queryClient.invalidateQueries({ queryKey: ['home', 'bootstrap'] }));
-    tasks.push(queryClient.invalidateQueries({ queryKey: ['promotions', 'home-ads'] }));
-    tasks.push(refreshHomeAdsNow(queryClient));
-    return Promise.all(tasks);
-  }
-
-  if (normalizedType === PromotionType.PIN_HOME || normalizedType === PromotionType.PIN_CATEGORY) {
-    tasks.push(queryClient.invalidateQueries({ queryKey: ['posts'] }));
-    tasks.push(queryClient.invalidateQueries({ queryKey: ['posts', 'home-feed'] }));
-    tasks.push(queryClient.refetchQueries({ queryKey: ['posts'], type: 'active' }));
-    tasks.push(queryClient.refetchQueries({ queryKey: ['posts', 'home-feed'], type: 'active' }));
-  }
+  tasks.push(queryClient.invalidateQueries({ queryKey: ['home'] }));
+  tasks.push(queryClient.invalidateQueries({ queryKey: ['home', 'bootstrap'] }));
+  tasks.push(queryClient.invalidateQueries({ queryKey: ['promotions', 'home-ads'] }));
+  tasks.push(queryClient.invalidateQueries({ queryKey: ['posts'] }));
+  tasks.push(queryClient.invalidateQueries({ queryKey: ['posts', 'home-feed'] }));
+  tasks.push(refreshHomeAdsNow(queryClient).catch(() => []));
+  tasks.push(queryClient.refetchQueries({ queryKey: ['posts'], type: 'active' }));
+  tasks.push(queryClient.refetchQueries({ queryKey: ['posts', 'home-feed'], type: 'active' }));
 
   return Promise.all(tasks);
 }

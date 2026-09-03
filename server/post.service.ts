@@ -381,4 +381,8 @@ export class PostService extends BasePostService {
   static maskContact(post: any, currentUserId: string | null, currentUserRole?: string | null) {
     return toPublicPostPayload(post, { currentUserId, currentUserRole, compactForFeed: false });
   }
+
+  static clearPromotionCache() {
+    BasePostService.clearPromotionCache?.();
+  }
 }

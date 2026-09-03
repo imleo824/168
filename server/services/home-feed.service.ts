@@ -522,7 +522,16 @@ async function listFeedUncached(
   });
 }
 
+export function clearHomeFeedCache() {
+  homeFeedPinCache.clear();
+  feedReadCache.clear();
+}
+
 export class HomeFeedService {
+  static clearCache() {
+    clearHomeFeedCache();
+  }
+
   static async listFeed(options: HomeFeedOptions): Promise<HomeFeedResult> {
     if (!isDbConfigured()) return emptyHomeFeedResult();
     const limit = normalizeLimit(options.limit);

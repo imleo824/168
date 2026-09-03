@@ -16,6 +16,7 @@ import {
   bookingStatusText,
   buildDailyEffectStats,
   buildPostEffectStats,
+  buildPromotionActiveTimeWhere,
   buildPromotionEffectGroupKey,
   buildScopeKey,
   conflictKey,
@@ -52,22 +53,7 @@ export class PromotionService {
   static readonly GLOBAL_SCOPE = GLOBAL_PROMOTION_SCOPE;
 
   static buildActiveTimeWhereClause(now = new Date()) {
-    const todayKey = getPlatformDateKey(now);
-    const utcTodayStart = startOfUtcDay(todayKey);
-    const utcTodayEnd = new Date(utcTodayStart.getTime() + DAY_MS);
-    const platformRange = getPlatformDayRange(now);
-    const platformStart = platformRange.start;
-    const platformEnd = platformRange.end;
-
-    return {
-      OR: [
-        { startsAt: { lte: now }, endsAt: { gt: now } },
-        { startsAt: { lte: platformEnd }, endsAt: { gte: platformStart } },
-        { targetDate: { gte: platformStart, lt: platformEnd } },
-        { targetDate: { gte: utcTodayStart, lt: utcTodayEnd } },
-        { targetDate: utcTodayStart },
-      ],
-    };
+    return buildPromotionActiveTimeWhere(now);
   }
 
   static clearCache() {

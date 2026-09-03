@@ -1,5 +1,5 @@
 import { PromotionType, getPromotionTypeLabel } from '../shared/domain';
-import { getPlatformDateKey, getPlatformDateKeyRange } from './platform-time';
+import { DAY_MS, getPlatformDateKey, getPlatformDateKeyRange, getPlatformDayRange } from './platform-time';
 
 export const DAILY_SLOT_INDEX = 0;
 export const HOME_AD_SLOT_INDICES = new Set([0, 1, 2]);
@@ -111,6 +111,25 @@ export function getTodayPlatformDay() {
   return startOfUtcDay(getPlatformDateKey());
 }
 
+export function buildPromotionActiveTimeWhere(now = new Date()) {
+  const todayKey = getPlatformDateKey(now);
+  const utcTodayStart = startOfUtcDay(todayKey);
+  const utcTodayEnd = new Date(utcTodayStart.getTime() + DAY_MS);
+  const platformRange = getPlatformDayRange(now);
+  const platformStart = platformRange.start;
+  const platformEnd = platformRange.end;
+
+  return {
+    OR: [
+      { startsAt: { lte: now }, endsAt: { gt: now } },
+      { startsAt: { lte: platformEnd }, endsAt: { gte: platformStart } },
+      { targetDate: { gte: platformStart, lt: platformEnd } },
+      { targetDate: { gte: utcTodayStart, lt: utcTodayEnd } },
+      { targetDate: utcTodayStart },
+    ],
+  };
+}
+
 export function addUtcDays(date: Date, days: number) {
   return new Date(date.getTime() + days * 24 * 60 * 60 * 1000);
 }
@@ -186,24 +205,22 @@ export function buildScopeKey(type: PromotionType, categoryId?: string | null) {
 
 function isPersistentUploadedImageUrl(url: string) {
   if (!url) return false;
-  if (url.startsWith('/uploads/')) return process.env.NODE_ENV !== 'production';
+  if (url.startsWith('/uploads/') || url.startsWith('uploads/')) return true;
+  if (url.startsWith('data:image/')) return true;
   if (!/^https?:\/\//i.test(url)) return false;
 
   try {
-    const configuredUrl = (process.env.VITE_SUPABASE_URL || '').trim();
-    if (!configuredUrl) return false;
     const parsed = new URL(url);
-    const configured = new URL(configuredUrl);
-    return parsed.hostname === configured.hostname
-      && parsed.pathname.includes('/storage/v1/object/public/uploads/');
+    return Boolean(parsed.hostname);
   } catch {
     return false;
   }
 }
 
 export function normalizeAdImageUrl(url?: string | null, label = '广告图片') {
-  const value = String(url || '').trim();
+  let value = String(url || '').trim();
   if (!value) throw new Error(`请上传${label}`);
+  if (value.startsWith('uploads/')) value = `/${value}`;
   if (value.length > MAX_AD_URL_LENGTH || /[\u0000-\u001F\u007F]/.test(value)) throw new Error(`${label}地址无效`);
   if (isPersistentUploadedImageUrl(value)) return value;
   throw new Error(`${label}必须先上传成功`);

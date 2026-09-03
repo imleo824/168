@@ -1,4 +1,5 @@
 import type { FeedCategoryContext, FeedKind, FeedPaginationInput, FeedViewerContext } from '../modules/feed';
+import { buildPromotionActiveTimeWhere } from '../promotion-utils';
 
 export type FeedQueryInput = {
   kind: FeedKind;
@@ -206,12 +207,12 @@ export class FeedRepository {
     if (!this.db.promotionBooking) return [];
     const categoryIds = uniqueCleanStrings(params.categoryIds || []);
     const now = params.now || new Date();
+    const activeTimeWhere = buildPromotionActiveTimeWhere(now);
     return this.db.promotionBooking.findMany({
       where: {
         type: params.type,
         ...(categoryIds.length > 0 ? { categoryId: { in: categoryIds } } : {}),
-        startsAt: { lte: now },
-        endsAt: { gt: now },
+        ...activeTimeWhere,
         postId: { not: null },
         post: {
           is: {

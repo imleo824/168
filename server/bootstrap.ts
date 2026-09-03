@@ -619,6 +619,7 @@ function markPromotionDataChanged() {
   bumpPublicFeedCacheVersion('promotion');
   clearPublicFeedResultCache();
   clearAdminReportCache();
+  HomeFeedService.clearCache();
   PostService.clearPromotionCache();
   PromotionService.clearCache();
 }
