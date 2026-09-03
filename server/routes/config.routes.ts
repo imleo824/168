@@ -257,7 +257,7 @@ export function registerConfigRoutes(app: Express) {
       getCachedCategoryPayload(),
       PromotionService.getActiveHomeAds(),
     ]);
-    setPublicCache(res, 30, 120, 300);
+    setPublicCache(res, 5, 15, 30);
     res.json({
       config: toPublicConfig(configs, { publishCategorySchema: categoryPayload.schema }),
       categories: categoryPayload.categories,

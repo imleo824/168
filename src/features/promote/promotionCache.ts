@@ -3,11 +3,14 @@ import * as api from '@/services/api';
 import type { HomeBootstrap, PromotionBooking } from '@/types';
 import { PromotionType } from '@/types';
 import { clearHomeFeedSnapshots } from '@/features/home/homeFeedSnapshotCache';
+import { writeHomeBootstrapSnapshot } from '@/features/home/homeBootstrapSnapshotCache';
 
 function writeHomeAdsToBootstrap(queryClient: QueryClient, homeAds: PromotionBooking[]) {
   queryClient.setQueryData<HomeBootstrap | undefined>(['home', 'bootstrap'], (current) => {
     if (!current) return current;
-    return { ...current, homeAds };
+    const next = { ...current, homeAds };
+    writeHomeBootstrapSnapshot(next);
+    return next;
   });
 }
 
@@ -25,6 +28,7 @@ export async function syncPromotionVisibilityAfterBooking(
   const normalizedType = String(type || '').toUpperCase();
   const tasks: Array<Promise<unknown>> = [];
 
+  clearHomeFeedSnapshots();
   tasks.push(queryClient.invalidateQueries({ queryKey: ['promotions'] }));
   tasks.push(queryClient.invalidateQueries({ queryKey: ['transactions'] }));
   tasks.push(queryClient.invalidateQueries({ queryKey: ['user-profile'] }));
@@ -37,7 +41,6 @@ export async function syncPromotionVisibilityAfterBooking(
   }
 
   if (normalizedType === PromotionType.PIN_HOME || normalizedType === PromotionType.PIN_CATEGORY) {
-    clearHomeFeedSnapshots();
     tasks.push(queryClient.invalidateQueries({ queryKey: ['posts'] }));
     tasks.push(queryClient.invalidateQueries({ queryKey: ['posts', 'home-feed'] }));
     tasks.push(queryClient.refetchQueries({ queryKey: ['posts'], type: 'active' }));
