@@ -48,7 +48,6 @@ import {
   validatePublishCategoryMetaPayload,
 } from './postCreateCategoryMeta';
 import {
-  PostCreateAuthRequiredState,
   PostCreateComposerSection,
   PostCreatePublishingLock,
   type PostCreateFormState,
@@ -751,18 +750,6 @@ export default function PostCreate({
 
   if (loading) {
     return <PageLoader text="正在准备发布" />;
-  }
-
-  if (!user) {
-    return (
-      <AppPage className="post-create-page" bottomSafe>
-        <SEO title={POST_CREATE_PAGE_TITLE} noindex />
-        <PageHeader title={POST_CREATE_PAGE_TITLE} />
-        <PageContentShell bottomSafe className="post-create-page-main ui-app-page-main">
-          <PostCreateAuthRequiredState onAction={handleLogin} />
-        </PageContentShell>
-      </AppPage>
-    );
   }
 
   return (

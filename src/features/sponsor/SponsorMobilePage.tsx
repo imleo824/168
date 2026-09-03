@@ -10,7 +10,6 @@ import {
 import SEO from '@/platform/SEO';
 import { APP_ROUTES } from '@/app/routePaths';
 import AppPage from '@/ui/AppPage';
-import AuthRequiredState from '@/ui/AuthRequiredState';
 import PageHeader from '@/ui/PageHeader';
 import ActionButton from '@/ui/ActionButton';
 import EmptyStateCard from '@/ui/EmptyStateCard';
@@ -201,32 +200,6 @@ export default function SponsorMobilePage() {
       () => showToast('复制失败，请手动复制', 'error'),
     );
   };
-
-  if (!isAuthLoading && !user) {
-    return (
-      <AppPage mobileAddressBarScroll bottomSafe className="sponsor-page surface-page">
-        <SEO title="推广｜推推" description="登录后管理推推积分、充积分、推广和曝光效果。" noindex />
-        <PageHeader title="推广" showBack={false} titleAlign="center" />
-        <PageContentShell as="main" className="ui-auth-required-wrap ui-app-page-main">
-          <AuthRequiredState
-            icon={<HandCoins />}
-            context="sponsor"
-            tone="panel"
-            density="compact"
-            title="登录后推广"
-            description="查看积分余额、充积分入口、曝光服务和积分记录。"
-            actionLabel="登录 / 注册"
-            previewItems={[
-              { icon: <HandCoins aria-hidden="true" />, label: '积分余额', description: '查看当前积分和近期变化' },
-              { icon: <Plus aria-hidden="true" />, label: '充积分', description: '快速进入充积分流程' },
-              { icon: <ReceiptText aria-hidden="true" />, label: '积分记录', description: '追踪充积分、推广和消费记录' },
-            ]}
-            onAction={() => requireAuth()}
-          />
-        </PageContentShell>
-      </AppPage>
-    );
-  }
 
   return (
     <AppPage mobileAddressBarScroll bottomSafe className="sponsor-page surface-page">

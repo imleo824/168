@@ -17,7 +17,6 @@ import { bookPromotionBatch, updatePaymentPassword } from '@/services/api';
 import PageContentShell from '@/ui/PageContentShell';
 import { syncPromotionVisibilityAfterBooking } from '@/features/promote/promotionCache';
 import { PromoteCheckoutBar } from './promoteComponents';
-import { PromoteAuthRequiredPage } from './PromoteAuthRequiredPage';
 import {
   PromoteAdCreativeSection,
   PromoteCalendarSection,
@@ -650,15 +649,6 @@ export default function PromoteMobile() {
   const handleConfirmBooking = () => {
     void runConfirmBooking();
   };
-
-  if (!isAuthLoading && !user) {
-    return (
-      <PromoteAuthRequiredPage
-        onBack={handleBack}
-        onLogin={() => requireAuth()}
-      />
-    );
-  }
 
   return (
     <AppPage

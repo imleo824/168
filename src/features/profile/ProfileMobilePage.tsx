@@ -41,7 +41,6 @@ import {
 
 import { useProfileMediaUploads } from './useProfileMediaUploads';
 import {
-  ProfileAuthRequiredState,
   ProfileIdentitySection,
   ProfileListSection,
   type ProfileTabType,

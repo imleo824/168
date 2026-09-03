@@ -20,7 +20,6 @@ import { useAsyncFlow } from '@/hooks/useAsyncFlow';
 
 import SEO from '@/platform/SEO';
 import AppPage from '@/ui/AppPage';
-import AuthRequiredState from '@/ui/AuthRequiredState';
 import PageHeader from '@/ui/PageHeader';
 import ActionButton from '@/ui/ActionButton';
 import { getRechargeOrders, createRechargeOrder, scanRechargeOrder, getConfig } from '@/services/api';
@@ -376,32 +375,6 @@ export default function RechargeMobile() {
     () => orders.find((o) => isRechargeOrderActive(o)),
     [orders],
   );
-
-  if (!user) {
-    return (
-      <AppPage mobileAddressBarScroll className="recharge-page">
-        <SEO title="充积分｜推推" description="登录后在推推充积分，用于推广、置顶和会员功能。" noindex />
-        <PageHeader title="充积分" onBack={goBackToSource} />
-        <PageContentShell as="main" className="ui-auth-required-wrap ui-app-page-main">
-          <AuthRequiredState
-            icon={<Coins />}
-            context="recharge"
-            tone="panel"
-            density="compact"
-            title="登录后充积分"
-            description="登录后可生成专属收款地址，查看订单状态和积分到账记录。"
-            actionLabel="登录 / 注册"
-            previewItems={[
-              { icon: <Copy aria-hidden="true" />, label: '专属地址', description: '为当前账号生成收款信息' },
-              { icon: <ArrowRight aria-hidden="true" />, label: '到账跟踪', description: '查看待支付、审核中和已到账状态' },
-              { icon: <CheckCircle2 aria-hidden="true" />, label: '积分到账', description: '到账后自动更新积分余额' },
-            ]}
-            onAction={() => requireAuth()}
-          />
-        </PageContentShell>
-      </AppPage>
-    );
-  }
 
   const handleCopy = () => {
     if (!usdtAddress) {

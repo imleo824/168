@@ -5,7 +5,6 @@ import { Pencil, Pin, Save } from 'lucide-react';
 
 import SEO from '@/platform/SEO';
 import AppPage from '@/ui/AppPage';
-import AuthRequiredState from '@/ui/AuthRequiredState';
 import PageHeader from '@/ui/PageHeader';
 import HeaderSelectAction from '@/ui/HeaderSelectAction';
 import ActionButton from '@/ui/ActionButton';
@@ -207,42 +206,6 @@ export default function PromoteHistory() {
       ariaLabel="按状态筛选推广记录"
     />
   ) : undefined;
-
-  if (!isAuthLoading && !user) {
-    return (
-      <AppPage bottomSafe className="promote-mobile-page promote-page surface-page">
-        <SEO title={`${PROMOTION_RECORDS_TITLE}｜推推`} description="登录后查看您在推推的广告推广记录。" noindex />
-        <PageHeader
-          title={PROMOTION_RECORDS_TITLE}
-          onBack={() => {
-            if (sponsorReturnPath) {
-              navigate(sponsorReturnPath, { replace: true });
-              return;
-            }
-
-            navigate('/promote', { replace: true, state: location.state ? { ...location.state } : undefined });
-          }}
-        />
-        <PageContentShell as="main" className="ui-auth-required-wrap ui-app-page-main">
-          <AuthRequiredState
-            icon={<Pin />}
-            context="records"
-            tone="panel"
-            density="compact"
-            title="登录后查看推广记录"
-            description="推广记录只展示当前账号的广告和置顶预约。"
-            actionLabel="登录 / 注册"
-            previewItems={[
-              { icon: <Pin aria-hidden="true" />, label: '推广记录', description: '查看每一次预约和展示状态' },
-              { icon: <Pencil aria-hidden="true" />, label: '素材管理', description: '在允许时继续更新广告素材' },
-              { icon: <Save aria-hidden="true" />, label: '账号归档', description: '推广明细只归属当前登录账号' },
-            ]}
-            onAction={() => requireAuth()}
-          />
-        </PageContentShell>
-      </AppPage>
-    );
-  }
 
   return (
     <AppPage

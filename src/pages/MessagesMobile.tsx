@@ -15,7 +15,6 @@ import TopbarIconButton from '@/ui/TopbarIconButton';
 import { APP_ROUTES } from '@/app/routePaths';
 import { getNotificationsList, markAllNotificationsAsRead, markNotificationAsRead } from '@/services/api';
 import { useAuth } from '@/context/AuthContext';
-import PushNotificationSetting from '@/features/notifications/PushNotificationSetting';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 
 import '@/features/notifications/NotificationsRoute.css';
@@ -185,7 +184,6 @@ export default function MessagesMobile() {
   const items = notificationsQuery.data?.items || [];
   const unreadCount = notificationsQuery.data?.unreadCount || 0;
   const title = '消息';
-  const canShowPushPrompt = notificationsQuery.isFetched || notificationsQuery.isError;
 
   const handleMarkAllRead = useCallback(async () => {
     if (isMarkingAllRead || unreadCount <= 0) return;

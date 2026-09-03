@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom';
 import { Camera, ChevronRight, Crown, Edit2, MessageCircle, SlidersHorizontal, UserRound } from 'lucide-react';
 
 import { APP_ROUTES } from '@/app/routePaths';
-import AuthRequiredState from '@/ui/AuthRequiredState';
 import AvatarImage from '@/ui/AvatarImage';
 import EmptyStateCard from '@/ui/EmptyStateCard';
 import LinkifiedText from '@/ui/LinkifiedText';
@@ -33,31 +32,6 @@ function getTuiPlusProfileLabel(user: any) {
     return user?.plusStatus === 'TRIALING' ? '会员试用中' : '推推会员';
   }
   return user?.plusTrialUsed ? '续费会员' : '免费试用7天';
-}
-
-export function ProfileAuthRequiredState({
-  onAction,
-}: {
-  onAction: () => void;
-}) {
-  return (
-    <AuthRequiredState
-      titleAs="h1"
-      icon={<UserRound />}
-      context="profile"
-      tone="panel"
-      density="compact"
-      title="欢迎回来"
-      description="登录推推账号后，随时管理你的个人主页与发布历史。"
-      actionLabel="登录 / 注册"
-      previewItems={[
-        { icon: <Camera aria-hidden="true" />, label: '主页资料', description: '头像、封面和个人简介统一管理' },
-        { icon: <Edit2 aria-hidden="true" />, label: '发布记录', description: '查看帖子、引用和互动内容' },
-        { icon: <MessageCircle aria-hidden="true" />, label: '联系偏好', description: '控制外部联系方式展示方式' },
-      ]}
-      onAction={onAction}
-    />
-  );
 }
 
 export function ProfileIdentitySection({
