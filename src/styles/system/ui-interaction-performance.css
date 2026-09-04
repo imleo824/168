@@ -3,15 +3,6 @@
  * Goals: keep input callbacks light, reduce presentation delay, and avoid broad expensive transitions.
  */
 
-@layer base {
-  :root {
-    --ui-record-card-intrinsic-block-size: calc(var(--ui-space-8) * 4);
-    --ui-press-response-duration: 70ms;
-    --ui-press-settle-duration: 130ms;
-    --ui-press-color-duration: 110ms;
-  }
-}
-
 @layer utilities {
   :is(
     .pressable,
@@ -33,7 +24,21 @@
     .sponsor-record-tab,
     .detail-bottom-action,
     .post-create-tool-button,
-    .image-upload-toolbar-trigger
+    .image-upload-toolbar-trigger,
+    .app-desktop-nav-item,
+    .app-desktop-post-btn,
+    .app-desktop-ad-rail-card,
+    .profile-action-btn,
+    .user-space-tab,
+    .tui-plus-benefit-card,
+    .tui-plus-plan-card,
+    .tui-plus-action-btn,
+    .post-create-submit-button,
+    .post-create-category-chip,
+    .post-create-channel-option,
+    .ui-sheet-close-button,
+    .ui-sheet-action-button,
+    .ui-dialog-action-btn
   ) {
     transition:
       background-color var(--ui-press-color-duration) var(--ease-standard),
@@ -64,7 +69,21 @@
     .sponsor-record-tab,
     .detail-bottom-action,
     .post-create-tool-button,
-    .image-upload-toolbar-trigger
+    .image-upload-toolbar-trigger,
+    .app-desktop-nav-item,
+    .app-desktop-post-btn,
+    .app-desktop-ad-rail-card,
+    .profile-action-btn,
+    .user-space-tab,
+    .tui-plus-benefit-card,
+    .tui-plus-plan-card,
+    .tui-plus-action-btn,
+    .post-create-submit-button,
+    .post-create-category-chip,
+    .post-create-channel-option,
+    .ui-sheet-close-button,
+    .ui-sheet-action-button,
+    .ui-dialog-action-btn
   ):active {
     transition-duration:
       var(--ui-press-response-duration),
@@ -96,7 +115,21 @@
       .sponsor-record-tab,
       .detail-bottom-action,
       .post-create-tool-button,
-      .image-upload-toolbar-trigger
+      .image-upload-toolbar-trigger,
+      .app-desktop-nav-item,
+      .app-desktop-post-btn,
+      .app-desktop-ad-rail-card,
+      .profile-action-btn,
+      .user-space-tab,
+      .tui-plus-benefit-card,
+      .tui-plus-plan-card,
+      .tui-plus-action-btn,
+      .post-create-submit-button,
+      .post-create-category-chip,
+      .post-create-channel-option,
+      .ui-sheet-close-button,
+      .ui-sheet-action-button,
+      .ui-dialog-action-btn
     ) {
       transition-duration:
         var(--ui-press-response-duration),
@@ -111,16 +144,26 @@
   .sponsor-record-panel .record-card,
   .transaction-history-page .record-card,
   .promote-history-page .record-card,
-  .promotion-effects-page .record-card {
+  .promotion-effects-page .record-card,
+  .referral-records-page .record-card,
+  .detail-interactions-section .detail-interaction-item {
     content-visibility: auto;
     contain-intrinsic-size: auto var(--ui-record-card-intrinsic-block-size);
+  }
+
+  .messages-list .messages-list-item {
+    content-visibility: auto;
+    contain-intrinsic-size: auto var(--ui-message-item-intrinsic-block-size);
   }
 
   @supports not (content-visibility: auto) {
     .sponsor-record-panel .record-card,
     .transaction-history-page .record-card,
     .promote-history-page .record-card,
-    .promotion-effects-page .record-card {
+    .promotion-effects-page .record-card,
+    .referral-records-page .record-card,
+    .detail-interactions-section .detail-interaction-item,
+    .messages-list .messages-list-item {
       contain-intrinsic-size: auto;
     }
   }

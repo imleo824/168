@@ -23,9 +23,9 @@
   .scrollbar-hide::-webkit-scrollbar { display: none; }
 
   .pressable:active {
-    will-change: auto;
+    will-change: transform;
     backface-visibility: hidden;
-    transform: none;
+    transform: scale(var(--ui-motion-press-scale));
     transition-duration: var(--ui-duration-press);
   }
 
@@ -36,7 +36,7 @@
     }
 
   .pressable:is(.ui-topbar-back-button, .topbar-icon-button):active {
-      transform: none;
+      transform: scale(var(--ui-motion-press-scale));
       filter: var(--ui-filter-none);
       box-shadow: var(--ui-shadow-none);
     }

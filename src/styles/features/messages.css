@@ -136,6 +136,11 @@
     border-radius: var(--ui-radius-pill);
     background: var(--ui-surface-transparent);
     padding: var(--ui-space-none);
+    transition: transform var(--ui-duration-press) var(--ease-standard);
+  }
+
+  .messages-avatar-button:active {
+    transform: scale(var(--ui-motion-press-scale));
   }
 
   .messages-avatar-button--system {

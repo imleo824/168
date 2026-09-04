@@ -34,9 +34,11 @@
     color: var(--ui-text-secondary);
     padding: var(--ui-profile-tab-padding-y) var(--ui-profile-tab-padding-x);
     box-shadow: var(--ui-shadow-none);
-    filter: var(--ui-filter-none);
     overflow: visible;
-    transform: var(--ui-transform-none);
+    transition:
+      color var(--ui-duration-fast) var(--ease-standard),
+      background-color var(--ui-duration-fast) var(--ease-standard),
+      transform var(--ui-duration-press) var(--ease-standard);
   }
 
   .profile-modern-page .ui-segment-tab-icon {
@@ -66,11 +68,10 @@
   .profile-modern-page .ui-segment-tab:active {
     background: var(--ui-state-hover);
     box-shadow: var(--ui-shadow-none);
-    filter: var(--ui-filter-none);
-    transform: var(--ui-transform-none);
+    transform: scale(var(--ui-motion-press-scale));
   }
 
-  .profile-modern-page .ui-segment-tab[aria-selected='true']::after {
+  .profile-modern-page .ui-segment-tab::after {
     content: var(--ui-content-empty);
     position: absolute;
     right: var(--ui-tab-underline-inset, var(--ui-profile-tab-underline-inset));
@@ -79,6 +80,13 @@
     height: var(--ui-tab-underline-height, var(--ui-border-width-hairline));
     border-radius: var(--ui-radius-pill);
     background: var(--ui-tab-underline-color, var(--ui-action-primary));
+    opacity: var(--ui-opacity-hidden);
+    pointer-events: none;
+    transition: opacity var(--ui-duration-fast) var(--ease-standard);
+  }
+
+  .profile-modern-page .ui-segment-tab[aria-selected='true']::after {
+    opacity: var(--ui-opacity-visible);
   }
 
   .profile-modern-page .ui-segment-tab-label {

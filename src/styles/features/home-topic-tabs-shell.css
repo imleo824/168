@@ -111,7 +111,8 @@
     transition:
       background-color var(--ui-duration-fast) var(--ease-standard),
       box-shadow var(--ui-duration-fast) var(--ease-standard),
-      color var(--ui-duration-fast) var(--ease-standard);
+      color var(--ui-duration-fast) var(--ease-standard),
+      transform var(--ui-duration-press) var(--ease-standard);
   }
 
   .home-topic-tab::after {
@@ -128,11 +129,15 @@
     transition: opacity var(--ui-duration-fast) var(--ease-standard);
   }
 
-  .home-topic-tab:hover,
+  .home-topic-tab:hover {
+    background: var(--ui-state-hover);
+    color: var(--ui-text-primary);
+  }
+
   .home-topic-tab:active {
     background: var(--ui-state-hover);
     color: var(--ui-text-primary);
-    transform: var(--ui-transform-none);
+    transform: scale(var(--ui-motion-press-scale));
   }
 
   .home-topic-tab:focus-visible {

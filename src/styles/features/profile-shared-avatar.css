@@ -46,6 +46,11 @@
     box-shadow:
       0 0 0 var(--ui-border-width-hairline) var(--ui-profile-avatar-ring-shadow),
       0 0 0 calc(var(--ui-profile-avatar-ring-gap) + var(--ui-profile-avatar-ring-width)) var(--ui-profile-avatar-ring-surface);
+    transition: transform var(--ui-duration-press) var(--ease-standard);
+  }
+
+  :is(.profile-modern-page, .user-space-page-next) .profile-avatar-button:active {
+    transform: scale(var(--ui-motion-press-scale));
   }
 
   :is(.profile-modern-page, .user-space-page-next) :is(.profile-avatar-button, .user-space-avatar-next)::before {

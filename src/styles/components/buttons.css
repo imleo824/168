@@ -26,7 +26,6 @@
       border-color var(--ui-duration-base) var(--ease-standard),
       color var(--ui-duration-base) var(--ease-standard),
       box-shadow var(--ui-duration-base) var(--ease-standard),
-      filter var(--ui-duration-base) var(--ease-standard),
       opacity var(--ui-duration-base) var(--ease-standard),
       transform var(--ui-duration-press) var(--ease-standard);
     -webkit-tap-highlight-color: var(--ui-tap-highlight-color);
@@ -77,10 +76,6 @@
     background: var(--ui-button-disabled-surface);
     color: var(--ui-text-soft);
     box-shadow: var(--ui-shadow-none);
-  }
-
-  .ui-button:hover:not(:disabled):not([data-action-state='disabled']) {
-    filter: saturate(1.02);
   }
 
   .ui-button[data-action-variant='brand']:hover:not(:disabled),

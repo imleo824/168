@@ -1,18 +1,40 @@
 @layer utilities {
-  .app-desktop-ad-rail-container {
-    position: sticky;
-    top: var(--app-desktop-shell-padding-y);
-    width: 100%;
-    height: var(--app-desktop-shell-content-height);
-    max-height: var(--app-desktop-shell-content-height);
-    display: flex;
-    flex-direction: column;
-    border-radius: var(--ui-radius-2xl, 1rem);
-    background: var(--ui-surface-card);
-    border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
-    box-shadow: var(--ui-shadow-card);
-    overflow: hidden;
-    user-select: none;
+  @media (max-width: 1023px) {
+    .app-shell .app-desktop-ad-rail,
+    .app-shell .app-desktop-ad-rail-container,
+    .app-desktop-ad-rail,
+    .app-desktop-ad-rail-container {
+      display: none;
+      visibility: hidden;
+      pointer-events: none;
+      max-height: var(--ui-space-none);
+      height: var(--ui-space-none);
+      width: var(--ui-space-none);
+      overflow: hidden;
+      margin: var(--ui-space-none);
+      padding: var(--ui-space-none);
+      border: var(--ui-border-none);
+      opacity: var(--ui-opacity-hidden);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .app-desktop-ad-rail-container {
+      position: sticky;
+      top: var(--app-desktop-shell-padding-y);
+      width: 100%;
+      height: var(--app-desktop-shell-content-height);
+      max-height: var(--app-desktop-shell-content-height);
+      display: flex;
+      flex-direction: column;
+      border-radius: var(--ui-radius-2xl, 1rem);
+      background: var(--ui-surface-card);
+      border: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+      box-shadow: var(--ui-shadow-card);
+      overflow: hidden;
+      user-select: none;
+      contain: layout style;
+    }
   }
 
   .app-desktop-ad-rail-header {
@@ -72,13 +94,15 @@
     cursor: pointer;
     overflow: hidden;
     outline: var(--ui-outline-none);
+    transform: translateZ(0);
+    backface-visibility: hidden;
   }
 
   .app-desktop-ad-rail-card:hover {
     background: var(--ui-surface-card);
     border-color: var(--ui-brand-soft, var(--ui-ad-rail-card-hover-border));
     box-shadow: var(--ui-shadow-card-hover);
-    transform: translateY(-1px);
+    transform: translateY(-1px) translateZ(0);
   }
 
   .app-desktop-ad-rail-card:focus-visible {
@@ -87,7 +111,7 @@
   }
 
   .app-desktop-ad-rail-card:active {
-    transform: scale(0.99) translateY(0);
+    transform: scale(0.99) translateY(0) translateZ(0);
   }
 
   .app-desktop-ad-rail-empty {

@@ -232,12 +232,19 @@
     text-align: left;
     transition:
       color var(--ui-duration-base) var(--ease-standard),
-      background-color var(--ui-duration-base) var(--ease-standard);
+      background-color var(--ui-duration-base) var(--ease-standard),
+      transform var(--ui-duration-press) var(--ease-standard);
   }
 
   .detail-quote-item:hover {
     color: var(--ui-text-strong);
     background: var(--ui-quote-item-hover-surface);
+  }
+
+  :is(button, a)[role='button'].detail-quote-item:active,
+  button.detail-quote-item:active,
+  a.detail-quote-item:active {
+    transform: scale(var(--ui-motion-press-scale));
   }
 
   .detail-quote-item-avatar {

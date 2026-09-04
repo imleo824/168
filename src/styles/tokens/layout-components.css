@@ -319,6 +319,10 @@
     --ui-duration-feed-follow-pending-sheen: 900ms;
     --ui-duration-motion-reduced: 0.01ms;
     --ui-spinner-border-width: calc(var(--ui-border-width-hairline) + (var(--ui-border-width-hairline) / 2));
-
+    --ui-record-card-intrinsic-block-size: calc(var(--ui-space-8) * 4);
+    --ui-message-item-intrinsic-block-size: calc(var(--ui-space-8) * 2);
+    --ui-press-response-duration: var(--ui-duration-press);
+    --ui-press-settle-duration: var(--ui-duration-base);
+    --ui-press-color-duration: var(--ui-duration-fast);
   }
 }
