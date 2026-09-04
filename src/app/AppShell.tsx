@@ -22,7 +22,7 @@ import PageContentShell from '@/ui/PageContentShell';
 import AvatarImage from '@/ui/AvatarImage';
 import { warmupNavigationIntent, warmupRoutePath } from '@/utils/routeWarmups';
 import AppBottomNavigation from '@/app/AppBottomNavigation';
-import { AppDesktopAdRail } from '@/app/AppDesktopAdRail';
+import { AppDesktopAuxRail } from '@/app/AppDesktopAuxRail';
 import { AppDesktopSidebar } from '@/app/AppDesktopSidebar';
 import AppRequireAuthRoute from '@/app/AppRequireAuthRoute';
 import AppRequireTuiPlusRoute from '@/app/AppRequireTuiPlusRoute';
@@ -449,7 +449,7 @@ function AppLayout() {
             </Suspense>
           </RecoveryGuard>
         </div>
-        {isUserSurface && isDesktopViewport ? <AppDesktopAdRail /> : null}
+        {isUserSurface && isDesktopViewport ? <AppDesktopAuxRail /> : null}
         {isUserSurface ? <AppBottomNavigation /> : null}
         <GlobalAuthOverlay />
       </div>

@@ -1,9 +1,9 @@
 @layer utilities {
   @media (max-width: 1023px) {
-    .app-shell .app-desktop-ad-rail,
-    .app-shell .app-desktop-ad-rail-container,
-    .app-desktop-ad-rail,
-    .app-desktop-ad-rail-container {
+    .app-shell .app-desktop-aux-rail,
+    .app-shell .app-desktop-aux-rail-container,
+    .app-desktop-aux-rail,
+    .app-desktop-aux-rail-container {
       display: none;
       visibility: hidden;
       pointer-events: none;
@@ -19,7 +19,7 @@
   }
 
   @media (min-width: 1024px) {
-    .app-desktop-ad-rail-container {
+    .app-desktop-aux-rail-container {
       position: sticky;
       top: var(--app-desktop-shell-padding-y);
       width: 100%;
@@ -37,7 +37,7 @@
     }
   }
 
-  .app-desktop-ad-rail-header {
+  .app-desktop-aux-rail-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -46,7 +46,7 @@
     background: var(--ui-surface-weak);
   }
 
-  .app-desktop-ad-rail-tag {
+  .app-desktop-aux-rail-tag {
     display: inline-flex;
     align-items: center;
     gap: var(--ui-space-1);
@@ -57,31 +57,31 @@
     border: var(--ui-border-width-hairline) solid transparent;
   }
 
-  .app-desktop-ad-rail-tag-amber {
-    background: var(--ui-ad-rail-tag-amber-bg);
-    color: var(--ui-ad-rail-tag-amber-color);
-    border-color: var(--ui-ad-rail-tag-amber-border);
+  .app-desktop-aux-rail-tag-amber {
+    background: var(--ui-aux-rail-tag-amber-bg);
+    color: var(--ui-aux-rail-tag-amber-color);
+    border-color: var(--ui-aux-rail-tag-amber-border);
   }
 
-  .app-desktop-ad-rail-tag-rose {
-    background: var(--ui-ad-rail-tag-rose-bg);
-    color: var(--ui-ad-rail-tag-rose-color);
-    border-color: var(--ui-ad-rail-tag-rose-border);
+  .app-desktop-aux-rail-tag-rose {
+    background: var(--ui-aux-rail-tag-rose-bg);
+    color: var(--ui-aux-rail-tag-rose-color);
+    border-color: var(--ui-aux-rail-tag-rose-border);
   }
 
-  .app-desktop-ad-rail-tag-indigo {
-    background: var(--ui-ad-rail-tag-indigo-bg);
-    color: var(--ui-ad-rail-tag-indigo-color);
-    border-color: var(--ui-ad-rail-tag-indigo-border);
+  .app-desktop-aux-rail-tag-indigo {
+    background: var(--ui-aux-rail-tag-indigo-bg);
+    color: var(--ui-aux-rail-tag-indigo-color);
+    border-color: var(--ui-aux-rail-tag-indigo-border);
   }
 
-  .app-desktop-ad-rail-tag-emerald {
-    background: var(--ui-ad-rail-tag-emerald-bg);
-    color: var(--ui-ad-rail-tag-emerald-color);
-    border-color: var(--ui-ad-rail-tag-emerald-border);
+  .app-desktop-aux-rail-tag-emerald {
+    background: var(--ui-aux-rail-tag-emerald-bg);
+    color: var(--ui-aux-rail-tag-emerald-color);
+    border-color: var(--ui-aux-rail-tag-emerald-border);
   }
 
-  .app-desktop-ad-rail-card {
+  .app-desktop-aux-rail-card {
     position: relative;
     padding: var(--ui-space-3);
     border-radius: var(--ui-radius-xl, 0.75rem);
@@ -98,23 +98,23 @@
     backface-visibility: hidden;
   }
 
-  .app-desktop-ad-rail-card:hover {
+  .app-desktop-aux-rail-card:hover {
     background: var(--ui-surface-card);
-    border-color: var(--ui-brand-soft, var(--ui-ad-rail-card-hover-border));
+    border-color: var(--ui-brand-soft, var(--ui-aux-rail-card-hover-border));
     box-shadow: var(--ui-shadow-card-hover);
     transform: translateY(-1px) translateZ(0);
   }
 
-  .app-desktop-ad-rail-card:focus-visible {
+  .app-desktop-aux-rail-card:focus-visible {
     border-color: var(--ui-brand);
     box-shadow: 0 0 0 2px var(--ui-brand-soft);
   }
 
-  .app-desktop-ad-rail-card:active {
+  .app-desktop-aux-rail-card:active {
     transform: scale(0.99) translateY(0) translateZ(0);
   }
 
-  .app-desktop-ad-rail-empty {
+  .app-desktop-aux-rail-empty {
     padding: var(--ui-space-6) var(--ui-space-4);
     text-align: center;
     display: flex;
@@ -127,7 +127,7 @@
     background: var(--ui-surface-weak);
   }
 
-  .app-desktop-ad-rail-empty-icon {
+  .app-desktop-aux-rail-empty-icon {
     width: 3rem;
     height: 3rem;
     border-radius: var(--ui-radius-xl);
@@ -140,7 +140,7 @@
     margin-bottom: var(--ui-space-3);
   }
 
-  .app-desktop-ad-rail-empty-btn {
+  .app-desktop-aux-rail-empty-btn {
     padding: var(--ui-space-2) var(--ui-space-4);
     font-size: var(--ui-text-xs);
     font-weight: var(--ui-font-weight-strong);
@@ -156,11 +156,11 @@
                 transform var(--ui-duration-fast) var(--ease-standard);
   }
 
-  .app-desktop-ad-rail-empty-btn:hover {
+  .app-desktop-aux-rail-empty-btn:hover {
     background: var(--ui-brand-hover);
   }
 
-  .app-desktop-ad-rail-empty-btn:active {
+  .app-desktop-aux-rail-empty-btn:active {
     transform: scale(0.96);
   }
 }

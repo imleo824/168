@@ -585,23 +585,23 @@
     --promote-payment-card-padding: calc(var(--ui-space-3) + var(--ui-space-quarter));
     --promote-category-chip-padding: calc(var(--ui-space-1) + var(--ui-space-half)) calc(var(--ui-space-3) + var(--ui-space-half));
 
-    --ui-ad-rail-tag-amber-bg: color-mix(in srgb, var(--ui-brand) 10%, transparent);
-    --ui-ad-rail-tag-amber-color: var(--ui-brand);
-    --ui-ad-rail-tag-amber-border: color-mix(in srgb, var(--ui-brand) 20%, transparent);
+    --ui-aux-rail-tag-amber-bg: color-mix(in srgb, var(--ui-brand) 10%, transparent);
+    --ui-aux-rail-tag-amber-color: var(--ui-brand);
+    --ui-aux-rail-tag-amber-border: color-mix(in srgb, var(--ui-brand) 20%, transparent);
 
-    --ui-ad-rail-tag-rose-bg: color-mix(in srgb, var(--ui-danger-classic) 10%, transparent);
-    --ui-ad-rail-tag-rose-color: var(--ui-danger-classic);
-    --ui-ad-rail-tag-rose-border: color-mix(in srgb, var(--ui-danger-classic) 20%, transparent);
+    --ui-aux-rail-tag-rose-bg: color-mix(in srgb, var(--ui-danger-classic) 10%, transparent);
+    --ui-aux-rail-tag-rose-color: var(--ui-danger-classic);
+    --ui-aux-rail-tag-rose-border: color-mix(in srgb, var(--ui-danger-classic) 20%, transparent);
 
-    --ui-ad-rail-tag-indigo-bg: color-mix(in srgb, var(--ui-brand) 12%, transparent);
-    --ui-ad-rail-tag-indigo-color: var(--ui-brand);
-    --ui-ad-rail-tag-indigo-border: color-mix(in srgb, var(--ui-brand) 22%, transparent);
+    --ui-aux-rail-tag-indigo-bg: color-mix(in srgb, var(--ui-brand) 12%, transparent);
+    --ui-aux-rail-tag-indigo-color: var(--ui-brand);
+    --ui-aux-rail-tag-indigo-border: color-mix(in srgb, var(--ui-brand) 22%, transparent);
 
-    --ui-ad-rail-tag-emerald-bg: color-mix(in srgb, var(--ui-success) 10%, transparent);
-    --ui-ad-rail-tag-emerald-color: var(--ui-success);
-    --ui-ad-rail-tag-emerald-border: color-mix(in srgb, var(--ui-success) 20%, transparent);
+    --ui-aux-rail-tag-emerald-bg: color-mix(in srgb, var(--ui-success) 10%, transparent);
+    --ui-aux-rail-tag-emerald-color: var(--ui-success);
+    --ui-aux-rail-tag-emerald-border: color-mix(in srgb, var(--ui-success) 20%, transparent);
 
-    --ui-ad-rail-card-hover-border: color-mix(in srgb, var(--ui-brand) 30%, transparent);
+    --ui-aux-rail-card-hover-border: color-mix(in srgb, var(--ui-brand) 30%, transparent);
 
     --ui-desktop-ad-action-bg: color-mix(in srgb, var(--ui-brand) 12%, var(--ui-surface-card));
     --ui-desktop-ad-action-border: color-mix(in srgb, var(--ui-brand) 25%, transparent);

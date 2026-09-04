@@ -24,22 +24,22 @@ import AvatarImage from '@/ui/AvatarImage';
 
 function getPromotionTag(type: string, booking?: PromotionBooking) {
   if (type === PromotionType.AD_HOME) {
-    return { label: '横幅广告', tagClass: 'app-desktop-ad-rail-tag-amber' };
+    return { label: '横幅广告', tagClass: 'app-desktop-aux-rail-tag-amber' };
   }
   if (type === PromotionType.PIN_HOME) {
-    return { label: '热门置顶', tagClass: 'app-desktop-ad-rail-tag-rose' };
+    return { label: '热门置顶', tagClass: 'app-desktop-aux-rail-tag-rose' };
   }
   if (type === PromotionType.PIN_CATEGORY) {
     const categoryName = booking?.post?.category?.name || (booking as any)?.category?.name;
     return {
       label: categoryName ? `${categoryName}置顶` : '分类置顶',
-      tagClass: 'app-desktop-ad-rail-tag-indigo',
+      tagClass: 'app-desktop-aux-rail-tag-indigo',
     };
   }
   if (type === PromotionType.PIN_CHAT) {
-    return { label: '聊天室置顶', tagClass: 'app-desktop-ad-rail-tag-emerald' };
+    return { label: '聊天室置顶', tagClass: 'app-desktop-aux-rail-tag-emerald' };
   }
-  return { label: '精选推广', tagClass: 'app-desktop-ad-rail-tag-amber' };
+  return { label: '精选推广', tagClass: 'app-desktop-aux-rail-tag-amber' };
 }
 
 function formatAdTargetDisplay(raw?: string | null) {
@@ -60,7 +60,7 @@ function formatAdTargetDisplay(raw?: string | null) {
   }
 }
 
-export const AppDesktopAdRail: React.FC = () => {
+export const AppDesktopAuxRail: React.FC = () => {
   const navigate = useNavigate();
   const { data: homeBootstrap } = useHomeBootstrap();
 
@@ -139,11 +139,11 @@ export const AppDesktopAdRail: React.FC = () => {
 
   return (
     <aside
-      className="app-desktop-ad-rail app-desktop-ad-rail-container"
+      className="app-desktop-aux-rail app-desktop-aux-rail-container"
       aria-label="热门推广与广告"
     >
       {/* Rail Header */}
-      <div className="app-desktop-ad-rail-header flex-shrink-0">
+      <div className="app-desktop-aux-rail-header flex-shrink-0">
         <div className="flex items-center gap-2">
           <div className="w-7 h-7 rounded-lg bg-[var(--ui-brand)]/10 flex items-center justify-center text-[var(--ui-brand)]">
             <Flame className="w-4 h-4 fill-[var(--ui-brand)]/20" />
@@ -193,8 +193,8 @@ export const AppDesktopAdRail: React.FC = () => {
           </div>
         ) : !activePromotions || activePromotions.length === 0 ? (
           /* Empty State */
-          <div className="app-desktop-ad-rail-empty">
-            <div className="app-desktop-ad-rail-empty-icon">
+          <div className="app-desktop-aux-rail-empty">
+            <div className="app-desktop-aux-rail-empty-icon">
               <Megaphone className="w-6 h-6" />
             </div>
             <h3 className="text-sm font-semibold text-[var(--ui-text-primary)] mb-1">暂无广告</h3>
@@ -203,7 +203,7 @@ export const AppDesktopAdRail: React.FC = () => {
               type="button"
               onClick={handleSponsorClick}
               onMouseEnter={() => warmupNavigationIntent('sponsor')}
-              className="pressable app-desktop-ad-rail-empty-btn"
+              className="pressable app-desktop-aux-rail-empty-btn"
             >
               <TrendingUp className="w-3.5 h-3.5" />
               <span>我要推广</span>
@@ -235,12 +235,12 @@ export const AppDesktopAdRail: React.FC = () => {
                     warmupRoutePath(`/post/${item.postId}`);
                   }
                 }}
-                className="app-desktop-ad-rail-card group"
+                className="app-desktop-aux-rail-card group"
               >
                 {/* Header Row: Badge & Type */}
                 <div className="flex items-center justify-between mb-2 gap-2">
                   <span
-                    className={`app-desktop-ad-rail-tag ${tag.tagClass}`}
+                    className={`app-desktop-aux-rail-tag ${tag.tagClass}`}
                   >
                     {item.type === PromotionType.AD_HOME ? (
                       <ImageIcon className="w-2.5 h-2.5" />

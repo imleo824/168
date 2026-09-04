@@ -10,7 +10,7 @@
     --app-shell-viewport-width: var(--ui-viewport-width);
     --app-shell-viewport-height: var(--app-layout-vh);
     --app-desktop-sidebar-width: calc(var(--ui-space-8) * 7 + var(--ui-space-4));
-    --app-desktop-ad-rail-width: calc(var(--ui-space-8) * 9 + var(--ui-space-6));
+    --app-desktop-aux-rail-width: calc(var(--ui-space-8) * 9 + var(--ui-space-6));
     --app-desktop-feed-main-width: calc(var(--ui-space-8) * 26);
     --app-desktop-reading-main-width: var(--app-desktop-feed-main-width);
     --app-desktop-detail-main-width: calc(
@@ -35,7 +35,7 @@
     --app-desktop-frame-width: calc(
       var(--app-desktop-sidebar-width) +
       var(--app-desktop-workspace-main-width) +
-      var(--app-desktop-ad-rail-width) +
+      var(--app-desktop-aux-rail-width) +
       (var(--app-desktop-shell-gap) * 2)
     );
     --app-desktop-shell-width: var(--app-desktop-frame-width);
@@ -69,7 +69,7 @@
   }
 
   .app-desktop-sidebar,
-  .app-desktop-ad-rail {
+  .app-desktop-aux-rail {
     display: none;
   }
 
@@ -171,7 +171,7 @@
           calc(
             var(--app-desktop-shell-active-width) -
             var(--app-desktop-sidebar-width) -
-            var(--app-desktop-ad-rail-width) -
+            var(--app-desktop-aux-rail-width) -
             var(--app-desktop-main-side-gap-total) -
             var(--app-desktop-balance-spacer-width)
           )
@@ -180,7 +180,7 @@
       grid-template-columns:
         minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
         minmax(0, var(--app-desktop-main-active-width))
-        minmax(calc(var(--ui-space-8) * 7), var(--app-desktop-ad-rail-width));
+        minmax(calc(var(--ui-space-8) * 7), var(--app-desktop-aux-rail-width));
       gap: var(--app-desktop-shell-gap);
       align-items: start;
       justify-content: center;
@@ -198,7 +198,7 @@
       grid-template-columns:
         minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
         minmax(0, var(--app-desktop-main-active-width))
-        minmax(calc(var(--ui-space-8) * 7), var(--app-desktop-ad-rail-width));
+        minmax(calc(var(--ui-space-8) * 7), var(--app-desktop-aux-rail-width));
     }
 
     .app-shell[data-route-surface='user'] > .ui-layer-header {
@@ -215,7 +215,7 @@
       grid-row: 1;
     }
 
-    .app-shell[data-route-surface='user'] .app-desktop-ad-rail {
+    .app-shell[data-route-surface='user'] .app-desktop-aux-rail {
       grid-column: 3;
       grid-row: 1;
     }
@@ -226,7 +226,7 @@
       grid-template-columns:
         minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
         minmax(0, var(--app-desktop-main-active-width))
-        minmax(calc(var(--ui-space-8) * 7), var(--app-desktop-ad-rail-width));
+        minmax(calc(var(--ui-space-8) * 7), var(--app-desktop-aux-rail-width));
     }
 
     .app-shell[data-route-surface='user']:not([data-desktop-surface='feed'])::after {
@@ -328,7 +328,7 @@
       border-inline-end: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
     }
 
-    .app-desktop-ad-rail {
+    .app-desktop-aux-rail {
       display: flex;
     }
 
@@ -572,7 +572,7 @@
       grid-template-columns:
         minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
         minmax(0, var(--app-desktop-main-active-width))
-        minmax(calc(var(--ui-space-8) * 7), var(--app-desktop-ad-rail-width));
+        minmax(calc(var(--ui-space-8) * 7), var(--app-desktop-aux-rail-width));
       justify-content: center;
     }
 
@@ -582,7 +582,7 @@
       grid-template-columns:
         minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
         minmax(0, var(--app-desktop-main-active-width))
-        minmax(calc(var(--ui-space-8) * 7), var(--app-desktop-ad-rail-width));
+        minmax(calc(var(--ui-space-8) * 7), var(--app-desktop-aux-rail-width));
     }
 
     .app-shell[data-route-surface='user']:not([data-desktop-surface='feed']) {
@@ -591,7 +591,7 @@
       grid-template-columns:
         minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
         minmax(0, var(--app-desktop-main-active-width))
-        minmax(calc(var(--ui-space-8) * 7), var(--app-desktop-ad-rail-width));
+        minmax(calc(var(--ui-space-8) * 7), var(--app-desktop-aux-rail-width));
     }
 
     .app-shell[data-route-surface='user']:not([data-desktop-surface='feed'])::after {
@@ -607,7 +607,7 @@
       grid-template-columns:
         minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
         minmax(0, var(--app-desktop-main-active-width))
-        minmax(calc(var(--ui-space-8) * 7), var(--app-desktop-ad-rail-width));
+        minmax(calc(var(--ui-space-8) * 7), var(--app-desktop-aux-rail-width));
     }
 
     .app-shell[data-route-surface='user']:not([data-desktop-surface='feed'])::after {
