@@ -117,7 +117,7 @@ export class PromotionService {
     const activeTimeWhere = this.buildActiveTimeWhereClause(now);
 
     try {
-      let bookings = await (prisma as any).promotionBooking.findMany({
+      let bookings = await prisma.promotionBooking.findMany({
         where: {
           type: PromotionType.AD_HOME,
           ...activeTimeWhere,
@@ -279,7 +279,7 @@ export class PromotionService {
         plusExpiresAt: true,
       };
 
-      let bookings = await (prisma as any).promotionBooking.findMany({
+      let bookings = await prisma.promotionBooking.findMany({
         where: {
           ...activeTimeWhere,
         },
@@ -295,7 +295,6 @@ export class PromotionService {
                 select: {
                   id: true,
                   name: true,
-                  icon: true,
                 },
               },
             },
@@ -308,7 +307,7 @@ export class PromotionService {
 
       // Broaden query if activeTimeWhere yielded 0 results (e.g. timezone boundaries or platform day differences)
       if (bookings.length === 0) {
-        bookings = await (prisma as any).promotionBooking.findMany({
+        bookings = await prisma.promotionBooking.findMany({
           where: {
             endsAt: { gt: now },
             startsAt: { lte: new Date(now.getTime() + 24 * 3600 * 1000) },
@@ -325,7 +324,6 @@ export class PromotionService {
                   select: {
                     id: true,
                     name: true,
-                    icon: true,
                   },
                 },
               },

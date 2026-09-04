@@ -107,6 +107,8 @@ assert.match(promotionUtils, /export function bookingDefaultEndAt\(targetDate: D
 assert.match(promotionUtils, /return addUtcDays\(new Date\(startAtTime\), 1\)/, 'admin promotion restore must recover the original platform-day end from startsAt');
 assert.match(promotionUtils, /getPlatformDateKeyRange\(targetDate\.toISOString\(\)\.slice\(0, 10\)\)/, 'admin promotion restore fallback must use platform date ranges');
 assert.match(promotionService, /select:\s*\{[\s\S]*targetDate:\s*true,[\s\S]*startsAt:\s*true,[\s\S]*\}[\s\S]*const targetDateEndAt = bookingDefaultEndAt\(new Date\(booking\.targetDate\), booking\.startsAt\)/, 'admin promotion display-state route must load startsAt before restoring display');
+assert.doesNotMatch(promotionService, /icon:\s*true/, 'public promotion queries must not select Category.icon because that field is absent from the Prisma schema');
+assert.match(promotionService, /getAllActivePromotions\(\)[\s\S]*let bookings = await prisma\.promotionBooking\.findMany\(/, 'public active promotions must use the typed Prisma client so invalid selected fields fail at build time');
 
 assert.match(postsRoute, /userType/, 'admin content management must accept an author type filter.');
 assert.match(postsRoute, /normalizeAdminUserTypeFilter\(userType\)/, 'admin content management author type filter must use the shared user type validator.');
