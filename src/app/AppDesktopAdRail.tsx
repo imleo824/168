@@ -86,8 +86,6 @@ export const AppDesktopAdRail: React.FC = () => {
       if (!item) return;
       // Never display fake/fallback ads
       if (String(item.id || '').startsWith('fallback-')) return;
-      // Filter out any expired promotion items
-      if (item.endsAt && new Date(item.endsAt).getTime() <= Date.now()) return;
 
       const dedupeKey = item.postId
         ? `post:${item.postId}`
