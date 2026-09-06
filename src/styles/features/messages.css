@@ -2,6 +2,9 @@
 
 @layer utilities {
   .messages-page {
+    --home-topic-tab-min-height: var(--ui-control-sm);
+    --ui-page-tab-min-height: var(--ui-control-sm);
+    --ui-page-tabs-background: var(--ui-topbar-surface-standard);
     width: 100%;
     min-height: var(--app-layout-vh);
     overflow-x: clip;
@@ -14,16 +17,33 @@
     transform: var(--ui-transform-none);
   }
 
+  .messages-page .messages-topbar {
+    border-bottom: var(--ui-border-none);
+    box-shadow: var(--ui-shadow-none);
+  }
+
   .messages-page .ui-page-tabs-section {
-    position: relative;
+    position: sticky;
+    top: calc(var(--ui-topbar-height) + env(safe-area-inset-top));
+    z-index: var(--ui-z-sticky-tab);
     width: 100%;
     overflow-x: clip;
     overflow-y: visible;
+    background: var(--ui-topbar-surface-standard);
+    padding-top: var(--ui-space-none);
+    padding-bottom: var(--ui-space-1);
+    box-shadow: var(--ui-shadow-none);
   }
 
   .messages-page .messages-tabbar {
     width: 100%;
     max-width: 100%;
+    background: var(--ui-topbar-surface-standard);
+  }
+
+  .messages-page .messages-tabbar .ui-segment-tab {
+    min-height: var(--ui-control-sm);
+    padding: var(--ui-space-1) var(--ui-space-3);
   }
 
   .messages-page .messages-main,
