@@ -128,33 +128,31 @@ function SegmentTabs({
   } as CSSProperties & Record<'--segment-tab-count', number>;
 
   return (
-    <div className="home-topic-tabs-rail">
-      <div
-        ref={tabsListRef}
-        className={`home-topic-tabs-list ui-segment-tabs ${className || ''}`}
-        data-segment-variant={variant}
-        data-segment-labels={showLabels ? 'visible' : 'hidden'}
-        style={tabsStyle}
-        role="tablist"
-        aria-label={ariaLabel}
-      >
-        {items.map((item) => {
-          const itemKey = item.key || item.id || '';
-          const active = itemKey === activeKey;
-          return (
-            <SegmentTabButton
-              key={itemKey}
-              item={item}
-              itemKey={itemKey}
-              active={active}
-              showLabels={showLabels}
-              labelClassName={labelClassName}
-              buttonRef={active ? activeTabButtonRef : undefined}
-              onSelect={onChange}
-            />
-          );
-        })}
-      </div>
+    <div
+      ref={tabsListRef}
+      className={`home-topic-tabs-list ui-segment-tabs ${className || ''}`}
+      data-segment-variant={variant}
+      data-segment-labels={showLabels ? 'visible' : 'hidden'}
+      style={tabsStyle}
+      role="tablist"
+      aria-label={ariaLabel}
+    >
+      {items.map((item) => {
+        const itemKey = item.key || item.id || '';
+        const active = itemKey === activeKey;
+        return (
+          <SegmentTabButton
+            key={itemKey}
+            item={item}
+            itemKey={itemKey}
+            active={active}
+            showLabels={showLabels}
+            labelClassName={labelClassName}
+            buttonRef={active ? activeTabButtonRef : undefined}
+            onSelect={onChange}
+          />
+        );
+      })}
     </div>
   );
 }

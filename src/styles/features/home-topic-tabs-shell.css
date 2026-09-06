@@ -143,7 +143,7 @@
     background: var(--ui-state-selected-soft);
     color: var(--ui-text-strong);
     font-weight: var(--ui-font-weight-strong);
-    border-radius: var(--ui-radius-pill);
+    border-radius: var(--ui-control-radius);
     box-shadow: var(--ui-shadow-none);
   }
 

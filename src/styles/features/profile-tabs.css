@@ -81,7 +81,7 @@
   .profile-modern-page .profile-tabbar .ui-segment-tab[data-active='true']:hover {
     background: var(--ui-state-selected-soft);
     color: var(--ui-text-strong);
-    border-radius: var(--ui-radius-pill);
+    border-radius: var(--ui-control-radius);
     font-weight: var(--ui-font-weight-strong);
     box-shadow: var(--ui-shadow-none);
   }

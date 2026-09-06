@@ -115,7 +115,7 @@
   .ui-page-tabs-bar .ui-segment-tab[data-active='true']:hover {
     background: var(--ui-state-selected-soft);
     color: var(--ui-text-strong);
-    border-radius: var(--ui-radius-pill);
+    border-radius: var(--ui-control-radius);
     font-weight: var(--ui-page-tab-selected-weight, var(--ui-profile-tab-selected-weight, var(--ui-font-weight-strong)));
     box-shadow: var(--ui-shadow-none);
     filter: var(--ui-filter-none);
