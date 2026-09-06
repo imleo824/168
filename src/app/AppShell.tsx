@@ -4,6 +4,7 @@ import { lazy, Suspense, useEffect, useMemo, type ReactNode } from 'react';
 import { ShieldCheck } from 'lucide-react';
 
 import { AuthProvider, useAuth } from '@/context/AuthContext';
+import Home from '@/pages/Home';
 import { useIsDesktopViewport } from '@/hooks/useIsDesktopViewport';
 import { UI_USER_DESKTOP_AUX_RAIL_MIN_WIDTH } from '@/ui/layoutViewport';
 import { useScrollLock } from '@/utils/scrollLock';
@@ -25,8 +26,6 @@ import { useHomeOnlineCount } from '@/features/home/useHomeOnlineCount';
 import { formatOptionalOnlineCount } from '@/features/home/onlinePresence';
 import { OnlinePresenceProvider, useOnlinePresence } from '@/features/home/OnlinePresenceContext';
 import { useConfig, useHomeBootstrap } from '@/hooks/useDataConfig';
-
-const Home = lazy(() => import('@/pages/Home'));
 
 const AuthModal = lazy(() => import('@/features/auth/AuthModal'));
 const AppDesktopAuxRail = lazy(() =>
