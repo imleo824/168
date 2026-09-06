@@ -43,11 +43,12 @@
     --ui-telegram-contact-action-color: var(--ui-social-action-muted);
     --ui-telegram-contact-action-color-hover: var(--ui-social-action);
     --ui-telegram-channel-color: #229ed9;
-    --ui-telegram-channel-surface: color-mix(in srgb, var(--ui-telegram-channel-color) 10%, var(--ui-surface-muted));
-    --ui-telegram-channel-surface-hover: color-mix(in srgb, var(--ui-telegram-channel-color) 18%, var(--ui-surface-muted));
-    --ui-telegram-channel-border: color-mix(in srgb, var(--ui-telegram-channel-color) 24%, var(--ui-line-hairline));
-    --ui-telegram-channel-border-hover: color-mix(in srgb, var(--ui-telegram-channel-color) 40%, var(--ui-line-hairline));
+    --ui-telegram-channel-surface: color-mix(in srgb, var(--ui-telegram-channel-color) 8%, var(--ui-surface-muted));
+    --ui-telegram-channel-surface-hover: color-mix(in srgb, var(--ui-telegram-channel-color) 16%, var(--ui-surface-muted));
+    --ui-telegram-channel-border: color-mix(in srgb, var(--ui-telegram-channel-color) 20%, var(--ui-line-hairline));
+    --ui-telegram-channel-border-hover: color-mix(in srgb, var(--ui-telegram-channel-color) 36%, var(--ui-line-hairline));
     --ui-telegram-channel-icon-surface: color-mix(in srgb, var(--ui-telegram-channel-color) 14%, var(--ui-surface-muted));
+    --ui-telegram-channel-topbar-height: 26px;
     --ui-feed-options-sheet-actions-gap: var(--ui-space-2);
     --ui-feed-options-sheet-overlay-background: color-mix(in srgb, var(--ui-color-black) 10%, transparent);
     --ui-feed-options-sheet-overlay-filter: var(--ui-filter-none);

@@ -53,8 +53,8 @@ export const HomeTopbar = memo(function HomeTopbar({
       target="_blank"
       rel="noopener noreferrer"
       className="home-topbar-channel-action pressable"
-      aria-label="官方频道"
-      title="跳转到 Telegram 官方频道"
+      aria-label="Telegram 官方频道"
+      title="Telegram 官方频道"
     >
       <Send className="home-topbar-channel-icon" aria-hidden="true" />
       <span className="home-topbar-channel-text">官方频道</span>

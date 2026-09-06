@@ -15,13 +15,14 @@
   .home-topbar .ui-topbar-leading-slot.home-topbar-channel-leading-slot,
   .home-topbar .ui-topbar-leading-slot.home-topbar-channel-leading-slot .ui-topbar-slot-item {
     width: auto;
-    min-width: var(--ui-topbar-control-size);
+    min-width: 0;
     max-width: var(--ui-max-width-none);
     overflow: visible;
   }
 
-  .home-topbar .ui-topbar-leading-slot .ui-topbar-slot-item {
-    justify-content: center;
+  .home-topbar .ui-topbar-leading-slot.home-topbar-channel-leading-slot .ui-topbar-slot-item {
+    justify-content: flex-start;
+    align-items: center;
   }
 
   .home-topbar-channel-action {
@@ -29,41 +30,47 @@
     align-items: center;
     gap: var(--ui-space-1);
     height: var(--ui-topbar-control-size);
-    padding-inline: var(--ui-space-2);
-    border-radius: var(--ui-radius-full);
-    background: var(--ui-telegram-channel-surface);
-    border: var(--ui-border-width-hairline) solid var(--ui-telegram-channel-border);
-    color: var(--ui-text-primary);
+    padding-inline: var(--ui-space-1);
+    border-radius: var(--ui-radius-sm);
+    background: var(--ui-surface-transparent);
+    border: var(--ui-border-none);
+    color: var(--ui-text-strong);
     text-decoration: var(--ui-text-decoration-none);
-    font-size: var(--ui-text-xs);
-    font-weight: var(--ui-font-weight-medium);
-    white-space: nowrap;
-    line-height: 1;
-    transition: background-color var(--ui-duration-base) var(--ease-standard),
-                border-color var(--ui-duration-base) var(--ease-standard);
+    transition: color var(--ui-duration-base) var(--ease-standard),
+                background-color var(--ui-duration-base) var(--ease-standard),
+                transform var(--ui-duration-base) var(--ease-standard);
     flex-shrink: 0;
   }
 
   .home-topbar-channel-action:hover {
-    background: var(--ui-telegram-channel-surface-hover);
-    border-color: var(--ui-telegram-channel-border-hover);
+    background: var(--ui-state-hover);
     color: var(--ui-telegram-channel-color);
   }
 
   .home-topbar-channel-action:active {
     transform: scale(var(--ui-motion-press-scale));
+    background: var(--ui-state-pressed);
   }
 
   .home-topbar-channel-icon {
-    width: 13px;
-    height: 13px;
+    width: 14px;
+    height: 14px;
     color: var(--ui-telegram-channel-color);
     flex-shrink: 0;
     transform: translate(-0.5px, 0.5px) rotate(-10deg);
   }
 
   .home-topbar-channel-text {
+    font-size: var(--ui-text-xs);
+    font-weight: var(--ui-font-weight-medium);
+    color: var(--ui-text-secondary);
     letter-spacing: var(--ui-tracking-tight);
+    line-height: var(--ui-line-none);
+    transition: color var(--ui-duration-base) var(--ease-standard);
+  }
+
+  .home-topbar-channel-action:hover .home-topbar-channel-text {
+    color: var(--ui-telegram-channel-color);
   }
 
   .home-topbar-message-icon {
