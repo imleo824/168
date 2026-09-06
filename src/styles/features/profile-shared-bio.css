@@ -37,6 +37,7 @@
     overflow-x: auto;
     overflow-y: hidden;
     scrollbar-width: none;
+    overscroll-behavior-x: contain;
   }
 
   :is(.profile-modern-page, .user-space-page-next) .profile-name-row::-webkit-scrollbar {

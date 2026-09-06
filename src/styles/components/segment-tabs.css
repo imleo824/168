@@ -21,38 +21,59 @@
     -webkit-backdrop-filter: var(--ui-backdrop-filter-none);
   }
 
-  .ui-page-tabs-bar.ui-segment-tabs[data-segment-variant='underline'] {
-    display: grid;
-    grid-template-columns: repeat(var(--segment-tab-count, 1), minmax(0, 1fr));
+  .ui-page-tabs-bar.ui-segment-tabs[data-segment-variant='underline'],
+  .ui-page-tabs-bar.ui-segment-tabs {
+    display: flex;
+    align-items: center;
     width: 100%;
-    min-width: 100%;
-    gap: var(--ui-space-none);
+    min-width: 0;
+    gap: var(--ui-home-topic-tab-gap, calc(var(--ui-space-1) + var(--ui-space-half)));
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-inline: contain;
+    padding: var(--ui-space-none);
+    scroll-padding-inline: var(--ui-space-2);
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+    touch-action: pan-x;
+    -webkit-overflow-scrolling: touch;
     border: var(--ui-border-none);
     border-radius: var(--ui-radius-none);
     background: var(--ui-page-tabs-background, var(--ui-surface-transparent));
-    padding: var(--ui-space-none);
     box-shadow: var(--ui-shadow-none);
+  }
+
+  .ui-page-tabs-bar.ui-segment-tabs::-webkit-scrollbar {
+    display: none;
   }
 
   .ui-page-tabs-bar .ui-segment-tab {
     position: relative;
     display: inline-flex;
-    width: 100%;
-    min-width: 0;
-    min-height: var(--ui-page-tab-min-height, var(--ui-profile-tab-min-height, var(--ui-control-md)));
+    width: auto;
+    min-width: var(--ui-home-topic-tab-min-width, auto);
+    min-height: var(--home-topic-tab-min-height, var(--ui-page-tab-min-height, var(--ui-control-md)));
+    flex: 0 0 auto;
     align-items: center;
     justify-content: center;
+    gap: var(--ui-space-none);
     border: var(--ui-border-none);
     border-radius: var(--ui-radius-none);
     appearance: none;
     -webkit-appearance: none;
     background: var(--ui-surface-transparent);
-    color: var(--ui-text-secondary);
-    padding: var(--ui-page-tab-padding-y, var(--ui-profile-tab-padding-y, var(--ui-space-none))) var(--ui-page-tab-padding-x, var(--ui-profile-tab-padding-x, var(--ui-space-2)));
+    color: var(--ui-home-topic-tab-text, var(--ui-text-secondary));
+    padding: var(--ui-space-none) var(--ui-home-topic-tab-padding-x, calc(var(--ui-space-1) + var(--ui-space-half)));
     font: inherit;
+    font-size: var(--ui-text-sm);
+    font-weight: var(--ui-font-weight-medium);
+    line-height: var(--ui-line-tight);
+    text-align: center;
+    white-space: nowrap;
     box-shadow: var(--ui-shadow-none);
     filter: var(--ui-filter-none);
     overflow: visible;
+    scroll-snap-align: start;
     transform: var(--ui-transform-none);
     transition:
       background-color var(--ui-duration-fast) var(--ease-standard),

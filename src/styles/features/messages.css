@@ -1,6 +1,31 @@
 /* features/messages.css */
 
 @layer utilities {
+  .messages-page {
+    width: 100%;
+    min-height: var(--app-layout-vh);
+    overflow-x: clip;
+    background: var(--ui-surface-page);
+    color: var(--ui-text-primary);
+  }
+
+  .messages-page.ui-page-enter {
+    animation: var(--ui-animation-none);
+    transform: var(--ui-transform-none);
+  }
+
+  .messages-page .ui-page-tabs-section {
+    position: relative;
+    width: 100%;
+    overflow-x: clip;
+    overflow-y: visible;
+  }
+
+  .messages-page .messages-tabbar {
+    width: 100%;
+    max-width: 100%;
+  }
+
   .messages-page .messages-main,
   .notification-settings-page .notification-settings-main {
     display: flex;
@@ -74,6 +99,9 @@
 
   .messages-list {
     display: flex;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
     flex-direction: column;
     gap: calc(var(--ui-space-2) + var(--ui-space-half));
   }
@@ -83,6 +111,7 @@
     display: grid;
     width: 100%;
     min-width: 0;
+    max-width: 100%;
     grid-template-columns: auto auto minmax(0, 1fr);
     align-items: center;
     gap: var(--ui-space-3);
@@ -92,6 +121,7 @@
     padding: calc(var(--ui-space-3) + var(--ui-space-half));
     text-align: left;
     box-shadow: var(--ui-shadow-card);
+    overflow: hidden;
     transition:
       border-color var(--ui-duration-base) var(--ease-standard),
       background-color var(--ui-duration-base) var(--ease-standard),

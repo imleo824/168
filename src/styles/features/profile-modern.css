@@ -4,10 +4,16 @@
   .profile-modern-page {
     --ui-sticky-tab-top: var(--ui-profile-sticky-tab-top);
     z-index: var(--ui-z-page-header);
-
+    width: 100%;
     min-height: var(--app-layout-vh);
+    overflow-x: clip;
     background: var(--ui-surface-page);
     color: var(--ui-text-primary);
+  }
+
+  .profile-modern-page.ui-page-enter {
+    animation: var(--ui-animation-none);
+    transform: var(--ui-transform-none);
   }
 
   .profile-modern-page .profile-modern-main {
