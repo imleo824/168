@@ -72,21 +72,14 @@
   }
 
   .profile-modern-page .ui-segment-tab::after {
-    content: var(--ui-content-empty);
-    position: absolute;
-    right: var(--ui-tab-underline-inset, var(--ui-profile-tab-underline-inset));
-    bottom: var(--ui-space-none);
-    left: var(--ui-tab-underline-inset, var(--ui-profile-tab-underline-inset));
-    height: var(--ui-tab-underline-height, var(--ui-border-width-hairline));
-    border-radius: var(--ui-radius-pill);
-    background: var(--ui-tab-underline-color, var(--ui-action-primary));
-    opacity: var(--ui-opacity-hidden);
-    pointer-events: none;
-    transition: opacity var(--ui-duration-fast) var(--ease-standard);
+    display: none;
+    content: none;
   }
 
   .profile-modern-page .ui-segment-tab[aria-selected='true']::after {
-    opacity: var(--ui-opacity-visible);
+    display: none;
+    content: none;
+    opacity: var(--ui-opacity-hidden);
   }
 
   .profile-modern-page .ui-segment-tab-label {

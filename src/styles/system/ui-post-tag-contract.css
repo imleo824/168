@@ -114,8 +114,7 @@
   .post-inline-tag-link:hover,
   .post-inline-tag-link:active {
     color: var(--ui-link-text);
-    text-decoration: underline;
-    text-underline-offset: var(--ui-space-half);
+    text-decoration: var(--ui-text-decoration-none);
   }
 
   .post-tag-chip:active {
@@ -130,8 +129,7 @@
   .post-inline-tag-link:focus-visible {
     outline: var(--ui-outline-width) solid var(--ui-post-chip-focus-ring);
     outline-offset: var(--ui-space-half);
-    text-decoration: underline;
-    text-underline-offset: var(--ui-space-half);
+    text-decoration: var(--ui-text-decoration-none);
   }
 
   .post-tag-chip :is(span, svg, .x-card-tag-icon) {

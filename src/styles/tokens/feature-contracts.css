@@ -73,7 +73,7 @@
     --ui-page-tab-selected-weight: var(--ui-profile-tab-selected-weight);
     --ui-page-tab-underline-inset: var(--ui-profile-tab-underline-inset);
     --ui-tab-underline-inset: var(--ui-page-tab-underline-inset);
-    --ui-tab-underline-height: var(--ui-border-width-hairline);
+    --ui-tab-underline-height: 0px;
     --ui-tab-underline-color: var(--ui-action-primary);
     --ui-skeleton-brand-lockup-opacity: var(--ui-opacity-visible);
     --ui-touch-tap-highlight-color: var(--ui-color-transparent);

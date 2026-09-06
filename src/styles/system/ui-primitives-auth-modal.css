@@ -353,8 +353,7 @@
     color: var(--ui-action-link);
     font: inherit;
     font-weight: var(--ui-font-weight-strong);
-    text-decoration: underline;
-    text-underline-offset: 0.18em;
+    text-decoration: var(--ui-text-decoration-none);
   }
 
   .ui-auth-agreement-panel {

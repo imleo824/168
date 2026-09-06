@@ -594,7 +594,7 @@
     color: var(--ui-brand);
     font-size: var(--ui-text-2xs);
     font-weight: var(--ui-font-weight-strong);
-    text-decoration: underline;
+    text-decoration: var(--ui-text-decoration-none);
     transition: opacity var(--ui-duration-fast) var(--ease-standard);
   }
 

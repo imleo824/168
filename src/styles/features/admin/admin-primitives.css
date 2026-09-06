@@ -342,7 +342,7 @@
   }
 
   .admin-table-link:hover {
-    text-decoration: underline;
+    text-decoration: var(--ui-text-decoration-none);
   }
 
   .admin-data-copy {

@@ -74,9 +74,7 @@
   .post-comment-list-text .post-comment-content-link {
     color: var(--ui-ins-link-blue);
     font-weight: var(--ui-font-weight-medium);
-    text-decoration: underline;
-    text-decoration-thickness: var(--ui-border-width-hairline);
-    text-underline-offset: var(--ui-space-half);
+    text-decoration: var(--ui-text-decoration-none);
     overflow-wrap: anywhere;
     word-break: break-word;
   }

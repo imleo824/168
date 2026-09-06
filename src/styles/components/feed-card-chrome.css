@@ -93,7 +93,7 @@
   }
 
   .x-card-content-hashtag:hover {
-    text-decoration: underline;
+    text-decoration: var(--ui-text-decoration-none);
   }
 
   .feed-status-dot-ping {

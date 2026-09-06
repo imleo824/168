@@ -82,8 +82,7 @@
   :is(.profile-modern-page, .user-space-page-next) .profile-bio-link:hover,
   :is(.profile-modern-page, .user-space-page-next) .profile-bio-link:focus-visible {
     color: var(--ui-brand-strong);
-    text-decoration: underline;
-    text-underline-offset: var(--ui-space-half);
+    text-decoration: var(--ui-text-decoration-none);
   }
 
   :is(.profile-modern-page, .user-space-page-next) .profile-bio-edit-button {

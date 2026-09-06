@@ -21,7 +21,7 @@
     --ui-profile-tabs-icon-size: var(--ui-control-icon-md);
     --ui-profile-tabs-label-size: var(--ui-text-2xs);
     --ui-profile-tabs-underline-inset: 28%;
-    --ui-profile-tabs-underline-height: calc(var(--ui-border-width-hairline) * 2);
+    --ui-profile-tabs-underline-height: 0px;
     --ui-profile-inline-note-padding: var(--ui-space-2) var(--ui-page-padding-x) calc(var(--ui-space-2) + var(--ui-space-half));
     --ui-profile-edit-action-height: var(--ui-header-filter-height);
     --ui-profile-user-row-padding-y: var(--ui-space-3);

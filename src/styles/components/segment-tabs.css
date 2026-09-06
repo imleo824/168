@@ -92,8 +92,9 @@
   .ui-page-tabs-bar .ui-segment-tab[data-active='true'],
   .ui-page-tabs-bar .ui-segment-tab[aria-selected='true']:hover,
   .ui-page-tabs-bar .ui-segment-tab[data-active='true']:hover {
-    background: var(--ui-surface-transparent);
+    background: var(--ui-state-selected-soft);
     color: var(--ui-text-strong);
+    border-radius: var(--ui-radius-pill);
     font-weight: var(--ui-page-tab-selected-weight, var(--ui-profile-tab-selected-weight, var(--ui-font-weight-strong)));
     box-shadow: var(--ui-shadow-none);
     filter: var(--ui-filter-none);
@@ -106,15 +107,8 @@
 
   .ui-page-tabs-bar .ui-segment-tab[aria-selected='true']::after,
   .ui-page-tabs-bar .ui-segment-tab[data-active='true']::after {
-    content: var(--ui-content-empty);
-    position: absolute;
-    right: var(--ui-tab-underline-inset, var(--ui-page-tab-underline-inset, var(--ui-profile-tab-underline-inset, var(--ui-segment-tab-indicator-inset, var(--ui-space-3)))));
-    bottom: var(--ui-space-none);
-    left: var(--ui-tab-underline-inset, var(--ui-page-tab-underline-inset, var(--ui-profile-tab-underline-inset, var(--ui-segment-tab-indicator-inset, var(--ui-space-3)))));
-    height: var(--ui-tab-underline-height, var(--ui-border-width-hairline));
-    border-radius: var(--ui-radius-pill);
-    background: var(--ui-tab-underline-color, var(--ui-action-primary));
-    pointer-events: none;
+    display: none;
+    content: none;
   }
 
   .ui-page-tabs-bar .ui-segment-tab-label {

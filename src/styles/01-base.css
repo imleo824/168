@@ -99,6 +99,11 @@
   a {
     touch-action: manipulation;
     -webkit-tap-highlight-color: var(--ui-tap-highlight-color);
+    text-decoration: var(--ui-text-decoration-none);
+  }
+
+  :is(a, button, [role='tab']):is(:hover, :focus, :focus-visible, :active) {
+    text-decoration: var(--ui-text-decoration-none);
   }
 
   button {
