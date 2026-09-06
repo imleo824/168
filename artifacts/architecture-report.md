@@ -1,6 +1,6 @@
 # Architecture Debt Report
 
-Generated at: 2026-08-31T13:38:29.481Z
+Generated at: 2026-09-06T06:59:50.521Z
 
 This report is generated from the project architecture audit scripts. It is intended to guide refactors and ratchet architecture baselines downward over time.
 
@@ -8,15 +8,15 @@ This report is generated from the project architecture audit scripts. It is inte
 
 | Audit | Status | Duration | Command |
 |---|---:|---:|---|
-| API Contract Audit | PASS | 306ms | `node scripts/api-contract-audit.mjs` |
-| Code Quality Audit | PASS | 439ms | `node scripts/code-quality-audit.mjs` |
-| Dead Code Audit | PASS | 337ms | `node scripts/dead-code-audit.mjs` |
-| Cache Policy Audit | PASS | 75ms | `node scripts/cache-policy-audit.mjs` |
-| Observability Audit | PASS | 74ms | `node scripts/observability-audit.mjs` |
-| Database Schema Audit | PASS | 4534ms | `node scripts/db-schema-audit.mjs` |
-| Bootstrap Boundary Guard | PASS | 79ms | `node scripts/bootstrap-boundary-guard.mjs` |
+| API Contract Audit | PASS | 299ms | `node scripts/api-contract-audit.mjs` |
+| Code Quality Audit | PASS | 419ms | `node scripts/code-quality-audit.mjs` |
+| Dead Code Audit | PASS | 390ms | `node scripts/dead-code-audit.mjs` |
+| Cache Policy Audit | PASS | 90ms | `node scripts/cache-policy-audit.mjs` |
+| Observability Audit | PASS | 76ms | `node scripts/observability-audit.mjs` |
+| Database Schema Audit | PASS | 4884ms | `node scripts/db-schema-audit.mjs` |
+| Bootstrap Boundary Guard | PASS | 83ms | `node scripts/bootstrap-boundary-guard.mjs` |
 | Route Boundary Guard | PASS | 116ms | `node scripts/route-boundary-guard.mjs` |
-| Frontend API Boundary Guard | PASS | 210ms | `node scripts/frontend-api-boundary-guard.mjs` |
+| Frontend API Boundary Guard | PASS | 218ms | `node scripts/frontend-api-boundary-guard.mjs` |
 
 ## Details
 
@@ -28,21 +28,9 @@ Status: **PASS**
 
 === API Contract Audit ===
 Frontend API literals: 108
-Server API route literals: 182
+Server API route literals: 183
 
-Potential frontend API endpoints without an exact server shape:
-  - ANY    /api/notifications/feed-counts${suffix                 src/services/api.ts:228, src/services/homeStartupApi.ts:70
-  - ANY    /api/notifications/home-summary${suffix                src/services/api.ts:232, src/services/homeStartupApi.ts:75
-  - ANY    /api/posts/:param/likes${suffix                        src/services/api.ts:261
-  - ANY    /api/promotions/chat-ads                               src/services/api.ts:313, src/services/apiCore.ts:42
-  - ANY    /api/me/promotion-effects${suffix                      src/services/api.ts:323
-
-Write routes that deserve manual auth review:
-  - POST   /api/internal/deposit-sweep-transactions/:param/complete server/routes/admin-deposit.routes.ts:112
-  - POST   /api/rum/web-vitals                                    server/routes/rum.routes.ts:11
-
-Reserved API prefix violations:
-  - requires=adminOnly USE    /api/admin                                             server/routes/admin-middleware.routes.ts:6
+No obvious frontend/server API shape gaps found.
 
 Server route inventory:
   USE    /api/admin                                             server/routes/admin-middleware.routes.ts:6
@@ -135,8 +123,8 @@ Server route inventory:
   GET    /api/config                                            server/routes/config.routes.ts:236
   GET    /api/health                                            server/routes/health.routes.ts:107
   GET    /api/home/bootstrap                                    server/routes/config.routes.ts:254
-  GET    /api/home/feed                                         server/routes/feed.routes.ts:284
-  GET    /api/home/first-screen                                 server/routes/feed.routes.ts:148
+  GET    /api/home/feed                                         server/routes/feed.routes.ts:337
+  GET    /api/home/first-screen                                 server/routes/feed.routes.ts:173
   GET    /api/internal/deposit-sweep-jobs/next                  server/routes/admin-deposit.routes.ts:105
   POST   /api/internal/deposit-sweep-transactions/:param/complete server/routes/admin-deposit.routes.ts:112
   POST   /api/internal/deposit-sweep-transactions/:param/fail   server/routes/admin-deposit.routes.ts:125
@@ -160,8 +148,8 @@ Server route inventory:
   PUT    /api/me/password                                       server/routes/account-settings.routes.ts:74
   PUT    /api/me/payment-password                               server/routes/account-settings.routes.ts:97
   PATCH  /api/me/profile                                        server/routes/account-settings.routes.ts:138
-  GET    /api/me/promotion-effects                              server/routes/promotion.routes.ts:58
-  GET    /api/me/promotions                                     server/routes/promotion.routes.ts:52
+  GET    /api/me/promotion-effects                              server/routes/promotion.routes.ts:64
+  GET    /api/me/promotions                                     server/routes/promotion.routes.ts:58
   GET    /api/me/transactions                                   server/routes/billing.routes.ts:43
   GET    /api/notification-preferences                          server/routes/notification-preference.routes.ts:32
   PATCH  /api/notification-preferences                          server/routes/notification-preference.routes.ts:38
@@ -184,16 +172,16 @@ Server route inventory:
   GET    /api/posts/contact-eligibility                         server/routes/post-create.routes.ts:90
   GET    /api/posts/following                                   server/routes/post-read.routes.ts:46
   POST   /api/posts/views                                       server/routes/post-read.routes.ts:200
-  POST   /api/promotion/book-batch                              server/routes/promotion.routes.ts:72
+  POST   /api/promotion/book-batch                              server/routes/promotion.routes.ts:78
 
 Summary: {
   "frontendApiCount": 108,
-  "serverRouteCount": 182,
-  "potentialFrontendGaps": 5,
+  "serverRouteCount": 183,
+  "potentialFrontendGaps": 0,
   "duplicateServerRoutes": 0,
   "deprecatedEndpointUsages": 0,
-  "writeRoutesNeedingManualAuthReview": 2,
-  "reservedPrefixViolations": 1
+  "writeRoutesNeedingManualAuthReview": 0,
+  "reservedPrefixViolations": 0
 }
 ```
 
@@ -204,11 +192,11 @@ Status: **PASS**
 ```txt
 
 === Code Quality Audit ===
-Files scanned: 775
-Findings: errors=0 warnings=7 info=0
+Files scanned: 796
+Findings: errors=0 warnings=8 info=0
 
 Findings by rule:
-  [warn] large-source-file: 7 — Large source file that should be split or justified: 1102 lines > 900
+  [warn] large-source-file: 8 — Large source file that should be split or justified: 1107 lines > 900
     server/bootstrap.ts:1
     server/promotion.service.ts:1
     server/routes/seo-fallback.routes.ts:1
@@ -216,6 +204,7 @@ Findings by rule:
     server/services/post/index.ts:1
     src/features/admin/AdminPage.tsx:1
     src/features/post-create/PostCreatePage.tsx:1
+    src/styles/features/recharge.css:1
 
 Review target: resolve error-level findings immediately, triage warning-level findings, and keep informational markers from becoming stale.
 ```
@@ -227,19 +216,22 @@ Status: **PASS**
 ```txt
 
 === Dead Code Audit ===
-Files scanned: 477
-Potential orphan files: 8
-Duplicate basenames: 4
-Potential unused named exports: 567
+Files scanned: 479
+Potential orphan files: 11
+Duplicate basenames: 5
+Potential unused named exports: 576
 
 Potential orphan files requiring manual verification:
   - server/chat/chat.admin.routes.ts
   - server/chat/chat.bot.service.ts
   - server/chat/chat.gateway.ts
   - server/chat/chat.routes.ts
+  - src/features/notifications/PushNotificationSetting.tsx
   - src/features/post-create/postCreateSheets.tsx
   - src/hooks/useData.ts
   - src/services/adminApi.ts
+  - src/ui/ProfileIconButton.tsx
+  - src/ui/PublishIconButton.tsx
   - src/utils/postCreateFocusBridge.ts
 
 Duplicate basenames that can confuse imports and ownership:
@@ -247,6 +239,7 @@ Duplicate basenames that can confuse imports and ownership:
   - accountCredentials: shared/accountCredentials.ts, src/utils/accountCredentials.ts
   - referral: shared/referral.ts, src/services/referral.ts
   - tuiPlusBenefits: shared/tuiPlusBenefits.mjs, src/features/tui-plus/tuiPlusBenefits.ts
+  - adminApi: src/features/admin/services/adminApi.ts, src/services/adminApi.ts
 
 Potential unused named exports requiring manual verification:
   - server/chat/chat.admin.routes.ts: registerChatAdminRoutes
@@ -268,6 +261,7 @@ Potential unused named exports requiring manual verification:
   - server/chat/chat.types.ts: ChatEligibilityReason
   - server/config.service.ts: parseLocationPresetsForSave
   - server/config.service.ts: parseFeedRankProfileForSave
+  - server/db.ts: prisma
   - server/http/pagination.ts: CursorPaginationOptions
   - server/http/pagination.ts: CursorPaginationResult
   - server/http/pagination.ts: CursorPaginationHeaders
@@ -368,8 +362,7 @@ Potential unused named exports requiring manual verification:
   - server/services/auto-post.config.ts: AutoPostConfig
   - server/services/auto-post.config.ts: AutoPostTopicConfig
   - server/services/auto-post.service.ts: buildAutoPostContentHash
-  - server/services/auto-post.service.ts: cleanupExpiredAutoPostRuns
-  ... 447 more
+  ... 456 more
 
 Review target: verify candidates before deletion. This audit is intentionally advisory because dynamic imports, route registration, and generated references can produce false positives.
 ```
@@ -409,22 +402,22 @@ Status: **PASS**
 === Database Schema Audit ===
 Models: 41
 Enums: 15
-Source files scanned: 571
+Source files scanned: 574
 
 No critical API SLO index gaps detected.
 
 Model usage inventory:
-  Post                         refs= 365 delegate= 56 files=scripts/security-guards.mjs(21), server/routes/admin-report.routes.ts(19), server/services/comment-publish-v8.service.ts(16), +64
-  User                         refs= 305 delegate= 35 files=server/routes/admin-report.routes.ts(52), server/routes/health.routes.ts(21), server/services/tui-plus.service.ts(16), +59
-  Category                     refs=  85 delegate= 23 files=src/features/home/HomeTopicTabs.tsx(10), server/services/auto-crawl.service.ts(6), src/hooks/useHomeCategoryState.ts(5), +37
-  AutoCrawlItem                refs=  79 delegate=  0 files=server/services/auto-crawl.service.ts(41), server/services/auto-crawl-fetch-parse.service.ts(11), server/services/auto-crawl-recovery.service.ts(8), +7
-  AutoCrawlSource              refs=  71 delegate=  0 files=server/services/auto-crawl.service.ts(28), server/services/tui-plus-channel.service.ts(8), server/services/tui-plus-entitlements.service.ts(8), +6
+  Post                         refs= 370 delegate= 57 files=scripts/security-guards.mjs(21), server/routes/admin-report.routes.ts(19), server/services/post/index.ts(17), +65
+  User                         refs= 306 delegate= 35 files=server/routes/admin-report.routes.ts(52), server/routes/health.routes.ts(21), server/services/tui-plus.service.ts(16), +60
+  Category                     refs=  87 delegate= 23 files=src/features/home/HomeTopicTabs.tsx(10), server/services/auto-crawl.service.ts(6), src/hooks/useHomeCategoryState.ts(5), +39
+  AutoCrawlSource              refs=  69 delegate=  0 files=server/services/auto-crawl.service.ts(26), server/services/tui-plus-channel.service.ts(8), server/services/tui-plus-entitlements.service.ts(8), +6
+  AutoCrawlItem                refs=  69 delegate=  0 files=server/services/auto-crawl.service.ts(29), server/services/auto-crawl-fetch-parse.service.ts(13), server/services/auto-crawl-recovery.service.ts(8), +7
   PostComment                  refs=  60 delegate=  1 files=server/routes/post-comments.routes.ts(12), server/services/comment-publish-v8.service.ts(12), server/services/quote-publish-v5.service.ts(10), +11
   Like                         refs=  43 delegate=  8 files=server/services/post/trusted-engagement-aggregate.ts(8), server/services/auto-like.service.ts(6), scripts/security-guards.mjs(6), +12
+  PromotionBooking             refs=  41 delegate=  4 files=src/features/promote/promotionDisplayUtils.ts(7), src/app/AppDesktopAuxRail.tsx(6), scripts/security-guards.mjs(5), +10
   PostEngagementAggregate      refs=  36 delegate=  1 files=server/services/post/post-engagement.ts(14), server/services/post/trusted-engagement-aggregate.ts(14), server/services/post/post-ranking-maintenance.ts(2), +4
   AutoCrawlConfig              refs=  34 delegate=  0 files=server/services/auto-crawl.service.ts(20), server/routes/auto-crawl.routes.ts(4), src/features/admin/AdminAutoCrawlPanel.tsx(3), +4
   AutoCrawlRun                 refs=  34 delegate=  0 files=server/services/auto-crawl.service.ts(10), server/services/auto-crawl-runtime-status.service.ts(8), server/services/auto-crawl-execution-log.service.ts(4), +5
-  PromotionBooking             refs=  32 delegate=  1 files=src/features/promote/promotionDisplayUtils.ts(7), scripts/security-guards.mjs(5), src/services/api.ts(4), +8
   PostRankingScore             refs=  29 delegate=  9 files=scripts/main-chain-schema-guards.mjs(6), scripts/feed-performance-guards.mjs(4), scripts/feed-module-guards.mjs(3), +10
   Order                        refs=  27 delegate= 19 files=server/services/deposit-scanner.service.ts(7), server/services/admin-deposit.service.ts(6), server/routes/billing.routes.ts(4), +5
   SystemConfig                 refs=  27 delegate=  7 files=scripts/deploy-main-schema.mjs(8), server/config.service.ts(2), server/routes/health.routes.ts(2), +11
@@ -490,7 +483,7 @@ Fields with low code signal; these are cleanup candidates only after runtime/dat
 Summary: {
   "modelCount": 41,
   "enumCount": 15,
-  "sourceFileCount": 571,
+  "sourceFileCount": 574,
   "criticalIndexFindings": 0,
   "lowSignalModelCount": 3,
   "lowSignalFieldCount": 17
@@ -506,12 +499,13 @@ Status: **PASS**
 === Bootstrap Boundary Guard ===
 Boundary config: config/architecture-boundaries.json#bootstrap
 Allowed top-level concerns: environment loading, express app creation, security middleware composition, route module registration, scheduler startup, http server startup
-server/bootstrap.ts lines: 1102 / 1315
+server/bootstrap.ts lines: 1107 / 1102
 server/bootstrap.ts /api route literals: 0 / 0
 server/bootstrap.ts direct app route calls: 0 / 0
 server/bootstrap.ts inline Prisma business-operation hints: 5
 
-No bootstrap boundary growth detected.
+Boundary violations:
+  - server/bootstrap.ts has 1107 lines, baseline max is 1102. Move new code into route/service modules.
 
 Refactor target: reduce config/architecture-boundaries.json#bootstrap after each route extraction until bootstrap only composes modules.
 ```
@@ -525,8 +519,8 @@ Status: **PASS**
 === Route Boundary Guard ===
 Boundary config: config/architecture-boundaries.json#routes
 Route files scanned: 46
-Route files with direct Prisma business queries: 19 / 6
-Route files with large handlers: 1 / 2
+Route files with direct Prisma business queries: 19 / 19
+Route files with large handlers: 1 / 1
 Route files with local HTTP helper redefinitions: 0 / 0
 Route files starting background schedulers: 0 / 0
 Account route implementation leaks: 0 / 0
@@ -607,12 +601,12 @@ Route file inventory:
   server/routes/account-settings.routes.ts
     routes=7 prismaOps=0 transactions=0 localHttpHelpers=0 schedulerStartups=0 accountImplementationLeaks=0 accountAggregatorRoutes=0
     sample=GET /api/me/feed-muted-categories | PATCH /api/me/feed-muted-categories | PUT /api/me/login-account | PUT /api/me/password | PUT /api/me/payment-password | PUT /api/me/bio | PATCH /api/me/profile
+  server/routes/promotion.routes.ts
+    routes=7 prismaOps=0 transactions=0 localHttpHelpers=0 schedulerStartups=0 accountImplementationLeaks=0 accountAggregatorRoutes=0
+    sample=GET /api/promotion/slots-batch | GET /api/promotions/home-ads | GET /api/promotions/active | GET /api/me/promotions | GET /api/me/promotion-effects | POST /api/promotion/book-batch | PUT /api/promotion/bookings/:id/ad-creative
   server/routes/admin-comment-publish.routes.ts
     routes=6 prismaOps=0 transactions=0 localHttpHelpers=0 schedulerStartups=0 accountImplementationLeaks=0 accountAggregatorRoutes=0
     sample=GET /api/admin/comment-publish/config | GET /api/admin/comment-publish/status | GET /api/admin/comment-publish/stats | GET /api/admin/comment-publish/runs | PATCH /api/admin/comment-publish/config | POST /api/admin/comment-publish/run-now
-  server/routes/promotion.routes.ts
-    routes=6 prismaOps=0 transactions=0 localHttpHelpers=0 schedulerStartups=0 accountImplementationLeaks=0 accountAggregatorRoutes=0
-    sample=GET /api/promotion/slots-batch | GET /api/promotions/home-ads | GET /api/me/promotions | GET /api/me/promotion-effects | POST /api/promotion/book-batch | PUT /api/promotion/bookings/:id/ad-creative
   server/routes/quote-publish.routes.ts
     routes=6 prismaOps=0 transactions=0 localHttpHelpers=0 schedulerStartups=0 accountImplementationLeaks=0 accountAggregatorRoutes=0
     sample=GET /api/admin/quote-publish/config | GET /api/admin/quote-publish/status | GET /api/admin/quote-publish/stats | GET /api/admin/quote-publish/runs | PATCH /api/admin/quote-publish/config | POST /api/admin/quote-publish/run-now
@@ -669,8 +663,7 @@ Route file inventory:
   server/routes/public-feed-response.ts
     routes=0 prismaOps=0 transactions=0 localHttpHelpers=0 schedulerStartups=0 accountImplementationLeaks=0 accountAggregatorRoutes=0
 
-Boundary violations:
-  - route files with direct Prisma business queries=19, baseline max=6
+No route boundary growth detected.
 
 Refactor target: move route-level Prisma work into server/services or server/repositories, keep HTTP params/pagination in server/http helpers, keep background schedulers in startup modules, then lower config/architecture-boundaries.json#routes. Keep persistence and crypto implementation out of all server/routes/account*.routes.ts modules, and keep account.routes.ts as a submodule aggregator only.
 ```
@@ -683,29 +676,20 @@ Status: **PASS**
 
 === Frontend API Boundary Guard ===
 Boundary config: config/architecture-boundaries.json#frontendApi
-Files containing /api literals: 20
+Files containing /api literals: 21
 Files outside allowed API layers: 11 / 11
-API literals outside allowed API layers: 90 / 90
+API literals outside allowed API layers: 47 / 47
 
 Frontend files to migrate toward src/services/api.ts or feature service layers:
-  src/features/admin/AdminPage.tsx
-    line  116 /api/admin/config
-    line  140 /api/config
-    line  141 /api/categories
-    line  142 /api/home/bootstrap
-    line  187 /api/admin/ops-report
-    line  214 /api/admin/deposit-addresses/stats
-    line  227 /api/admin/deposit-addresses
-    line  247 /api/admin/deposit-addresses/${id}
   src/features/admin/AdminAutoCrawlPanel.tsx
-    line  119 /api/admin/auto-crawl/config
-    line  134 /api/admin/auto-crawl/config
-    line  192 /api/admin/auto-crawl/sources/${editingSourceId}
-    line  192 /api/admin/auto-crawl/sources
-    line  229 /api/admin/auto-crawl/sources/${source.id}
-    line  249 /api/admin/auto-crawl/sources/${source.id}
-    line  119 /api/admin/auto-crawl/config
-    line  134 /api/admin/auto-crawl/config
+    line  121 /api/admin/auto-crawl/config
+    line  136 /api/admin/auto-crawl/config
+    line  194 /api/admin/auto-crawl/sources/${editingSourceId}
+    line  194 /api/admin/auto-crawl/sources
+    line  231 /api/admin/auto-crawl/sources/${source.id}
+    line  256 /api/admin/auto-crawl/sources/${source.id}
+    line  121 /api/admin/auto-crawl/config
+    line  136 /api/admin/auto-crawl/config
   src/features/admin/AdminModelConfigPanel.tsx
     line   33 /api/admin/comment-publish/config
     line   34 /api/admin/quote-publish/config
@@ -741,14 +725,16 @@ Frontend files to migrate toward src/services/api.ts or feature service layers:
     line   41 /api/admin/quote-publish/config
     line   44 /api/admin/quote-publish/config
   src/features/admin/AdminReferralWithdrawalPanel.tsx
-    line   74 /api/admin/referral-withdrawals?${params.toString()}
-    line  101 /api/admin/referral-withdrawals/${item.id}
-    line   74 /api/admin/referral-withdrawals?${params.toString()}
-    line  101 /api/admin/referral-withdrawals/${item.id}
+    line   76 /api/admin/referral-withdrawals?${params.toString()}
+    line  113 /api/admin/referral-withdrawals/${item.id}
+    line   76 /api/admin/referral-withdrawals?${params.toString()}
+    line  113 /api/admin/referral-withdrawals/${item.id}
   src/features/admin/AdminInteractionConfigPanel.tsx
     line  172 /api/admin/${module}/runs?limit=20
     line  190 /api/admin/${module}/run-now
     line  190 /api/admin/${module}/run-now
+  src/features/admin/AdminPage.tsx
+    line  673 /api/admin
   src/platform/rum.ts
     line   10 /api/rum/web-vitals
 

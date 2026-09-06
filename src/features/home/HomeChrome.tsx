@@ -17,11 +17,15 @@ import type {
 import { formatOptionalOnlineCount } from '@/features/home/onlinePresence';
 import { HomeTopbar } from '@/features/home/HomeTopbar';
 import { HomeTopicTabs, type HomeTopicTabId, type HomeTopicTabsBootstrapState } from './HomeTopicTabs';
-import { HomeStructuredFilterSheet } from './HomeStructuredFilterSheet';
 import type { HomeStructuredFilterFieldItem } from './homeStructuredFilterUtils';
 import type { HomeVisualState } from './homeTypes';
 
 const LazyHomeAdBanner = lazy(() => import('@/features/feed/HomeAdBanner'));
+const LazyHomeStructuredFilterSheet = lazy(() =>
+  import('./HomeStructuredFilterSheet').then((module) => ({
+    default: module.HomeStructuredFilterSheet,
+  })),
+);
 
 interface HomeChromeProps {
   homeAds: PromotionBooking[];
@@ -108,16 +112,20 @@ export const HomeChrome = memo(function HomeChrome({
         />
       </div>
 
-      <HomeStructuredFilterSheet
-        open={isTopicFilterOpen}
-        tabId={activeHomeTopicTabId}
-        schema={activeHomeTopicFilterSchema}
-        value={activeHomeTopicCategoryMetaFilters}
-        locationPresets={locationPresets}
-        focusFieldKey={topicFilterFocusFieldKey}
-        onClose={handleCloseTopicFilter}
-        onApply={onHomeTopicCategoryMetaFilterApply}
-      />
+      {isTopicFilterOpen ? (
+        <Suspense fallback={null}>
+          <LazyHomeStructuredFilterSheet
+            open={isTopicFilterOpen}
+            tabId={activeHomeTopicTabId}
+            schema={activeHomeTopicFilterSchema}
+            value={activeHomeTopicCategoryMetaFilters}
+            locationPresets={locationPresets}
+            focusFieldKey={topicFilterFocusFieldKey}
+            onClose={handleCloseTopicFilter}
+            onApply={onHomeTopicCategoryMetaFilterApply}
+          />
+        </Suspense>
+      ) : null}
     </>
   );
 });

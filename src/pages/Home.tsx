@@ -596,11 +596,6 @@ export default function Home() {
         validDiscoverCategoryId={activeHomeCategorySlug || 'all'}
         categories={categories}
       />
-      <section className="sr-only" aria-label="页面概要">
-        <h1>推推 | 圈内最大的匿名社交分类信息网</h1>
-        <h2>新闻快讯、招聘求职、资源合作、房屋租赁、证件护照信息聚合</h2>
-        <h3>实时更新的分类生活信息平台，支持发布、浏览与快速互动</h3>
-      </section>
       <ListReturnScrollRestorer
         scope={listReturnScope}
         ready={!showInitialLoading && !shouldLockHomeChromeOpen}

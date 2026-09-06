@@ -6,11 +6,12 @@ import { APP_ROUTES } from '@/app/routePaths';
 import { useAuth } from '@/context/AuthContext';
 import { PostOptionsMenu } from '@/features/post/AnchoredActionMenu';
 import PostMediaGrid from '@/features/post/PostMediaGrid';
-import PostCommentSheet from '@/features/post/PostCommentSheet';
-import PostQuoteSheet from '@/features/post/PostQuoteSheet';
 import QuotedPostPreviewCard from '@/features/post/QuotedPostPreviewCard';
-import TelegramSyncConfirmSheet from '@/features/post/TelegramSyncConfirmSheet';
 import { HashtagText } from '@/features/post/HashtagText';
+
+const PostCommentSheet = React.lazy(() => import('@/features/post/PostCommentSheet'));
+const PostQuoteSheet = React.lazy(() => import('@/features/post/PostQuoteSheet'));
+const TelegramSyncConfirmSheet = React.lazy(() => import('@/features/post/TelegramSyncConfirmSheet'));
 import { useDelayedHoverAction } from '@/hooks/useDelayedHoverAction';
 import { useActionLock } from '@/hooks/useActionLock';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
@@ -716,9 +717,21 @@ const PostCard = memo(function PostCard({ post: inputPost, isOwner = false, show
           </div>
         </div>
       </article>
-      <PostCommentSheet open={isCommentSheetOpen} postId={postId} commentCount={localCommentCount} onCommentCountChange={handleCommentCountChange} onClose={handleCloseCommentSheet} />
-      <PostQuoteSheet open={isQuoteSheetOpen} quoteCount={quoteCount} targetPost={resolvedPost} onClose={handleCloseQuoteSheet} />
-      <TelegramSyncConfirmSheet open={isTelegramSyncConfirmOpen} channelUrl={telegramChannelUrl} isSubmitting={telegramSyncLock.isPending} isInsufficientBalance={telegramSyncPrice > 0 && currentPoints < telegramSyncPrice} telegramSyncPrice={telegramSyncPrice} onConfirm={handleConfirmTelegramSync} onClose={handleCloseTelegramSyncConfirm} />
+      {isCommentSheetOpen ? (
+        <React.Suspense fallback={null}>
+          <PostCommentSheet open={isCommentSheetOpen} postId={postId} commentCount={localCommentCount} onCommentCountChange={handleCommentCountChange} onClose={handleCloseCommentSheet} />
+        </React.Suspense>
+      ) : null}
+      {isQuoteSheetOpen ? (
+        <React.Suspense fallback={null}>
+          <PostQuoteSheet open={isQuoteSheetOpen} quoteCount={quoteCount} targetPost={resolvedPost} onClose={handleCloseQuoteSheet} />
+        </React.Suspense>
+      ) : null}
+      {isTelegramSyncConfirmOpen ? (
+        <React.Suspense fallback={null}>
+          <TelegramSyncConfirmSheet open={isTelegramSyncConfirmOpen} channelUrl={telegramChannelUrl} isSubmitting={telegramSyncLock.isPending} isInsufficientBalance={telegramSyncPrice > 0 && currentPoints < telegramSyncPrice} telegramSyncPrice={telegramSyncPrice} onConfirm={handleConfirmTelegramSync} onClose={handleCloseTelegramSyncConfirm} />
+        </React.Suspense>
+      ) : null}
       {lightboxIndex >= 0 && postImages.length > 0 ? <React.Suspense fallback={null}><ImageLightbox images={postImages} index={lightboxIndex} onClose={handleCloseLightbox} onChange={handleLightboxChange} /></React.Suspense> : null}
     </div>
   );
