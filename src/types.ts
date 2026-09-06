@@ -345,6 +345,7 @@ export interface SystemConfig {
   post_fee?: number;
   online_users_min?: number;
   online_users_max?: number;
+  telegram_channel?: string;
   telegram_channels?: Record<string, string>;
   telegram_sync_require_image?: string;
   recharge_points_per_usdt?: number;

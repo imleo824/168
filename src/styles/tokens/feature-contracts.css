@@ -97,6 +97,6 @@
     --ui-tui-plus-chip-active-border: color-mix(in srgb, var(--ui-brand) 34%, transparent);
     --ui-tui-plus-chip-active-surface: linear-gradient(135deg, color-mix(in srgb, var(--ui-brand) 14%, var(--ui-color-white)), var(--ui-color-white));
     --ui-tui-plus-chip-active-shadow: 0 var(--ui-border-width-hairline) var(--ui-space-half) color-mix(in srgb, var(--ui-brand) 14%, transparent);
-
+    --ui-profile-plus-expired-filter: grayscale(0.18);
   }
 }

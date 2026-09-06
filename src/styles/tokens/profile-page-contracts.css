@@ -94,6 +94,5 @@
     --ui-profile-security-scrim-surface: color-mix(in srgb, var(--ui-color-black) 42%, transparent);
     --ui-profile-security-row-border: color-mix(in srgb, var(--ui-line-hairline) 72%, transparent);
     --ui-profile-plus-expired-opacity: 0.58;
-    --ui-profile-plus-expired-filter: grayscale(0.18);
   }
 }

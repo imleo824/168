@@ -4,9 +4,11 @@ import { useQuery } from '@tanstack/react-query';
 import {
   Bell,
   CirclePlus,
+  ExternalLink,
   House,
   Info,
   Megaphone,
+  Send,
   ShieldCheck,
   TrendingUp,
   UserRound,
@@ -21,6 +23,8 @@ import { useOnlinePresence } from '@/features/home/OnlinePresenceContext';
 import AvatarImage from '@/ui/AvatarImage';
 import { isTuiPlusActive } from '@/features/tui-plus/tuiPlusBenefits';
 import { useInteractionGuard } from '@/hooks/useInteractionGuard';
+import { useConfig } from '@/hooks/useDataConfig';
+import { resolveTelegramChannelUrl } from '@/utils/contact';
 
 const DESKTOP_NAV_ITEMS = [
   { to: APP_ROUTES.home, label: '首页', icon: House, end: true },
@@ -36,6 +40,8 @@ export const AppDesktopSidebar: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { onlineCountText } = useOnlinePresence();
+  const { data: config } = useConfig();
+  const telegramChannelUrl = resolveTelegramChannelUrl(config?.telegram_channel);
 
   const notificationsQuery = useQuery({
     queryKey: ['me', 'notifications', 'ALL'],
@@ -227,6 +233,24 @@ export const AppDesktopSidebar: React.FC = () => {
             </div>
           </button>
         )}
+
+        <a
+          href={telegramChannelUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="app-desktop-channel-card pressable"
+          aria-label="跳转到 Telegram 官方频道"
+          title="跳转到 Telegram 官方频道"
+        >
+          <span className="app-desktop-channel-icon-shell">
+            <Send className="app-desktop-channel-icon" aria-hidden="true" />
+          </span>
+          <div className="app-desktop-channel-info">
+            <span className="app-desktop-channel-title">官方频道</span>
+            <span className="app-desktop-channel-desc">实时关注最新动态</span>
+          </div>
+          <ExternalLink className="app-desktop-channel-arrow" aria-hidden="true" />
+        </a>
 
         <div className="app-desktop-context-card">
           <div className="app-desktop-context-kicker">当前在线</div>

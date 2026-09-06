@@ -3,5 +3,6 @@
 @import "../features/pc-page-consistency.css";
 @import "../features/pc-user-page-contracts.css";
 
+@import "../features/tui-plus.css";
 @import "../features/tui-plus-avatar-ring-contract.css";
 @import "../features/skeleton-state.css";

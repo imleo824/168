@@ -33,6 +33,16 @@ export function getTelegramContactUrl(contact?: string | null) {
   return handle ? `https://t.me/${handle}` : null;
 }
 
+export function resolveTelegramChannelUrl(channel?: string | null): string {
+  if (!channel) return 'https://t.me/';
+  const raw = channel.trim();
+  if (!raw) return 'https://t.me/';
+  if (/^(https?:\/\/|tg:\/\/)/i.test(raw)) return raw;
+  if (/^t\.me\//i.test(raw)) return `https://${raw}`;
+  const clean = raw.replace(/^@+/, '').trim();
+  return clean ? `https://t.me/${clean}` : 'https://t.me/';
+}
+
 export function openTelegramContact(contact?: string | null) {
   const url = getTelegramContactUrl(contact);
   if (!url) return false;

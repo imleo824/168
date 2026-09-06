@@ -26,7 +26,7 @@ const config = {
     rollupOptions: {
       output: {
         manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'react-vendor': ['react', 'react/jsx-runtime', 'react-dom', 'react-dom/client', 'react-router-dom', 'scheduler'],
           query: ['@tanstack/react-query'],
           'date-vendor': ['date-fns'],
         },
@@ -42,4 +42,9 @@ const config = {
   },
 } satisfies UserConfig;
 
-export default defineConfig(() => config);
+export default defineConfig(({ command }) => {
+  if (command === 'build') {
+    process.env.NODE_ENV = 'production';
+  }
+  return config;
+});
