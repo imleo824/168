@@ -1,5 +1,6 @@
 import { type InputHTMLAttributes, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
+import '@/styles/components/payment-action-sheet.css';
 
 import ActionButton from '@/ui/ActionButton';
 import { InlineSpinner } from '@/ui/LoadingState';

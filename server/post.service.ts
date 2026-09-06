@@ -284,17 +284,17 @@ export class PostService extends BasePostService {
     const filter = args[0];
     const currentUserRole = getViewerRole(filter);
     if (isDefaultHomeRecommendedFilter(filter)) {
-      return withRecentAuthorActivity(await HomeFeedService.listFeed({
+      return HomeFeedService.listFeed({
         kind: 'recommended',
         currentUserId: filter?.currentUserId,
         currentUserRole,
         limit: filter?.limit,
         cursor: filter?.cursor,
-      }));
+      });
     }
 
     if (isHomeCategoryFeedFilter(filter)) {
-      return withRecentAuthorActivity(await HomeFeedService.listFeed({
+      return HomeFeedService.listFeed({
         kind: 'category',
         categorySlug: String(filter?.categoryId || ''),
         currentUserId: filter?.currentUserId,
@@ -302,19 +302,19 @@ export class PostService extends BasePostService {
         limit: filter?.limit,
         cursor: filter?.cursor,
         categoryMetaFilters: filter?.categoryMetaFilters,
-      }));
+      });
     }
 
     return withRecentAuthorActivity(await listRobotSafePublicPosts(filter));
   }
 
   static async listFollowingPosts(userId: string, options: ListFollowingOptions = {}) {
-    return withRecentAuthorActivity(await HomeFeedService.listFeed({
+    return HomeFeedService.listFeed({
       kind: 'following',
       currentUserId: userId,
       limit: options?.limit,
       cursor: options?.cursor,
-    }));
+    });
   }
 
   static async listPostQuotes(postId: string, options: ListPostQuotesOptions = {}) {

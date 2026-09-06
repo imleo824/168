@@ -517,7 +517,7 @@ export default function TuiPlusLinkEditorMobile() {
 
   if (!statusReady) {
     return (
-      <AppPage mobileAddressBarScroll bottomSafe className="tui-plus-link-editor-page surface-page">
+      <AppPage surface="workspace" mobileAddressBarScroll bottomSafe className="tui-plus-link-editor-page surface-page">
         <SEO title="会员主页外链｜推推" noindex />
         <PageHeader title="会员主页外链" showBack titleAlign="center" />
         <PageContentShell as="main" className="tui-plus-link-editor-main ui-app-page-main">
@@ -529,7 +529,7 @@ export default function TuiPlusLinkEditorMobile() {
 
   if (!activeMember) {
     return (
-      <AppPage mobileAddressBarScroll bottomSafe className="tui-plus-link-editor-page surface-page">
+      <AppPage surface="workspace" mobileAddressBarScroll bottomSafe className="tui-plus-link-editor-page surface-page">
         <SEO title="会员主页外链｜推推" noindex />
         <PageHeader title="会员主页外链" showBack titleAlign="center" />
         <PageContentShell as="main" className="ui-auth-required-wrap ui-app-page-main">
@@ -547,7 +547,7 @@ export default function TuiPlusLinkEditorMobile() {
   }
 
   return (
-    <AppPage mobileAddressBarScroll bottomSafe className="tui-plus-link-editor-page surface-page">
+    <AppPage surface="workspace" mobileAddressBarScroll bottomSafe className="tui-plus-link-editor-page surface-page">
       <SEO title="会员主页外链｜推推" noindex />
       <PageHeader title="会员主页外链" showBack titleAlign="center" />
       <PageContentShell as="main" className="tui-plus-link-editor-main ui-app-page-main">

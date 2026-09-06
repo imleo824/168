@@ -1,4 +1,4 @@
-type RumMetricName = 'FCP' | 'LCP' | 'CLS' | 'INP' | 'TTFB';
+type RumMetricName = 'FCP' | 'LCP' | 'CLS' | 'INP' | 'TTFB' | 'LONG_TASK';
 
 interface RumMetric {
   name: RumMetricName;
@@ -34,6 +34,30 @@ function currentPath() {
   return `${window.location.pathname}${window.location.search}`;
 }
 
+function routeFamily(pathname: string) {
+  if (pathname === '/') return 'feed';
+  if (pathname.startsWith('/post/')) return 'detail';
+  if (pathname.startsWith('/user/') || pathname === '/profile') return 'profile';
+  if (pathname === '/messages') return 'conversation';
+  if (pathname === '/create') return 'compose';
+  if (pathname.startsWith('/168wc')) return 'admin';
+  return 'workspace';
+}
+
+function navigationContext() {
+  const navigation = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming | undefined;
+  return {
+    viewport: {
+      width: Math.round(window.innerWidth),
+      height: Math.round(window.innerHeight),
+      devicePixelRatio: Math.round(window.devicePixelRatio * 100) / 100,
+    },
+    navigationType: navigation?.type || 'navigate',
+    routeFamily: routeFamily(window.location.pathname),
+    cacheState: document.documentElement.dataset.homeFeedCache || 'UNKNOWN',
+  };
+}
+
 function queueMetric(name: RumMetricName, value: number) {
   if (!sampled || !Number.isFinite(value) || value < 0) return;
   queue.push({
@@ -60,6 +84,7 @@ function flushRum() {
           downlink: Number((navigator as any).connection.downlink || 0),
         }
       : undefined,
+    context: navigationContext(),
   });
 
   if (navigator.sendBeacon) {
@@ -129,13 +154,23 @@ function observeLcpAndCls() {
   window.addEventListener('pagehide', reportFinal, { once: true });
 }
 
-function observeInpApproximation() {
+function observeInp() {
+  const interactions = new Map<number, number>();
   let maxInteraction = 0;
   try {
     const observer = new PerformanceObserver((list) => {
       for (const entry of list.getEntries() as any[]) {
         const duration = Number(entry.duration || 0);
-        if (duration > maxInteraction) maxInteraction = duration;
+        const interactionId = Number(entry.interactionId || 0);
+        if (interactionId > 0) {
+          const previousDuration = interactions.get(interactionId) || 0;
+          interactions.set(interactionId, Math.max(previousDuration, duration));
+          if (interactions.size > 50) {
+            const oldestKey = interactions.keys().next().value;
+            if (oldestKey !== undefined) interactions.delete(oldestKey);
+          }
+        }
+        maxInteraction = Math.max(maxInteraction, duration);
       }
     });
     observer.observe({ type: 'event', buffered: true, durationThreshold: 40 } as PerformanceObserverInit);
@@ -145,6 +180,28 @@ function observeInpApproximation() {
 
   const reportFinal = () => {
     if (maxInteraction > 0) queueMetric('INP', maxInteraction);
+  };
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') reportFinal();
+  });
+  window.addEventListener('pagehide', reportFinal, { once: true });
+}
+
+function observeLongTasks() {
+  let longestTask = 0;
+  try {
+    const observer = new PerformanceObserver((list) => {
+      for (const entry of list.getEntries()) {
+        longestTask = Math.max(longestTask, entry.duration);
+      }
+    });
+    observer.observe({ type: 'longtask', buffered: true });
+  } catch {
+    return;
+  }
+
+  const reportFinal = () => {
+    if (longestTask > 0) queueMetric('LONG_TASK', longestTask);
   };
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') reportFinal();
@@ -175,7 +232,8 @@ export function initRum() {
   sessionId = safeSessionId();
   observePaint();
   observeLcpAndCls();
-  observeInpApproximation();
+  observeInp();
+  observeLongTasks();
   reportTtfb();
   window.addEventListener('pagehide', flushRum);
 }

@@ -1,0 +1,10 @@
+/* Brand/about route contracts. */
+
+@layer base {
+  :root {
+    --ui-brand-about-eyebrow-icon-size: var(--ui-control-icon-xs);
+    --ui-brand-about-action-icon-size: var(--ui-control-icon-sm);
+    --ui-brand-about-card-icon-graphic-size: calc(var(--ui-control-icon-md) + var(--ui-space-1));
+    --ui-brand-about-check-icon-size: var(--ui-control-icon-md);
+  }
+}

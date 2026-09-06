@@ -457,7 +457,7 @@ export default function CategoryFeedMobile() {
   }, [categoryName, categorySeo, location.pathname, location.search, pageKind, posts]);
 
   return (
-    <AppPage mobileAddressBarScroll className={isMobile ? 'category-feed-page category-feed-page--mobile' : 'category-feed-page category-feed-page--desktop'}>
+    <AppPage surface="feed" scrollMode={isMobile ? 'document' : 'contained'} mobileAddressBarScroll className={isMobile ? 'category-feed-page category-feed-page--mobile' : 'category-feed-page category-feed-page--desktop'}>
       <ListReturnScrollRestorer
         scope={listReturnScope}
         ready={!isInitialLoading && canRestoreListPosition}

@@ -3,4 +3,5 @@
  * brand/about presentation rules.
  */
 
+@import "../../styles/tokens/brand-about-contracts.css";
 @import "../../styles/features/brand.css";

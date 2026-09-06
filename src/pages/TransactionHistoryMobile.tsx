@@ -24,6 +24,7 @@ import ActionButton from '@/ui/ActionButton';
 import EmptyStateCard from '@/ui/EmptyStateCard';
 import PageContentShell from '@/ui/PageContentShell';
 import { APP_ROUTES } from '@/app/routePaths';
+import '@/features/records/RecordsRoute.css';
 
 type RechargeStatusFilter = '' | RechargeStatusGroup;
 type UnifiedRecordType =
@@ -214,7 +215,7 @@ export default function TransactionHistoryMobile() {
   return (
     <>
       <SEO title="交易记录｜推推" description="查看推推账号积分、充值与推广消费记录。" noindex />
-      <AppPage mobileAddressBarScroll bottomSafe className="record-page">
+      <AppPage surface="workspace" mobileAddressBarScroll bottomSafe className="record-page">
         <PageHeader
           title="交易记录"
           onBack={() => navigate(returnTo, { replace: true })}

@@ -18,6 +18,7 @@ const server = read('server/bootstrap.ts');
 const postRoutes = read('server/routes/post.routes.ts');
 const postReadRoutes = read('server/routes/post-read.routes.ts');
 const feedRoutes = read('server/routes/feed.routes.ts');
+const feedObservability = read('server/modules/feed/feed-observability.ts');
 const configRoutes = read('server/routes/config.routes.ts');
 const adminConfigRoutes = read('server/routes/admin-config.routes.ts');
 const postService = read('server/services/post/index.ts');
@@ -29,6 +30,8 @@ const feedRankingService = read('server/modules/feed/feed-ranking.service.ts');
 const publicFeedCache = read('server/public-feed-cache.ts');
 const publicPostDetailCache = read('server/public-post-detail-cache.ts');
 const publicFeedWarmup = read('server/services/public-feed-warmup.service.ts');
+const recentAuthorActivity = read('server/services/post/recent-author-activity.ts');
+const tuiPlusRanking = read('server/services/tui-plus-ranking.service.ts');
 const httpCache = read('server/http-cache.ts');
 const performanceBudget = read('scripts/performance-budget-production.mjs');
 const productionSmoke = read('scripts/smoke-production.mjs');
@@ -38,6 +41,7 @@ const apiClient = read('src/services/api.ts');
 const apiCore = read('src/services/apiCore.ts');
 const homeStartupApi = read('src/services/homeStartupApi.ts');
 const appShell = read('src/app/AppShell.tsx');
+const appDesktopAuxRail = read('src/app/AppDesktopAuxRail.tsx');
 const mobileAddressBarController = read('src/app/MobileAddressBarController.tsx');
 const appRequireTuiPlusRoute = read('src/app/AppRequireTuiPlusRoute.tsx');
 const authContext = read('src/context/AuthContext.tsx');
@@ -47,7 +51,6 @@ const useDataPromotions = read('src/hooks/useDataPromotions.ts');
 const useFeedExposureViews = read('src/hooks/useFeedExposureViews.ts');
 const homeRefresh = read('src/hooks/useHomeRefresh.ts');
 const useHomeNotificationSummary = read('src/hooks/useHomeNotificationSummary.ts');
-const useHomeBootstrapPrefetch = read('src/app/useHomeBootstrapPrefetch.ts');
 const browserPushResync = read('src/app/useBrowserPushResync.ts');
 const pushNotification = read('src/services/pushNotification.ts');
 const appBottomNavigation = read('src/app/AppBottomNavigation.tsx');
@@ -375,14 +378,26 @@ assert.match(
 
 assert.match(
   useDataConfig,
-  /export function useHomeBootstrap\(enabled: boolean = true\)[\s\S]*\(\) => \(enabled \? readHomeBootstrapSnapshot\(\) : undefined\)[\s\S]*enabled,/,
-  'useHomeBootstrap should support disabled route contexts without reading the home snapshot',
+  /export function useHomeBootstrap\(enabled: boolean = true\)[\s\S]*\(\) => readHomeBootstrapSnapshot\(\)[\s\S]*enabled,/,
+  'useHomeBootstrap should let disabled home-shell subscribers reuse the first-screen snapshot without issuing a request',
 );
 
 assert.match(
   appShell,
-  /const isHomePath = pathname === APP_ROUTES\.home;[\s\S]*const isAdminRoute = pathname\.startsWith\('\/168wc'\);[\s\S]*const isUserSurface = routeSurface === 'user';[\s\S]*useHomeBootstrap\(isUserSurface && isHomePath\)[\s\S]*useConfig\(isUserSurface && !isHomePath\)[\s\S]*const onlineConfig = isUserSurface \? \(isHomePath \? homeBootstrap\?\.config : routeConfig\) : undefined;[\s\S]*enabled: isUserSurface && Boolean\(onlineConfig\),/,
-  'app shell online presence should use full home bootstrap only on user home, lightweight config on other user routes, and no config subscription on admin routes',
+  /const isHomePath = pathname === APP_ROUTES\.home;[\s\S]*const isAdminRoute = pathname\.startsWith\('\/168wc'\);[\s\S]*const isUserSurface = routeSurface === 'user';[\s\S]*useHomeBootstrap\(false\)[\s\S]*useConfig\(isUserSurface && !isHomePath\)[\s\S]*const onlineConfig = isUserSurface \? \(isHomePath \? homeBootstrap\?\.config : routeConfig\) : undefined;[\s\S]*enabled: isUserSurface && Boolean\(onlineConfig\),/,
+  'app shell online presence should subscribe to first-screen bootstrap on home, use lightweight config elsewhere, and issue no admin config request',
+);
+
+assert.match(
+  appDesktopAuxRail,
+  /getAllActivePromotions[\s\S]*useHomeBootstrap\(false\)[\s\S]*queryKey: \['promotions', 'all-active'\][\s\S]*homeBootstrap\?\.homeAds/,
+  'desktop promotion rail should combine the authoritative active-promotion feed with the existing first-screen home-ad snapshot',
+);
+
+assert.doesNotMatch(
+  appDesktopAuxRail,
+  /getHomeAds|queryKey: \['promotions', 'home-ads'\]/,
+  'desktop promotion rail must not duplicate the home-ad request already owned by the first-screen payload',
 );
 
 assert.match(
@@ -441,8 +456,45 @@ assert.match(
 
 assert.match(
   publicFeedWarmup,
-  /setTimeout\(run, options\.initialDelayMs\)/,
+  /recommendedTimer = setUnrefTimeout\(runRecommended, options\.initialDelayMs\)/,
   'public feed warmup service should honor the configured initial warm delay',
+);
+
+assert.match(
+  publicFeedWarmup,
+  /categoryTimer = setUnrefTimeout\(runNextCategory, options\.categoryInitialDelayMs\)/,
+  'category feed warmup should be delayed independently from the canonical home feed',
+);
+
+assert.match(
+  publicFeedWarmup,
+  /setPublicFeedInflight\(homeFeedKey, loadPromise\)/,
+  'canonical home warmup and cold requests should share one in-flight query',
+);
+
+assert.match(
+  feedObservability,
+  /new AsyncLocalStorage<Map<string, number>>\(\)[\s\S]*activeCollection\.set/,
+  'feed observability should collect nested request timings without sharing state across concurrent requests',
+);
+
+for (const metric of ['bootstrap', 'feed', 'candidates', 'promotions', 'membership', 'activity', 'serialize', 'total']) {
+  assert.ok(
+    feedRoutes.includes(`formatServerTimingMetric('${metric}'`),
+    `home first-screen should expose the ${metric} Server-Timing phase`,
+  );
+}
+
+assert.match(
+  recentAuthorActivity,
+  /RECENT_AUTHOR_ACTIVITY_CACHE_TTL_MS = 30_000[\s\S]*RECENT_AUTHOR_ACTIVITY_CACHE_MAX_ENTRIES = 2_000[\s\S]*pruneRecentAuthorActivityCache/,
+  'recent author activity hydration should use a short, bounded cache',
+);
+
+assert.match(
+  tuiPlusRanking,
+  /TUI_PLUS_AUTHOR_CACHE_TTL_MS = 30_000[\s\S]*TUI_PLUS_AUTHOR_CACHE_MAX_ENTRIES = 2_000[\s\S]*pruneTuiPlusAuthorCache/,
+  'Tui Plus membership hydration should use a short, bounded cache',
 );
 
 assert.match(
@@ -833,12 +885,23 @@ assert.doesNotMatch(
     homeFeedQueries,
     homeRefresh,
     useHomeNotificationSummary,
-    useHomeBootstrapPrefetch,
     browserPushResync,
     pushNotification,
   ].join('\n'),
   /@\/services\/api['"]|@\/services\/api["]|from ['"]\.\/api['"]|from ["']\.\/api["']/,
   'home startup hooks and app shell must use apiCore/homeStartupApi instead of the broad API endpoint facade',
+);
+
+assert.doesNotMatch(
+  appShell,
+  /useHomeBootstrapPrefetch|import\(['"]@\/features\/feed\/PostFeedList['"]\)/,
+  'home startup must not duplicate bootstrap loading or preload the feed tree before first-screen data resolves',
+);
+
+assert.match(
+  homePage,
+  /useHomeBootstrap\(false\)/,
+  'home must subscribe to the bootstrap cache without issuing a second bootstrap request',
 );
 
 assert.doesNotMatch(

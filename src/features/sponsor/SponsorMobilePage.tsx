@@ -202,7 +202,7 @@ export default function SponsorMobilePage() {
   };
 
   return (
-    <AppPage mobileAddressBarScroll bottomSafe className="sponsor-page surface-page">
+    <AppPage surface="workspace" mobileAddressBarScroll bottomSafe className="sponsor-page surface-page">
       <SEO title="推广｜推推" description="管理推推积分、充积分、推广和曝光效果。" noindex />
       <PageHeader title="推广" showBack={false} titleAlign="center" />
 
@@ -223,7 +223,7 @@ export default function SponsorMobilePage() {
         <ReferralInviteBanner onClick={() => void guardedGoInvite()} />
 
         <div className="ui-page-tabs-section ui-layer-sticky-tab scrollbar-hide">
-          <SegmentTabs items={SPONSOR_RECORD_TABS} activeKey={activeRecordTab} onChange={(key) => setActiveRecordTab(key as SponsorRecordTab)} ariaLabel="曝光记录分类" className="ui-page-tabs-bar" showLabels labelDisplay="full" />
+          <SegmentTabs items={SPONSOR_RECORD_TABS} activeKey={activeRecordTab} onChange={(key) => setActiveRecordTab(key as SponsorRecordTab)} ariaLabel="曝光记录分类" className="ui-page-tabs-bar" showLabels labelDisplay="full" variant="underline" />
         </div>
 
         <section className="sponsor-record-section" aria-label="曝光记录内容">

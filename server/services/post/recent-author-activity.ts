@@ -6,8 +6,23 @@ const RECENT_AUTHOR_POST_WINDOW_MIN_HOURS = 1;
 const RECENT_AUTHOR_POST_WINDOW_MAX_HOURS = 168;
 const RECENT_AUTHOR_ACTIVITY_MAX_AUTHORS = 500;
 const RECENT_AUTHOR_WINDOW_CACHE_TTL_MS = 5 * 60 * 1000;
+const RECENT_AUTHOR_ACTIVITY_CACHE_TTL_MS = 30_000;
+const RECENT_AUTHOR_ACTIVITY_CACHE_MAX_ENTRIES = 2_000;
 
 let recentAuthorWindowCache: { value: number; expiresAt: number } | null = null;
+const recentAuthorActivityCache = new Map<string, { value: RecentAuthorActivity; expiresAt: number }>();
+
+function pruneRecentAuthorActivityCache(nowMs: number, incomingEntries: number) {
+  for (const [authorId, entry] of recentAuthorActivityCache) {
+    if (entry.expiresAt <= nowMs) recentAuthorActivityCache.delete(authorId);
+  }
+  const targetSize = Math.max(0, RECENT_AUTHOR_ACTIVITY_CACHE_MAX_ENTRIES - incomingEntries);
+  while (recentAuthorActivityCache.size > targetSize) {
+    const oldestAuthorId = recentAuthorActivityCache.keys().next().value;
+    if (!oldestAuthorId) break;
+    recentAuthorActivityCache.delete(oldestAuthorId);
+  }
+}
 
 type RecentAuthorActivity = {
   hasRecentPost: boolean;
@@ -59,14 +74,23 @@ async function getRecentAuthorActivityMap(authorIds: string[]): Promise<Map<stri
   const activityMap = new Map<string, RecentAuthorActivity>();
   if (!isDbConfigured() || ids.length === 0) return activityMap;
 
+  const nowMs = Date.now();
+  const missingIds = ids.filter((id) => {
+    const cached = recentAuthorActivityCache.get(id);
+    if (!cached || cached.expiresAt <= nowMs) return true;
+    activityMap.set(id, cached.value);
+    return false;
+  });
+  if (missingIds.length === 0) return activityMap;
+
   const windowHours = await getRecentAuthorPostWindowHours();
-  const cutoff = new Date(Date.now() - windowHours * 60 * 60 * 1000);
+  const cutoff = new Date(nowMs - windowHours * 60 * 60 * 1000);
 
   try {
     const rows = await prisma.post.groupBy({
       by: ['userId'],
       where: {
-        userId: { in: ids },
+        userId: { in: missingIds },
         deletedAt: null,
         isPublished: true,
         isAnonymous: false,
@@ -75,13 +99,26 @@ async function getRecentAuthorActivityMap(authorIds: string[]): Promise<Map<stri
       _max: { createdAt: true },
     });
 
+    const activeByAuthorId = new Map<string, RecentAuthorActivity>();
     rows.forEach((row) => {
       const authorId = String(row.userId || '').trim();
       if (!authorId) return;
-      activityMap.set(authorId, {
+      activeByAuthorId.set(authorId, {
         hasRecentPost: true,
         recentPostCreatedAt: row._max.createdAt || null,
       });
+    });
+    pruneRecentAuthorActivityCache(nowMs, missingIds.length);
+    missingIds.forEach((authorId) => {
+      const value = activeByAuthorId.get(authorId) || {
+        hasRecentPost: false,
+        recentPostCreatedAt: null,
+      };
+      recentAuthorActivityCache.set(authorId, {
+        value,
+        expiresAt: nowMs + RECENT_AUTHOR_ACTIVITY_CACHE_TTL_MS,
+      });
+      activityMap.set(authorId, value);
     });
   } catch (error) {
     console.warn('[recent-author-activity] Failed to load recent author post activity.', error);

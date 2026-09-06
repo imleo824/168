@@ -45,7 +45,7 @@ export default function AppRequireTuiPlusRoute({ children, benefit = 'generic' }
   if (isTuiPlusActive(user)) return <>{children}</>;
 
   return (
-    <AppPage mobileAddressBarScroll bottomSafe className="tui-plus-required-page surface-page">
+    <AppPage surface="workspace" mobileAddressBarScroll bottomSafe className="tui-plus-required-page surface-page">
       <PageHeader title="推推会员" titleAlign="center" onBack={() => navigate(fallbackPath, { replace: true })} />
       <PageContentShell as="main" className="ui-auth-required-wrap ui-app-page-main">
         <Suspense fallback={<PageLoader />}>

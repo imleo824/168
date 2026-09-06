@@ -547,7 +547,7 @@ export default function UserSpace() {
 
   if (userError && !displayUser) {
     return (
-      <AppPage className={`user-space-page user-space-page-next ${isMobile ? 'user-space-page-mobile' : 'user-space-page-desktop ui-page-card-shell'}`}>
+      <AppPage surface="profile" className={`user-space-page user-space-page-next ${isMobile ? 'user-space-page-mobile' : 'user-space-page-desktop ui-page-card-shell'}`}>
         <PageHeader title="个人空间" titleAlign="center" />
         <SEO title="个人空间｜推推" description="查看用户在推推发布的圈内分类信息与资源。" />
         <PageContentShell variant="fluid" className="user-space-body ui-app-page-main">
@@ -570,7 +570,7 @@ export default function UserSpace() {
 
   if (isLoading && !displayUser) {
     return (
-      <AppPage className={`user-space-loading-page user-space-page user-space-page-next ${isMobile ? 'user-space-page-mobile' : 'user-space-page-desktop ui-page-card-shell'}`}>
+      <AppPage surface="profile" className={`user-space-loading-page user-space-page user-space-page-next ${isMobile ? 'user-space-page-mobile' : 'user-space-page-desktop ui-page-card-shell'}`}>
         <PageHeader title="个人空间" titleAlign="center" right={stickyFollowButton} />
         <UserSpaceSkeleton mobile={isMobile} />
       </AppPage>
@@ -618,7 +618,7 @@ export default function UserSpace() {
   );
 
   return (
-    <AppPage className={`user-space-page user-space-page-next ${isMobile ? 'user-space-page-mobile' : 'user-space-page-desktop ui-page-card-shell'}`}>
+    <AppPage surface="profile" className={`user-space-page user-space-page-next ${isMobile ? 'user-space-page-mobile' : 'user-space-page-desktop ui-page-card-shell'}`}>
       <ListReturnScrollRestorer scope={listReturnScope} ready={!isLoading} restoreVersion={posts.length} />
       <PageHeader title="个人空间" titleAlign="center" right={stickyFollowButton} isTitleLoading={isTitleLoading} />
       <SEO

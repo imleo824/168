@@ -14,13 +14,14 @@ import {
   ChevronRight,
   LayoutGrid,
 } from 'lucide-react';
-import { getAllActivePromotions, getHomeAds } from '@/services/api';
+import { getAllActivePromotions } from '@/services/api';
 import { APP_ROUTES } from '@/app/routePaths';
 import { PromotionType, type PromotionBooking } from '@/types';
 import { warmupNavigationIntent, warmupRoutePath } from '@/utils/routeWarmups';
 import { resolveAdTargetUrlInput } from '@/utils/adTargetUrl';
 import { useHomeBootstrap } from '@/hooks/useDataConfig';
 import AvatarImage from '@/ui/AvatarImage';
+import '@/styles/features/aux-rail.css';
 
 function getPromotionTag(type: string, booking?: PromotionBooking) {
   if (type === PromotionType.AD_HOME) {
@@ -62,18 +63,14 @@ function formatAdTargetDisplay(raw?: string | null) {
 
 export const AppDesktopAuxRail: React.FC = () => {
   const navigate = useNavigate();
-  const { data: homeBootstrap } = useHomeBootstrap();
+  // The home first-screen request is the only network owner for bootstrap data.
+  // Other routes can still consume an already-populated snapshot without
+  // creating a duplicate request solely for the desktop rail.
+  const { data: homeBootstrap } = useHomeBootstrap(false);
 
   const { data: promotions, isLoading: isLoadingPromos } = useQuery<PromotionBooking[]>({
     queryKey: ['promotions', 'all-active'],
     queryFn: () => getAllActivePromotions(),
-    staleTime: 30_000,
-    refetchInterval: 60_000,
-  });
-
-  const { data: homeAds, isLoading: isLoadingHomeAds } = useQuery<PromotionBooking[]>({
-    queryKey: ['promotions', 'home-ads'],
-    queryFn: () => getHomeAds(),
     staleTime: 30_000,
     refetchInterval: 60_000,
   });
@@ -102,17 +99,14 @@ export const AppDesktopAuxRail: React.FC = () => {
     if (promotions && Array.isArray(promotions)) {
       promotions.forEach(addBooking);
     }
-    if (homeAds && Array.isArray(homeAds)) {
-      homeAds.forEach(addBooking);
-    }
     if (homeBootstrap?.homeAds && Array.isArray(homeBootstrap.homeAds)) {
       homeBootstrap.homeAds.forEach(addBooking);
     }
 
     return list;
-  }, [promotions, homeAds, homeBootstrap?.homeAds]);
+  }, [promotions, homeBootstrap?.homeAds]);
 
-  const isLoading = (isLoadingPromos || isLoadingHomeAds) && activePromotions.length === 0;
+  const isLoading = isLoadingPromos && activePromotions.length === 0;
 
   const handleSponsorClick = () => {
     warmupNavigationIntent('sponsor');
@@ -143,16 +137,16 @@ export const AppDesktopAuxRail: React.FC = () => {
       aria-label="热门推广与广告"
     >
       {/* Rail Header */}
-      <div className="app-desktop-aux-rail-header flex-shrink-0">
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-[var(--ui-brand)]/10 flex items-center justify-center text-[var(--ui-brand)]">
-            <Flame className="w-4 h-4 fill-[var(--ui-brand)]/20" />
+      <div className="app-desktop-aux-rail-header">
+        <div className="app-desktop-aux-rail-heading">
+          <div className="app-desktop-aux-rail-heading-icon">
+            <Flame className="app-desktop-aux-rail-flame-icon" />
           </div>
           <div>
-            <h2 className="text-sm font-semibold text-[var(--ui-text-primary)] leading-none flex items-center gap-1.5">
+            <h2 className="app-desktop-aux-rail-title">
               实时推广
               {activePromotions && activePromotions.length > 0 && (
-                <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-[var(--ui-brand)]/10 text-[var(--ui-brand)]">
+                <span className="app-desktop-aux-rail-live-badge">
                   {activePromotions.length} 生效中
                 </span>
               )}
@@ -164,30 +158,30 @@ export const AppDesktopAuxRail: React.FC = () => {
           type="button"
           onClick={handleSponsorClick}
           onMouseEnter={() => warmupNavigationIntent('sponsor')}
-          className="inline-flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium rounded-lg text-[var(--ui-brand)] bg-[var(--ui-brand)]/10 hover:bg-[var(--ui-brand)]/20 transition-colors cursor-pointer"
+          className="app-desktop-aux-rail-new-action pressable"
           title="发起新推广"
         >
-          <TrendingUp className="w-3.5 h-3.5" />
+          <TrendingUp className="app-desktop-aux-rail-small-icon" />
           <span>我要推广</span>
         </button>
       </div>
 
       {/* Rail Content Area */}
-      <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
+      <div className="app-desktop-aux-rail-content custom-scrollbar">
         {isLoading ? (
           /* Loading Skeleton */
-          <div className="space-y-3">
+          <div className="app-desktop-aux-rail-loading-list">
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="p-3 rounded-xl border border-[var(--ui-line-hairline)] bg-[var(--ui-surface-muted)] animate-pulse space-y-2.5"
+                className="app-desktop-aux-rail-skeleton-card"
               >
-                <div className="flex items-center justify-between">
-                  <div className="w-16 h-4 bg-[var(--ui-line-hairline)] rounded-md" />
-                  <div className="w-12 h-3 bg-[var(--ui-line-hairline)] rounded-md" />
+                <div className="app-desktop-aux-rail-skeleton-row">
+                  <div className="app-desktop-aux-rail-skeleton-line app-desktop-aux-rail-skeleton-line--tag" />
+                  <div className="app-desktop-aux-rail-skeleton-line app-desktop-aux-rail-skeleton-line--meta" />
                 </div>
-                <div className="w-3/4 h-4 bg-[var(--ui-line-hairline)] rounded-md" />
-                <div className="w-full h-16 bg-[var(--ui-line-hairline)] rounded-lg" />
+                <div className="app-desktop-aux-rail-skeleton-line app-desktop-aux-rail-skeleton-line--title" />
+                <div className="app-desktop-aux-rail-skeleton-line app-desktop-aux-rail-skeleton-line--media" />
               </div>
             ))}
           </div>
@@ -195,17 +189,17 @@ export const AppDesktopAuxRail: React.FC = () => {
           /* Empty State */
           <div className="app-desktop-aux-rail-empty">
             <div className="app-desktop-aux-rail-empty-icon">
-              <Megaphone className="w-6 h-6" />
+              <Megaphone className="app-desktop-aux-rail-empty-graphic" />
             </div>
-            <h3 className="text-sm font-semibold text-[var(--ui-text-primary)] mb-1">暂无广告</h3>
-            <p className="text-xs text-[var(--ui-text-muted)] mb-4 max-w-48 leading-relaxed">抢占黄金曝光位，让更多人发现您的优质内容</p>
+            <h3 className="app-desktop-aux-rail-empty-title">暂无广告</h3>
+            <p className="app-desktop-aux-rail-empty-copy">抢占黄金曝光位，让更多人发现您的优质内容</p>
             <button
               type="button"
               onClick={handleSponsorClick}
               onMouseEnter={() => warmupNavigationIntent('sponsor')}
               className="pressable app-desktop-aux-rail-empty-btn"
             >
-              <TrendingUp className="w-3.5 h-3.5" />
+              <TrendingUp className="app-desktop-aux-rail-small-icon" />
               <span>我要推广</span>
             </button>
           </div>
@@ -235,38 +229,38 @@ export const AppDesktopAuxRail: React.FC = () => {
                     warmupRoutePath(`/post/${item.postId}`);
                   }
                 }}
-                className="app-desktop-aux-rail-card group"
+                className="app-desktop-aux-rail-card"
               >
                 {/* Header Row: Badge & Type */}
-                <div className="flex items-center justify-between mb-2 gap-2">
+                <div className="app-desktop-aux-rail-card-header">
                   <span
                     className={`app-desktop-aux-rail-tag ${tag.tagClass}`}
                   >
                     {item.type === PromotionType.AD_HOME ? (
-                      <ImageIcon className="w-2.5 h-2.5" />
+                      <ImageIcon className="app-desktop-aux-rail-tag-icon" />
                     ) : item.type === PromotionType.PIN_CATEGORY ? (
-                      <LayoutGrid className="w-2.5 h-2.5" />
+                      <LayoutGrid className="app-desktop-aux-rail-tag-icon" />
                     ) : (
-                      <Pin className="w-2.5 h-2.5" />
+                      <Pin className="app-desktop-aux-rail-tag-icon" />
                     )}
                     <span>{tag.label}</span>
                   </span>
 
                   {item.adTargetUrl && (
-                    <span className="text-xs text-[var(--ui-text-muted)] group-hover:text-[var(--ui-brand)] flex items-center gap-0.5 transition-colors">
-                      <span className="truncate max-w-28">{formatAdTargetDisplay(item.adTargetUrl)}</span>
-                      <ExternalLink className="w-2.5 h-2.5 flex-shrink-0" />
+                    <span className="app-desktop-aux-rail-target">
+                      <span className="app-desktop-aux-rail-target-label">{formatAdTargetDisplay(item.adTargetUrl)}</span>
+                      <ExternalLink className="app-desktop-aux-rail-tag-icon" />
                     </span>
                   )}
                 </div>
 
                 {/* Banner Ad Display */}
                 {hasBannerImage && (
-                  <div className="relative mb-2 rounded-lg overflow-hidden bg-[var(--ui-surface-muted)] aspect-[21/9]">
+                  <div className="app-desktop-aux-rail-media app-desktop-aux-rail-media--banner">
                     <img
                       src={adImageUrl!}
                       alt="广告Banner"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="app-desktop-aux-rail-media-image"
                       loading="lazy"
                       decoding="async"
                       referrerPolicy="no-referrer"
@@ -276,41 +270,41 @@ export const AppDesktopAuxRail: React.FC = () => {
 
                 {/* Post Promotion Display */}
                 {post ? (
-                  <div className="space-y-1.5">
+                  <div className="app-desktop-aux-rail-post">
                     {/* Author Row */}
-                    <div className="flex items-center gap-2">
-                      <span className="w-5 h-5 rounded-full overflow-hidden flex-shrink-0">
+                    <div className="app-desktop-aux-rail-author">
+                      <span className="app-desktop-aux-rail-avatar">
                         <AvatarImage
                           src={post.user?.photoUrl || ''}
                           name={post.user?.displayName || post.user?.username}
                           id={post.user?.id || post.userId}
                           alt={post.user?.displayName || post.user?.username || '用户'}
-                          className="w-full h-full object-cover"
+                          className="app-desktop-aux-rail-avatar-image"
                           variant="thumb"
                         />
                       </span>
-                      <span className="text-xs font-medium text-[var(--ui-text-primary)] truncate max-w-32">
+                      <span className="app-desktop-aux-rail-author-name">
                         {post.user?.displayName || post.user?.username || '匿名用户'}
                       </span>
                     </div>
 
                     {/* Post Title or Content */}
                     {post.title ? (
-                      <h4 className="text-xs font-semibold text-[var(--ui-text-primary)] line-clamp-1 group-hover:text-[var(--ui-brand)] transition-colors">
+                      <h4 className="app-desktop-aux-rail-post-title">
                         {post.title}
                       </h4>
                     ) : null}
-                    <p className="text-xs text-[var(--ui-text-muted)] line-clamp-2 leading-relaxed">
+                    <p className="app-desktop-aux-rail-post-copy">
                       {post.content}
                     </p>
 
                     {/* Post Image Thumbnail */}
                     {coverPhoto && !hasBannerImage && (
-                      <div className="rounded-lg overflow-hidden bg-[var(--ui-surface-muted)] aspect-[16/9] mt-1.5">
+                      <div className="app-desktop-aux-rail-media app-desktop-aux-rail-media--post">
                         <img
                           src={coverPhoto}
                           alt={post.title || '帖子图文'}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="app-desktop-aux-rail-media-image"
                           loading="lazy"
                           decoding="async"
                           referrerPolicy="no-referrer"
@@ -319,34 +313,34 @@ export const AppDesktopAuxRail: React.FC = () => {
                     )}
 
                     {/* Post Stats Footer */}
-                    <div className="flex items-center justify-between text-xs text-[var(--ui-text-muted)] pt-1">
-                      <div className="flex items-center gap-3">
-                        <span className="flex items-center gap-1">
-                          <Eye className="w-3 h-3 opacity-60 flex-shrink-0" />
+                    <div className="app-desktop-aux-rail-stats">
+                      <div className="app-desktop-aux-rail-stats-group">
+                        <span className="app-desktop-aux-rail-stat">
+                          <Eye className="app-desktop-aux-rail-stat-icon" />
                           <span>{post.viewCount || 0}</span>
                         </span>
-                        <span className="flex items-center gap-1">
-                          <MessageSquare className="w-3 h-3 opacity-60 flex-shrink-0" />
+                        <span className="app-desktop-aux-rail-stat">
+                          <MessageSquare className="app-desktop-aux-rail-stat-icon" />
                           <span>{post.commentCount || 0}</span>
                         </span>
-                        <span className="flex items-center gap-1">
-                          <Heart className="w-3 h-3 opacity-60 flex-shrink-0" />
+                        <span className="app-desktop-aux-rail-stat">
+                          <Heart className="app-desktop-aux-rail-stat-icon" />
                           <span>{post.likeCount || 0}</span>
                         </span>
                       </div>
-                      <span className="flex items-center text-[var(--ui-brand)] opacity-0 group-hover:opacity-100 transition-opacity font-medium">
-                        查看详情 <ChevronRight className="w-3 h-3 flex-shrink-0" />
+                      <span className="app-desktop-aux-rail-view-action">
+                        查看详情 <ChevronRight className="app-desktop-aux-rail-stat-icon" />
                       </span>
                     </div>
                   </div>
                 ) : (
                   /* Banner/URL only without post attached */
-                  <div className="flex items-center justify-between pt-0.5">
-                    <span className="text-xs font-medium text-[var(--ui-text-primary)] group-hover:text-[var(--ui-brand)] transition-colors truncate">
+                  <div className="app-desktop-aux-rail-link-row">
+                    <span className="app-desktop-aux-rail-link-label">
                       {item.adTargetUrl || '点击了解详情'}
                     </span>
-                    <span className="flex items-center text-xs text-[var(--ui-brand)] font-medium flex-shrink-0 ml-1">
-                      点击访问 <ChevronRight className="w-3 h-3 flex-shrink-0" />
+                    <span className="app-desktop-aux-rail-link-action">
+                      点击访问 <ChevronRight className="app-desktop-aux-rail-stat-icon" />
                     </span>
                   </div>
                 )}

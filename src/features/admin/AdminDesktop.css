@@ -4,6 +4,9 @@
  * instead of being loaded globally through the app-wide feature layer.
  */
 
+@import "tailwindcss";
+
+@import "../../styles/tokens/admin-contracts.css";
 @import "../../styles/features/admin/admin-workflows.css";
 @import "../../styles/features/admin/admin-auto-post.css";
 @import "../../styles/features/admin/admin-primitives.css";

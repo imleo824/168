@@ -1,0 +1,14 @@
+/* Profile biography editor route contracts. */
+
+@layer base {
+  :root {
+    --ui-profile-bio-editor-page-surface:
+      radial-gradient(circle at 50% calc(var(--ui-space-8) * -1), color-mix(in srgb, var(--ui-brand) 12%, transparent), transparent 34%),
+      var(--ui-surface-page);
+    --ui-profile-bio-editor-field-min-height: calc(var(--ui-space-8) * 5 + var(--ui-space-2));
+    --ui-profile-bio-editor-field-border: color-mix(in srgb, var(--ui-brand) 14%, var(--ui-line-subtle));
+    --ui-profile-bio-editor-field-surface: color-mix(in srgb, var(--ui-surface-card) 88%, var(--ui-surface-page));
+    --ui-profile-bio-editor-field-focus-border: color-mix(in srgb, var(--ui-brand) 55%, var(--ui-line-subtle));
+    --ui-profile-bio-editor-field-focus-shadow: 0 0 0 var(--ui-focus-ring-width) color-mix(in srgb, var(--ui-brand) 14%, transparent);
+  }
+}

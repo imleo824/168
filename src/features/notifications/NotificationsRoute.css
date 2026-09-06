@@ -1,5 +1,6 @@
 /* Route-owned notification/message styles.
    These are intentionally kept out of global first-paint CSS. */
 
+@import "../../styles/tokens/notification-contracts.css";
 @import "../../styles/features/settings.css";
 @import "../../styles/features/messages.css";

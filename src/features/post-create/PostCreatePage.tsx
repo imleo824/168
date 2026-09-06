@@ -753,7 +753,7 @@ export default function PostCreate({
   }
 
   return (
-    <AppPage className="post-create-page" bottomSafe>
+    <AppPage surface="compose" className="post-create-page" bottomSafe>
       <SEO title={POST_CREATE_PAGE_TITLE} noindex />
       <PageHeader
         title={POST_CREATE_PAGE_TITLE}

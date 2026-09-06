@@ -1,0 +1,15 @@
+/* Sponsor and referral route contracts. */
+
+@layer base {
+  :root {
+    --ui-sponsor-row-skeleton-title-width: 42%;
+    --ui-sponsor-row-skeleton-meta-width: var(--ui-skeleton-width-compact);
+    --ui-referral-hero-surface:
+      radial-gradient(circle at 12% 0%, color-mix(in srgb, var(--ui-brand) 16%, transparent), transparent 34%),
+      linear-gradient(135deg, color-mix(in srgb, var(--ui-brand) 14%, var(--ui-surface-card)), var(--ui-surface-card));
+    --ui-referral-metric-border: color-mix(in srgb, var(--ui-text-strong) 5%, transparent);
+    --ui-referral-available-surface: color-mix(in srgb, var(--ui-surface-card) 78%, transparent);
+    --ui-referral-stat-surface: color-mix(in srgb, var(--ui-surface-card) 74%, transparent);
+    --ui-referral-rules-overlay-z: var(--ui-z-dialog);
+  }
+}

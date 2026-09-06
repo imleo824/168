@@ -1,0 +1,99 @@
+/* Profile and user-space route contracts. */
+
+@layer base {
+  :root {
+    --ui-profile-cover-height: calc(var(--ui-space-8) * 4 + var(--ui-space-4));
+    --ui-profile-cover-image-opacity: 1;
+    --ui-profile-cover-pattern-opacity: 0.18;
+    --ui-profile-cover-default-pattern-opacity: 0.09;
+    --ui-profile-cover-default-glass-opacity: 0.22;
+    --ui-profile-cover-image-overlay-opacity: 0.18;
+    --ui-profile-cover-default-surface:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--ui-color-white) 94%, var(--ui-brand) 6%) 0%,
+        color-mix(in srgb, var(--ui-color-white) 97%, var(--ui-success) 3%) 46%,
+        color-mix(in srgb, var(--ui-surface-card-solid) 98%, var(--ui-brand) 2%) 100%
+      ),
+      linear-gradient(
+        118deg,
+        color-mix(in srgb, var(--ui-brand) 10%, var(--ui-color-white)) 0%,
+        color-mix(in srgb, var(--ui-success) 7%, var(--ui-color-white)) 54%,
+        color-mix(in srgb, var(--ui-warning) 9%, var(--ui-color-white)) 100%
+      );
+    --ui-profile-cover-pattern-surface:
+      repeating-linear-gradient(
+        0deg,
+        color-mix(in srgb, var(--ui-brand) 8%, transparent) 0,
+        color-mix(in srgb, var(--ui-brand) 8%, transparent) var(--ui-border-width-hairline),
+        transparent var(--ui-border-width-hairline),
+        transparent calc(var(--ui-space-5) + var(--ui-space-1))
+      ),
+      repeating-linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--ui-text-primary) 5%, transparent) 0,
+        color-mix(in srgb, var(--ui-text-primary) 5%, transparent) var(--ui-border-width-hairline),
+        transparent var(--ui-border-width-hairline),
+        transparent calc(var(--ui-space-8) + var(--ui-space-3))
+      ),
+      repeating-linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--ui-color-white) 46%, transparent) 0,
+        color-mix(in srgb, var(--ui-color-white) 46%, transparent) var(--ui-border-width-hairline),
+        transparent var(--ui-border-width-hairline),
+        transparent calc(var(--ui-space-7) + var(--ui-space-1))
+      ),
+      linear-gradient(
+        100deg,
+        transparent 0%,
+        color-mix(in srgb, var(--ui-color-white) 32%, transparent) 42%,
+        transparent 76%
+      );
+    --ui-profile-cover-glass-surface:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--ui-color-white) 12%, transparent) 0%,
+        transparent 46%,
+        color-mix(in srgb, var(--ui-surface-card-solid) 58%, transparent) 100%
+      ),
+      linear-gradient(
+        90deg,
+        color-mix(in srgb, var(--ui-brand) 3%, transparent) 0%,
+        transparent 38%,
+        color-mix(in srgb, var(--ui-warning) 3%, transparent) 100%
+      );
+    --ui-profile-cover-edit-badge-border: color-mix(in srgb, var(--ui-color-white) 28%, transparent);
+    --ui-profile-cover-edit-badge-surface: color-mix(in srgb, var(--ui-color-black) 16%, transparent);
+    --ui-profile-cover-image-overlay-surface:
+      linear-gradient(180deg, color-mix(in srgb, var(--ui-color-black) 3%, transparent), transparent 42%),
+      linear-gradient(180deg, transparent 72%, color-mix(in srgb, var(--ui-surface-card-solid) 22%, transparent));
+    --ui-profile-avatar-camera-badge-bg: var(--ui-brand);
+    --ui-profile-avatar-camera-badge-fg: var(--ui-color-white);
+    --ui-profile-avatar-camera-badge-border: var(--ui-surface-card);
+    --ui-profile-avatar-camera-badge-size: calc(var(--ui-control-xs) - var(--ui-space-half) - var(--ui-space-1));
+    --ui-profile-avatar-camera-badge-shadow: 0 0 0 var(--ui-border-width-hairline) color-mix(in srgb, var(--ui-brand) 24%, transparent);
+    --ui-profile-avatar-pseudo-hidden-opacity: var(--ui-opacity-hidden);
+    --ui-profile-user-list-avatar-size: var(--ui-header-avatar-size);
+    --ui-user-space-bottom-mobile: calc(env(safe-area-inset-bottom) + var(--ui-space-8) * 2 + var(--ui-space-4));
+    --ui-user-space-bottom-desktop: calc(env(safe-area-inset-bottom) + var(--ui-space-8) + var(--ui-space-5));
+    --ui-user-space-following-surface: color-mix(in srgb, var(--ui-surface-muted) 92%, var(--ui-color-white));
+    --ui-user-space-plus-action-border: color-mix(in srgb, var(--ui-brand) 30%, var(--ui-line-hairline));
+    --ui-user-space-plus-action-surface: color-mix(in srgb, var(--ui-brand) 6%, var(--ui-surface-card));
+    --ui-user-space-plus-action-hover-border: color-mix(in srgb, var(--ui-brand) 48%, var(--ui-line-soft));
+    --ui-user-space-plus-action-hover-surface: color-mix(in srgb, var(--ui-brand) 9%, var(--ui-surface-card));
+    --ui-user-space-plus-action-hover-y: calc(var(--ui-border-width-hairline) * -1);
+    --ui-user-space-link-section-surface: color-mix(in srgb, var(--ui-surface-muted) 45%, transparent);
+    --ui-user-space-link-index-filled-surface: color-mix(in srgb, var(--ui-brand) 10%, var(--ui-surface-card));
+    --ui-user-space-link-field-disabled-opacity: 0.6;
+    --ui-profile-tui-plus-trial-border: color-mix(in srgb, var(--ui-brand-warm) 42%, var(--ui-line-hairline));
+    --ui-profile-tui-plus-trial-surface: linear-gradient(135deg, color-mix(in srgb, var(--ui-text-strong) 88%, var(--ui-surface-card)), color-mix(in srgb, var(--ui-brand-warm) 20%, var(--ui-text-strong)));
+    --ui-profile-tui-plus-trial-shadow: 0 var(--ui-border-width-hairline) var(--ui-space-1) color-mix(in srgb, var(--ui-text-strong) 16%, transparent);
+    --ui-profile-tui-plus-trial-hover-border: color-mix(in srgb, var(--ui-brand-warm) 62%, var(--ui-line-soft));
+    --ui-profile-tui-plus-trial-hover-surface: linear-gradient(135deg, color-mix(in srgb, var(--ui-text-strong) 82%, var(--ui-surface-card)), color-mix(in srgb, var(--ui-brand-warm) 28%, var(--ui-text-strong)));
+    --ui-profile-tui-plus-trial-icon-fill: color-mix(in srgb, var(--ui-brand-warm) 32%, transparent);
+    --ui-profile-security-scrim-surface: color-mix(in srgb, var(--ui-color-black) 42%, transparent);
+    --ui-profile-security-row-border: color-mix(in srgb, var(--ui-line-hairline) 72%, transparent);
+    --ui-profile-plus-expired-opacity: 0.58;
+    --ui-profile-plus-expired-filter: grayscale(0.18);
+  }
+}

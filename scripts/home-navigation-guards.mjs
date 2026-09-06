@@ -178,7 +178,8 @@ for (const required of [
   "overscroll-behavior: contain;",
   ".app-shell[data-route-surface='user'][data-desktop-surface='feed'] .app-shell-main {\n      overflow: hidden;",
   ".app-shell[data-route-surface='user'] .app-bottom-nav {\n      display: none;",
-  ".app-desktop-sidebar {\n      position: sticky;",
+  ".app-desktop-sidebar {\n      display: flex;",
+  "padding-block-end: var(--ui-space-none);",
 ]) {
   assertIncludes(wideScreenAdaptation, required, `Wide-screen adaptation must preserve the desktop shell contract; missing ${required}`);
 }

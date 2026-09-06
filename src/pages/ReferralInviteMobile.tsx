@@ -14,7 +14,7 @@ export default function ReferralInviteMobile() {
   const [isRulesOpen, setIsRulesOpen] = useState(false);
 
   return (
-    <AppPage mobileAddressBarScroll bottomSafe className="referral-page surface-page">
+    <AppPage surface="workspace" mobileAddressBarScroll bottomSafe className="referral-page surface-page">
       <SEO title="邀请好友｜推推" description="邀请好友注册并充值后获得返佣，可提现或转为积分。" noindex />
       <PageHeader
         title="邀请好友"

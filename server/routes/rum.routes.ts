@@ -4,7 +4,7 @@ import { setNoStore } from '../http-cache';
 import { normalizeStringParam } from '../http/params';
 import type { AuthRequest } from '../middlewares/auth';
 
-const RUM_METRIC_NAMES = new Set(['FCP', 'LCP', 'CLS', 'INP', 'TTFB']);
+const RUM_METRIC_NAMES = new Set(['FCP', 'LCP', 'CLS', 'INP', 'TTFB', 'LONG_TASK']);
 const RUM_MAX_METRICS_PER_REQUEST = 12;
 
 export function registerRumRoutes(app: Express) {
@@ -33,6 +33,7 @@ export function registerRumRoutes(app: Express) {
         sessionId: normalizeStringParam(req.body?.sessionId, 64) || undefined,
         metrics: normalizedMetrics,
         connection: req.body?.connection,
+        context: req.body?.context,
       });
     }
 

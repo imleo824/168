@@ -202,6 +202,7 @@ export function DetailStatePage({
 }) {
   return (
     <AppPage
+      surface="detail"
       data-route-overlay={isOverlayDetail ? '' : undefined}
       data-route-overlay-scroll={isOverlayDetail ? '' : undefined}
       mobileAddressBarScroll={shouldUseDetailPageScroll}
@@ -256,6 +257,7 @@ export function DetailLoadingPage({
 }) {
   return (
     <AppPage
+      surface="detail"
       data-route-overlay={isOverlayDetail ? '' : undefined}
       data-route-overlay-scroll={isOverlayDetail ? '' : undefined}
       mobileAddressBarScroll={shouldUseDetailPageScroll}

@@ -1,15 +1,6 @@
 /* system/ui-primitives-upload.css */
 
 @layer utilities {
-  .ui-mono-value {
-    background: var(--ui-surface-card);
-    color: var(--ui-text-strong);
-    font-size: var(--ui-text-xs);
-    font-weight: var(--ui-font-weight-strong);
-    letter-spacing: var(--ui-tracking-normal);
-    line-height: var(--ui-line-none);
-  }
-
   .ui-upload-error-text {
     color: var(--ui-danger-on-soft);
     font-size: var(--ui-text-2xs);
@@ -246,10 +237,6 @@
     align-items: flex-start;
     gap: var(--ui-space-1);
     color: var(--ui-danger-classic);
-  }
-
-  .ui-skeleton-card {
-    border-radius: var(--ui-radius-xl);
   }
 
 }

@@ -10,7 +10,6 @@ const root = path.resolve(__dirname, '..');
 
 const failures = [];
 const expectedIndexImports = [
-  '@import "tailwindcss";',
   '@import "./styles/layers/foundation.css";',
   '@import "./styles/layers/system-core.css";',
   '@import "./styles/layers/components.css";',
@@ -271,9 +270,11 @@ assertStableImports(
 );
 
 const productTokenSource = read('src/styles/00-product-tokens.css');
+const adminDesktopSource = read('src/features/admin/AdminDesktop.css');
 const indexHtmlSource = read('index.html');
 const coreSheetSource = read('src/styles/02-core-sheets-actions.css');
-const featureContractTokenSource = read('src/styles/tokens/feature-contracts.css');
+const postCreateContractTokenSource = read('src/styles/tokens/post-create-contracts.css');
+const profilePageContractTokenSource = read('src/styles/tokens/profile-page-contracts.css');
 const homeStructuredFilterSource = read('src/styles/features/home-structured-filters.css');
 const socialTokenSource = read('src/styles/tokens/social-contracts.css');
 const postTagContractSource = read('src/styles/system/ui-post-tag-contract.css');
@@ -335,6 +336,14 @@ const requiredCssArchitectureContract = [
   ],
 ];
 
+if (read('src/index.css').includes('@import "tailwindcss";')) {
+  failures.push('src/index.css must not load Tailwind globally for user routes.');
+}
+
+if (!adminDesktopSource.includes('@import "tailwindcss";')) {
+  failures.push('src/features/admin/AdminDesktop.css must own the admin-only Tailwind import.');
+}
+
 for (const [snippet, message] of requiredCssArchitectureContract) {
   if (!frontendWorkingRulesSource.includes(snippet)) {
     failures.push(`docs/process/frontend-working-rules.rst ${message}`);
@@ -392,8 +401,8 @@ const requiredPostCreatePickerTokens = [
 ];
 
 for (const token of requiredPostCreatePickerTokens) {
-  if (featureContractTokenSource.includes(token)) continue;
-  failures.push(`src/styles/tokens/feature-contracts.css must define ${token} for the post-create picker geometry contract.`);
+  if (postCreateContractTokenSource.includes(token)) continue;
+  failures.push(`src/styles/tokens/post-create-contracts.css must define ${token} for the post-create picker geometry contract.`);
 }
 
 const requiredPostCreateStateTokens = [
@@ -412,8 +421,8 @@ const requiredPostCreateStateTokens = [
 ];
 
 for (const token of requiredPostCreateStateTokens) {
-  if (featureContractTokenSource.includes(token)) continue;
-  failures.push(`src/styles/tokens/feature-contracts.css must define ${token} for the post-create state and meta control contract.`);
+  if (postCreateContractTokenSource.includes(token)) continue;
+  failures.push(`src/styles/tokens/post-create-contracts.css must define ${token} for the post-create state and meta control contract.`);
 }
 
 const requiredProfileAvatarActionTokens = [
@@ -425,8 +434,8 @@ const requiredProfileAvatarActionTokens = [
 ];
 
 for (const token of requiredProfileAvatarActionTokens) {
-  if (featureContractTokenSource.includes(token)) continue;
-  failures.push(`src/styles/tokens/feature-contracts.css must define ${token} for the profile avatar camera badge contract.`);
+  if (profilePageContractTokenSource.includes(token)) continue;
+  failures.push(`src/styles/tokens/profile-page-contracts.css must define ${token} for the profile avatar camera badge contract.`);
 }
 
 const requiredHomeStructuredFilterTokens = [
@@ -1064,12 +1073,12 @@ const selectorOwnershipRules = [
   {
     file: 'src/styles/features/create-promote-state.css',
     forbidden: '--post-create-option-selected-border:',
-    owner: 'src/styles/tokens/feature-contracts.css post-create state tokens',
+    owner: 'src/styles/tokens/post-create-contracts.css post-create state tokens',
   },
   {
     file: 'src/styles/features/create-promote-state.css',
     forbidden: '--post-create-option-idle-border:',
-    owner: 'src/styles/tokens/feature-contracts.css post-create state tokens',
+    owner: 'src/styles/tokens/post-create-contracts.css post-create state tokens',
   },
   {
     file: 'src/styles/features/create-promote-state.css',
@@ -1439,47 +1448,47 @@ const selectorOwnershipRules = [
   {
     file: 'src/styles/features/create-promote-state.css',
     forbidden: 'background: color-mix(in srgb, var(--ui-social-surface) 92%, transparent)',
-    owner: 'src/styles/tokens/feature-contracts.css post-create meta card surface token',
+    owner: 'src/styles/tokens/post-create-contracts.css post-create meta card surface token',
   },
   {
     file: 'src/styles/features/create-promote-state.css',
     forbidden: 'background: color-mix(in srgb, var(--ui-social-surface-muted) 70%, var(--ui-social-surface))',
-    owner: 'src/styles/tokens/feature-contracts.css post-create meta row filled surface token',
+    owner: 'src/styles/tokens/post-create-contracts.css post-create meta row filled surface token',
   },
   {
     file: 'src/styles/features/create-promote-state.css',
     forbidden: 'border-color: color-mix(in srgb, var(--ui-danger-classic) 30%, transparent)',
-    owner: 'src/styles/tokens/feature-contracts.css post-create meta row error border token',
+    owner: 'src/styles/tokens/post-create-contracts.css post-create meta row error border token',
   },
   {
     file: 'src/styles/features/create-promote-state.css',
     forbidden: 'background: color-mix(in srgb, var(--ui-danger-classic) 8%, var(--ui-social-surface))',
-    owner: 'src/styles/tokens/feature-contracts.css post-create meta row error surface token',
+    owner: 'src/styles/tokens/post-create-contracts.css post-create meta row error surface token',
   },
   {
     file: 'src/styles/features/create-promote-post-picker.css',
     forbidden: '42rem',
-    owner: 'src/styles/tokens/feature-contracts.css semantic picker panel width token',
+    owner: 'src/styles/tokens/post-create-contracts.css semantic picker panel width token',
   },
   {
     file: 'src/styles/features/create-promote-post-picker.css',
     forbidden: '46rem',
-    owner: 'src/styles/tokens/feature-contracts.css semantic picker panel desktop height token',
+    owner: 'src/styles/tokens/post-create-contracts.css semantic picker panel desktop height token',
   },
   {
     file: 'src/styles/features/create-promote-post-picker.css',
     forbidden: '82vh',
-    owner: 'src/styles/tokens/feature-contracts.css semantic picker panel desktop viewport token',
+    owner: 'src/styles/tokens/post-create-contracts.css semantic picker panel desktop viewport token',
   },
   {
     file: 'src/styles/features/create-promote-post-picker.css',
     forbidden: '100svh',
-    owner: 'src/styles/tokens/feature-contracts.css semantic picker panel mobile height token',
+    owner: 'src/styles/tokens/post-create-contracts.css semantic picker panel mobile height token',
   },
   {
     file: 'src/styles/features/create-promote-post-picker.css',
     forbidden: '100dvh',
-    owner: 'src/styles/tokens/feature-contracts.css semantic picker panel mobile height token',
+    owner: 'src/styles/tokens/post-create-contracts.css semantic picker panel mobile height token',
   },
   {
     file: 'src/styles/features/home-feed-foundation.css',
@@ -1806,7 +1815,18 @@ for (const file of walk('src', (entry) => /\.(tsx|ts)$/.test(entry))) {
     ['src/pages/ReferralInviteMobile.tsx', '@/features/sponsor/ReferralRoute.css'],
     ['src/pages/ReferralInviteRecordsMobile.tsx', '@/features/sponsor/ReferralRoute.css'],
     ['src/pages/RechargeMobile.tsx', '@/features/recharge/RechargeRoute.css'],
+    ['src/pages/TransactionHistoryMobile.tsx', '@/features/records/RecordsRoute.css'],
     ['src/pages/BrandAbout.tsx', '@/features/brand/BrandAboutRoute.css'],
+    // These components are code-split interaction boundaries. Keeping their
+    // styles with the lazy module prevents dialogs and upload/lightbox chrome
+    // from inflating the app-wide first-screen stylesheet.
+    ['src/features/profile/ProfileDialog.tsx', '@/styles/components/profile-dialog.css'],
+    ['src/features/upload/ImageUpload.tsx', '@/styles/system/ui-primitives-upload.css'],
+    ['src/ui/ImageLightbox.tsx', '@/styles/system/ui-primitives-lightbox.css'],
+    ['src/ui/PaymentActionSheet.tsx', '@/styles/components/payment-action-sheet.css'],
+    ['src/features/auth/AuthModal.tsx', './AuthModal.css'],
+    ['src/features/tui-plus/TuiPlusBenefitPromptDialog.tsx', '@/styles/features/tui-plus.css'],
+    ['src/app/AppDesktopAuxRail.tsx', '@/styles/features/aux-rail.css'],
   ]);
   const allowedRouteOwnedCss = routeOwnedCssImport.get(file);
   if (allowedRouteOwnedCss) {

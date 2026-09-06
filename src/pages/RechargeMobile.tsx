@@ -413,7 +413,7 @@ export default function RechargeMobile() {
   ];
 
   return (
-    <AppPage mobileAddressBarScroll className="recharge-page">
+    <AppPage surface="workspace" mobileAddressBarScroll className="recharge-page">
       <SEO title="充积分｜推推" description="推推充积分，支持通过 TRC-20 USDT 兑换积分。" noindex />
 
       <PageHeader
@@ -484,7 +484,7 @@ export default function RechargeMobile() {
                           className="recharge-amount-clear-btn"
                           aria-label="清空金额"
                         >
-                          <XCircle className="w-4 h-4" />
+                          <XCircle className="recharge-error-icon" />
                         </button>
                       )}
                     </div>
@@ -668,5 +668,3 @@ export default function RechargeMobile() {
     </AppPage>
   );
 }
-
-

@@ -534,7 +534,7 @@ export default function ProfileMobile() {
   }
 
   return (
-    <AppPage mobileAddressBarScroll bottomSafe className="profile-modern-page surface-page">
+    <AppPage surface="profile" mobileAddressBarScroll bottomSafe className="profile-modern-page surface-page">
       <ListReturnScrollRestorer
         scope={listReturnScope}
         ready={activeListReady}

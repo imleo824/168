@@ -137,6 +137,9 @@
     --ui-page-padding-x: var(--ui-space-5);
     --ui-page-edge-padding-x: var(--ui-page-padding-x);
     --ui-page-content-max-width: min(100%, calc(var(--ui-space-8) * 19 + var(--ui-space-4)));
+    --ui-page-reading-max-width: min(100%, calc(var(--ui-space-8) * 18));
+    --ui-page-standard-max-width: var(--ui-page-content-max-width);
+    --ui-page-wide-max-width: min(100%, var(--ui-feed-card-max-width));
     --ui-app-shell-bounded-max-width: var(--ui-page-content-max-width);
     --ui-app-shell-desktop-padding-x: var(--ui-space-6);
     --ui-app-shell-desktop-padding-y: var(--ui-space-5);
@@ -257,7 +260,6 @@
 
     /* Topbar rhythm consumed by topbar.css / topbar-system.css. */
     --ui-topbar-height: var(--ui-control-hit);
-    --ui-topbar-surface-base: var(--ui-surface-card-solid);
     --ui-topbar-surface-standard: var(--ui-surface-card-solid);
     --ui-topbar-surface-home: var(--ui-topbar-surface-standard);
     --ui-topbar-surface-detail: var(--ui-topbar-surface-standard);
@@ -298,10 +300,6 @@
     --ui-home-feed-state-surface: var(--ui-color-transparent);
     --ui-home-feed-state-border: var(--ui-color-transparent);
     --ui-home-feed-state-shadow: var(--ui-shadow-none);
-    --ui-home-topbar-brand-font: var(--ui-font-family-sans);
-    --ui-home-topbar-brand-weight: var(--ui-font-weight-display);
-    --ui-home-topbar-brand-baseline-shift: var(--ui-space-none);
-    --ui-home-topbar-brand-display-size: var(--ui-home-topbar-brand-size);
     --ui-home-topbar-blur-strong: var(--ui-topbar-backdrop-filter);
     --ui-home-action-icon-size: var(--ui-control-icon-md);
     --ui-home-action-icon-stroke: var(--ui-icon-stroke);

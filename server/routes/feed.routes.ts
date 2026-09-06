@@ -4,7 +4,7 @@ import type { PostCategoryMetaFilter } from '../post.service';
 import { ConfigService, type PublishCategoryMetaConfig } from '../config.service';
 import type { PublicFeedCachedPayload, PublicFeedResultPayload } from '../public-feed-cache';
 import type { FeedKind } from '../modules/feed';
-import { measureFeedStep } from '../modules/feed';
+import { collectFeedPerformance, measureFeedStep } from '../modules/feed';
 import { PromotionService } from '../promotion.service';
 import { toPublicPromotionAdPayloads } from '../services/promotion-public-ad-payload.service';
 import { getCachedCategories, toPublicConfig } from './config.routes';
@@ -64,6 +64,31 @@ export type FeedRoutesDeps = {
 const HOME_FEED_KINDS = new Set<FeedKind>(['following', 'recommended', 'category']);
 const HOME_FEED_CATEGORY_SLUG_PATTERN = /^[a-z0-9][a-z0-9-]{0,63}$/i;
 const HOME_FIRST_SCREEN_BOOTSTRAP_BUDGET_MS = 450;
+
+function nowMs() {
+  return typeof performance !== 'undefined' ? performance.now() : Date.now();
+}
+
+async function measureDuration<T>(task: () => Promise<T>, onComplete: (durationMs: number) => void) {
+  const startedAt = nowMs();
+  try {
+    return await task();
+  } finally {
+    onComplete(Math.max(0, nowMs() - startedAt));
+  }
+}
+
+function formatServerTimingMetric(name: string, durationMs: number) {
+  return `${name};dur=${durationMs.toFixed(1)}`;
+}
+
+function sumFeedTimingPrefix(timings: Map<string, number>, prefix: string) {
+  let total = 0;
+  timings.forEach((durationMs, name) => {
+    if (name.startsWith(prefix)) total += durationMs;
+  });
+  return total;
+}
 
 export function normalizeHomeFeedKind(raw: unknown): FeedKind {
   const kind = String(raw || '').trim().toLowerCase() as FeedKind;
@@ -146,6 +171,11 @@ function listHomeFeed(params: {
 
 export function registerFeedRoutes(app: Express, deps: FeedRoutesDeps) {
   app.get('/api/home/first-screen', deps.publicReadLimiter, deps.authMiddleware, deps.catchAsync(async (req: AuthRequest, res: Response) => {
+    const requestStartedAt = nowMs();
+    let bootstrapDurationMs = 0;
+    let feedDurationMs = 0;
+    let serializationDurationMs = 0;
+    let feedStepTimings = new Map<string, number>();
     const feedKind = normalizeHomeFeedKind(req.query.feed);
     const categorySlug = normalizeHomeFeedCategorySlug(req.query.categorySlug);
     const currentUserId = deps.getCurrentUserId(req);
@@ -164,7 +194,10 @@ export function registerFeedRoutes(app: Express, deps: FeedRoutesDeps) {
     }
 
     const configsPromise = deps.getConfigs().catch(() => ConfigService.getDefaultConfigs());
-    const bootstrapPromise = buildHomeFirstScreenBootstrap(deps, configsPromise);
+    const bootstrapPromise = measureDuration(
+      () => buildHomeFirstScreenBootstrap(deps, configsPromise),
+      (durationMs) => { bootstrapDurationMs = durationMs; },
+    );
     const shouldValidateCategoryMetaFilters = feedKind === 'category' && Boolean(req.query.categoryMetaScope || req.query.categoryMetaFilters);
     let normalizedCategoryMetaFilters: PostCategoryMetaFilter[] = [];
 
@@ -185,25 +218,31 @@ export function registerFeedRoutes(app: Express, deps: FeedRoutesDeps) {
       normalizedCategoryMetaFilters = validationResult.filters;
     }
 
-    const loadFeedResult = () => deps.runPublicFeedRead(() => measureFeedStep({
-      name: 'home-first-screen.load',
-      requestId: req.requestId,
-      kind: feedKind,
-      limit,
-    }, async () => {
-      const feedResult = await listHomeFeed({
-        deps,
-        feedKind,
-        categorySlug,
-        currentUserId,
-        currentUserRole,
+    const loadFeedResult = () => deps.runPublicFeedRead(async () => {
+      const collected = await collectFeedPerformance(() => measureFeedStep({
+        name: 'home-first-screen.load',
+        requestId: req.requestId,
+        kind: feedKind,
         limit,
-        cursor,
-        categoryMetaFilters: normalizedCategoryMetaFilters,
-      });
-      const safePosts = feedResult.items.map((post: any) => deps.PostService.maskContact(post, currentUserId, currentUserRole));
-      return { ...feedResult, items: safePosts };
-    }));
+      }, async () => {
+        const feedResult = await listHomeFeed({
+          deps,
+          feedKind,
+          categorySlug,
+          currentUserId,
+          currentUserRole,
+          limit,
+          cursor,
+          categoryMetaFilters: normalizedCategoryMetaFilters,
+        });
+        const serializationStartedAt = nowMs();
+        const safePosts = feedResult.items.map((post: any) => deps.PostService.maskContact(post, currentUserId, currentUserRole));
+        serializationDurationMs += Math.max(0, nowMs() - serializationStartedAt);
+        return { ...feedResult, items: safePosts };
+      }));
+      feedStepTimings = collected.timings;
+      return collected.result;
+    });
 
     const publicCacheKey = feedKind !== 'following'
       ? deps.getPublicFeedResultCacheKey(req, 'home-feed', { currentUserId, limit, cursor })
@@ -273,11 +312,25 @@ export function registerFeedRoutes(app: Express, deps: FeedRoutesDeps) {
       }
     };
 
-    const [bootstrap, feed] = await Promise.all([bootstrapPromise, loadFirstScreenFeed()]);
+    const feedPromise = measureDuration(
+      loadFirstScreenFeed,
+      (durationMs) => { feedDurationMs = durationMs; },
+    );
+    const [bootstrap, feed] = await Promise.all([bootstrapPromise, feedPromise]);
     deps.setPublicFeedListCacheHeaders(res, currentUserId, 10);
     res.setHeader('X-Home-First-Screen', '1');
     res.setHeader('X-Feed-Result-Cache', feedCacheState);
     res.setHeader('X-Feed-Cache-Version', String(deps.getPublicFeedCacheVersion()));
+    res.setHeader('Server-Timing', [
+      formatServerTimingMetric('bootstrap', bootstrapDurationMs),
+      formatServerTimingMetric('feed', feedDurationMs),
+      formatServerTimingMetric('candidates', sumFeedTimingPrefix(feedStepTimings, 'feed-candidates.')),
+      formatServerTimingMetric('promotions', sumFeedTimingPrefix(feedStepTimings, 'feed-promotions.')),
+      formatServerTimingMetric('membership', feedStepTimings.get('feed-hydrate.tui-plus') || 0),
+      formatServerTimingMetric('activity', feedStepTimings.get('feed-hydrate.recent-author-activity') || 0),
+      formatServerTimingMetric('serialize', serializationDurationMs),
+      formatServerTimingMetric('total', nowMs() - requestStartedAt),
+    ].join(', '));
     return res.json({ bootstrap, feed, generatedAt: new Date().toISOString() });
   }));
 

@@ -6,6 +6,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import '@/styles/system/ui-primitives-upload.css';
 import {
   ACCEPTED_IMAGE_TYPES,
   getImageValidationError,

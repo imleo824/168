@@ -1,0 +1,74 @@
+/* Post creation route contracts. Loaded with the lazy composer route. */
+
+@layer base {
+  :root {
+    --ui-post-create-main-padding-top: var(--ui-space-none);
+    --ui-post-create-submit-label-size: var(--ui-text-title);
+    --ui-post-create-submit-label-weight: var(--ui-font-weight-title);
+    --ui-post-create-submit-label-line-height: var(--ui-line-tight);
+    --ui-post-create-submit-label-tracking: var(--ui-tracking-normal);
+    --post-create-publishing-lock-surface: color-mix(in srgb, var(--ui-color-black) 12%, transparent);
+    --ui-post-create-topbar-compact-action-height: var(--ui-header-filter-height);
+    --ui-post-create-topbar-compact-action-min-width: calc(var(--ui-header-filter-height) + var(--ui-space-4));
+    --ui-post-create-topbar-compact-text-action-min-width: var(--ui-post-create-topbar-compact-action-min-width);
+    --ui-post-create-topbar-compact-action-padding-x: var(--ui-space-3);
+    --post-create-section-padding-x: var(--ui-topbar-edge-padding-x, var(--ui-page-padding-x));
+    --post-create-media-padding-block: var(--ui-space-3);
+    --post-create-input-padding-block-start: var(--ui-space-4);
+    --post-create-input-padding-block-end: var(--post-create-media-padding-block);
+    --post-create-textarea-min-height: calc(var(--ui-space-8) * 4 + var(--ui-space-3));
+    --ui-create-image-upload-tile-size: calc(var(--ui-control-xl) + var(--ui-space-8));
+    --post-create-header-action-min-width: calc(var(--ui-space-8) + var(--ui-space-4));
+    --post-create-input-padding: var(--post-create-input-padding-block-start) var(--post-create-section-padding-x) var(--post-create-input-padding-block-end);
+    --post-create-sync-width: calc(var(--ui-space-8) * 2);
+    --post-create-sync-height: var(--ui-control-sm);
+    --post-create-sync-thumb-size: var(--ui-space-6);
+    --post-create-sync-thumb-on-x: calc(var(--ui-control-sm) + var(--ui-space-half));
+    --post-create-sync-thumb-off-x: var(--ui-space-1);
+    --post-create-channel-gap: calc(var(--ui-space-1) + var(--ui-space-half));
+    --post-create-category-option-min-height: calc(var(--ui-control-lg) + var(--ui-space-1));
+    --post-create-option-gap-top-sm: var(--ui-space-2);
+    --post-create-option-selected-border: var(--ui-color-transparent);
+    --post-create-option-selected-surface: var(--ui-action-primary-soft);
+    --post-create-option-selected-text: var(--ui-action-primary-strong);
+    --post-create-option-selected-shadow: var(--ui-shadow-none);
+    --post-create-option-idle-border: var(--ui-color-transparent);
+    --post-create-option-idle-surface: var(--ui-action-muted-surface);
+    --post-create-option-idle-surface-hover: var(--ui-action-muted-surface-hover);
+    --post-create-option-idle-text: var(--ui-text-secondary);
+    --post-create-placeholder-text: color-mix(in srgb, var(--ui-text-placeholder) 72%, transparent);
+    --post-create-image-upload-hover-border: color-mix(in srgb, var(--ui-brand) 38%, var(--ui-line-subtle));
+    --post-create-image-upload-hover-surface: color-mix(in srgb, var(--ui-brand) 7%, var(--ui-surface-muted));
+    --post-create-tool-muted-text: color-mix(in srgb, var(--ui-social-action-muted) 84%, transparent);
+    --post-create-location-idle-overlay-surface: var(--ui-surface-transparent);
+    --post-create-category-clear-border: color-mix(in srgb, var(--ui-danger-classic) 32%, transparent);
+    --post-create-category-clear-surface: color-mix(in srgb, var(--ui-danger-classic) 8%, transparent);
+    --post-create-category-clear-active-surface: color-mix(in srgb, var(--ui-danger-classic) 14%, transparent);
+    --post-create-meta-card-surface: color-mix(in srgb, var(--ui-social-surface) 92%, transparent);
+    --post-create-meta-row-filled-surface: color-mix(in srgb, var(--ui-social-surface-muted) 70%, var(--ui-social-surface));
+    --post-create-meta-row-error-border: color-mix(in srgb, var(--ui-danger-classic) 30%, transparent);
+    --post-create-meta-row-error-surface: color-mix(in srgb, var(--ui-danger-classic) 8%, var(--ui-social-surface));
+    --post-create-contact-input-padding: calc(var(--ui-space-3) + var(--ui-space-half)) var(--ui-space-4);
+    --post-create-contact-save-min-width: calc(var(--ui-space-8) * 3 + var(--ui-space-4));
+    --post-create-location-city-grid-max-height: min(48vh, calc(var(--ui-space-8) * 13));
+    --post-create-location-option-mark-ring: 0 0 0 var(--ui-border-width-hairline) color-mix(in srgb, var(--ui-brand) 32%, transparent);
+    --post-create-edit-icon-size: var(--ui-control-sm);
+    --post-create-edit-icon-offset: var(--ui-space-3);
+    --post-create-picker-panel-height: 100%;
+    --post-create-picker-panel-height-svh: var(--ui-app-page-min-height);
+    --post-create-picker-panel-height-dvh: var(--app-layout-vh);
+    --post-create-picker-panel-max-width: calc(var(--ui-space-8) * 21);
+    --post-create-picker-panel-desktop-max-height: calc(var(--ui-space-8) * 23);
+    --post-create-picker-panel-desktop-viewport-height: 82vh;
+    --post-create-picker-panel-desktop-height: min(var(--post-create-picker-panel-desktop-viewport-height), var(--post-create-picker-panel-desktop-max-height));
+    --post-create-page-scroll-padding-top: calc(var(--ui-topbar-height) + var(--ui-space-4) + env(safe-area-inset-top));
+    --post-create-dialog-actions-gap: var(--ui-space-3);
+    --post-create-dialog-actions-margin-top: var(--ui-space-6);
+    --post-create-promote-actions-gap: var(--ui-space-3);
+    --post-create-promote-actions-margin-top: var(--ui-space-5);
+    --post-create-promote-action-height: var(--ui-control-lg);
+    --post-create-promote-title-size: var(--ui-type-section-title-size);
+    --post-create-mobile-input-font-size: var(--ui-mobile-form-font-size);
+    --post-create-mobile-scroll-margin-top: calc(var(--ui-topbar-height) + var(--ui-space-4) + env(safe-area-inset-top));
+  }
+}

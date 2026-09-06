@@ -77,7 +77,7 @@ for (const forbidden of ['PAYMENT_FOCUS_STABILIZE_DELAYS', 'schedulePaymentInput
 }
 
 const paymentActionSheetSource = read('src/styles/components/payment-action-sheet.css');
-const featureContractsSource = read('src/styles/tokens/feature-contracts.css');
+const promoteContractsSource = read('src/styles/tokens/promote-contracts.css');
 const foundationTokensSource = read('src/styles/tokens/foundation.css');
 const postQuoteSource = read('src/styles/components/post-quote.css');
 const wideScreenAdaptationSource = read('src/styles/system/wide-screen-mobile-adaptation.css');
@@ -102,17 +102,17 @@ if (!paymentActionSheetSource.includes('var(--ui-promote-payment-sheet-max-heigh
 if (!paymentActionSheetSource.includes('var(--app-layout-vh, var(--app-vh))')) {
   failures.push('src/styles/components/payment-action-sheet.css must keep the stable layout viewport cap so keyboard avoidance is not double-counted on mobile browsers.');
 }
-if (!featureContractsSource.includes('--ui-promote-payment-sheet-max-height: calc(var(--ui-visual-viewport-height) - env(safe-area-inset-top) - var(--ui-space-3));')) {
-  failures.push('src/styles/tokens/feature-contracts.css must not hard-code promote/payment sheet height; derive it from the shared visual viewport contract.');
+if (!promoteContractsSource.includes('--ui-promote-payment-sheet-max-height: calc(var(--ui-visual-viewport-height) - env(safe-area-inset-top) - var(--ui-space-3));')) {
+  failures.push('src/styles/tokens/promote-contracts.css must not hard-code promote/payment sheet height; derive it from the shared visual viewport contract.');
 }
-if (featureContractsSource.includes('--ui-promote-payment-sheet-max-height: 88dvh')) {
-  failures.push('src/styles/tokens/feature-contracts.css must not restore the raw 88dvh payment sheet height.');
+if (promoteContractsSource.includes('--ui-promote-payment-sheet-max-height: 88dvh')) {
+  failures.push('src/styles/tokens/promote-contracts.css must not restore the raw 88dvh payment sheet height.');
 }
-if (!featureContractsSource.includes('--ui-promote-picker-sheet-max-height: calc(var(--ui-visual-viewport-height) - var(--ui-space-4));')) {
-  failures.push('src/styles/tokens/feature-contracts.css must derive promote picker sheet height from the shared visual viewport contract.');
+if (!promoteContractsSource.includes('--ui-promote-picker-sheet-max-height: calc(var(--ui-visual-viewport-height) - var(--ui-space-4));')) {
+  failures.push('src/styles/tokens/promote-contracts.css must derive promote picker sheet height from the shared visual viewport contract.');
 }
-if (featureContractsSource.includes('--ui-promote-picker-sheet-max-height: 86dvh')) {
-  failures.push('src/styles/tokens/feature-contracts.css must not restore the raw 86dvh promote picker sheet height.');
+if (promoteContractsSource.includes('--ui-promote-picker-sheet-max-height: 86dvh')) {
+  failures.push('src/styles/tokens/promote-contracts.css must not restore the raw 86dvh promote picker sheet height.');
 }
 if (!foundationTokensSource.includes('--ui-sheet-max-height: min(calc(var(--ui-visual-viewport-height) - var(--ui-space-4)), calc(var(--ui-space-8) * 22 + var(--ui-space-4)));')) {
   failures.push('src/styles/tokens/foundation.css must derive shared sheet max-height from the visual viewport contract.');
@@ -146,15 +146,15 @@ if (!read('src/styles/02-core-controls.css').includes('min-height: var(--ui-load
 if (!read('src/styles/system/feed-scroll-shell.css').includes('min-height: var(--ui-feed-footer-state-min-height);')) {
   failures.push('src/styles/system/feed-scroll-shell.css must use the shared feed footer state height token.');
 }
-const authPrimitivesSource = read('src/styles/system/ui-primitives-auth.css');
-if (!authPrimitivesSource.includes('--ui-auth-agreement-panel-max-height: clamp(calc(var(--ui-space-8) * 4), calc(var(--ui-visual-viewport-height) - (var(--ui-space-8) * 19)), calc(var(--ui-space-8) * 7));')) {
-  failures.push('src/styles/system/ui-primitives-auth.css must derive the auth agreement panel height from the visual viewport contract.');
+const authModalPrimitivesSource = read('src/styles/system/ui-primitives-auth-modal.css');
+if (!authModalPrimitivesSource.includes('--ui-auth-agreement-panel-max-height: clamp(calc(var(--ui-space-8) * 4), calc(var(--ui-visual-viewport-height) - (var(--ui-space-8) * 19)), calc(var(--ui-space-8) * 7));')) {
+  failures.push('src/styles/system/ui-primitives-auth-modal.css must derive the auth agreement panel height from the visual viewport contract.');
 }
-if (!authPrimitivesSource.includes('max-width: calc(var(--ui-viewport-width) - var(--ui-space-6));')) {
-  failures.push('src/styles/system/ui-primitives-auth.css must use the shared viewport width token for compact auth panels.');
+if (!authModalPrimitivesSource.includes('max-width: calc(var(--ui-viewport-width) - var(--ui-space-6));')) {
+  failures.push('src/styles/system/ui-primitives-auth-modal.css must use the shared viewport width token for compact auth panels.');
 }
 for (const forbidden of ['48svh', '46svh', '58svh', '34svh', 'calc(100vw - var(--ui-space-6))']) {
-  if (authPrimitivesSource.includes(forbidden) || read('src/styles/system/ui-primitives-layout.css').includes(forbidden) || read('src/styles/system/feed-scroll-shell.css').includes(forbidden) || read('src/styles/02-core-controls.css').includes(forbidden)) {
+  if (authModalPrimitivesSource.includes(forbidden) || read('src/styles/system/ui-primitives-layout.css').includes(forbidden) || read('src/styles/system/feed-scroll-shell.css').includes(forbidden) || read('src/styles/02-core-controls.css').includes(forbidden)) {
     failures.push(`shared state/auth primitives must not restore raw viewport sizing: ${forbidden}`);
   }
 }

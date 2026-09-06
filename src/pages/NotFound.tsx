@@ -12,7 +12,7 @@ export default function NotFound() {
   const navigate = useNavigate();
 
   return (
-    <AppPage mobileAddressBarScroll className="notfound-page">
+    <AppPage surface="utility" mobileAddressBarScroll className="notfound-page">
       <SEO title="页面走丢了｜推推" description="你访问的页面不存在或已下线，请返回首页继续浏览。" noindex />
 
       <PageHeader title="页面走丢了" />

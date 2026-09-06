@@ -26,8 +26,7 @@ const config = {
     rollupOptions: {
       output: {
         manualChunks: {
-          'react-vendor': ['react', 'react-dom', 'react-router-dom', 'react-helmet-async'],
-          'ui-vendor': ['lucide-react', 'clsx', 'tailwind-merge'],
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
           query: ['@tanstack/react-query'],
           'date-vendor': ['date-fns'],
         },

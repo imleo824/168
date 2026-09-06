@@ -151,7 +151,7 @@ export default function NotificationSettings() {
   const settingsBusy = isMutating || masterTogglePending || preferenceTogglePending;
 
   return (
-    <AppPage mobileAddressBarScroll bottomSafe className="notification-settings-page surface-page">
+    <AppPage surface="workspace" mobileAddressBarScroll bottomSafe className="notification-settings-page surface-page">
       <SEO title="通知设置｜推推" description="管理推推系统提醒和消息通知类型。" noindex />
       <PageHeader
         title="通知设置"

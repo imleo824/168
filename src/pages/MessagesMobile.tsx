@@ -340,7 +340,7 @@ export default function MessagesMobile() {
   }, [guardedOpenActorSpace, guardedOpenNotification, items, notificationsQuery.error, notificationsQuery.isError, notificationsQuery.isLoading]);
 
   return (
-    <AppPage mobileAddressBarScroll bottomSafe className="messages-page surface-page">
+    <AppPage surface="conversation" mobileAddressBarScroll bottomSafe className="messages-page surface-page">
       <SEO title="消息｜推推" description="查看点赞、评论、引用、关注和平台提醒。" noindex />
       <PageHeader
         title={title}

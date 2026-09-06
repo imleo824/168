@@ -3,6 +3,9 @@
  * profile identity, settings dialog, and user-space presentation CSS.
  */
 
+@import "../../styles/00-profile-tokens.css";
+@import "../../styles/tokens/profile-page-contracts.css";
+@import "../../styles/features/tui-plus.css";
 @import "../../styles/features/settings.css";
 @import "../../styles/features/profile.css";
 @import "../../styles/features/user-space-next.css";

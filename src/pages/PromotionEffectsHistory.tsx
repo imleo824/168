@@ -120,7 +120,7 @@ export default function PromotionEffectsHistory() {
   return (
     <>
       <SEO title="效果分析｜推推" description="查看推广效果累计数据和每日明细。" noindex />
-      <AppPage bottomSafe className="promote-mobile-page promote-page promotion-effects-page surface-page">
+      <AppPage surface="workspace" bottomSafe className="promote-mobile-page promote-page promotion-effects-page surface-page">
         <PageHeader
           title="效果分析"
           onBack={() => navigate(returnTo, { replace: true })}

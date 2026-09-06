@@ -235,7 +235,7 @@ export default function ReferralInvitePageContent({ isRulesOpen, onCloseRules }:
 
       <section className="referral-record-section" aria-label="邀请与返佣记录">
         <div className="referral-record-tabs-section ui-page-tabs-section scrollbar-hide">
-          <SegmentTabs items={REFERRAL_RECORD_TABS} activeKey={activeRecordTab} onChange={(key) => setActiveRecordTab(key as ReferralRecordTab)} ariaLabel="邀请记录分类" className="ui-page-tabs-bar referral-record-tabbar" showLabels labelDisplay="full" />
+          <SegmentTabs items={REFERRAL_RECORD_TABS} activeKey={activeRecordTab} onChange={(key) => setActiveRecordTab(key as ReferralRecordTab)} ariaLabel="邀请记录分类" className="ui-page-tabs-bar referral-record-tabbar" showLabels labelDisplay="full" variant="underline" />
         </div>
         <div className="referral-record-panel">
           {recordContent}

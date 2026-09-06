@@ -817,16 +817,6 @@ export const allowedSelectorPropertyOverlapManifests = [
     reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
   },
   {
-    selector: ".ui-auth-agreement-row",
-    files: [
-      "src/styles/system/ui-primitives-auth-agreement.css",
-      "src/styles/system/ui-primitives-auth.css",
-    ],
-    properties: ["align-items", "grid-template-columns"],
-    reason: "Current CSS architecture intentionally splits this selector across these owner files; this manifest keeps the overlap explicit and stale-checked.",
-  },
-
-  {
     selector: ".ui-button[data-action-size='header']",
     files: [
       "src/styles/components/buttons.css",

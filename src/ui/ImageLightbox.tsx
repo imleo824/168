@@ -1,5 +1,6 @@
 import React from 'react';
 import { createPortal } from 'react-dom';
+import '@/styles/system/ui-primitives-lightbox.css';
 import { ChevronLeft, ChevronRight, X, ZoomIn, ZoomOut } from 'lucide-react';
 import OptimizedImage from './OptimizedImage';
 import { useScrollLock } from '@/utils/scrollLock';

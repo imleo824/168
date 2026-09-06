@@ -193,7 +193,7 @@ export function PostCreateContactEditorDialog({
   if (!open) return null;
 
   return (
-    <AppPage className="post-create-page post-create-contact-editor-page" bottomSafe>
+    <AppPage surface="compose" className="post-create-page post-create-contact-editor-page" bottomSafe>
       <PageHeader
         title="设置 Telegram 账号"
         showBack

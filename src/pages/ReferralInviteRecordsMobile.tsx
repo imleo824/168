@@ -108,7 +108,7 @@ export default function ReferralInviteRecordsMobile() {
   }, [activeTab, commissionsQuery.data, commissionsQuery.isError, commissionsQuery.isLoading, relationsQuery.data, relationsQuery.isError, relationsQuery.isLoading, retryAction, withdrawalsQuery.data, withdrawalsQuery.isError, withdrawalsQuery.isLoading]);
 
   return (
-    <AppPage mobileAddressBarScroll bottomSafe className="referral-page surface-page">
+      <AppPage surface="workspace" mobileAddressBarScroll bottomSafe className="referral-page surface-page">
       <SEO title={`${pageTitle}｜推推`} description="查看邀请好友、返佣和提现完整记录。" noindex />
       <PageHeader title={pageTitle} showBack titleAlign="center" />
       <PageContentShell as="main" className="referral-page-main referral-records-page-main ui-app-page-main">

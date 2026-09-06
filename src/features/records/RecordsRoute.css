@@ -1,0 +1,6 @@
+/* Shared route-owned record presentation. */
+
+@import "../../styles/tokens/record-contracts.css";
+@import "../../styles/system/record-header-filter-contract.css";
+@import "../../styles/system/record-card-contract.css";
+@import "../../styles/components/record-more-link.css";

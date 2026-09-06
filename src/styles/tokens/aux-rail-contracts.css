@@ -1,0 +1,37 @@
+/* Desktop promotion rail contracts. Loaded only with the desktop rail. */
+
+@layer base {
+  :root {
+    --ui-aux-rail-tag-amber-bg: color-mix(in srgb, var(--ui-brand) 10%, transparent);
+    --ui-aux-rail-tag-amber-color: var(--ui-brand);
+    --ui-aux-rail-tag-amber-border: color-mix(in srgb, var(--ui-brand) 20%, transparent);
+
+    --ui-aux-rail-tag-rose-bg: color-mix(in srgb, var(--ui-danger-classic) 10%, transparent);
+    --ui-aux-rail-tag-rose-color: var(--ui-danger-classic);
+    --ui-aux-rail-tag-rose-border: color-mix(in srgb, var(--ui-danger-classic) 20%, transparent);
+
+    --ui-aux-rail-tag-indigo-bg: color-mix(in srgb, var(--ui-brand) 12%, transparent);
+    --ui-aux-rail-tag-indigo-color: var(--ui-brand);
+    --ui-aux-rail-tag-indigo-border: color-mix(in srgb, var(--ui-brand) 22%, transparent);
+
+    --ui-aux-rail-tag-emerald-bg: color-mix(in srgb, var(--ui-success) 10%, transparent);
+    --ui-aux-rail-tag-emerald-color: var(--ui-success);
+    --ui-aux-rail-tag-emerald-border: color-mix(in srgb, var(--ui-success) 20%, transparent);
+
+    --ui-aux-rail-card-hover-border: color-mix(in srgb, var(--ui-brand) 30%, transparent);
+    --ui-aux-rail-banner-ratio: 16 / 9;
+    --ui-aux-rail-post-media-ratio: 3 / 2;
+    --ui-aux-rail-empty-icon-size: calc(var(--ui-space-8) + var(--ui-space-6));
+    --ui-aux-rail-avatar-size: var(--ui-control-xs);
+    --ui-aux-rail-title-lines: 2;
+    --ui-aux-rail-copy-lines: 3;
+    --ui-aux-rail-skeleton-tag-width: calc(var(--ui-space-8) * 2);
+    --ui-aux-rail-skeleton-meta-width: calc(var(--ui-space-8) + var(--ui-space-4));
+    --ui-aux-rail-skeleton-title-width: calc(100% - var(--ui-space-8));
+
+    --ui-desktop-ad-action-bg: color-mix(in srgb, var(--ui-brand) 12%, var(--ui-surface-card));
+    --ui-desktop-ad-action-border: color-mix(in srgb, var(--ui-brand) 25%, transparent);
+    --ui-desktop-ad-action-hover-bg: color-mix(in srgb, var(--ui-brand) 20%, var(--ui-surface-card));
+    --ui-desktop-ad-action-hover-border: color-mix(in srgb, var(--ui-brand) 40%, transparent);
+  }
+}

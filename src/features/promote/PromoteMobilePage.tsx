@@ -652,6 +652,7 @@ export default function PromoteMobile() {
 
   return (
     <AppPage
+      surface="workspace"
       ref={pageRef}
       onFocusCapture={handlePromoteFocusCapture}
       onBlurCapture={handlePromoteBlurCapture}

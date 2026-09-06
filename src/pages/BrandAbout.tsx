@@ -80,7 +80,7 @@ export default function BrandAbout() {
   ];
 
   return (
-    <AppPage mobileAddressBarScroll className="brand-about-page">
+    <AppPage surface="content" mobileAddressBarScroll className="brand-about-page">
       <SEO
         title={`关于${SITE_NAME}｜圈内最大的匿名社交分类信息网`}
         socialTitle={`${SITE_NAME}｜${SITE_SLOGAN}`}

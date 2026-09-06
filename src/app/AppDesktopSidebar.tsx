@@ -20,6 +20,7 @@ import { primePostCreateComposerFocus } from '@/utils/postCreateFocusPrime';
 import { useOnlinePresence } from '@/features/home/OnlinePresenceContext';
 import AvatarImage from '@/ui/AvatarImage';
 import { isTuiPlusActive } from '@/features/tui-plus/tuiPlusBenefits';
+import { useInteractionGuard } from '@/hooks/useInteractionGuard';
 
 const DESKTOP_NAV_ITEMS = [
   { to: APP_ROUTES.home, label: '首页', icon: House, end: true },
@@ -63,6 +64,13 @@ export const AppDesktopSidebar: React.FC = () => {
     });
   };
 
+  const { guarded: guardedHandleQuickPost } = useInteractionGuard(handleQuickPost, {
+    policy: 'critical',
+    cooldownMs: 520,
+    minPendingMs: 160,
+    mode: 'drop',
+  });
+
   const handleAdPost = () => {
     warmupNavigationIntent('sponsor');
     navigate(APP_ROUTES.sponsor);
@@ -76,23 +84,23 @@ export const AppDesktopSidebar: React.FC = () => {
   return (
     <aside className="app-desktop-sidebar" aria-label="桌面主导航">
       {/* Brand Header */}
-      <div className="flex flex-col gap-3">
+      <div className="app-desktop-sidebar-primary">
         <NavLink
-          className="app-desktop-brand flex flex-row items-center gap-3 group"
+          className="app-desktop-brand"
           to={APP_ROUTES.home}
           aria-label="返回首页"
         >
-          <span className="app-desktop-brand-mark flex items-center justify-center group-hover:scale-105 transition-transform">
+          <span className="app-desktop-brand-mark">
             T
           </span>
-          <span className="app-desktop-brand-copy flex flex-col min-w-0">
+          <span className="app-desktop-brand-copy">
             <span className="app-desktop-brand-name">推推</span>
             <span className="app-desktop-brand-subtitle">匿名分类信息网</span>
           </span>
         </NavLink>
 
         {/* Navigation Items */}
-        <nav className="app-desktop-nav flex flex-col gap-1.5" aria-label="桌面导航">
+        <nav className="app-desktop-nav" aria-label="桌面导航">
           {desktopNavItems.map((item) => {
             const Icon = item.icon;
             const isMessages = item.to === APP_ROUTES.messages;
@@ -116,17 +124,17 @@ export const AppDesktopSidebar: React.FC = () => {
                   }
                 }}
                 className={({ isActive }) =>
-                  `app-desktop-nav-item flex flex-row items-center gap-3 ${
+                  `app-desktop-nav-item ${
                     isActive ? 'app-desktop-nav-item--active' : ''
                   }`
                 }
                 onPointerEnter={() => warmupRoutePath(item.to)}
                 onFocus={() => warmupRoutePath(item.to)}
               >
-                <span className="app-desktop-nav-icon-container flex items-center justify-center">
+                <span className="app-desktop-nav-icon-container">
                   <Icon className="app-desktop-nav-icon" aria-hidden="true" />
                 </span>
-                <span className="app-desktop-nav-label flex-1 truncate">{item.label}</span>
+                <span className="app-desktop-nav-label">{item.label}</span>
                 {isMessages && unreadCount > 0 ? (
                   <span className="app-desktop-nav-badge" aria-label={`${unreadCount}条未读消息`}>
                     {unreadCount > 99 ? '99+' : unreadCount}
@@ -138,44 +146,44 @@ export const AppDesktopSidebar: React.FC = () => {
         </nav>
 
         {/* Action Buttons Group */}
-        <div className="flex flex-col gap-2 pt-2">
+        <div className="app-desktop-action-group">
           <button
             type="button"
-            className="app-desktop-post-action pressable flex flex-row items-center justify-center gap-2"
-            onClick={handleQuickPost}
+            className="app-desktop-post-action pressable"
+            onClick={() => void guardedHandleQuickPost()}
             onMouseEnter={() => warmupNavigationIntent('create')}
             onFocus={() => warmupNavigationIntent('create')}
             aria-label="快速发推"
             title="快速发推"
           >
-            <CirclePlus className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
+            <CirclePlus className="app-desktop-action-icon" aria-hidden="true" />
             <span>立即发推</span>
           </button>
           <button
             type="button"
-            className="app-desktop-ad-action pressable flex flex-row items-center justify-center gap-2"
+            className="app-desktop-ad-action pressable"
             onClick={handleAdPost}
             onMouseEnter={() => warmupNavigationIntent('sponsor')}
             aria-label="投放广告"
             title="投放广告"
           >
-            <Megaphone className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
+            <Megaphone className="app-desktop-action-icon" aria-hidden="true" />
             <span>投放广告</span>
           </button>
         </div>
       </div>
 
       {/* User Status & Online Context Footer */}
-      <section className="app-desktop-sidebar-context mt-auto" aria-label="用户与状态">
+      <section className="app-desktop-sidebar-context" aria-label="用户与状态">
         {user ? (
           <NavLink
             to={APP_ROUTES.profile}
-            className="app-desktop-user-card flex flex-row items-center gap-3 group"
+            className="app-desktop-user-card"
             aria-label="查看个人主页"
             title="查看个人主页"
           >
             <span
-              className="app-desktop-user-avatar-shell flex-shrink-0"
+              className="app-desktop-user-avatar-shell"
               data-tui-plus={isTuiPlusActive(user) ? 'true' : undefined}
             >
               <AvatarImage
@@ -183,15 +191,15 @@ export const AppDesktopSidebar: React.FC = () => {
                 name={displayName}
                 id={user.id}
                 alt={displayName}
-                className="w-full h-full rounded-full object-cover block"
+                className="app-desktop-user-avatar-image"
                 variant="thumb"
               />
             </span>
-            <div className="app-desktop-user-info flex flex-col min-w-0 flex-1">
-              <span className="app-desktop-user-name truncate group-hover:text-[var(--ui-brand)] transition-colors">
+            <div className="app-desktop-user-info">
+              <span className="app-desktop-user-name">
                 {displayName}
               </span>
-              <span className="app-desktop-user-role truncate">
+              <span className="app-desktop-user-role">
                 {isTuiPlusActive(user)
                   ? '推推+ 尊享会员'
                   : user.role === 'ADMIN'
@@ -203,16 +211,16 @@ export const AppDesktopSidebar: React.FC = () => {
         ) : (
           <button
             type="button"
-            className="app-desktop-user-card flex flex-row items-center gap-3 text-left w-full pressable group"
+            className="app-desktop-user-card app-desktop-user-card--button pressable"
             onClick={() => requireAuth(() => {})}
             aria-label="登录或注册账号"
             title="登录或注册账号"
           >
-            <span className="app-desktop-guest-avatar flex items-center justify-center flex-shrink-0">
+            <span className="app-desktop-guest-avatar">
               <UserRound className="app-desktop-nav-icon" aria-hidden="true" />
             </span>
-            <div className="app-desktop-user-info flex flex-col min-w-0 flex-1">
-              <span className="app-desktop-user-name group-hover:text-[var(--ui-brand)] transition-colors">
+            <div className="app-desktop-user-info">
+              <span className="app-desktop-user-name">
                 登录 / 注册
               </span>
               <span className="app-desktop-user-role">体验完整功能</span>
@@ -220,11 +228,11 @@ export const AppDesktopSidebar: React.FC = () => {
           </button>
         )}
 
-        <div className="app-desktop-context-card flex flex-col gap-1">
+        <div className="app-desktop-context-card">
           <div className="app-desktop-context-kicker">当前在线</div>
-          <div className="app-desktop-context-metric flex items-center gap-2">
-            <span className="app-desktop-context-dot flex-shrink-0" aria-hidden="true" />
-            <span className="truncate">{onlineCountText || '实时更新'}</span>
+          <div className="app-desktop-context-metric">
+            <span className="app-desktop-context-dot" aria-hidden="true" />
+            <span className="app-desktop-context-value">{onlineCountText || '实时更新'}</span>
           </div>
         </div>
       </section>

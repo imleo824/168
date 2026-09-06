@@ -3,4 +3,5 @@
  * download composer, picker, and publishing-state presentation CSS.
  */
 
+@import "../../styles/tokens/post-create-contracts.css";
 @import "../../styles/features/create-promote.css";

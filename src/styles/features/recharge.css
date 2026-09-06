@@ -228,6 +228,11 @@
     color: var(--ui-text-strong);
   }
 
+  .recharge-error-icon {
+    width: var(--ui-control-icon-sm);
+    height: var(--ui-control-icon-sm);
+  }
+
   /* 快捷预设与选项扩展 */
   .recharge-preset-section {
     display: flex;

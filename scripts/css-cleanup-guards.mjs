@@ -60,16 +60,13 @@ assertImports('src/styles/layers/contracts.css', [
 assertImports('src/styles/system/ui-primitives.css', [
   '@import "./ui-primitives-layout.css";',
   '@import "./ui-primitives-auth.css";',
-  '@import "./ui-primitives-auth-agreement.css";',
   '@import "./ui-primitives-feedback.css";',
-  '@import "./ui-primitives-upload.css";',
   '@import "./ui-primitives-interactions.css";',
   '@import "./ui-interaction-performance.css";',
   '@import "./ui-touch-contract.css";',
-  '@import "./ui-primitives-lightbox.css";',
   '@import "./ui-primitives-responsive.css";',
   '@import "./wide-screen-mobile-adaptation.css";',
-], 'must keep shared primitive, interaction, and responsive contracts in one stable facade');
+], 'must keep only critical shared primitive, interaction, and responsive contracts in the global facade');
 
 assertImports('src/styles/layers/components.css', [
   '@import "../components/buttons.css";',
@@ -85,13 +82,19 @@ assertImports('src/styles/layers/components.css', [
   '@import "../components/feed-list-performance.css";',
   '@import "../components/feed-follow-interaction.css";',
   '@import "../components/media.css";',
-  '@import "../system/record-header-filter-contract.css";',
-  '@import "../system/record-card-contract.css";',
-  '@import "../components/payment-action-sheet.css";',
-  '@import "../components/record-more-link.css";',
-  '@import "../components/profile-dialog.css";',
   '@import "../components/state-contract.css";',
-], 'must load the hardened feed card facade and keep component owners in stable order');
+], 'must load only globally shared component owners in stable order');
+
+assertImports('src/features/auth/AuthModal.css', [
+  '@import "../../styles/system/ui-primitives-auth-modal.css";',
+], 'must lazy-load modal-only authentication contracts');
+
+assertImports('src/features/records/RecordsRoute.css', [
+  '@import "../../styles/tokens/record-contracts.css";',
+  '@import "../../styles/system/record-header-filter-contract.css";',
+  '@import "../../styles/system/record-card-contract.css";',
+  '@import "../../styles/components/record-more-link.css";',
+], 'must lazy-load shared record presentation with record routes');
 
 assertImports('src/styles/components/feed-card-system.css', [
   '@import "./feed-card-chrome.css";',

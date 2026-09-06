@@ -1,4 +1,6 @@
 /* Route-owned sponsor center styles.
    These are intentionally kept out of global first-paint CSS. */
 
+@import "../../styles/tokens/sponsor-contracts.css";
+@import "../records/RecordsRoute.css";
 @import "../../styles/features/sponsor.css";

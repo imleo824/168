@@ -110,7 +110,9 @@ export default function Home() {
   const activeFeedIdentityRef = useRef('discover:all');
   const stableHomeCategoriesRef = useRef<Category[]>(readInitialHomeCategories());
 
-  const { data: homeBootstrap } = useHomeBootstrap();
+  // The first-screen feed request owns home bootstrap loading. This disabled
+  // query remains subscribed so the shell and page update from the same cache.
+  const { data: homeBootstrap } = useHomeBootstrap(false);
   const { onlineCount } = useOnlinePresence();
   const rawCategories = homeBootstrap?.categories || [];
   const categories = getStableHomeCategories(rawCategories, stableHomeCategoriesRef);

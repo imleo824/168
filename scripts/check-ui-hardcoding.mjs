@@ -350,7 +350,7 @@ assertCssRuleIncludes(
   'topbar compact actions and promotion filters must not shimmer while scrolling.',
 );
 assertIncludes('src/hooks/useMobileAddressBar.ts', 'function shouldUpdateLayoutHeight', 'mobile viewport layout height must be stabilized separately from visual height updates.');
-assertIncludes('src/app/AppRequireTuiPlusRoute.tsx', '<AppPage mobileAddressBarScroll bottomSafe className="tui-plus-required-page surface-page">', 'Tui Plus route guard must render through the shared page shell.');
+assertIncludes('src/app/AppRequireTuiPlusRoute.tsx', '<AppPage surface="workspace" mobileAddressBarScroll bottomSafe className="tui-plus-required-page surface-page">', 'Tui Plus route guard must render through the shared page shell.');
 assertIncludes('src/app/AppRequireTuiPlusRoute.tsx', '<PageHeader title="推推会员" titleAlign="center"', 'Tui Plus route guard must own a stable page topbar behind its prompt dialog.');
 assertIncludes('src/app/AppRequireTuiPlusRoute.tsx', '<PageContentShell as="main" className="ui-auth-required-wrap ui-app-page-main">', 'Tui Plus route guard main content must use the shared page content shell.');
 assertIncludes('src/app/AppRequireTuiPlusRoute.tsx', '<LazyTuiPlusBenefitPromptDialog', 'Tui Plus route guard prompt must be lazy-loaded so route protection does not inflate the main bundle.');
@@ -361,6 +361,7 @@ assertIncludes('src/app/AppShell.tsx', 'pathname === APP_ROUTES.legacyPromoteHis
 assertIncludes('src/app/AppShell.tsx', 'APP_ROUTES.legacyPromotionEffects,\n  APP_ROUTES.recharge,', 'legacy promotion effects route must keep the workspace shell before redirect.');
 assertIncludes('src/app/AppShell.tsx', 'pathname === APP_ROUTES.legacyPromotionEffects ||\n    pathname === APP_ROUTES.recharge', 'legacy promotion effects route must resolve to the workspace desktop surface before redirect.');
 assertIncludes('src/ui/layoutViewport.ts', 'UI_USER_DESKTOP_MIN_WIDTH = 1024', 'user viewport breakpoint must have one shared UI runtime source.');
+assertIncludes('src/ui/layoutViewport.ts', 'UI_USER_DESKTOP_AUX_RAIL_MIN_WIDTH = 1180', 'desktop advertising rail breakpoint must have one shared UI runtime source.');
 assertIncludes('src/ui/layoutViewport.ts', 'UI_USER_MOBILE_MAX_WIDTH = UI_USER_DESKTOP_MIN_WIDTH - 1', 'mobile max width must derive from the shared desktop breakpoint.');
 assertIncludes('src/hooks/useIsMobile.ts', 'breakpoint = UI_USER_DESKTOP_MIN_WIDTH', 'mobile detection must consume the shared UI viewport contract.');
 assertIncludes('src/hooks/useIsDesktopViewport.ts', 'breakpoint = UI_USER_DESKTOP_MIN_WIDTH', 'desktop detection must consume the shared UI viewport contract.');
@@ -369,7 +370,7 @@ assertIncludes('src/hooks/useMobileAddressBar.ts', 'UI_USER_DESKTOP_MIN_WIDTH', 
 assertIncludes('src/ui/OptimizedImage.tsx', 'UI_DEFAULT_IMAGE_SIZES', 'optimized image sizes must consume the shared UI viewport contract.');
 assertIncludes('src/features/feed/HomeAdBanner.tsx', 'UI_HOME_AD_IMAGE_SIZES', 'home ad images must consume the shared UI viewport contract.');
 assertIncludes('src/features/profile/ProfileHeaderCover.tsx', 'UI_PROFILE_HEADER_COVER_SIZES', 'profile cover images must consume the shared UI viewport contract.');
-assertIncludes('src/styles/tokens/feature-contracts.css', '--ui-referral-rules-overlay-z: var(--ui-z-dialog);', 'referral rules overlay must consume a semantic feature layer token.');
+assertIncludes('src/styles/tokens/sponsor-contracts.css', '--ui-referral-rules-overlay-z: var(--ui-z-dialog);', 'referral rules overlay must consume a semantic route-owned layer token.');
 assertIncludes('src/styles/features/referral-invite.css', 'z-index: var(--ui-referral-rules-overlay-z);', 'referral rules overlay must consume its semantic feature layer token.');
 assertNotIncludes('src/hooks/useIsMobile.ts', 'breakpoint = 1024', 'mobile detection must not hard-code the desktop breakpoint.');
 assertNotIncludes('src/hooks/useIsDesktopViewport.ts', 'breakpoint = 1024', 'desktop detection must not hard-code the desktop breakpoint.');
@@ -442,9 +443,9 @@ assertIncludes('src/services/api.ts', 'quotedOnly?: boolean', 'posts API client 
 assertIncludes('server/routes/post.routes.ts', "quotedOnly: quotedOnly === 'true'", 'posts route must pass the quotedOnly filter to the service.');
 assertIncludes('server/services/post/index.ts', 'whereClause.quotedPostId = { not: null };', 'post service must filter quote posts at the database source.');
 assertIncludes('src/features/profile/ProfileHeaderCover.tsx', 'disableOptimization', 'profile cover must load the original source for clarity.');
-assertIncludes('src/styles/tokens/feature-contracts.css', '--ui-profile-cover-image-opacity: 1;', 'profile cover images must stay fully opaque.');
+assertIncludes('src/styles/tokens/profile-page-contracts.css', '--ui-profile-cover-image-opacity: 1;', 'profile cover images must stay fully opaque.');
 assertIncludes('src/styles/features/profile-shared-cover-effects.css', 'opacity: var(--ui-profile-cover-pattern-opacity);', 'profile cover texture overlay must use the shared subtle opacity token.');
-assertIncludes('src/styles/tokens/feature-contracts.css', '--ui-profile-cover-pattern-opacity: 0.18;', 'profile cover texture overlay must stay subtle.');
+assertIncludes('src/styles/tokens/profile-page-contracts.css', '--ui-profile-cover-pattern-opacity: 0.18;', 'profile cover texture overlay must stay subtle.');
 assertIncludes('src/features/upload/imageUploadConfig.ts', 'export const COVER_UPLOAD_RETRY_OPTIONS', 'cover uploads must use a shared retry strategy.');
 assertIncludes('src/features/upload/imageUploadConfig.ts', 'maxWidth: 2400,\n    maxHeight: 960,', 'cover uploads must pre-compress to a high-density display size.');
 assertIncludes('src/pages/UserSpace.tsx', '...COVER_UPLOAD_RETRY_OPTIONS', 'user-space cover upload must use the shared cover retry strategy.');
@@ -871,7 +872,7 @@ assertIncludes('src/features/home/homeStructuredFilterUtils.ts', 'sortHomeStruct
 assertIncludes('src/styles/00-product-tokens.css', '--ui-layer-panel-close-surface: transparent;', 'layer panel close actions must render as a plain X without a default button shell.');
 assertIncludes('src/styles/02-core-sheets-actions.css', 'margin-inline-end: var(--ui-layer-panel-close-offset-inline-end);', 'layer panel close actions must use the shared alignment offset.');
 assertIncludes('src/features/auth/AuthModal.tsx', 'className="ui-auth-brand-lockup"', 'auth modal brand and slogan must use the stacked brand contract.');
-assertIncludes('src/styles/system/ui-primitives-auth.css', '.ui-auth-brand-lockup', 'auth brand lockup style contract is required.');
+assertIncludes('src/styles/system/ui-primitives-auth-modal.css', '.ui-auth-brand-lockup', 'auth brand lockup style contract is required in the lazy modal owner.');
 assertNotIncludes('src/features/auth/AuthModal.tsx', 'ui-auth-brand-divider', 'auth modal brand and slogan must not be split by an inline divider.');
 assertIncludes('server/chat/chat.repository.ts', 'normalizeRobotUserId', 'chat bot user spaces must normalize away legacy profile ids before writes.');
 assertIncludes('server/chat/chat.repository.ts', "NOT: { id: { startsWith: 'chat-bot-profile-' } }", 'chat bot user spaces must not list the legacy profile-id namespace.');
@@ -981,7 +982,7 @@ assertIncludes('src/features/admin/AdminPage.tsx', 'className="admin-console-pag
 assertIncludes('src/features/admin/AdminPage.tsx', 'className="admin-console-layout"', 'admin page layout must use the shared admin shell contract.');
 assertIncludes('src/features/admin/AdminPage.tsx', 'className="admin-console-main"', 'admin page main spacing must be owned by admin CSS.');
 assertIncludes('src/styles/features/admin/admin-shell.css', '.admin-console-main {\n    min-width: 0;\n    flex: 1 1 auto;', 'admin console main layout must be owned by admin CSS.');
-assertIncludes('src/styles/tokens/feature-contracts.css', '--ui-admin-console-main-padding-x-mobile:', 'admin console spacing must use semantic admin tokens.');
+assertIncludes('src/styles/tokens/admin-contracts.css', '--ui-admin-console-main-padding-x-mobile:', 'admin console spacing must use lazy admin-only semantic tokens.');
 assertNotIncludes('src/features/admin/AdminPage.tsx', 'min-h-screen w-full', 'admin page root must not hard-code viewport and width utilities.');
 assertNotIncludes('src/features/admin/AdminPage.tsx', 'min-w-0 flex-1 px-2 py-3 sm:px-4 lg:px-5 lg:py-4 xl:px-6 2xl:px-8', 'admin page main spacing must not live in component utility classes.');
 assertIncludes('src/features/admin/AdminDesktopDataTable.tsx', 'admin-dialog-overlay admin-modal-scrim-soft', 'admin promotion edit dialog overlay must reuse the shared admin dialog contract.');
@@ -999,7 +1000,7 @@ assertIncludes('src/features/admin/AdminAutoCrawlPanel.tsx', 'admin-dialog-overl
 assertIncludes('src/features/admin/AdminAutoCrawlPanel.tsx', 'admin-dialog-panel admin-dialog-panel--wide', 'admin auto-crawl source dialog panel sizing must be owned by admin CSS.');
 assertNotIncludes('src/features/admin/AdminAutoCrawlPanel.tsx', 'max-h-[88vh]', 'admin source dialog must not hard-code viewport height in component utility classes.');
 assertNotIncludes('src/features/admin/AdminAutoCrawlPanel.tsx', 'max-w-4xl', 'admin source dialog must not hard-code panel width in component utility classes.');
-assertIncludes('src/styles/tokens/feature-contracts.css', '--ui-admin-dialog-panel-max-height: min(calc(var(--ui-visual-viewport-height)', 'admin dialog max-height must derive from the shared visual viewport contract.');
+assertIncludes('src/styles/tokens/admin-contracts.css', '--ui-admin-dialog-panel-max-height: min(calc(var(--ui-visual-viewport-height)', 'admin dialog max-height must derive from the shared visual viewport contract.');
 assertIncludes('src/styles/features/admin/admin-primitives.css', '.admin-dialog-panel {\n    width: 100%;\n    max-height: var(--ui-admin-dialog-panel-max-height);', 'admin dialog panels must consume the shared panel max-height token.');
 assertNotIncludes('src/features/admin/AdminPage.tsx', 'lg:hidden divide-y divide-gray-50 bg-white pt-2', 'admin mobile list must not return to local utility shell styling.');
 assertNotIncludes('src/features/admin/AdminPage.tsx', 'key={item.id} className="p-4"', 'admin mobile list items must not return to local padding-only cards.');

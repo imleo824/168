@@ -1,0 +1,63 @@
+/* Tui Plus purchase and link-management route contracts. */
+
+@layer base {
+  :root {
+    --ui-tui-plus-page-surface:
+      radial-gradient(circle at 50% calc(var(--ui-space-8) * -1), color-mix(in srgb, var(--ui-brand) 15%, transparent), transparent 36%),
+      radial-gradient(circle at 100% 10%, color-mix(in srgb, var(--ui-brand-warm) 9%, transparent), transparent 30%),
+      linear-gradient(180deg, color-mix(in srgb, var(--ui-brand) 5%, var(--ui-surface-page)), var(--ui-surface-page) 46%);
+    --ui-tui-plus-topbar-title-border: color-mix(in srgb, var(--ui-brand) 20%, transparent);
+    --ui-tui-plus-topbar-title-surface: linear-gradient(135deg, color-mix(in srgb, var(--ui-brand) 10%, var(--ui-color-white)), var(--ui-color-white));
+    --ui-tui-plus-topbar-title-shadow: 0 var(--ui-border-width-hairline) var(--ui-space-half) color-mix(in srgb, var(--ui-brand) 12%, transparent);
+    --ui-tui-plus-hero-border: color-mix(in srgb, var(--ui-brand) 20%, var(--ui-line-subtle));
+    --ui-tui-plus-hero-surface:
+      radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--ui-brand) 18%, transparent), transparent 36%),
+      radial-gradient(circle at 0% 100%, color-mix(in srgb, var(--ui-brand-warm) 10%, transparent), transparent 42%),
+      linear-gradient(135deg, color-mix(in srgb, var(--ui-brand) 8%, var(--ui-surface-card)), var(--ui-surface-card));
+    --ui-tui-plus-hero-overlay:
+      linear-gradient(120deg, color-mix(in srgb, var(--ui-color-white) 58%, transparent), transparent 40%),
+      radial-gradient(circle at 12% 12%, color-mix(in srgb, var(--ui-brand) 10%, transparent), transparent 30%);
+    --ui-tui-plus-hero-inset-shadow: inset 0 var(--ui-border-width-hairline) 0 color-mix(in srgb, var(--ui-color-white) 72%, transparent);
+    --ui-tui-plus-mark-shadow: 0 var(--ui-space-2) var(--ui-space-6) color-mix(in srgb, var(--ui-brand) 22%, transparent), inset 0 var(--ui-border-width-hairline) 0 color-mix(in srgb, var(--ui-color-white) 42%, transparent);
+    --ui-tui-plus-mark-shadow-compact: 0 var(--ui-space-1) var(--ui-space-4) color-mix(in srgb, var(--ui-brand) 24%, transparent);
+    --ui-tui-plus-eyebrow-surface: color-mix(in srgb, var(--ui-brand) 8%, transparent);
+    --ui-tui-plus-status-surface: color-mix(in srgb, var(--ui-brand) 7%, var(--ui-surface-card));
+    --ui-tui-plus-benefits-border: color-mix(in srgb, var(--ui-brand) 12%, var(--ui-line-subtle));
+    --ui-tui-plus-benefits-surface: linear-gradient(180deg, color-mix(in srgb, var(--ui-brand) 4%, var(--ui-surface-card)), var(--ui-surface-card));
+    --ui-tui-plus-benefit-item-border: color-mix(in srgb, var(--ui-brand) 8%, var(--ui-line-subtle));
+    --ui-tui-plus-benefit-item-surface: color-mix(in srgb, var(--ui-brand) 4%, var(--ui-surface-card));
+    --ui-tui-plus-benefit-item-hover-border: color-mix(in srgb, var(--ui-brand) 14%, var(--ui-line-subtle));
+    --ui-tui-plus-benefit-item-hover-surface: color-mix(in srgb, var(--ui-brand) 6%, var(--ui-surface-card));
+    --ui-tui-plus-benefit-icon-surface: color-mix(in srgb, var(--ui-brand) 11%, var(--ui-surface-card));
+    --ui-tui-plus-benefit-icon-surface-soft: color-mix(in srgb, var(--ui-brand) 8%, var(--ui-color-white));
+    --ui-tui-plus-toggle-surface: color-mix(in srgb, var(--ui-brand) 5%, var(--ui-surface-muted));
+    --ui-tui-plus-price-badge-border: color-mix(in srgb, var(--ui-brand) 14%, var(--ui-line-hairline));
+    --ui-tui-plus-price-badge-surface: color-mix(in srgb, var(--ui-brand) 6%, var(--ui-surface-muted));
+    --ui-tui-plus-price-emphasis-surface: color-mix(in srgb, var(--ui-brand) 8%, var(--ui-color-white));
+    --ui-tui-plus-plan-border: color-mix(in srgb, var(--ui-brand) 10%, var(--ui-line-subtle));
+    --ui-tui-plus-plan-surface:
+      linear-gradient(180deg, color-mix(in srgb, var(--ui-color-white) 64%, transparent), transparent 42%),
+      var(--ui-surface-card);
+    --ui-tui-plus-plan-overlay: radial-gradient(circle at 100% 0%, color-mix(in srgb, var(--ui-brand) 10%, transparent), transparent 42%);
+    --ui-tui-plus-plan-selected-border: color-mix(in srgb, var(--ui-brand) 46%, var(--ui-line-subtle));
+    --ui-tui-plus-plan-selected-surface:
+      radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--ui-brand) 13%, transparent), transparent 40%),
+      color-mix(in srgb, var(--ui-brand) 5%, var(--ui-surface-card));
+    --ui-tui-plus-plan-mark-opacity: 0.9;
+    --ui-tui-plus-plan-mark-surface: color-mix(in srgb, var(--ui-brand) 8%, var(--ui-surface-muted));
+    --ui-tui-plus-plan-badge-border: color-mix(in srgb, var(--ui-brand) 18%, transparent);
+    --ui-tui-plus-plan-badge-surface: color-mix(in srgb, var(--ui-brand) 10%, var(--ui-surface-muted));
+    --ui-tui-plus-link-tabs-border: color-mix(in srgb, var(--ui-brand) 10%, var(--ui-line-subtle));
+    --ui-tui-plus-link-tabs-surface: color-mix(in srgb, var(--ui-brand) 5%, var(--ui-surface-muted));
+    --ui-tui-plus-link-section-border: color-mix(in srgb, var(--ui-brand) 10%, var(--ui-line-subtle));
+    --ui-tui-plus-link-section-surface: color-mix(in srgb, var(--ui-surface-card) 96%, var(--ui-brand));
+    --ui-tui-plus-link-section-badge-surface: color-mix(in srgb, var(--ui-brand) 7%, var(--ui-surface-muted));
+    --ui-tui-plus-link-slot-filled-border: color-mix(in srgb, var(--ui-brand) 12%, var(--ui-line-subtle));
+    --ui-tui-plus-link-slot-filled-surface: color-mix(in srgb, var(--ui-brand) 3%, var(--ui-surface-card));
+    --ui-tui-plus-link-slot-dirty-border: color-mix(in srgb, var(--ui-brand) 34%, var(--ui-line-subtle));
+    --ui-tui-plus-link-slot-dirty-surface: color-mix(in srgb, var(--ui-brand) 5%, var(--ui-surface-card));
+    --ui-tui-plus-link-slot-index-surface: color-mix(in srgb, var(--ui-brand) 7%, var(--ui-surface-muted));
+    --ui-tui-plus-link-field-focus-shadow: 0 0 0 calc(var(--ui-border-width-hairline) * 3) var(--ui-ring-brand-soft);
+    --ui-plus-link-label-max-width: calc(var(--ui-space-8) * 6 + var(--ui-space-7));
+  }
+}

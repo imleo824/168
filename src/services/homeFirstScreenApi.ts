@@ -77,6 +77,9 @@ export async function getHomeFirstScreen(params: {
     ...options,
     retry: false,
   });
+  if (typeof document !== 'undefined') {
+    document.documentElement.dataset.homeFeedCache = res.headers.get('X-Feed-Result-Cache') || 'UNKNOWN';
+  }
   const payload = await readResponse<HomeFirstScreenResponse>(res);
   const feed = normalizeHomeFirstScreenFeedForDisplay({
     items: Array.isArray(payload.feed?.items) ? payload.feed.items : [],

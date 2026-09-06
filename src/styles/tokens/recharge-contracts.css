@@ -1,0 +1,17 @@
+/* Recharge route contracts. */
+
+@layer base {
+  :root {
+    --ui-recharge-page-max: var(--ui-page-narrow);
+    --ui-recharge-shell-gap: var(--ui-space-4);
+    --ui-recharge-card-radius: var(--ui-section-card-radius, var(--ui-radius-lg));
+    --ui-recharge-balance-icon-size: var(--ui-control-lg);
+    --ui-recharge-balance-icon-graphic-size: calc(var(--ui-control-icon-md) + var(--ui-space-1));
+    --ui-recharge-submit-icon-size: var(--ui-control-icon-md);
+    --ui-recharge-copy-icon-size: var(--ui-control-icon-xs);
+    --ui-recharge-input-height: calc(var(--ui-control-lg) + var(--ui-space-3));
+    --ui-recharge-input-radius: var(--ui-radius-lg);
+    --ui-recharge-action-height: var(--ui-control-lg);
+    --ui-recharge-qr-size: min(64vw, calc(var(--ui-space-8) * 7));
+  }
+}

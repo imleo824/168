@@ -2,6 +2,7 @@
 
 @layer utilities {
   .app-shell {
+    box-sizing: border-box;
     display: flex;
     min-height: var(--ui-app-page-min-height);
     flex-direction: column;
@@ -11,6 +12,7 @@
   }
 
   .app-shell-main {
+    box-sizing: border-box;
     position: relative;
     display: flex;
     width: 100%;
@@ -37,6 +39,15 @@
     width: 100%;
     min-height: var(--ui-app-page-min-height);
     background: var(--ui-surface-page);
+  }
+
+  .ui-app-page[data-ui-page-density='compact'] {
+    --ui-app-page-main-gap: var(--ui-space-3);
+    --ui-app-page-main-padding-y: var(--ui-space-3);
+  }
+
+  .ui-app-page[data-ui-page-scroll='contained'] {
+    min-height: 0;
   }
 
   .ui-shell-fluid {

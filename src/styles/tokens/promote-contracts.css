@@ -1,0 +1,15 @@
+/* Promotion route contracts. */
+
+@layer base {
+  :root {
+    --ui-promote-picker-sheet-max-height: calc(var(--ui-visual-viewport-height) - var(--ui-space-4));
+    --ui-promote-payment-sheet-max-height: calc(var(--ui-visual-viewport-height) - env(safe-area-inset-top) - var(--ui-space-3));
+    --ui-promote-form-gap: calc(var(--ui-space-3) + var(--ui-space-half));
+    --ui-promote-form-field-gap: calc(var(--ui-space-1) + var(--ui-space-half));
+    --ui-promote-input-height: var(--ui-control-lg);
+    --ui-promote-calendar-gap: calc(var(--ui-space-1) + var(--ui-space-half));
+    --ui-promote-ad-input-error-border: color-mix(in srgb, var(--ui-danger-classic) 35%, var(--ui-line-hairline));
+    --promote-payment-card-padding: calc(var(--ui-space-3) + var(--ui-space-quarter));
+    --promote-category-chip-padding: calc(var(--ui-space-1) + var(--ui-space-half)) calc(var(--ui-space-3) + var(--ui-space-half));
+  }
+}

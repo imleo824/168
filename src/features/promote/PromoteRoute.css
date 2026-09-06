@@ -1,6 +1,9 @@
 /* Route-owned promote workspace styles.
    These are intentionally kept out of global first-paint CSS. */
 
+@import "../../styles/00-promote-tokens.css";
+@import "../../styles/tokens/promote-contracts.css";
+@import "../records/RecordsRoute.css";
 @import "../../styles/features/promote-page-foundation.css";
 @import "../../styles/features/promote-page-keyboard.css";
 @import "../../styles/features/promote-layout.css";

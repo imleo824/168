@@ -3,6 +3,7 @@
  * download membership checkout, plan-card, and link-editor presentation.
  */
 
+@import "../../styles/tokens/tui-plus-page-contracts.css";
 @import "../../styles/features/tui-plus-page.css";
 @import "../../styles/features/tui-plus-mobile.css";
 @import "../../styles/features/tui-plus-visual.css";

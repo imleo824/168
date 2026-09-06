@@ -221,6 +221,7 @@ for (const required of [
   "justify-content: center;",
   "height: var(--app-shell-viewport-height);",
   "overflow: hidden;",
+  "padding-block-end: var(--ui-space-none);",
   ".app-shell[data-route-surface='user'][data-desktop-surface='feed'] .app-shell-main {\n      overflow: hidden;",
   ".app-shell[data-route-surface='user'] .app-shell-main {\n      --app-desktop-page-content-width:",
   "overflow-y: auto;",
@@ -232,8 +233,7 @@ for (const required of [
   ".app-shell[data-route-surface='user'] .app-bottom-nav {\n      display: none;",
   "@media (min-width: 1024px) and (max-width: 1179px)",
   "--app-desktop-main-width: var(--app-desktop-workspace-main-width);",
-  ".app-desktop-sidebar {\n      position: sticky;",
-  "top: var(--app-desktop-shell-padding-y);",
+  ".app-desktop-sidebar {\n      display: flex;",
   "--app-mobile-canvas-width: min(100%, calc(var(--ui-space-8) * 24));",
   "transform: translateX(-50%) translateZ(var(--ui-space-none));",
 ]) {
@@ -241,12 +241,22 @@ for (const required of [
   failures.push(`wide-screen-mobile-adaptation.css missing current desktop shell contract: ${required}`);
 }
 
-if (!/@media \(min-width: 1024px\) and \(max-width: 1179px\)[\s\S]*?\.app-shell\[data-route-surface='user'\] \{[\s\S]*?--app-desktop-main-width: var\(--app-desktop-workspace-main-width\);/.test(adaptationSource)) {
-  failures.push('1024-1179 desktop shell must keep one stable main frame width across sidebar navigation.');
+if (!/@media \(min-width: 1024px\) and \(max-width: 1179px\)[\s\S]*?--app-desktop-aux-rail-width: var\(--ui-space-none\);[\s\S]*?--app-desktop-main-width: var\(--app-desktop-workspace-main-width\);[\s\S]*?--app-desktop-main-side-gap-total: var\(--app-desktop-shell-gap\);/.test(adaptationSource)) {
+  failures.push('1024-1179 desktop shell must keep one stable two-column frame and remove the hidden advertising rail from grid math.');
 }
 
-if (/\.app-desktop-sidebar\s*\{[\s\S]*?top:\s*var\(--ui-space-none\);/.test(adaptationSource)) {
-  failures.push('Desktop sidebar must stick to the framed shell top padding instead of jumping to the viewport edge.');
+if (!appShellSource.includes('useIsDesktopViewport(UI_USER_DESKTOP_AUX_RAIL_MIN_WIDTH)') ||
+    !appShellSource.includes('isUserSurface && isDesktopAuxRailViewport')) {
+  failures.push('AppShell must only mount the advertising rail when the wide desktop breakpoint is active.');
+}
+
+const auxRailSource = read('src/styles/features/aux-rail.css');
+if (!auxRailSource.includes('@media (max-width: 1179px)') || !auxRailSource.includes('@media (min-width: 1180px)')) {
+  failures.push('Desktop advertising rail CSS must stay hidden below 1180px and activate at the shared wide desktop breakpoint.');
+}
+
+if (/\.app-desktop-sidebar\s*\{[\s\S]*?position:\s*sticky;/.test(adaptationSource)) {
+  failures.push('Desktop sidebar must stay in the viewport-bound grid flow instead of applying a second sticky top offset.');
 }
 
 if (!/\.app-shell\[data-route-surface='user'\] \.app-shell-main\s*\{[\s\S]*?overflow-y:\s*auto;[\s\S]*?overscroll-behavior:\s*contain;/.test(adaptationSource)) {

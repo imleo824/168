@@ -62,7 +62,7 @@ export default function ProfileBioEditorMobile() {
   const saveBusy = isSaving || saveGuardPending;
 
   return (
-    <AppPage mobileAddressBarScroll bottomSafe className="profile-bio-editor-page surface-page">
+    <AppPage surface="workspace" mobileAddressBarScroll bottomSafe className="profile-bio-editor-page surface-page">
       <SEO title="编辑简介｜推推" description="编辑推推个人主页简介。" noindex />
       <PageHeader title="编辑简介" showBack titleAlign="center" onBack={goBack} />
 

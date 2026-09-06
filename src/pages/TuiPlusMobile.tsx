@@ -311,7 +311,7 @@ export default function TuiPlusMobile() {
   const guardedActionLocked = actionLocked || trialGuardPending || planGuardPending;
 
   return (
-    <AppPage mobileAddressBarScroll bottomSafe className="tui-plus-page surface-page">
+    <AppPage surface="workspace" mobileAddressBarScroll bottomSafe className="tui-plus-page surface-page">
       <SEO title="开通推推会员｜推推" description="开通推推会员，立享全站曝光提权、主页专属外链、无限制联系方式及频道自动同步等多项尊享特权。" noindex />
       <PageHeader
         title="推推会员"

@@ -320,7 +320,7 @@ export const UserSpaceSkeleton = memo(function UserSpaceSkeleton(_props: UserSpa
 
 export const PageShellSkeleton = memo(function PageShellSkeleton() {
   return (
-    <AppPage className="surface-page">
+    <AppPage surface="utility" className="surface-page">
       <PageHeader title="加载中" />
       <PageContentShell>
         <HomeFeedSkeleton count={2} />

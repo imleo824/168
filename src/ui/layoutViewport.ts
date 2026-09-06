@@ -1,5 +1,6 @@
 export const UI_USER_DESKTOP_MIN_WIDTH = 1024;
 export const UI_USER_MOBILE_MAX_WIDTH = UI_USER_DESKTOP_MIN_WIDTH - 1;
+export const UI_USER_DESKTOP_AUX_RAIL_MIN_WIDTH = 1180;
 
 export const UI_USER_MOBILE_MEDIA_QUERY = `(max-width: ${UI_USER_MOBILE_MAX_WIDTH}px)`;
 export const UI_IMAGE_MOBILE_MEDIA_QUERY = '(max-width: 48rem)';

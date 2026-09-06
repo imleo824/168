@@ -1,0 +1,9 @@
+/* Category feed route contracts. */
+
+@layer base {
+  :root {
+    --ui-category-feed-bottom-space-mobile: calc(var(--ui-space-8) * 3 + var(--ui-space-4));
+    --ui-category-feed-bottom-space-desktop: calc(var(--ui-space-8) * 2);
+    --ui-category-feed-empty-padding: var(--ui-space-8) var(--ui-space-6);
+  }
+}

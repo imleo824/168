@@ -61,6 +61,7 @@ import {
   refreshPostRankingScores,
   schedulePostRankingRefresh,
 } from './post-ranking-maintenance';
+import { measureFeedStep } from '../../modules/feed/feed-observability';
 
 const DEFAULT_PAGE_SIZE = 20;
 const MAX_PAGE_SIZE = 50;
@@ -807,9 +808,13 @@ export class PostService {
 
     const [feedBlockedIds, activePromotions] = await Promise.all([
       getFeedBlockedUserIds(filter.currentUserId),
-      filter.userId
-        ? getActivePinnedPostsForUser(filter.userId)
-        : getActivePinnedPosts(resolvedCategoryFilterId),
+      measureFeedStep({
+        name: 'feed-promotions.active',
+        kind: shouldUseRecommendationRank ? 'recommended' : 'category',
+        limit,
+      }, () => filter.userId
+          ? getActivePinnedPostsForUser(filter.userId)
+          : getActivePinnedPosts(resolvedCategoryFilterId)),
     ]);
 
     if (filter.currentUserId) {
@@ -916,7 +921,11 @@ export class PostService {
         post: any;
       }> = [];
       try {
-        rows = await prisma.postRankingScore.findMany({
+        rows = await measureFeedStep({
+          name: 'feed-candidates.ranking-score',
+          kind: 'recommended',
+          limit: regularLimit,
+        }, () => prisma.postRankingScore.findMany({
           where: {
             ...(recommendationScoreCursorFilter || {}),
             post: {
@@ -932,7 +941,7 @@ export class PostService {
             recommendationScore: true,
             post: { select: postFastListSelect(filter.currentUserId) },
           },
-        });
+        }));
       } catch (error) {
         if (!isOptionalFeedDependencyUnavailable(error)) throw error;
         console.warn('Recommendation score lookup unavailable; falling back to candidate feed:', error);
@@ -951,34 +960,47 @@ export class PostService {
       const pageRows = hasMore ? sortedRows.slice(0, regularLimit) : sortedRows;
       const shouldFallbackToCandidateRank = !filter.cursor && pageRows.length === 0;
       if (!shouldFallbackToCandidateRank) {
-      const regularItems = pageRows
-        .map((row) => ({
-          ...toListItem(row.post),
-          heatScore: toPublicHeatScore(row.recommendationScore),
-          recommendationScore: row.recommendationScore,
-        }))
-        .filter((p: any) => !pinnedIds.has(p.id));
-      const lastRow = pageRows[pageRows.length - 1];
+        const pagePostIds = pageRows.map((row) => row.postId).filter(Boolean);
+        const pagePosts = pagePostIds.length > 0
+          ? await prisma.post.findMany({
+              where: { id: { in: pagePostIds } },
+              select: postFeedListSelect(filter.currentUserId),
+            })
+          : [];
+        const pagePostById = new Map(pagePosts.map((post: any) => [post.id, post]));
+        const regularItems = pageRows
+          .map((row) => {
+            const post = pagePostById.get(row.postId);
+            return post
+              ? {
+                  ...toListItem(post),
+                  heatScore: toPublicHeatScore(row.recommendationScore),
+                  recommendationScore: row.recommendationScore,
+                }
+              : null;
+          })
+          .filter((post: any) => Boolean(post) && !pinnedIds.has(post.id));
+        const lastRow = pageRows[pageRows.length - 1];
 
-      return {
-        items: [
-          ...pinnedItems,
-          ...regularItems,
-        ],
-        nextCursor: hasMore && lastRow
-          ? encodeRankedCursor(
-              {
-                id: lastRow.postId,
-                recommendationScore: lastRow.recommendationScore,
-                bumpedAt: lastRow.post.bumpedAt,
-                createdAt: lastRow.post.createdAt,
-              },
-              'recommendationScore',
-              getRankedCursorDepth(filter.cursor) + pageRows.length - 1,
-            )
-          : null,
-        hasMore,
-      };
+        return {
+          items: [
+            ...pinnedItems,
+            ...regularItems,
+          ],
+          nextCursor: hasMore && lastRow
+            ? encodeRankedCursor(
+                {
+                  id: lastRow.postId,
+                  recommendationScore: lastRow.recommendationScore,
+                  bumpedAt: lastRow.post.bumpedAt,
+                  createdAt: lastRow.post.createdAt,
+                },
+                'recommendationScore',
+                getRankedCursorDepth(filter.cursor) + pageRows.length - 1,
+              )
+            : null,
+          hasMore,
+        };
       }
     }
 

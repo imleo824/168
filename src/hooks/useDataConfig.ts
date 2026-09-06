@@ -73,8 +73,8 @@ export function useCategories() {
 export function useHomeBootstrap(enabled: boolean = true) {
   const queryClient = useQueryClient();
   const bootstrapSnapshot = useMemo(
-    () => (enabled ? readHomeBootstrapSnapshot() : undefined),
-    [enabled],
+    () => readHomeBootstrapSnapshot(),
+    [],
   );
   const query = useQuery({
     queryKey: ['home', 'bootstrap'],

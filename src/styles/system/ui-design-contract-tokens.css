@@ -41,8 +41,6 @@
 
     /* Shared mobile text-entry contract: keep controls stable before focus. */
     --ui-mobile-form-min-font-size: 1rem;
-    --ui-mobile-form-font-size: max(var(--ui-mobile-form-min-font-size), var(--ui-type-body-size));
-    --ui-mobile-form-line-height: var(--ui-line-normal);
     --ui-post-create-focus-bridge-size: var(--ui-border-width-hairline);
     --ui-post-create-focus-bridge-opacity: 0.01;
     --ui-post-create-focus-bridge-z: var(--ui-z-auth);

@@ -8,6 +8,7 @@ import {
   type ReactNode,
 } from 'react';
 import { createPortal } from 'react-dom';
+import '@/styles/components/profile-dialog.css';
 import { X } from 'lucide-react';
 import IconButton from '@/ui/IconButton';
 import { releaseActiveTextEntry } from '@/utils/textEntryFocus';

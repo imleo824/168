@@ -1,4 +1,5 @@
 import { Crown } from 'lucide-react';
+import '@/styles/features/tui-plus.css';
 
 import ProfileDialog from '@/features/profile/ProfileDialog';
 import ActionButton from '@/ui/ActionButton';

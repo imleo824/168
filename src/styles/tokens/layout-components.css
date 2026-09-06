@@ -2,8 +2,6 @@
 
 @layer base {
   :root {
-    --ui-topbar-height: var(--ui-control-hit);
-    --ui-topbar-edge-padding-x: max(var(--ui-space-2), calc(var(--ui-page-padding-x) - var(--ui-space-2)));
     --ui-topbar-content-max-width: var(--ui-page-content-max-width);
     --ui-topbar-outer-padding-x: var(--ui-space-none);
     --ui-topbar-inner-padding-x: var(--ui-topbar-edge-padding-x, var(--ui-page-edge-padding-x));
@@ -112,7 +110,6 @@
     --ui-bottom-nav-chat-typing-shadow-start: 0 0 0 var(--ui-space-none) color-mix(in srgb, var(--ui-brand) 14%, transparent);
     --ui-bottom-nav-chat-typing-shadow-end: 0 0 0 var(--ui-space-1) color-mix(in srgb, var(--ui-brand) 0%, transparent);
     --ui-motion-spin-turn: 360deg;
-    --ui-social-feed-max-width: min(100%, calc(var(--ui-space-8) * 19 + var(--ui-space-4)));
     --ui-home-desktop-feed-width: var(--ui-social-feed-max-width);
     --ui-home-desktop-container-width: calc(var(--ui-home-desktop-feed-width) + var(--ui-space-8) * 5);
     --ui-home-feed-reading-column-width: min(100%, calc(var(--app-desktop-reading-main-width) - (var(--ui-app-shell-desktop-padding-x) * 2)));
@@ -141,8 +138,6 @@
     --feed-list-item-index: 0;
     --lightbox-track-offset: var(--ui-space-none);
     --lightbox-zoom-scale: var(--ui-opacity-visible);
-    --ui-home-topbar-blur-strong: blur(var(--ui-space-5)) saturate(1.18);
-    --ui-header-avatar-size: var(--ui-control-md);
     --ui-profile-icon-compact-size: var(--ui-control-sm);
     --ui-home-feed-empty-max: var(--ui-home-desktop-feed-width);
     --ui-z-modal: 9999;
@@ -173,37 +168,17 @@
     --ui-z-local-floating: 3;
     --ui-z-local-overlay: 10;
 
-    --ui-feed-card-padding: var(--ui-space-3);
-    --ui-feed-card-gap: calc(var(--ui-space-2) + var(--ui-space-half));
-    --ui-ins-card-radius: var(--ui-social-card-radius);
-    --ui-ins-card-desktop-gap: var(--ui-space-4);
-    --ui-ins-card-author-padding-x: var(--ui-page-padding-x);
-    --ui-ins-card-author-padding-y: var(--ui-space-3);
-    --ui-ins-card-body-padding-x: var(--ui-page-padding-x);
-    --ui-ins-card-body-padding-bottom: var(--ui-space-2);
-    --ui-ins-card-media-margin-top: var(--ui-space-2);
-    --ui-ins-card-footer-padding-x: var(--ui-page-padding-x);
     --ui-ins-card-footer-padding-top: var(--ui-space-2);
     --ui-ins-card-footer-padding-bottom: var(--ui-space-3);
-    --ui-ins-card-action-button-size: var(--ui-control-hit);
-    --ui-ins-card-action-icon-size: var(--ui-feed-action-icon-size);
-    --ui-feed-author-stack-gap: var(--ui-space-quarter);
-    --ui-feed-author-name-line: var(--ui-line-tight);
-    --ui-feed-author-meta-line: var(--ui-line-tight);
     --ui-feed-author-stack-height: calc(var(--ui-feed-author-name-row-height) + var(--ui-feed-author-meta-row-height));
     --ui-feed-author-avatar-ring-shadow: inset 0 0 0 var(--ui-border-width-hairline) var(--ui-social-line);
     --ui-feed-avatar-activity-ring-size: var(--ui-space-half);
     --ui-feed-avatar-activity-ring-gap: calc(var(--ui-border-width-hairline) + (var(--ui-border-width-hairline) / 2));
     --ui-feed-avatar-activity-ring-surface: var(--ui-surface-card);
     --ui-feed-avatar-activity-ring-color: var(--ui-color-white);
-    --ui-feed-card-content-line: 1.58;
     --ui-feed-author-name-row-height: calc(var(--ui-type-feed-author-size) + var(--ui-space-half));
     --ui-feed-author-meta-row-height: calc(var(--ui-type-feed-meta-size) + var(--ui-space-half));
     --ui-feed-card-body-to-media-gap: var(--ui-space-3);
-    --ui-feed-card-media-radius-mobile: var(--ui-radius-none);
-    --ui-feed-card-media-radius-desktop: var(--ui-radius-none);
-    --ui-feed-action-gap: var(--ui-space-1);
-    --ui-feed-action-padding: var(--ui-space-1) var(--ui-space-3);
     --ui-feed-action-muted-color: color-mix(in srgb, var(--ui-feed-action-color) 90%, transparent);
     --ui-feed-action-stat-color: color-mix(in srgb, var(--ui-feed-action-color) 78%, transparent);
     --ui-feed-action-heat-stat-color: color-mix(in srgb, var(--ui-feed-action-heat-color) 82%, transparent);
@@ -264,16 +239,8 @@
     --ui-media-carousel-count-shadow: 0 var(--ui-space-1) var(--ui-space-3) color-mix(in srgb, var(--ui-color-black) 18%, transparent);
     --ui-media-carousel-count-separator-opacity: 0.68;
     --ui-feed-status-dot-size: var(--ui-space-2);
-    --ui-feed-contact-size: var(--ui-control-xs);
-    --ui-feed-author-avatar-size: calc(var(--ui-control-sm) + var(--ui-space-1));
     --ui-feed-author-action-max-width: min(50vw, calc(var(--ui-space-8) * 5 + var(--ui-space-4)));
     --ui-feed-author-action-max-width-compact: min(52vw, calc(var(--ui-space-8) * 5 + var(--ui-space-2)));
-    --ui-feed-action-icon-size: calc(var(--ui-space-4) + var(--ui-space-half));
-    --ui-feed-location-icon-size: var(--ui-text-xs);
-    --ui-feed-location-chip-gap: var(--ui-space-none);
-    --ui-feed-chip-min-height: var(--ui-control-xs);
-    --ui-feed-tag-color: var(--ui-ins-text-muted);
-    --ui-feed-tag-surface: var(--ui-color-transparent);
     --segment-tab-count: 1;
 
     --ui-motion-scale-base: 1;

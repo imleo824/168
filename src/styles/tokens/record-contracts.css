@@ -1,0 +1,10 @@
+/* Transaction, promotion and referral record contracts. */
+
+@layer base {
+  :root {
+    --ui-record-copy-icon-size: var(--ui-control-icon-xs);
+    --ui-promote-history-action-icon-size: var(--ui-control-icon-xs);
+    --ui-record-header-caret-offset-x: var(--ui-space-2);
+    --ui-promote-record-filter-surface: color-mix(in srgb, var(--ui-surface-raised) 92%, transparent);
+  }
+}

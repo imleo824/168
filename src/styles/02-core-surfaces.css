@@ -7,8 +7,28 @@
       margin-inline: auto;
       padding-inline: var(--ui-page-edge-padding-x);
     }
+  .ui-page-content-shell[data-ui-content-width='reading'] {
+      max-width: var(--ui-page-reading-max-width);
+    }
+  .ui-page-content-shell[data-ui-content-width='standard'] {
+      max-width: var(--ui-page-standard-max-width);
+    }
+  .ui-page-content-shell[data-ui-content-width='wide'] {
+      max-width: var(--ui-page-wide-max-width);
+    }
   .surface-page {
       background: var(--ui-surface-page);
+    }
+  .ui-mono-value {
+      background: var(--ui-surface-card);
+      color: var(--ui-text-strong);
+      font-size: var(--ui-text-xs);
+      font-weight: var(--ui-font-weight-strong);
+      letter-spacing: var(--ui-tracking-normal);
+      line-height: var(--ui-line-none);
+    }
+  .ui-skeleton-card {
+      border-radius: var(--ui-radius-xl);
     }
   .surface-soft {
       background: var(--ui-surface-soft);

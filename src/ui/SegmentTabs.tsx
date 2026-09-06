@@ -21,32 +21,16 @@ interface SegmentTabsProps {
   variant?: SegmentTabsVariant;
 }
 
-function getClassSet(className?: string) {
-  return new Set(String(className || '').split(/\s+/).filter(Boolean));
-}
-
-function shouldShowLabels(className?: string, explicitShowLabels?: boolean) {
-  if (typeof explicitShowLabels === 'boolean') return explicitShowLabels;
-  return !getClassSet(className).has('profile-tabbar');
-}
-
-function resolveSegmentVariant(className?: string, explicitVariant: SegmentTabsVariant = 'default') {
-  if (explicitVariant !== 'default') return explicitVariant;
-  return getClassSet(className).has('ui-page-tabs-bar') ? 'underline' : 'default';
-}
-
 function SegmentTabs({
   items,
   activeKey,
   onChange,
   ariaLabel,
   className,
-  showLabels,
+  showLabels = true,
   labelDisplay = 'truncate',
   variant = 'default',
 }: SegmentTabsProps) {
-  const resolvedShowLabels = shouldShowLabels(className, showLabels);
-  const resolvedVariant = resolveSegmentVariant(className, variant);
   const labelClassName = labelDisplay === 'full'
     ? 'ui-segment-tab-label ui-segment-tab-label--full'
     : 'ui-segment-tab-label';
@@ -57,7 +41,8 @@ function SegmentTabs({
   return (
     <div
       className={`ui-segment-tabs ${className || ''}`}
-      data-segment-variant={resolvedVariant}
+      data-segment-variant={variant}
+      data-segment-labels={showLabels ? 'visible' : 'hidden'}
       style={tabsStyle}
       role="tablist"
       aria-label={ariaLabel}
@@ -70,7 +55,7 @@ function SegmentTabs({
             type="button"
             role="tab"
             aria-label={item.label}
-            title={resolvedShowLabels ? undefined : item.label}
+            title={showLabels ? undefined : item.label}
             aria-selected={active}
             aria-pressed={active}
             disabled={item.disabled}
@@ -78,12 +63,12 @@ function SegmentTabs({
               if (!item.disabled) onChange(item.key);
             }}
             className="ui-segment-tab pressable"
-            data-labels={resolvedShowLabels ? 'visible' : 'hidden'}
+            data-labels={showLabels ? 'visible' : 'hidden'}
           >
             {item.icon ? (
               <span className="ui-segment-tab-icon" aria-hidden="true">{item.icon}</span>
             ) : null}
-            {resolvedShowLabels ? (
+            {showLabels ? (
               <span className={labelClassName}>{item.label}</span>
             ) : null}
             {item.meta !== undefined ? (

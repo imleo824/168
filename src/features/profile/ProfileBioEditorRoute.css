@@ -1,3 +1,5 @@
 /* Profile bio editor route-only stylesheet. */
 
+@import "../../styles/00-profile-tokens.css";
+@import "../../styles/tokens/profile-bio-editor-contracts.css";
 @import "../../styles/features/profile-bio-editor.css";

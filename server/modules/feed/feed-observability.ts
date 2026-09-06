@@ -1,6 +1,14 @@
+import { AsyncLocalStorage } from 'node:async_hooks';
 import type { FeedPerformanceMark } from './feed-contracts';
 
 const DEFAULT_SLOW_FEED_THRESHOLD_MS = 800;
+const feedPerformanceCollection = new AsyncLocalStorage<Map<string, number>>();
+
+export async function collectFeedPerformance<T>(task: () => Promise<T>) {
+  const timings = new Map<string, number>();
+  const result = await feedPerformanceCollection.run(timings, task);
+  return { result, timings };
+}
 
 function getSlowFeedThresholdMs() {
   const raw = Number.parseInt(process.env.FEED_SLOW_QUERY_THRESHOLD_MS || '', 10);
@@ -8,6 +16,13 @@ function getSlowFeedThresholdMs() {
 }
 
 export function recordFeedPerformance(mark: FeedPerformanceMark) {
+  const activeCollection = feedPerformanceCollection.getStore();
+  if (activeCollection) {
+    activeCollection.set(
+      mark.name,
+      (activeCollection.get(mark.name) || 0) + Math.max(0, mark.durationMs),
+    );
+  }
   const thresholdMs = getSlowFeedThresholdMs();
   const payload = {
     name: mark.name,

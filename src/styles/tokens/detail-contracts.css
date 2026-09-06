@@ -1,0 +1,22 @@
+/* Post detail route contracts. */
+
+@layer base {
+  :root {
+    --ui-detail-topbar-author-max: min(54vw, var(--ui-page-narrow));
+    --ui-detail-topbar-author-gap: var(--ui-space-2);
+    --ui-detail-topbar-author-stack-gap: var(--ui-space-half);
+    --ui-detail-topbar-avatar-size: var(--ui-control-md);
+    --ui-detail-topbar-avatar-size-compact: calc(var(--ui-control-sm) - var(--ui-space-1));
+    --ui-detail-topbar-author-name-size: var(--ui-text-sm);
+    --ui-detail-topbar-author-time-size: var(--ui-text-2xs);
+    --ui-detail-topbar-action-slot-min-width: calc(var(--ui-control-lg) + var(--ui-space-4));
+    --ui-detail-border: var(--ui-ins-divider);
+    --ui-detail-border-soft: var(--ui-ins-divider-soft);
+    --ui-detail-page-bottom-space: calc(var(--ui-space-8) * 4 + var(--ui-space-2));
+    --ui-detail-article-padding-mobile: var(--ui-social-feed-row-padding-y) var(--ui-social-feed-row-padding-x) calc(var(--ui-space-3) + var(--ui-space-half));
+    --ui-detail-content-gap: var(--ui-space-3);
+    --ui-detail-tag-row-gap: var(--ui-post-tag-row-gap-y);
+    --ui-detail-source-padding: var(--ui-space-2) var(--ui-social-feed-row-padding-x) var(--ui-social-feed-row-padding-y);
+    --ui-detail-source-gap: var(--ui-space-1);
+  }
+}

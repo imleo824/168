@@ -1,4 +1,5 @@
 import React, { useCallback, useState } from 'react';
+import './AuthModal.css';
 import { X, Lock, User, ChevronDown, ChevronUp, Gift } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { APP_ROUTES } from '@/app/routePaths';

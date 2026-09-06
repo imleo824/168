@@ -1,0 +1,30 @@
+/* Message and notification route contracts. */
+
+@layer base {
+  :root {
+    --ui-messages-read-all-hover-border: color-mix(in srgb, var(--ui-brand) 10%, transparent);
+    --ui-messages-read-all-hover-surface: color-mix(in srgb, var(--ui-brand) 6%, transparent);
+    --ui-messages-card-border: color-mix(in srgb, var(--ui-social-line-soft) 88%, transparent);
+    --ui-messages-card-border-strong: color-mix(in srgb, var(--ui-social-line-soft) 90%, transparent);
+    --ui-messages-card-hover-border: color-mix(in srgb, var(--ui-text-strong) 8%, transparent);
+    --ui-messages-unread-border: color-mix(in srgb, var(--ui-brand) 13%, transparent);
+    --ui-messages-unread-surface: color-mix(in srgb, var(--ui-brand) 2%, var(--ui-surface-card));
+    --ui-messages-unread-dot-surface: color-mix(in srgb, var(--ui-brand) 90%, var(--ui-text-strong));
+    --ui-messages-unread-dot-shadow: 0 0 0 var(--ui-border-width-hairline) var(--ui-surface-card), 0 0 0 calc(var(--ui-border-width-hairline) * 3) color-mix(in srgb, var(--ui-brand) 8%, transparent);
+    --ui-messages-system-avatar-border: color-mix(in srgb, var(--ui-brand) 12%, transparent);
+    --ui-messages-system-avatar-surface:
+      radial-gradient(circle at 28% 18%, color-mix(in srgb, var(--ui-brand) 16%, transparent), transparent 42%),
+      color-mix(in srgb, var(--ui-brand) 7%, var(--ui-surface-muted));
+    --ui-messages-system-avatar-color: color-mix(in srgb, var(--ui-brand) 78%, var(--ui-text-secondary));
+    --ui-messages-item-icon-surface: color-mix(in srgb, var(--ui-brand) 5%, var(--ui-surface-muted));
+    --ui-messages-item-icon-color: color-mix(in srgb, var(--ui-brand) 72%, var(--ui-text-secondary));
+    --ui-notification-section-divider: var(--ui-messages-card-border);
+    --ui-notification-item-icon-surface: color-mix(in srgb, var(--ui-brand) 6%, var(--ui-surface-muted));
+    --ui-notification-item-icon-color: color-mix(in srgb, var(--ui-brand) 76%, var(--ui-text-secondary));
+    --ui-notification-switch-border: color-mix(in srgb, var(--ui-line-medium) 78%, transparent);
+    --ui-notification-switch-surface: color-mix(in srgb, var(--ui-surface-muted) 76%, var(--ui-color-white));
+    --ui-notification-switch-thumb-shadow: 0 var(--ui-border-width-hairline) var(--ui-space-1) color-mix(in srgb, var(--ui-color-black) 12%, transparent);
+    --ui-notification-switch-checked-border: color-mix(in srgb, var(--ui-brand) 16%, transparent);
+    --ui-notification-switch-checked-surface: color-mix(in srgb, var(--ui-brand) 18%, var(--ui-color-white));
+  }
+}

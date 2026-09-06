@@ -23,18 +23,7 @@
     --ring: var(--ui-focus-ring);
 
     --ui-color-white: #ffffff;
-    --ui-color-black: #172033;
-    --ui-color-ink: #0f172a;
-    --ui-color-ink-raised: #111827;
-    --ui-color-ink-soft: #243047;
 
-    --ui-brand: #287dfa;
-    --ui-brand-hover: #1f6ee8;
-    --ui-brand-strong: #1557c7;
-    --ui-brand-soft: #edf5ff;
-    --ui-brand-soft-10: rgba(40, 125, 250, 0.10);
-    --ui-brand-soft-15: rgba(40, 125, 250, 0.15);
-    --ui-brand-soft-25: rgba(40, 125, 250, 0.25);
     --ui-brand-mark: var(--ui-brand);
     --ui-brand-mark-soft: color-mix(in srgb, var(--ui-brand) 12%, transparent);
     --ui-brand-warm: #ffb400;
@@ -47,11 +36,6 @@
     --ui-brand-blue-hover: #1f6ee8;
     --ui-brand-blue-strong: #1557c7;
     --ui-brand-blue-soft: #edf5ff;
-    --ui-ins-link-blue: var(--ui-brand);
-    --ui-ins-link-blue-strong: var(--ui-brand-strong);
-    --ui-ins-link-blue-soft: rgba(40, 125, 250, 0.10);
-    --ui-ins-link-blue-hover: rgba(40, 125, 250, 0.14);
-    --ui-ins-link-blue-ring: rgba(40, 125, 250, 0.24);
     --ui-success: #16a34a;
     --ui-success-classic: var(--ui-success);
     --ui-success-strong: #059669;
@@ -61,28 +45,12 @@
     --ui-warning-soft: rgba(245, 158, 11, 0.2);
     --ui-warning-bg: rgba(245, 158, 11, 0.08);
 
-    --ui-text-primary: var(--ui-color-black);
-    --ui-text-strong: var(--ui-color-ink);
-    --ui-text-secondary: #4a5872;
-    --ui-text-muted: #6b7890;
-    --ui-text-subtle: #8995aa;
-    --ui-text-soft: #a6b0bf;
-    --ui-text-disabled: #b6c0ce;
-    --ui-text-placeholder: #8c98aa;
     --ui-text-danger: var(--ui-danger);
     --ui-text-inverse: var(--ui-color-white);
     --ui-text-inverse-muted: rgba(255, 255, 255, 0.64);
     --ui-text: var(--ui-text-primary);
     --ui-text-tertiary: var(--ui-text-subtle);
 
-    --ui-surface-page: #f5f8ff;
-    --ui-surface-card: var(--ui-color-white);
-    --ui-surface-raised: var(--ui-color-white);
-    --ui-surface-focus: var(--ui-color-white);
-    --ui-surface-muted: #f2f6fc;
-    --ui-surface-weak: #f7faff;
-    --ui-surface-soft: #fbfdff;
-    --ui-surface-elevated: var(--ui-color-white);
     --ui-surface-pressed: rgba(247, 249, 249, 0.82);
     --ui-surface-base: var(--ui-surface-card);
     --ui-panel-card-surface: var(--ui-surface-card);
@@ -91,8 +59,6 @@
     --ui-tap-highlight-color: var(--ui-color-transparent);
 
     --ui-app-page-min-height: 100svh;
-    --ui-app-page-main-gap: var(--ui-secondary-page-gap);
-    --ui-app-page-main-padding-y: var(--ui-space-3);
     --ui-app-page-bottom-safe: var(--ui-page-bottom-safe);
     --ui-skeleton-width-xl: 94%;
     --ui-skeleton-width-lg: 92%;
@@ -104,22 +70,14 @@
     --ui-skeleton-width-compact: 64%;
     --ui-skeleton-width-label: 56%;
 
-    --ui-line-hairline: rgba(15, 23, 42, 0.052);
-    --ui-line-soft: #eff3f4;
-    --ui-line-medium: #d7dee3;
     --ui-line-strong: rgba(15, 23, 42, 0.12);
-    --ui-line-subtle: rgba(15, 23, 42, 0.045);
     --ui-line-faint: rgba(15, 20, 25, 0.055);
-    --ui-line-fainter: rgba(15, 20, 25, 0.022);
     --ui-line-glass: rgba(209, 217, 224, 0.28);
     --ui-line-glass-strong: rgba(209, 217, 224, 0.48);
     --ui-border-muted: var(--ui-line-hairline);
     --ui-line-focus: rgba(15, 20, 25, 0.34);
-    --ui-focus-ring: rgba(15, 20, 25, 0.09);
     --ui-ring-brand-soft: color-mix(in srgb, var(--ui-brand) 14%, transparent);
-    --ui-focus-outline: rgba(15, 20, 25, 0.16);
     --ui-focus-strong: rgba(15, 20, 25, 0.52);
-    --ui-focus-surface: color-mix(in srgb, var(--ui-brand) 4%, transparent);
     --ui-danger-ring: rgba(239, 68, 68, 0.16);
     --ui-danger-soft-surface: var(--ui-danger-surface-soft);
     --ui-danger-on-soft: color-mix(in srgb, var(--ui-danger-classic) 34%, var(--ui-color-white));
@@ -128,11 +86,6 @@
     --ui-success-surface-soft: color-mix(in srgb, var(--ui-success) 10%, transparent);
     --ui-quote-preview-surface: color-mix(in srgb, var(--ui-surface-card) 92%, transparent);
 
-    --ui-state-hover: rgba(15, 20, 25, 0.045);
-    --ui-state-pressed: rgba(15, 20, 25, 0.085);
-    --ui-state-selected: rgba(15, 20, 25, 0.075);
-    --ui-state-selected-strong: rgba(15, 20, 25, 0.082);
-    --ui-state-selected-soft: rgba(15, 20, 25, 0.076);
     --ui-state-divider: rgba(15, 20, 25, 0.04);
 
     --ui-font-family-sans: var(--font-sans);
@@ -148,46 +101,26 @@
     --ui-font-weight-display: 700;
     --ui-font-weight-regular: var(--ui-font-weight-body);
 
-    --ui-text-xs: 0.75rem;
-    --ui-text-2xs: 0.625rem;
-    --ui-text-sm: 0.8125rem;
-    --ui-text-md: 0.875rem;
-    --ui-text-base: 0.875rem;
-    --ui-text-body: 0.875rem;
-    --ui-text-title: 1rem;
     --ui-text-xl: 1.25rem;
-    --ui-text-page-title: 1.0625rem;
     --ui-text-profile-name: 1.3125rem;
     --ui-font-size-xs: var(--ui-text-xs);
     --ui-font-size-sm: var(--ui-text-sm);
 
-    --ui-type-display-size: 1.35rem;
     --ui-type-page-title-size: var(--ui-text-page-title);
     --ui-type-section-title-size: var(--ui-text-title);
     --ui-type-body-size: var(--ui-text-body);
     --ui-type-meta-size: var(--ui-text-xs);
     --ui-type-caption-size: var(--ui-text-xs);
     --ui-type-control-label-size: var(--ui-text-md);
-    --ui-type-feed-author-size: var(--ui-type-feed-body-size);
-    --ui-type-feed-body-size: var(--ui-text-base);
-    --ui-type-feed-body-compact-size: var(--ui-text-md);
     --ui-type-feed-meta-size: var(--ui-text-xs);
-    --ui-type-feed-action-size: var(--ui-text-xs);
     --ui-type-lg-size: var(--ui-text-title);
-    --ui-type-xl-size: 1.15625rem;
     --ui-control-label-size: var(--ui-text-sm);
 
     --ui-line-tight: 1.18;
     --ui-line-none: 1;
-    --ui-line-title: 1.36;
-    --ui-line-title-compact: 1.34;
-    --ui-line-meta: 1.44;
     --ui-line-compact: 1.28;
-    --ui-line-normal: 1.42;
-    --ui-line-readable: 1.58;
     --ui-line-relaxed: var(--ui-line-readable);
 
-    --ui-space-none: 0;
     --ui-space-1: 4px;
     --ui-space-2: 8px;
     --ui-space-3: 12px;
@@ -232,30 +165,17 @@
     --ui-outline-none: none;
     --ui-outline-width: 2px;
     --ui-focus-ring-width: 3px;
-    --ui-radius-xs: 4px;
     --ui-radius-none: 0;
-    --ui-radius-sm: 7px;
-    --ui-radius-md: 9px;
-    --ui-radius-lg: 8px;
-    --ui-radius-xl: 12px;
-    --ui-radius-2xl: 14px;
-    --ui-radius-media: 8px;
     --ui-radius-pill: 999px;
     --ui-radius-full: var(--ui-radius-pill);
     --ui-radius-card: var(--ui-section-card-radius, var(--ui-radius-xl));
 
     --ui-shadow-hairline: 0 var(--ui-border-width-hairline) 0 color-mix(in srgb, var(--ui-text-strong) 3.5%, transparent);
-    --ui-shadow-card: 0 var(--ui-border-width-hairline) 0 color-mix(in srgb, var(--ui-text-strong) 3.2%, transparent), 0 calc(var(--ui-space-1) + var(--ui-space-half)) calc(var(--ui-space-4) + var(--ui-space-half)) color-mix(in srgb, var(--ui-text-strong) 1.2%, transparent);
-    --ui-shadow-card-hover: 0 var(--ui-border-width-hairline) 0 color-mix(in srgb, var(--ui-text-strong) 4.2%, transparent), 0 calc(var(--ui-space-2) + var(--ui-space-half)) var(--ui-space-6) color-mix(in srgb, var(--ui-text-strong) 2.4%, transparent);
     --ui-shadow-control: 0 var(--ui-border-width-hairline) 0 color-mix(in srgb, var(--ui-text-strong) 4%, transparent);
-    --ui-shadow-sheet: 0 calc(var(--ui-border-width-hairline) * -1) 0 color-mix(in srgb, var(--ui-text-strong) 4.5%, transparent), 0 calc(var(--ui-space-6) * -1) calc(var(--ui-space-8) + var(--ui-space-7)) color-mix(in srgb, var(--ui-text-strong) 8%, transparent);
-    --ui-shadow-popover: 0 var(--ui-space-3) calc(var(--ui-space-8) + var(--ui-space-half)) color-mix(in srgb, var(--ui-text-strong) 4%, transparent);
-    --ui-shadow-panel: 0 var(--ui-space-4) calc(var(--ui-space-8) + var(--ui-space-2) + var(--ui-space-half)) color-mix(in srgb, var(--ui-text-strong) 4.5%, transparent);
     --ui-shadow-lightbox-control: 0 var(--ui-space-2) calc(var(--ui-space-5) + var(--ui-space-half)) color-mix(in srgb, var(--ui-color-black) 22%, transparent);
     --ui-shadow-subtle-raise: 0 var(--ui-space-2) calc(var(--ui-space-4) + var(--ui-space-half)) color-mix(in srgb, var(--ui-color-black) 10%, transparent);
     --ui-shadow-rank-card: 0 calc(var(--ui-space-2) + var(--ui-space-half)) var(--ui-space-6) color-mix(in srgb, var(--ui-text-strong) 4%, transparent);
     --ui-shadow-rank-active: 0 calc(var(--ui-space-2) + var(--ui-space-half)) var(--ui-space-7) color-mix(in srgb, var(--ui-color-black) 10%, transparent);
-    --ui-shadow-brand-soft: 0 var(--ui-space-2) calc(var(--ui-space-4) + var(--ui-space-half)) color-mix(in srgb, var(--ui-brand) 18%, transparent);
     --ui-shadow-airy: var(--ui-shadow-panel);
     --ui-shadow-none: none;
     --ui-text-shadow-none: none;
@@ -354,9 +274,6 @@
     --ui-empty-state-card-surface: linear-gradient(180deg, color-mix(in srgb, var(--ui-color-white) 98%, transparent), color-mix(in srgb, var(--ui-surface-soft) 94%, transparent)), var(--ui-surface-card);
     --ui-token-panel-label-color: color-mix(in srgb, var(--ui-color-white) 60%, transparent);
     --ui-token-panel-unit-color: color-mix(in srgb, var(--ui-color-white) 72%, transparent);
-    --ui-sheet-radius: var(--ui-radius-2xl);
-    --ui-sheet-header-height: calc(var(--ui-control-lg) + var(--ui-space-2));
-    --ui-sheet-body-padding: var(--ui-space-4);
     --ui-sheet-handle-width: var(--ui-control-md);
     --ui-sheet-handle-height: var(--ui-space-1);
     --ui-sheet-max-height: min(calc(var(--ui-visual-viewport-height) - var(--ui-space-4)), calc(var(--ui-space-8) * 22 + var(--ui-space-4)));
@@ -389,11 +306,8 @@
     --ui-checkout-action-min-width: calc(var(--ui-space-8) * 3 + var(--ui-space-7));
     --ui-checkout-action-min-width-compact: calc(var(--ui-space-8) * 3 + var(--ui-space-6) - var(--ui-space-half));
     --ui-checkout-shell-padding-y: calc(var(--ui-space-2) + var(--ui-space-half));
-    --ui-secondary-page-gap: var(--ui-space-3);
-    --ui-secondary-page-gap-loose: var(--ui-space-4);
     --ui-secondary-state-padding-y: calc(var(--ui-space-8) * 3);
     --ui-secondary-input-min-height: var(--ui-control-lg);
-    --ui-secondary-action-min-width: calc(var(--ui-space-8) * 3 + var(--ui-space-1));
     --ui-topbar-title-skeleton-width: calc(var(--ui-space-8) * 2 + var(--ui-space-4));
     --ui-topbar-title-skeleton-height: var(--ui-space-4);
     --ui-record-list-gap: calc(var(--ui-space-2) + var(--ui-space-half));
@@ -417,7 +331,6 @@
     --ui-layout-max: 1200px;
     --ui-page-max: 760px;
     --ui-page-narrow: 560px;
-    --ui-page-padding-x: calc(var(--ui-space-3) + var(--ui-space-half));
     --ui-page-bottom-safe: calc(env(safe-area-inset-bottom) + (var(--ui-control-lg) * 2) + var(--ui-space-2));
     --app-layout-vh: 100dvh;
   }

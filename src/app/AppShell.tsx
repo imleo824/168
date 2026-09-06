@@ -1,43 +1,39 @@
-import { BrowserRouter as Router, Navigate, NavLink, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
+import { BrowserRouter as Router, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
-import { HelmetProvider } from 'react-helmet-async';
 import { lazy, Suspense, useEffect, useMemo, type ReactNode } from 'react';
-import { Bell, CirclePlus, House, Info, Megaphone, ShieldCheck, TrendingUp, UserRound } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import Home from '@/pages/Home';
 import { useIsDesktopViewport } from '@/hooks/useIsDesktopViewport';
-import { useInteractionGuard } from '@/hooks/useInteractionGuard';
+import { UI_USER_DESKTOP_AUX_RAIL_MIN_WIDTH } from '@/ui/layoutViewport';
 import { useScrollLock } from '@/utils/scrollLock';
-import { primePostCreateComposerFocus } from '@/utils/postCreateFocusPrime';
 import { ApiError } from '@/services/apiCore';
-import PageHeader from '@/ui/PageHeader';
-import ProfileIconButton from '@/ui/ProfileIconButton';
-import PublishIconButton from '@/ui/PublishIconButton';
 import { PageLoader } from '@/ui/PageLoader';
 import { RecoveryGuard } from '@/ui/RecoveryGuard';
 import { HomePageSkeleton, Skeleton } from '@/ui/Skeleton';
 import AuthRequiredState from '@/ui/AuthRequiredState';
 import PageContentShell from '@/ui/PageContentShell';
 import AvatarImage from '@/ui/AvatarImage';
-import { warmupNavigationIntent, warmupRoutePath } from '@/utils/routeWarmups';
 import AppBottomNavigation from '@/app/AppBottomNavigation';
-import { AppDesktopAuxRail } from '@/app/AppDesktopAuxRail';
-import { AppDesktopSidebar } from '@/app/AppDesktopSidebar';
 import AppRequireAuthRoute from '@/app/AppRequireAuthRoute';
 import AppRequireTuiPlusRoute from '@/app/AppRequireTuiPlusRoute';
 import { APP_ROUTES } from '@/app/routePaths';
 import { useBrowserPushResync } from '@/app/useBrowserPushResync';
-import { useHomeBootstrapPrefetch } from '@/app/useHomeBootstrapPrefetch';
 import { usePostCreateFocusIntentCapture } from '@/app/usePostCreateFocusIntentCapture';
 import { useReferralInviteAttributionCapture } from '@/app/useReferralInviteAttributionCapture';
-import { isTuiPlusActive } from '@/features/tui-plus/tuiPlusBenefits';
 import { useHomeOnlineCount } from '@/features/home/useHomeOnlineCount';
 import { formatOptionalOnlineCount } from '@/features/home/onlinePresence';
 import { OnlinePresenceProvider, useOnlinePresence } from '@/features/home/OnlinePresenceContext';
 import { useConfig, useHomeBootstrap } from '@/hooks/useDataConfig';
 
 const AuthModal = lazy(() => import('@/features/auth/AuthModal'));
+const AppDesktopAuxRail = lazy(() =>
+  import('@/app/AppDesktopAuxRail').then((module) => ({ default: module.AppDesktopAuxRail })),
+);
+const AppDesktopSidebar = lazy(() =>
+  import('@/app/AppDesktopSidebar').then((module) => ({ default: module.AppDesktopSidebar })),
+);
 const MobileAddressBarController = lazy(() => import('@/app/MobileAddressBarController'));
 const Recharge = lazy(() => import('@/pages/RechargeMobile'));
 const Profile = lazy(() => import('@/pages/ProfileMobile'));
@@ -60,38 +56,6 @@ const UserSpace = lazy(() => import('@/pages/UserSpace'));
 const NotFound = lazy(() => import('@/pages/NotFound'));
 const CategoryFeed = lazy(() => import('@/pages/CategoryFeedMobile'));
 const BrandAbout = lazy(() => import('@/pages/BrandAbout'));
-
-const DESKTOP_NAV_ITEMS = [
-  { to: APP_ROUTES.home, label: '首页', icon: House, end: true },
-  { to: APP_ROUTES.messages, label: '消息', icon: Bell, end: false },
-  { to: APP_ROUTES.create, label: '发推', icon: CirclePlus, end: false },
-  { to: APP_ROUTES.sponsor, label: '推广', icon: TrendingUp, end: false },
-  { to: APP_ROUTES.profile, label: '我的', icon: UserRound, end: false },
-  { to: APP_ROUTES.about, label: '关于', icon: Info, end: false },
-] as const;
-
-const PAGE_OWNED_HEADER_PREFIXES = [
-  '/post/',
-  '/category/',
-  '/user/',
-  APP_ROUTES.profile,
-  APP_ROUTES.messages,
-  '/settings',
-  APP_ROUTES.sponsor,
-  APP_ROUTES.invite,
-  APP_ROUTES.create,
-  APP_ROUTES.promote,
-  APP_ROUTES.promotions,
-  APP_ROUTES.legacyPromoteHistory,
-  APP_ROUTES.promotionEffects,
-  APP_ROUTES.legacyPromotionEffects,
-  APP_ROUTES.recharge,
-  APP_ROUTES.tuiPlus,
-  APP_ROUTES.transactions,
-  '/168wc',
-  APP_ROUTES.about,
-  '/404',
-];
 
 const AUTH_REQUIRED_WORKSPACE_PATHS = [
   APP_ROUTES.create,
@@ -155,10 +119,6 @@ function isKnownUserRoutePath(pathname: string) {
   );
 }
 
-function isPageOwnedHeaderPath(pathname: string) {
-  return pathname === APP_ROUTES.home || hasPrefix(pathname, PAGE_OWNED_HEADER_PREFIXES) || !isKnownUserRoutePath(pathname);
-}
-
 function isAuthRequiredWorkspacePath(pathname: string) {
   return (
     AUTH_REQUIRED_WORKSPACE_PATHS.some((path) => pathname === path) ||
@@ -220,63 +180,6 @@ const queryClient = new QueryClient({
   },
 });
 
-function Navigation() {
-  const { user, requireAuth } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  const openProfile = () => {
-    warmupNavigationIntent('profile');
-    requireAuth(() => {
-      navigate(APP_ROUTES.profile);
-    });
-  };
-
-  const openCreate = () => {
-    if (location.pathname === APP_ROUTES.create) return;
-    warmupNavigationIntent('create');
-    requireAuth(() => {
-      primePostCreateComposerFocus();
-      navigate(APP_ROUTES.create);
-    });
-  };
-
-  const { guarded: guardedOpenCreate } = useInteractionGuard(openCreate, {
-    policy: 'critical',
-    cooldownMs: 520,
-    minPendingMs: 160,
-    mode: 'drop',
-  });
-
-  if (isPageOwnedHeaderPath(location.pathname)) return null;
-
-  return (
-    <PageHeader
-      title=" "
-      showBack={false}
-      className="ui-layer-header"
-      titleClassName="sr-only"
-      left={
-        <ProfileIconButton
-          onClick={openProfile}
-          photoUrl={user?.photoUrl}
-          displayName={user?.displayName}
-          userId={user?.id}
-          isTuiPlus={isTuiPlusActive(user)}
-        />
-      }
-      right={
-        <PublishIconButton
-          onClick={() => void guardedOpenCreate()}
-          ariaLabel="发布内容"
-          title="发布内容"
-          variant="top"
-        />
-      }
-    />
-  );
-}
-
 function AuthModalFallback() {
   useScrollLock(true, {
     fixed: true,
@@ -284,21 +187,21 @@ function AuthModalFallback() {
   });
 
   return (
-    <div className="ui-auth-fallback-shell" data-auth-scroll>
-      <div className="ui-auth-fallback-panel" role="status" aria-label="正在加载登录面板">
-        <div className="ui-auth-fallback-header">
-          <Skeleton className="ui-auth-fallback-logo" />
-          <Skeleton className="ui-auth-fallback-title" />
+    <div className="ui-auth-loader-shell" data-auth-scroll>
+      <div className="ui-auth-loader-panel" role="status" aria-label="正在加载登录面板">
+        <div className="ui-auth-loader-header">
+          <Skeleton className="ui-auth-loader-logo" />
+          <Skeleton className="ui-auth-loader-title" />
         </div>
-        <div className="ui-auth-fallback-body">
-          <div className="ui-auth-fallback-tabs">
-            <Skeleton className="ui-auth-fallback-tab" />
-            <Skeleton className="ui-auth-fallback-tab" />
+        <div className="ui-auth-loader-body">
+          <div className="ui-auth-loader-tabs">
+            <Skeleton className="ui-auth-loader-tab" />
+            <Skeleton className="ui-auth-loader-tab" />
           </div>
-          <div className="ui-auth-fallback-form">
-            <Skeleton className="ui-auth-fallback-field" />
-            <Skeleton className="ui-auth-fallback-field" />
-            <Skeleton className="ui-auth-fallback-submit" />
+          <div className="ui-auth-loader-form">
+            <Skeleton className="ui-auth-loader-field" />
+            <Skeleton className="ui-auth-loader-field" />
+            <Skeleton className="ui-auth-loader-submit" />
           </div>
         </div>
       </div>
@@ -356,7 +259,9 @@ function AppLayout() {
   const isAdminRoute = pathname.startsWith('/168wc');
   const routeSurface = isAdminRoute ? 'admin' : 'user';
   const isUserSurface = routeSurface === 'user';
-  const { data: homeBootstrap } = useHomeBootstrap(isUserSurface && isHomePath);
+  // Home's first-screen request is the single network owner for bootstrap
+  // data. A disabled query still subscribes to the cache it populates.
+  const { data: homeBootstrap } = useHomeBootstrap(false);
   const { data: routeConfig } = useConfig(isUserSurface && !isHomePath);
   const onlineConfig = isUserSurface ? (isHomePath ? homeBootstrap?.config : routeConfig) : undefined;
   const onlineCount = useHomeOnlineCount({
@@ -375,9 +280,9 @@ function AppLayout() {
     ? useAuthRequiredWorkspaceSurface ? 'workspace' : getDesktopSurfaceKind(pathname)
     : 'admin';
   const isDesktopViewport = useIsDesktopViewport();
+  const isDesktopAuxRailViewport = useIsDesktopViewport(UI_USER_DESKTOP_AUX_RAIL_MIN_WIDTH);
 
   useBrowserPushResync(user?.id);
-  useHomeBootstrapPrefetch(pathname === APP_ROUTES.home);
   usePostCreateFocusIntentCapture(Boolean(user));
   useReferralInviteAttributionCapture(location.search);
 
@@ -402,12 +307,15 @@ function AppLayout() {
         data-route-surface={routeSurface}
         data-desktop-surface={desktopSurfaceKind}
       >
-        {isUserSurface ? <Navigation /> : null}
         {isUserSurface && isDesktopViewport ? (
-          <>
+          <Suspense
+            fallback={(
+              <aside className="app-desktop-sidebar" aria-hidden="true" />
+            )}
+          >
             <AppDesktopSidebar />
             {/* wide-screen-adaptation contract: <section className="app-desktop-sidebar-context" aria-label="当前在线"><span>{onlineCountText || '实时更新'}</span> */}
-          </>
+          </Suspense>
         ) : null}
         <div
           className="app-main app-shell-main"
@@ -449,7 +357,18 @@ function AppLayout() {
             </Suspense>
           </RecoveryGuard>
         </div>
-        {isUserSurface && isDesktopViewport ? <AppDesktopAuxRail /> : null}
+        {isUserSurface && isDesktopAuxRailViewport ? (
+          <Suspense
+            fallback={(
+              <aside
+                className="app-desktop-aux-rail app-desktop-aux-rail-container"
+                aria-hidden="true"
+              />
+            )}
+          >
+            <AppDesktopAuxRail />
+          </Suspense>
+        ) : null}
         {isUserSurface ? <AppBottomNavigation /> : null}
         <GlobalAuthOverlay />
       </div>
@@ -459,14 +378,12 @@ function AppLayout() {
 
 export default function AppShell() {
   return (
-    <HelmetProvider>
-      <QueryClientProvider client={queryClient}>
-        <Router>
-          <AuthProvider>
-            <AppLayout />
-          </AuthProvider>
-        </Router>
-      </QueryClientProvider>
-    </HelmetProvider>
+    <QueryClientProvider client={queryClient}>
+      <Router>
+        <AuthProvider>
+          <AppLayout />
+        </AuthProvider>
+      </Router>
+    </QueryClientProvider>
   );
 }

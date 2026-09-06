@@ -7,6 +7,7 @@ type PageContentShellProps = Omit<ComponentPropsWithoutRef<'div'>, 'as' | 'class
   bottomSafe?: boolean;
   className?: string;
   variant?: 'narrow' | 'fluid';
+  width?: 'reading' | 'standard' | 'wide' | 'fluid';
 };
 
 export default function PageContentShell({
@@ -15,15 +16,18 @@ export default function PageContentShell({
   children,
   className = '',
   variant = 'narrow',
+  width,
   ...restProps
 }: PageContentShellProps) {
   const Component: ElementType = as || 'div';
+  const resolvedWidth = width || (variant === 'fluid' ? 'fluid' : 'standard');
   return (
     <Component
       {...restProps}
+      data-ui-content-width={resolvedWidth}
       className={cn(
         'ui-page-content-shell',
-        variant === 'fluid' ? 'ui-shell-fluid' : 'ui-shell-narrow',
+        resolvedWidth === 'fluid' ? 'ui-shell-fluid' : 'ui-shell-narrow',
         bottomSafe && 'ui-page-content-shell--bottom-safe',
         className,
       )}

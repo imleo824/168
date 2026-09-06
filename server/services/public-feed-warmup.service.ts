@@ -1,5 +1,6 @@
 import {
   buildPublicFeedCacheKey,
+  setPublicFeedInflight,
   setPublicFeedResultCache,
   type PublicFeedResultPayload,
 } from '../public-feed-cache';
@@ -18,55 +19,108 @@ export type PublicFeedWarmupOptions = {
   categoryMax: number;
   intervalMs: number;
   initialDelayMs: number;
+  categoryInitialDelayMs: number;
+  categoryStepDelayMs: number;
 };
 
-export function startPublicFeedWarmup(deps: PublicFeedWarmupDeps, options: PublicFeedWarmupOptions) {
-  let timer: NodeJS.Timeout | null = null;
+type CategoryWarmTarget = { categoryId: string; limit: number };
 
-  const warmOnce = async () => {
+export function startPublicFeedWarmup(deps: PublicFeedWarmupDeps, options: PublicFeedWarmupOptions) {
+  let stopped = false;
+  let recommendedTimer: NodeJS.Timeout | null = null;
+  let categoryTimer: NodeJS.Timeout | null = null;
+  let categoryQueue: CategoryWarmTarget[] = [];
+
+  const setUnrefTimeout = (callback: () => void, delayMs: number) => {
+    const timer = setTimeout(callback, delayMs);
+    timer.unref?.();
+    return timer;
+  };
+
+  const loadPublicPosts = async (params: { limit: number; categoryId?: string }) => {
+    const result = await deps.PostService.listPosts(params);
+    const safePosts = result.items.map((post: any) => deps.PostService.maskContact(post, null, null));
+    return { result, safePosts };
+  };
+
+  const warmRecommendedOnce = async () => {
     if (!deps.isDbConfigured()) return;
 
-    const warmCategories = (await deps.getCachedCategories())
+    for (const limit of options.limits) {
+      // Keep this identical to getPublicFeedResultCacheKey's canonical order:
+      // kind -> limit -> tracked query values. The shared in-flight entry also
+      // prevents a cold request from launching the same expensive query twice.
+      const homeFeedKey = buildPublicFeedCacheKey('home-feed', { limit, feed: 'recommended' });
+      const loadPromise = loadPublicPosts({ limit }).then(({ result, safePosts }) => {
+        setPublicFeedResultCache(buildPublicFeedCacheKey('posts', { limit }), result, safePosts);
+        setPublicFeedResultCache(homeFeedKey, result, safePosts);
+        return { ...result, items: safePosts };
+      });
+      setPublicFeedInflight(homeFeedKey, loadPromise);
+      await loadPromise;
+    }
+  };
+
+  const runRecommended = async () => {
+    if (stopped) return;
+    try {
+      await warmRecommendedOnce();
+    } catch (error) {
+      console.warn('Public recommended feed cache warmup failed:', error);
+    } finally {
+      if (!stopped) recommendedTimer = setUnrefTimeout(runRecommended, options.intervalMs);
+    }
+  };
+
+  const refillCategoryQueue = async () => {
+    const categoryIds = (await deps.getCachedCategories())
       .map((category) => (typeof category?.id === 'string' ? category.id : ''))
       .filter(Boolean)
       .slice(0, options.categoryMax);
 
-    for (const limit of options.limits) {
-      const postsResult = await deps.PostService.listPosts({ limit });
-      const safePosts = postsResult.items.map((post: any) => deps.PostService.maskContact(post, null, null));
-      setPublicFeedResultCache(buildPublicFeedCacheKey('posts', { limit }), postsResult, safePosts);
-      setPublicFeedResultCache(
-        buildPublicFeedCacheKey('home-feed', { feed: 'recommended', limit }),
-        postsResult,
-        safePosts,
-      );
-
-      for (const categoryId of warmCategories) {
-        const categoryPostsResult = await deps.PostService.listPosts({ limit, categoryId });
-        const safeCategoryPosts = categoryPostsResult.items.map((post: any) => deps.PostService.maskContact(post, null, null));
-        setPublicFeedResultCache(buildPublicFeedCacheKey('posts', { limit, categoryId }), categoryPostsResult, safeCategoryPosts);
-      }
-    }
+    categoryQueue = options.limits.flatMap((limit) =>
+      categoryIds.map((categoryId) => ({ categoryId, limit })),
+    );
   };
 
-  const run = async () => {
+  const runNextCategory = async () => {
+    if (stopped) return;
     try {
-      await warmOnce();
+      if (!deps.isDbConfigured()) {
+        categoryQueue = [];
+      } else if (categoryQueue.length === 0) {
+        await refillCategoryQueue();
+      }
+
+      const target = categoryQueue.shift();
+      if (target) {
+        const { result, safePosts } = await loadPublicPosts(target);
+        setPublicFeedResultCache(
+          buildPublicFeedCacheKey('posts', { limit: target.limit, categoryId: target.categoryId }),
+          result,
+          safePosts,
+        );
+      }
     } catch (error) {
-      console.warn('Public feed cache warmup failed:', error);
+      console.warn('Public category feed cache warmup failed:', error);
     } finally {
-      timer = setTimeout(run, options.intervalMs);
-      timer.unref?.();
+      if (stopped) return;
+      const nextDelay = categoryQueue.length > 0
+        ? options.categoryStepDelayMs
+        : options.intervalMs;
+      categoryTimer = setUnrefTimeout(runNextCategory, nextDelay);
     }
   };
 
-  timer = setTimeout(run, options.initialDelayMs);
-  timer.unref?.();
+  recommendedTimer = setUnrefTimeout(runRecommended, options.initialDelayMs);
+  categoryTimer = setUnrefTimeout(runNextCategory, options.categoryInitialDelayMs);
 
   return () => {
-    if (timer) {
-      clearTimeout(timer);
-      timer = null;
-    }
+    stopped = true;
+    if (recommendedTimer) clearTimeout(recommendedTimer);
+    if (categoryTimer) clearTimeout(categoryTimer);
+    recommendedTimer = null;
+    categoryTimer = null;
+    categoryQueue = [];
   };
 }

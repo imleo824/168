@@ -278,7 +278,7 @@ export function PostCreateComposerSection({
       </div>
 
       {isLinkEditorOpen ? (
-        <AppPage className="post-create-page post-create-contact-editor-page post-create-link-editor-page" bottomSafe>
+        <AppPage surface="compose" className="post-create-page post-create-contact-editor-page post-create-link-editor-page" bottomSafe>
           <PageHeader title="添加推广链接" showBack onBack={() => setIsLinkEditorOpen(false)} right={<ActionButton type="button" variant="brand" size="header" disabled={promotionLinkSaveDisabled} state={savePromotionLinkPending ? 'loading' : 'idle'} onClick={() => void guardedSavePromotionLink()}>{savePromotionLinkPending ? '保存中' : '保存'}</ActionButton>} />
           <PageContentShell bottomSafe className="post-create-contact-editor-main ui-app-page-main">
             <section data-post-create-stable-focus="true" className="post-create-stable-focus post-create-contact-editor-card post-create-link-editor-card">

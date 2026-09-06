@@ -13,6 +13,7 @@ import {
   createFeedQueryService,
 } from '../modules/feed';
 import { createFeedRepository } from '../repositories/feed.repository';
+import { measureFeedStep } from '../modules/feed/feed-observability';
 
 export type HomeFeedKind = 'following' | 'recommended' | 'category';
 
@@ -432,21 +433,29 @@ async function listRecommendedOrCategory(params: {
   currentUserRole?: string | null;
 }) {
   const cursor = normalizeCursor(params.cursor);
-  const pins = cursor ? [] : await getActivePinMeta({ kind: params.kind, categoryIds: params.categoryIds });
+  const pins = cursor ? [] : await measureFeedStep({
+    name: 'feed-promotions.active',
+    kind: params.kind,
+    limit: params.limit,
+  }, () => getActivePinMeta({ kind: params.kind, categoryIds: params.categoryIds }));
   const { rows: allPinnedRows, pinMap } = await fetchPinnedRows({ where: params.baseWhere, pins, currentUserId: params.currentUserId });
   const promotedPostIds = feedPromotionMixer.getPromotedPostIds(pinMap);
   const regularWhere = feedPromotionMixer.buildRegularWhereExclusion(params.baseWhere, promotedPostIds);
   const rankedCursorWhere = buildRankCursorWhere(cursor);
   const regularRankWhere = rankedCursorWhere ? { AND: [regularWhere, rankedCursorWhere] } : regularWhere;
   const cursorPostId = decodeHomeRankCursor(cursor)?.id || (cursor && POST_ID_PATTERN.test(cursor) ? cursor : undefined);
-  const regularRows = await feedRepository.listHumanRankedCandidatePosts({
+  const regularRows = await measureFeedStep({
+    name: 'feed-candidates.ranked',
+    kind: params.kind,
+    limit: params.limit,
+  }, () => feedRepository.listHumanRankedCandidatePosts({
     where: regularRankWhere,
     limit: params.limit,
     cursor: cursorPostId,
     select: postFeedListSelect(params.currentUserId),
     promotedPostIds,
     useRankCursor: true,
-  });
+  }));
   const rankedRows = feedRankingService.rankRecommendedRows(regularRows, {
     isCursorPage: Boolean(cursor),
     promotedPostIds: new Set(promotedPostIds),

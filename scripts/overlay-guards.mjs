@@ -283,9 +283,9 @@ assert(
     '../components/feed-card-system.css',
     '../components/feed-follow-interaction.css',
     '../components/media.css',
-    '../components/profile-dialog.css',
+    '../components/state-contract.css',
   ]),
-  'Shared component CSS must be registered through src/styles/layers/components.css.',
+  'Only startup-critical shared component CSS may be registered through src/styles/layers/components.css.',
 );
 
 assert(
@@ -466,6 +466,25 @@ for (const file of walk('src', (entry) => /\.(tsx|ts)$/.test(entry))) {
     assert(
       imports.length === 1 && imports[0] === allowedRouteOwnedCss,
       `${file} may only import the lazy route-owned ${allowedRouteOwnedCss}.`,
+    );
+    continue;
+  }
+
+  const lazyComponentOwnedCssImport = new Map([
+    ['src/app/AppDesktopAuxRail.tsx', '@/styles/features/aux-rail.css'],
+    ['src/features/auth/AuthModal.tsx', './AuthModal.css'],
+    ['src/features/profile/ProfileDialog.tsx', '@/styles/components/profile-dialog.css'],
+    ['src/features/tui-plus/TuiPlusBenefitPromptDialog.tsx', '@/styles/features/tui-plus.css'],
+    ['src/features/upload/ImageUpload.tsx', '@/styles/system/ui-primitives-upload.css'],
+    ['src/pages/TransactionHistoryMobile.tsx', '@/features/records/RecordsRoute.css'],
+    ['src/ui/ImageLightbox.tsx', '@/styles/system/ui-primitives-lightbox.css'],
+    ['src/ui/PaymentActionSheet.tsx', '@/styles/components/payment-action-sheet.css'],
+  ]);
+  const allowedLazyComponentCss = lazyComponentOwnedCssImport.get(file);
+  if (allowedLazyComponentCss) {
+    assert(
+      imports.length === 1 && imports[0] === allowedLazyComponentCss,
+      `${file} may only import its lazy component-owned ${allowedLazyComponentCss}.`,
     );
     continue;
   }

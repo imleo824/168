@@ -53,6 +53,7 @@ const postCreateFocusPrime = read('src/utils/postCreateFocusPrime.ts');
 const postCreateFocusRestore = read('src/utils/postCreateFocusRestore.ts');
 const publishIconButton = read('src/ui/PublishIconButton.tsx');
 const bottomNavigation = read('src/app/AppBottomNavigation.tsx');
+const desktopSidebar = read('src/app/AppDesktopSidebar.tsx');
 const appShell = read('src/app/AppShell.tsx');
 const authRoute = read('src/app/AppRequireAuthRoute.tsx');
 const appRequireTuiPlusRoute = read('src/app/AppRequireTuiPlusRoute.tsx');
@@ -148,7 +149,6 @@ assertOrder(
 assert(
   appShell.includes('const KNOWN_USER_ROUTE_EXACT_PATHS = [') &&
     appShell.includes('const KNOWN_USER_ROUTE_PREFIXES = [') &&
-    appShell.includes('|| !isKnownUserRoutePath(pathname)') &&
     appShell.includes("if (!isKnownUserRoutePath(pathname)) return 'content';") &&
     !appShell.includes("pathname.startsWith('/profile/') || pathname.startsWith('/user/')") &&
     notFound.includes('title="这个页面暂时不可用"'),
@@ -658,8 +658,9 @@ assert(
 assert(
   bottomNavigation.includes('guardedGoCreate') &&
     bottomNavigation.includes('cooldownMs: 520') &&
-    appShell.includes('guardedOpenCreate') &&
-    appShell.includes('cooldownMs: 520'),
+    desktopSidebar.includes('guardedHandleQuickPost') &&
+    desktopSidebar.includes('cooldownMs: 520') &&
+    desktopSidebar.includes('onClick={() => void guardedHandleQuickPost()}'),
   'Top and bottom publish entries must be guarded so rapid taps cannot repeat route navigation and focus retries.',
 );
 

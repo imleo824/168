@@ -1,4 +1,4 @@
-import { Helmet } from 'react-helmet-async';
+import { useEffect } from 'react';
 import {
   SITE_DESCRIPTION,
   SITE_KEYWORDS,
@@ -126,6 +126,40 @@ function resolveCanonicalUrl(id?: string, canonicalPath?: string) {
   return `${origin}${window.location.pathname}`;
 }
 
+type HeadAttribute = 'name' | 'property';
+
+function upsertMeta(attribute: HeadAttribute, key: string, content: string) {
+  const selector = `meta[${attribute}="${CSS.escape(key)}"]`;
+  let node = document.head.querySelector<HTMLMetaElement>(selector);
+  if (!node) {
+    node = document.createElement('meta');
+    node.setAttribute(attribute, key);
+    document.head.appendChild(node);
+  }
+  node.dataset.tuituiSeo = 'managed';
+  node.content = content;
+}
+
+function removeManagedMeta(attribute: HeadAttribute, key: string) {
+  document.head
+    .querySelector<HTMLMetaElement>(`meta[${attribute}="${CSS.escape(key)}"][data-tuitui-seo="managed"]`)
+    ?.remove();
+}
+
+function upsertLink(selector: string, attributes: Record<string, string>) {
+  let node = document.head.querySelector<HTMLLinkElement>(selector);
+  if (!node) {
+    node = document.createElement('link');
+    document.head.appendChild(node);
+  }
+  node.dataset.tuituiSeo = 'managed';
+  for (const [key, value] of Object.entries(attributes)) node.setAttribute(key, value);
+}
+
+function removeManagedLink(selector: string) {
+  document.head.querySelector<HTMLLinkElement>(`${selector}[data-tuitui-seo="managed"]`)?.remove();
+}
+
 export default function SEO({ 
   title = SITE_TITLE,
   socialTitle,
@@ -158,58 +192,110 @@ export default function SEO({
     : imageSource.startsWith('http')
       ? imageSource
       : `${appOrigin || window.location.origin}${imageSource.startsWith('/') ? imageSource : `/${imageSource}`}`;
+  const jsonLdPayload = JSON.stringify(jsonLdItems);
 
-  return (
-    <Helmet>
-      {/* Basic Meta Tags */}
-      <title>{fullTitle}</title>
-      <meta name="description" content={resolvedDescription} />
-      <meta name="keywords" content={resolvedKeywords} />
-      <meta name="robots" content={noindex ? 'noindex,nofollow,noarchive' : 'index,follow,max-image-preview:large'} />
-      <meta name="applicable-device" content="pc,mobile" />
-      {baiduSiteVerification && <meta name="baidu-site-verification" content={baiduSiteVerification} />}
-      <meta name="application-name" content={siteName} />
-      <meta name="apple-mobile-web-app-title" content={siteName} />
+  useEffect(() => {
+    document.title = fullTitle;
 
-      {/* Open Graph / Facebook */}
-      <meta property="og:type" content={type} />
-      <meta property="og:title" content={safeSocialTitle} />
-      <meta property="og:description" content={resolvedDescription} />
-      <meta property="og:image" content={resolvedImage} />
-      <meta property="og:image:secure_url" content={resolvedImage} />
-      <meta property="og:image:width" content="1200" />
-      <meta property="og:image:height" content="630" />
-      <meta property="og:image:alt" content={safeSocialTitle} />
-      <meta property="og:site_name" content={siteName} />
-      <meta property="og:locale" content="zh_CN" />
-      <meta property="og:locale:alternate" content="zh_CN" />
-      {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
-      {canonicalUrl && <meta name="twitter:url" content={canonicalUrl} />}
+    const metaByName: Record<string, string> = {
+      description: resolvedDescription,
+      keywords: resolvedKeywords,
+      robots: noindex ? 'noindex,nofollow,noarchive' : 'index,follow,max-image-preview:large',
+      'applicable-device': 'pc,mobile',
+      'application-name': siteName,
+      'apple-mobile-web-app-title': siteName,
+      'twitter:card': 'summary_large_image',
+      'twitter:title': safeSocialTitle,
+      'twitter:description': resolvedDescription,
+      'twitter:image': resolvedImage,
+      'twitter:image:src': resolvedImage,
+      'twitter:image:alt': safeSocialTitle,
+      viewport: 'width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content',
+      'theme-color': '#ffffff',
+    };
+    if (canonicalUrl) metaByName['twitter:url'] = canonicalUrl;
+    if (normalizedTwitterSite) metaByName['twitter:site'] = normalizedTwitterSite;
+    if (baiduSiteVerification) metaByName['baidu-site-verification'] = baiduSiteVerification;
+    for (const [name, content] of Object.entries(metaByName)) upsertMeta('name', name, content);
 
-      {/* Twitter */}
-      <meta name="twitter:card" content="summary_large_image" />
-      <meta name="twitter:title" content={safeSocialTitle} />
-      <meta name="twitter:description" content={resolvedDescription} />
-      {normalizedTwitterSite ? <meta name="twitter:site" content={normalizedTwitterSite} /> : null}
-      <meta name="twitter:image" content={resolvedImage} />
-      <meta name="twitter:image:src" content={resolvedImage} />
-      <meta name="twitter:image:alt" content={safeSocialTitle} />
-      {/* Global Meta */}
-      <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
-      <meta name="theme-color" content="#ffffff" />
-      
-      {/* Canonical URL */}
-      {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
-      {canonicalUrl ? <link rel="alternate" hrefLang="zh-CN" href={canonicalUrl} /> : null}
-      {xDefaultHref ? <link rel="alternate" hrefLang="x-default" href={xDefaultHref} /> : null}
-      {appOrigin && <link rel="alternate" type="application/rss+xml" title="推推分类信息 Feed" href={`${appOrigin}/feed.xml`} />}
-      {appOrigin && <link rel="alternate" type="text/markdown" title="推推 AI 可读站点说明" href={`${appOrigin}/llms.txt`} />}
+    if (!canonicalUrl) removeManagedMeta('name', 'twitter:url');
+    if (!normalizedTwitterSite) removeManagedMeta('name', 'twitter:site');
+    if (!baiduSiteVerification) removeManagedMeta('name', 'baidu-site-verification');
 
-      {jsonLdItems.map((item, index) => (
-        <script key={index} type="application/ld+json">
-          {JSON.stringify(item)}
-        </script>
-      ))}
-    </Helmet>
-  );
+    const metaByProperty: Record<string, string> = {
+      'og:type': type,
+      'og:title': safeSocialTitle,
+      'og:description': resolvedDescription,
+      'og:image': resolvedImage,
+      'og:image:secure_url': resolvedImage,
+      'og:image:width': '1200',
+      'og:image:height': '630',
+      'og:image:alt': safeSocialTitle,
+      'og:site_name': siteName,
+      'og:locale': 'zh_CN',
+      'og:locale:alternate': 'zh_CN',
+    };
+    if (canonicalUrl) metaByProperty['og:url'] = canonicalUrl;
+    for (const [property, content] of Object.entries(metaByProperty)) upsertMeta('property', property, content);
+    if (!canonicalUrl) removeManagedMeta('property', 'og:url');
+
+    if (canonicalUrl) {
+      upsertLink('link[rel="canonical"]', { rel: 'canonical', href: canonicalUrl });
+      upsertLink('link[rel="alternate"][hreflang="zh-CN"]', { rel: 'alternate', hreflang: 'zh-CN', href: canonicalUrl });
+    } else {
+      removeManagedLink('link[rel="canonical"]');
+      removeManagedLink('link[rel="alternate"][hreflang="zh-CN"]');
+    }
+
+    if (xDefaultHref) {
+      upsertLink('link[rel="alternate"][hreflang="x-default"]', { rel: 'alternate', hreflang: 'x-default', href: xDefaultHref });
+    } else {
+      removeManagedLink('link[rel="alternate"][hreflang="x-default"]');
+    }
+
+    if (appOrigin) {
+      upsertLink('link[rel="alternate"][type="application/rss+xml"]', {
+        rel: 'alternate',
+        type: 'application/rss+xml',
+        title: '推推分类信息 Feed',
+        href: `${appOrigin}/feed.xml`,
+      });
+      upsertLink('link[rel="alternate"][type="text/markdown"]', {
+        rel: 'alternate',
+        type: 'text/markdown',
+        title: '推推 AI 可读站点说明',
+        href: `${appOrigin}/llms.txt`,
+      });
+    }
+
+    document.head.querySelectorAll('script[data-tuitui-seo-jsonld]').forEach((node) => node.remove());
+    for (const item of jsonLdItems) {
+      const script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.dataset.tuituiSeoJsonld = 'true';
+      script.textContent = JSON.stringify(item);
+      document.head.appendChild(script);
+    }
+
+    return () => {
+      document.head.querySelectorAll('script[data-tuitui-seo-jsonld]').forEach((node) => node.remove());
+    };
+  }, [
+    appOrigin,
+    baiduSiteVerification,
+    canonicalUrl,
+    fullTitle,
+    jsonLdPayload,
+    noindex,
+    normalizedTwitterSite,
+    resolvedDescription,
+    resolvedImage,
+    resolvedKeywords,
+    safeSocialTitle,
+    siteName,
+    type,
+    xDefaultHref,
+  ]);
+
+  return null;
 }

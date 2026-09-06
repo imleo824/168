@@ -209,6 +209,7 @@ export default function PromoteHistory() {
 
   return (
     <AppPage
+      surface="workspace"
       ref={rootRef}
       bottomSafe
       onFocusCapture={onFocusCapture}

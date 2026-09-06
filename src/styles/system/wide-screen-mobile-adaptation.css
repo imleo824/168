@@ -255,6 +255,7 @@
       min-height: var(--ui-space-none);
       max-height: var(--app-desktop-shell-content-height);
       flex: initial;
+      padding-block-end: var(--ui-space-none);
       overflow-x: hidden;
       overflow-y: auto;
       overscroll-behavior: contain;
@@ -315,8 +316,6 @@
     }
 
     .app-desktop-sidebar {
-      position: sticky;
-      top: var(--app-desktop-shell-padding-y);
       display: flex;
       min-width: var(--ui-space-none);
       max-height: var(--app-desktop-shell-content-height);
@@ -326,6 +325,62 @@
       align-self: stretch;
       padding-inline-end: var(--ui-space-3);
       border-inline-end: var(--ui-border-width-hairline) solid var(--ui-line-hairline);
+    }
+
+    .app-desktop-sidebar-primary,
+    .app-desktop-nav,
+    .app-desktop-action-group,
+    .app-desktop-user-info,
+    .app-desktop-context-card {
+      display: flex;
+      min-width: 0;
+      flex-direction: column;
+    }
+
+    .app-desktop-sidebar-primary {
+      gap: var(--ui-space-3);
+    }
+
+    .app-desktop-brand,
+    .app-desktop-nav-item,
+    .app-desktop-post-action,
+    .app-desktop-ad-action,
+    .app-desktop-user-card {
+      display: flex;
+      align-items: center;
+    }
+
+    .app-desktop-brand,
+    .app-desktop-nav-item,
+    .app-desktop-user-card {
+      gap: var(--ui-space-3);
+    }
+
+    .app-desktop-brand-copy {
+      display: flex;
+      min-width: 0;
+      flex-direction: column;
+    }
+
+    .app-desktop-nav {
+      gap: calc(var(--ui-space-1) + var(--ui-space-half));
+    }
+
+    .app-desktop-action-group {
+      gap: var(--ui-space-2);
+      padding-top: var(--ui-space-2);
+    }
+
+    .app-desktop-post-action,
+    .app-desktop-ad-action {
+      justify-content: center;
+      gap: var(--ui-space-2);
+    }
+
+    .app-desktop-action-icon {
+      width: var(--ui-control-icon-md);
+      height: var(--ui-control-icon-md);
+      flex: 0 0 auto;
     }
 
     .app-desktop-aux-rail {
@@ -343,13 +398,21 @@
     }
 
     .app-desktop-brand-mark {
+      display: inline-flex;
       width: var(--ui-control-hit);
       height: var(--ui-control-hit);
+      align-items: center;
+      justify-content: center;
       border-radius: var(--ui-radius-xl);
       background: var(--ui-brand);
       color: var(--ui-color-white);
       font-weight: var(--ui-font-weight-display);
       font-size: var(--ui-text-xl);
+      transition: transform var(--ui-duration-base) var(--ease-standard);
+    }
+
+    .app-desktop-brand:hover .app-desktop-brand-mark {
+      transform: scale(var(--ui-motion-cover-hover-scale));
     }
 
     .app-desktop-brand-name {
@@ -385,8 +448,11 @@
     }
 
     .app-desktop-nav-icon-container {
+      display: inline-flex;
       width: var(--ui-control-md);
       height: var(--ui-control-md);
+      align-items: center;
+      justify-content: center;
     }
 
     .app-desktop-nav-icon {
@@ -401,8 +467,13 @@
     }
 
     .app-desktop-nav-label {
+      min-width: 0;
+      flex: 1 1 auto;
+      overflow: hidden;
       font-size: var(--ui-text-md);
       line-height: var(--ui-line-tight);
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .app-desktop-nav-badge {
@@ -437,11 +508,11 @@
     }
 
     .app-desktop-post-action:active {
-      transform: scale(0.98);
+      transform: scale(var(--ui-motion-press-scale));
     }
 
     .app-desktop-post-action:focus-visible {
-      box-shadow: 0 0 0 2px var(--ui-surface-card), 0 0 0 4px var(--ui-brand);
+      box-shadow: var(--ui-focus-ring-brand-soft-shadow);
     }
 
     .app-desktop-ad-action {
@@ -469,11 +540,11 @@
     }
 
     .app-desktop-ad-action:active {
-      transform: scale(0.98);
+      transform: scale(var(--ui-motion-press-scale));
     }
 
     .app-desktop-ad-action:focus-visible {
-      box-shadow: 0 0 0 2px var(--ui-surface-card), 0 0 0 4px var(--ui-desktop-ad-action-border);
+      box-shadow: var(--ui-focus-ring-brand-soft-shadow);
     }
 
     .app-desktop-sidebar-context {
@@ -489,6 +560,11 @@
       padding: var(--ui-space-2) var(--ui-space-3);
       border-radius: var(--ui-radius-xl);
       transition: background-color var(--ui-duration-base) var(--ease-standard);
+    }
+
+    .app-desktop-user-card--button {
+      width: 100%;
+      text-align: left;
     }
 
     .app-desktop-user-card:hover {
@@ -514,27 +590,51 @@
       display: block;
     }
 
+    .app-desktop-user-avatar-image {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: var(--ui-radius-pill);
+      object-fit: cover;
+    }
+
     .app-desktop-guest-avatar {
+      display: inline-flex;
       width: var(--ui-control-lg);
       height: var(--ui-control-lg);
+      flex: 0 0 auto;
+      align-items: center;
+      justify-content: center;
       border-radius: var(--ui-radius-full);
       background: var(--ui-surface-muted);
       color: var(--ui-text-secondary);
     }
 
     .app-desktop-user-name {
+      overflow: hidden;
       font-size: var(--ui-text-sm);
       font-weight: var(--ui-font-weight-strong);
       color: var(--ui-text-primary);
       line-height: var(--ui-line-normal);
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      transition: color var(--ui-duration-base) var(--ease-standard);
+    }
+
+    .app-desktop-user-card:hover .app-desktop-user-name {
+      color: var(--ui-brand);
     }
 
     .app-desktop-user-role {
+      overflow: hidden;
       font-size: var(--ui-text-xs);
       color: var(--ui-text-muted);
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .app-desktop-context-card {
+      gap: var(--ui-space-1);
       padding: var(--ui-space-2) var(--ui-space-3);
       border-radius: var(--ui-radius-lg);
       background: var(--ui-surface-muted);
@@ -561,37 +661,29 @@
       height: var(--ui-space-2);
       border-radius: var(--ui-radius-full);
       background: var(--ui-success);
+      flex: 0 0 auto;
+    }
+
+    .app-desktop-context-value {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   }
 
   @media (min-width: 1024px) and (max-width: 1179px) {
-    .app-shell[data-route-surface='user'] {
-      --app-desktop-balance-spacer-width: var(--ui-space-none);
-      --app-desktop-main-width: var(--app-desktop-workspace-main-width);
-      --app-desktop-main-side-gap-total: calc(var(--app-desktop-shell-gap) * 2);
-      grid-template-columns:
-        minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
-        minmax(0, var(--app-desktop-main-active-width))
-        minmax(calc(var(--ui-space-8) * 7), var(--app-desktop-aux-rail-width));
-      justify-content: center;
-    }
-
-    .app-shell[data-route-surface='user'][data-desktop-surface='feed'] {
-      --app-desktop-main-width: var(--app-desktop-workspace-main-width);
-      --app-desktop-main-side-gap-total: calc(var(--app-desktop-shell-gap) * 2);
-      grid-template-columns:
-        minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
-        minmax(0, var(--app-desktop-main-active-width))
-        minmax(calc(var(--ui-space-8) * 7), var(--app-desktop-aux-rail-width));
-    }
-
+    .app-shell[data-route-surface='user'],
+    .app-shell[data-route-surface='user'][data-desktop-surface='feed'],
     .app-shell[data-route-surface='user']:not([data-desktop-surface='feed']) {
       --app-desktop-balance-spacer-width: var(--ui-space-none);
-      --app-desktop-main-side-gap-total: calc(var(--app-desktop-shell-gap) * 2);
+      --app-desktop-aux-rail-width: var(--ui-space-none);
+      --app-desktop-main-width: var(--app-desktop-workspace-main-width);
+      --app-desktop-main-side-gap-total: var(--app-desktop-shell-gap);
       grid-template-columns:
         minmax(calc(var(--ui-space-8) * 5), var(--app-desktop-sidebar-width))
-        minmax(0, var(--app-desktop-main-active-width))
-        minmax(calc(var(--ui-space-8) * 7), var(--app-desktop-aux-rail-width));
+        minmax(0, var(--app-desktop-main-active-width));
+      justify-content: center;
     }
 
     .app-shell[data-route-surface='user']:not([data-desktop-surface='feed'])::after {
