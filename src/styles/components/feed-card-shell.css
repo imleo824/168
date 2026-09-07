@@ -280,6 +280,7 @@
     display: inline-flex;
     min-height: var(--feed-card-author-row-height);
     min-width: 0;
+    flex-shrink: 0;
     align-items: center;
     justify-content: flex-end;
     justify-self: end;

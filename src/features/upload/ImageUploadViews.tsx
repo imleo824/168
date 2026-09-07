@@ -47,7 +47,7 @@ function ImageUploadInput({
       type="file"
       multiple={remainingCapacity > 1}
       disabled={!canAddMore || disabled}
-      className="sr-only"
+      className="ui-file-input-hidden image-upload-input sr-only"
       accept={acceptedTypes}
       onChange={onFileChange}
       aria-describedby={describedBy}

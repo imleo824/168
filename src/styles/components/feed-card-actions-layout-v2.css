@@ -2,7 +2,7 @@
 
 @layer utilities {
   .ins-post-card {
-    --feed-card-primary-action-gap: calc(var(--ui-space-4) + var(--ui-space-1));
+    --feed-card-primary-action-gap: calc(var(--ui-space-3) + var(--ui-space-half));
     --feed-card-primary-action-padding-inline: var(--ui-space-none);
   }
 
@@ -14,37 +14,52 @@
   }
 
   .ins-post-card .x-card-action-row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr);
+    display: flex;
     width: 100%;
     min-width: 0;
     min-height: 100%;
-    align-items: stretch;
+    align-items: center;
+    justify-content: space-between;
     gap: var(--ui-social-feed-footer-gap);
     margin-top: var(--ui-space-none);
     color: var(--ui-feed-action-color);
   }
 
   .ins-post-card .x-card-action-row--with-management {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-  .ins-post-card .x-card-action-primary {
-    display: inline-flex;
+    display: flex;
     width: 100%;
     min-width: 0;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: space-between;
+    gap: var(--ui-space-2);
+  }
+
+  .ins-post-card .x-card-action-primary {
+    display: flex;
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    align-items: center;
+    justify-content: space-between;
     gap: var(--feed-card-primary-action-gap);
   }
 
+  .ins-post-card .x-card-action-row--with-management .x-card-action-primary {
+    justify-content: flex-start;
+    gap: calc(var(--ui-space-2) + var(--ui-space-half));
+  }
+
   .ins-post-card .x-card-action-management {
-    position: absolute;
-    width: var(--ui-border-width-hairline);
-    height: var(--ui-border-width-hairline);
-    margin: calc(var(--ui-border-width-hairline) * -1);
-    overflow: hidden;
-    white-space: nowrap;
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: var(--ui-space-1);
+    position: static;
+    width: auto;
+    height: auto;
+    margin: 0;
+    overflow: visible;
   }
 
   .ins-post-card .x-card-action-cell {

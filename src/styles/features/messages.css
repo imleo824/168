@@ -238,6 +238,7 @@
     border: var(--ui-border-none);
     background: var(--ui-surface-transparent);
     padding: var(--ui-space-none);
+    padding-inline-end: var(--ui-space-3);
     text-align: left;
   }
 

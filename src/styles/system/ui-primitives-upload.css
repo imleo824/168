@@ -239,4 +239,24 @@
     color: var(--ui-danger-classic);
   }
 
+  .image-upload-input,
+  .image-upload input[type='file'] {
+    display: none !important;
+  }
+
+  .image-upload .sr-only,
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: var(--ui-space-none);
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: var(--ui-border-none);
+    pointer-events: none;
+    opacity: var(--ui-opacity-hidden);
+  }
+
 }

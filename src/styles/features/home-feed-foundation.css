@@ -53,8 +53,8 @@
       --ui-feed-card-list-gap: var(--ui-space-none);
       --ui-home-desktop-feed-width: var(--app-desktop-page-content-width);
       --ui-home-desktop-container-width: var(--app-desktop-page-content-width);
-      --ui-home-feed-reading-column-width: min(100%, calc(var(--app-desktop-reading-main-width) - (var(--ui-app-shell-desktop-padding-x) * 2)));
-      --ui-social-feed-list-max-width: var(--ui-home-feed-reading-column-width);
+      --ui-home-feed-reading-column-width: 100%;
+      --ui-social-feed-list-max-width: var(--app-desktop-page-content-width);
       --home-topic-tab-min-height: var(--ui-control-lg);
       --home-topic-filter-row-height: var(--ui-control-sm);
 

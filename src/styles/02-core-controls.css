@@ -17,8 +17,19 @@
   .ui-control:hover {
       background: var(--ui-surface-card);
     }
-  .ui-file-input-hidden {
-      display: none;
+  .ui-file-input-hidden,
+  .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: var(--ui-space-none);
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: var(--ui-border-none);
+      pointer-events: none;
+      opacity: var(--ui-opacity-hidden);
     }
   .ui-control:focus,
     .ui-control:focus-within {
