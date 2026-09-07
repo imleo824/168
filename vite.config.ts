@@ -26,7 +26,7 @@ const config = {
     rollupOptions: {
       output: {
         manualChunks: {
-          'react-vendor': ['react', 'react/jsx-runtime', 'react-dom', 'react-dom/client', 'react-router-dom', 'scheduler'],
+          'react-vendor': ['react', 'react/jsx-runtime', 'react-dom', 'react-dom/client', 'react-router-dom'],
           query: ['@tanstack/react-query'],
           'date-vendor': ['date-fns'],
         },

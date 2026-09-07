@@ -721,6 +721,7 @@ assertIncludes('src/utils/postStructuredMeta.ts', "if (normalizeKey(key) === 'lo
 assertNotIncludes('src/styles/system/ui-post-tag-contract.css', 'They are text links', 'old text-link tag contract must not return.');
 assertIncludes('src/styles/components/feed-card-chrome.css', 'gap: var(--ui-feed-card-list-gap);', 'feed list must use card gap token.');
 assertIncludes('src/styles/components/feed-card-chrome.css', 'box-sizing: border-box;', 'feed list width must include its own gutter padding.');
+assertIncludes('src/styles/components/feed-card-shell.css', '.ins-post-card .x-card-layout {\n    box-sizing: border-box;', 'feed card layout width must include its own mobile gutters to prevent right-edge clipping.');
 assertNotIncludes('src/styles/components/feed-card-chrome.css', 'ui-feed-panel', 'old feed panel shell must not return.');
 assertNotIncludes('src/styles/components/feed-card-shell.css', 'background: var(--ui-surface-card-glass)', 'feed rows must not use a glass card background.');
 assertNotIncludes('src/styles/components/feed-card-shell.css', 'transform: scale(var(--ui-press-scale-card))', 'feed rows must not use card press scaling.');
