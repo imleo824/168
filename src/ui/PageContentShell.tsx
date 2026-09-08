@@ -25,6 +25,7 @@ export default function PageContentShell({
     <Component
       {...restProps}
       data-ui-content-width={resolvedWidth}
+      data-ui-content-variant={variant}
       className={cn(
         'ui-page-content-shell',
         resolvedWidth === 'fluid' ? 'ui-shell-fluid' : 'ui-shell-narrow',

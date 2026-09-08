@@ -5,6 +5,7 @@ import {
   isDocumentFeedScrollMode,
   subscribeFeedScrollModeChange,
 } from '@/utils/feedScroll';
+import { useRafThrottledCallback } from '@/ui/useRafThrottledCallback';
 
 export type FeedScrollContentState = 'default' | 'loading' | 'refreshing' | 'empty' | 'error' | 'content' | 'custom';
 
@@ -72,7 +73,6 @@ export function FeedScrollShell({
   documentScrollMode = false,
 }: FeedScrollShellProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const frameRef = useRef<number | null>(null);
   const onScrollPositionChangeRef = useRef(onScrollPositionChange);
   const onNearBottomRef = useRef(onNearBottom);
   const [isDocumentScrollModeState, setIsDocumentScrollModeState] = useState(
@@ -81,6 +81,15 @@ export function FeedScrollShell({
 
   onScrollPositionChangeRef.current = onScrollPositionChange;
   onNearBottomRef.current = onNearBottom;
+  const flushScroll = useRafThrottledCallback((container: HTMLDivElement, useDocumentScroll: boolean) => {
+    const metrics = getFeedScrollMetrics(container, useDocumentScroll);
+    onScrollPositionChangeRef.current?.(metrics.scrollTop);
+
+    if (!onNearBottomRef.current) return;
+    const distanceFromBottom = metrics.scrollHeight - metrics.scrollTop - metrics.clientHeight;
+    if (metrics.scrollTop < topGuardPx || distanceFromBottom > nearBottomThresholdPx) return;
+    onNearBottomRef.current();
+  });
 
   const setNode = useCallback((node: HTMLDivElement | null) => {
     containerRef.current = node;
@@ -117,18 +126,7 @@ export function FeedScrollShell({
     if (!container || typeof window === 'undefined') return undefined;
 
     const handleScroll = () => {
-      if (frameRef.current !== null) return;
-
-      frameRef.current = window.requestAnimationFrame(() => {
-        frameRef.current = null;
-        const metrics = getFeedScrollMetrics(container, isDocumentScrollModeState);
-        onScrollPositionChangeRef.current?.(metrics.scrollTop);
-
-        if (!onNearBottomRef.current) return;
-        const distanceFromBottom = metrics.scrollHeight - metrics.scrollTop - metrics.clientHeight;
-        if (metrics.scrollTop < topGuardPx || distanceFromBottom > nearBottomThresholdPx) return;
-        onNearBottomRef.current();
-      });
+      flushScroll(container, isDocumentScrollModeState);
     };
 
     const scrollTarget = getFeedScrollEventTarget(container, isDocumentScrollModeState);
@@ -139,12 +137,8 @@ export function FeedScrollShell({
 
     return () => {
       scrollTarget.removeEventListener('scroll', handleScroll);
-      if (frameRef.current !== null) {
-        window.cancelAnimationFrame(frameRef.current);
-        frameRef.current = null;
-      }
     };
-  }, [isDocumentScrollModeState, nearBottomThresholdPx, topGuardPx]);
+  }, [flushScroll, isDocumentScrollModeState]);
 
   const isTranslated = translateY !== 0;
   const contentStyle = useMemo<CSSProperties | undefined>(() => {

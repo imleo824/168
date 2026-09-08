@@ -60,6 +60,19 @@
     min-width: 0;
   }
 
+  .app-shell[data-route-surface='user'] :is(.app-shell-main, .ui-app-page, .ui-page-content-shell) {
+    min-inline-size: 0;
+  }
+
+  .app-shell[data-route-surface='user'] .ui-page-content-shell[data-ui-content-variant='fluid'] {
+    inline-size: 100%;
+  }
+
+  :is(.ui-button, .ui-segment-tab, .feed-action-btn, .app-bottom-nav-item, .app-desktop-nav-item):focus-visible {
+    outline: var(--ui-outline-width) solid var(--ui-focus-ring);
+    outline-offset: var(--ui-focus-ring-width);
+  }
+
   .ui-page-content-shell--bottom-safe {
     padding-bottom: var(--ui-page-content-bottom-safe);
   }
@@ -245,6 +258,12 @@
 
     .app-shell-main[data-route-surface='admin'][data-bottom-nav-visible='true'] {
       padding-block-end: var(--ui-space-none);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .app-shell[data-route-surface='user'] * {
+      scroll-behavior: auto;
     }
   }
 

@@ -48,6 +48,7 @@ function ActionButton({
 }: ActionButtonProps) {
   const actionState: ActionState = disabled ? 'disabled' : state || 'idle';
   const isDomDisabled = disabled || actionState === 'disabled';
+  const isBusy = actionState === 'loading';
   const shouldUseInstantPress = instantPress && type === 'button' && Boolean(onClick);
   const instantPressHandlers = useInstantPress<HTMLButtonElement>(
     onClick,
@@ -62,6 +63,7 @@ function ActionButton({
       data-action-variant={variant}
       data-action-size={size}
       data-action-state={actionState}
+      aria-busy={isBusy || undefined}
       disabled={isDomDisabled}
       {...buttonProps}
       {...clickHandlers}

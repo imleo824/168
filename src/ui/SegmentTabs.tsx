@@ -1,4 +1,4 @@
-import { memo, useEffect, useRef, type CSSProperties, type ReactNode, type Ref } from 'react';
+import { memo, useCallback, useEffect, useRef, type CSSProperties, type KeyboardEvent, type ReactNode, type Ref } from 'react';
 import { useInstantPress } from '@/hooks/useInstantPress';
 
 export type SegmentTabItem = {
@@ -53,6 +53,7 @@ interface SegmentTabButtonProps {
   labelClassName: string;
   buttonRef?: Ref<HTMLButtonElement>;
   onSelect: (key: string) => void;
+  onNavigate: (key: string, direction: 'next' | 'previous' | 'first' | 'last') => void;
 }
 
 const SegmentTabButton = memo(function SegmentTabButton({
@@ -63,6 +64,7 @@ const SegmentTabButton = memo(function SegmentTabButton({
   labelClassName,
   buttonRef,
   onSelect,
+  onNavigate,
 }: SegmentTabButtonProps) {
   const pressHandlers = useInstantPress<HTMLButtonElement>(() => {
     if (!item.disabled) onSelect(itemKey);
@@ -85,6 +87,18 @@ const SegmentTabButton = memo(function SegmentTabButton({
         active ? 'home-topic-tab--active ui-segment-tab--active' : 'home-topic-tab--idle ui-segment-tab--idle'
       }`}
       data-labels={showLabels ? 'visible' : 'hidden'}
+      onKeyDown={(event: KeyboardEvent<HTMLButtonElement>) => {
+        if (event.key === 'ArrowRight') {
+          event.preventDefault();
+          onNavigate(itemKey, 'next');
+        } else if (event.key === 'ArrowLeft') {
+          event.preventDefault();
+          onNavigate(itemKey, 'previous');
+        } else if (event.key === 'Home' || event.key === 'End') {
+          event.preventDefault();
+          onNavigate(itemKey, event.key === 'Home' ? 'first' : 'last');
+        }
+      }}
     >
       {item.icon ? (
         <span className="ui-segment-tab-icon" aria-hidden="true">{item.icon}</span>
@@ -126,6 +140,25 @@ function SegmentTabs({
   const tabsStyle = {
     '--segment-tab-count': Math.max(1, items.length),
   } as CSSProperties & Record<'--segment-tab-count', number>;
+  const handleNavigate = useCallback((currentKey: string, direction: 'next' | 'previous' | 'first' | 'last') => {
+    const enabledItems = items.filter((item) => !item.disabled);
+    if (enabledItems.length === 0) return;
+    const currentIndex = enabledItems.findIndex((item) => (item.key || item.id || '') === currentKey);
+    const nextIndex = direction === 'first'
+      ? 0
+      : direction === 'last'
+        ? enabledItems.length - 1
+        : currentIndex < 0
+          ? 0
+          : (currentIndex + (direction === 'next' ? 1 : -1) + enabledItems.length) % enabledItems.length;
+    const nextItem = enabledItems[nextIndex];
+    const nextKey = nextItem.key || nextItem.id || '';
+    if (!nextKey) return;
+    onChange(nextKey);
+    window.requestAnimationFrame(() => {
+      tabsListRef.current?.querySelector<HTMLButtonElement>(`[data-topic="${CSS.escape(nextKey)}"]`)?.focus();
+    });
+  }, [items, onChange]);
 
   return (
     <div
@@ -150,6 +183,7 @@ function SegmentTabs({
             labelClassName={labelClassName}
             buttonRef={active ? activeTabButtonRef : undefined}
             onSelect={onChange}
+            onNavigate={handleNavigate}
           />
         );
       })}
@@ -158,4 +192,3 @@ function SegmentTabs({
 }
 
 export default memo(SegmentTabs);
-
