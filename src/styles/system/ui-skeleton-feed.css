@@ -46,6 +46,7 @@
     --ui-feed-skeleton-media-height: min(calc(var(--ui-space-8) * 5), 34vw);
 
     position: relative;
+    box-sizing: border-box;
     display: flex;
     width: 100%;
     min-width: 0;
@@ -60,6 +61,7 @@
   }
 
   .ui-feed-skeleton-layout {
+    box-sizing: border-box;
     display: grid;
     width: 100%;
     min-width: 0;

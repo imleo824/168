@@ -145,6 +145,9 @@ assertIncludes('src/styles/system/wide-screen-mobile-adaptation.css', 'calc(var(
 assertIncludes('src/styles/system/wide-screen-mobile-adaptation.css', '--ui-topbar-content-max-width: var(--app-desktop-page-content-width);', 'desktop secondary page topbars must align to the framed content width.');
 assertIncludes('src/styles/02-core-surfaces.css', '.ui-shell-narrow {\n      box-sizing: border-box;', 'narrow content shells must include padding inside their max width.');
 assertIncludes('src/styles/system/ui-primitives-layout.css', '.ui-page-content-shell {\n    box-sizing: border-box;', 'PageContentShell must keep page padding inside its assigned width.');
+assertIncludes('src/styles/system/ui-skeleton-feed.css', '.ui-feed-skeleton-card {\n    --ui-feed-skeleton-author-row-gap:', 'feed skeleton cards must keep a dedicated shared layout owner.');
+assertMatches('src/styles/system/ui-skeleton-feed.css', /\.ui-feed-skeleton-card\s*\{[\s\S]*?box-sizing:\s*border-box;/, 'feed skeleton cards must include their borders inside the feed width.');
+assertMatches('src/styles/system/ui-skeleton-feed.css', /\.ui-feed-skeleton-layout\s*\{[\s\S]*?box-sizing:\s*border-box;/, 'feed skeleton layout padding must stay inside the same width as real feed cards.');
 assertIncludes('src/styles/features/recharge.css', '--ui-recharge-page-max: var(--app-desktop-page-content-width);', 'desktop recharge content must align to the framed content width.');
 assertIncludes('src/styles/features/recharge.css', '.recharge-step--amount {\n      display: grid;\n      grid-template-columns:', 'desktop recharge amount entry must use a multi-column workspace layout.');
 assertIncludes('src/styles/features/recharge.css', '.recharge-payment-panel {\n      display: grid;\n      grid-template-columns:', 'desktop recharge payment instructions must use a multi-column workspace layout.');
