@@ -33,7 +33,6 @@ type AccessiblePostMeta = { id: string };
 
 type PostCreateRoutesDeps = {
   POST_ID_PATTERN: RegExp;
-  POST_CREATED_CHAT_QUOTE_SELECT: any;
   normalizeExternalLocation: (rawLocation?: unknown) => string;
   derivePostLocation: (externalLocation?: unknown) => { location: string; countryCode: string | null; countryName: string | null };
   normalizeTelegramContactHandle: (input: unknown) => string;
@@ -202,7 +201,7 @@ export function registerPostCreateRoutes(app: Express, deps: PostCreateRoutesDep
           if (existingId) {
             const existingPost = await tx.post.findUnique({
               where: { id: existingId },
-              include: { category: true, quotedPost: { select: deps.POST_CREATED_CHAT_QUOTE_SELECT } },
+              select: PostService.listPostSelect(req.user.id),
             });
             if (existingPost) return { post: existingPost, updatedUser: { id: user.id, points: Number(user.points || 0) }, idempotentReplay: true };
           }
@@ -214,7 +213,7 @@ export function registerPostCreateRoutes(app: Express, deps: PostCreateRoutesDep
         // Persisted inside categoryMeta: { [POST_PROMOTION_LINK_META_KEY]: normalizedPromotionLink }
         if (!isRobotUser && prepared.showContact && !activeTuiPlus) await assertCanShowContactOnPost(tx, req.user.id, now);
         const newPost = await createPreparedPost(tx, prepared, { userId: req.user.id, createdAt: now }, {
-          include: { category: true, quotedPost: { select: deps.POST_CREATED_CHAT_QUOTE_SELECT } },
+          select: PostService.listPostSelect(req.user.id),
         });
         if (quotedPostMeta?.id) {
           await deps.adjustPostQuoteCount(tx, quotedPostMeta.id, 1);
@@ -226,23 +225,17 @@ export function registerPostCreateRoutes(app: Express, deps: PostCreateRoutesDep
       });
 
       if (!idempotentReplay) runPostCreatedSideEffects(deps, post, req.user);
+      const clientPost = PostService.maskContact(
+        PostService.toClientPost(post, req.user.id),
+        req.user.id,
+        req.user.role,
+      );
       res.status(idempotentReplay ? 200 : 201).json({
         success: true,
         idempotentReplay,
         post: {
-          id: post.id,
-          title: post.title,
-          content: post.content,
-          categoryId: post.categoryId,
-          images: post.images,
-          contact: post.contact,
-          showContact: post.showContact,
-          isAnonymous: post.isAnonymous,
-          quotedPostId: post.quotedPostId,
-          quoteCount: post.quoteCount || 0,
-          categoryMeta: (post as unknown as { categoryMeta?: Record<string, unknown> | null }).categoryMeta ?? null,
-          categoryMetaSchemaVersion: prepared.categoryMetaSchemaVersion,
-          createdAt: post.createdAt,
+          ...clientPost,
+          categoryMetaSchemaVersion: post.categoryMetaSchemaVersion ?? prepared.categoryMetaSchemaVersion,
         },
         userPoints: updatedUser.points,
       });

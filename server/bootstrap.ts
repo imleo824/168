@@ -155,18 +155,6 @@ const USER_PROFILE_VIEW_DEDUPE_MAX_ENTRIES = 50_000;
 const FOLLOWING_IDS_CACHE_TTL_MS = 20_000;
 const FOLLOWING_IDS_CACHE_MAX_ENTRIES = 2_000;
 const FEED_UPDATE_BADGE_LIMIT = 50;
-const POST_CREATED_CHAT_QUOTE_SELECT = {
-  id: true,
-  userId: true,
-  title: true,
-  content: true,
-  images: true,
-  isPublished: true,
-  deletedAt: true,
-  isAnonymous: true,
-  createdAt: true,
-  user: { select: { id: true, displayName: true, photoUrl: true, userType: true } },
-};
 const userProfileCache = new Map<string, { expiresAt: number; payload: any }>();
 const userProfileInflight = new Map<string, Promise<any>>();
 const userProfileViewDedupe = new Map<string, number>();
@@ -872,7 +860,6 @@ registerAccountRoutes(app, {
 
 registerPostCreateRoutes(app, {
   POST_ID_PATTERN,
-  POST_CREATED_CHAT_QUOTE_SELECT,
   normalizeExternalLocation,
   derivePostLocation,
   normalizeTelegramContactHandle,

@@ -2,7 +2,11 @@ import { useCallback, useMemo, useRef } from 'react';
 import { keepPreviousData, useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import * as api from '@/services/api';
-import type { CategoryMetaFeedFilters } from '@/types';
+import {
+  postQueryKeys,
+  type InfinitePostListQueryParams,
+  type PostListQueryParams,
+} from '@/features/post/postQueryKeys';
 
 import {
   POST_COLLECTION_ROOT_KEYS,
@@ -89,22 +93,23 @@ export function useBlockUser() {
   });
 }
 
-export function usePosts(params: { categoryId?: string; userId?: string; country?: string; query?: string; limit?: number; location?: string; quotedOnly?: boolean; categoryMetaScope?: string; categoryMetaFilters?: CategoryMetaFeedFilters; enabled?: boolean }) {
+export function usePosts(params: PostListQueryParams & { enabled?: boolean }) {
+  const { enabled, ...requestParams } = params;
   return useQuery({
-    queryKey: ['posts', params],
-    queryFn: ({ signal }) => api.getPosts(params, { signal, retry: false }),
+    queryKey: postQueryKeys.list(requestParams),
+    queryFn: ({ signal }) => api.getPosts(requestParams, { signal, retry: false }),
     placeholderData: keepPreviousData,
     staleTime: LIST_STALE_TIME,
     gcTime: LIST_GC_TIME,
-    enabled: params.enabled !== false,
+    enabled: enabled !== false,
     retry: false,
   });
 }
 
-export function useInfinitePosts(params: { categoryId?: string; userId?: string; country?: string; query?: string; location?: string; categoryMetaScope?: string; categoryMetaFilters?: CategoryMetaFeedFilters; enabled?: boolean }) {
+export function useInfinitePosts(params: InfinitePostListQueryParams & { enabled?: boolean }) {
   const { enabled, ...requestParams } = params;
   return useInfiniteQuery({
-    queryKey: ['posts', 'infinite', requestParams],
+    queryKey: postQueryKeys.infinite(requestParams),
     queryFn: ({ pageParam, signal }) => api.getPostsPage({
       ...requestParams,
       limit: FEED_PAGE_SIZE,

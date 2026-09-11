@@ -272,6 +272,7 @@ export interface Post {
   userId: string;
   user?: Partial<User>;
   categoryMeta?: Record<string, unknown> | null;
+  categoryMetaSchemaVersion?: number | null;
   [key: string]: unknown;
 }
 

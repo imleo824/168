@@ -18,6 +18,7 @@ import {
   isTuiPlusActive,
   type TuiPlusBenefitKey,
 } from '@/features/tui-plus/tuiPlusBenefits';
+import { synchronizePostPublishCache } from '@/features/post/postPublishCache';
 import { formatTelegramContactDisplay, normalizeTelegramContactHandle } from '@/utils/contact';
 import { focusPostCreateComposer } from '@/utils/postCreateFocusRestore';
 import type { QuotePostPreview } from '@/types';
@@ -492,14 +493,14 @@ export default function PostCreate({
         if (!isActive()) return;
 
         submitNonceRef.current = '';
-        const createdPostId = parsed.post.id;
+        const createdPost = parsed.post;
+        const createdPostId = createdPost.id;
         clearPostCreateDraft();
         setHasRestoredDraft(false);
         setPublishedPostId(createdPostId);
         showToast('发布成功', 'success');
         void refreshUser(true).catch((error) => console.warn('[PostCreate] 刷新用户数据失败', error));
-        void queryClient.invalidateQueries({ queryKey: ['posts'] });
-        void queryClient.invalidateQueries({ queryKey: ['notifications', 'feed-counts'] });
+        void synchronizePostPublishCache(queryClient, createdPost, user.id);
 
         if (form.categoryId) {
           void loadPostCreateSettingsSheets();
